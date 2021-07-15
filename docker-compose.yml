@@ -1,0 +1,17 @@
+version: "3.3"
+
+services:
+  db:
+    image: postgres:9.6
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=bhtom
+      - POSTGRES_USER=bhtom
+      - POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
