@@ -1,0 +1,26 @@
+version: "3.7"
+
+services:
+  db:
+    restart: always
+    build:
+      context: .
+      dockerfile: db_Dockerfile
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+      - POSTGRES_DB=bhtom
+      - POSTGRES_USER=bhtom
+      - POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
+  web:
+    build:
+      context: ..
+      dockerfile: Docker/web_Dockerfile
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db

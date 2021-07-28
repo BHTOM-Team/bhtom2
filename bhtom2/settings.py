@@ -32,7 +32,7 @@ SECRET_KEY = 'jkg5zb*xutcc+93y!00$7z409yrh%6#i@f)+h!$lyr3vqo9c)e'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [] + list(secret.get("ALLOWED_HOSTS", []))
+ALLOWED_HOSTS = [] + list(secret.get("ALLOWED_HOSTS", 'localhost').split(','))
 
 # Application definition
 
@@ -57,7 +57,8 @@ INSTALLED_APPS = [
     'tom_alerts',
     'tom_catalogs',
     'tom_observations',
-    'tom_dataproducts'
+    'tom_dataproducts',
+    'bhtom2'
 ]
 
 SITE_ID = 1
@@ -80,7 +81,7 @@ ROOT_URLCONF = 'bhtom2.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'bhtom2/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -163,7 +164,7 @@ DATE_FORMAT = 'Y-m-d'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, '_static')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'bhtom2/static')]
 MEDIA_ROOT = os.path.join(BASE_DIR, 'data')
 MEDIA_URL = '/data/'
 
