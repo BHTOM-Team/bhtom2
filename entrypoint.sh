@@ -20,7 +20,7 @@ done
 
 echo "Collecting static..."
 
-while ! python manage.py collectstatic 2>&1; do
+while ! python manage.py collectstatic --no-input 2>&1; do
   echo "Collecting static..."
   sleep 3
 done
