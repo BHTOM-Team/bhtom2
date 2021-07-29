@@ -113,6 +113,9 @@ DATABASES = {
         'PASSWORD': secret.get("POSTGRES_PASSWORD", ""),
         'HOST': secret.get('POSTGRES_HOST', 'localhost'),
         'PORT': secret.get('POSTGRES_PORT', 5432),
+        'TEST': {
+            'NAME': 'test_bhtom'
+        }
     },
 }
 
@@ -289,7 +292,22 @@ HARVESTERS = {
 #     {'name': 'eligible', 'type': 'boolean'},
 #     {'name': 'dicovery_date', 'type': 'datetime'}
 # ]
-EXTRA_FIELDS = []
+EXTRA_FIELDS = [
+    {'name': 'gaia_alert_name', 'type': 'string'},
+    {'name': 'calib_server_name', 'type': 'string'},
+    {'name': 'ztf_alert_name', 'type': 'string'},
+    {'name': 'aavso_name', 'type': 'string'},
+    {'name': 'gaiadr2_id', 'type': 'string'},
+    {'name': 'tns_id', 'type': 'string'},
+    {'name': 'classification', 'type': 'string'},
+    {'name': 'tweet', 'type': 'boolean'},
+    {'name': 'last_jd', 'type': 'number'},
+    {'name': 'last_mag', 'type': 'number'},
+    {'name': 'priority', 'type': 'number'},
+    {'name': 'dicovery_date', 'type': 'datetime'},
+    {'name': 'cadence', 'type': 'number'},
+    {'name': 'sun_separation', 'type': 'number'},
+    {'name': 'dont_update_me', 'type': 'boolean'}]
 
 # Authentication strategy can either be LOCKED (required login for all views)
 # or READ_ONLY (read only access to views)
