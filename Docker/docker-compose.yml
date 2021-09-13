@@ -13,6 +13,8 @@ services:
       - POSTGRES_DB=bhtom
       - POSTGRES_USER=bhtom
       - POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
+    ports:
+      - "35432:5432"
   web:
     build:
       context: ..
