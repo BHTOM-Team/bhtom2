@@ -36,6 +36,7 @@ SECRET_KEY = 'jkg5zb*xutcc+93y!00$7z409yrh%6#i@f)+h!$lyr3vqo9c)e'
 DEBUG = True
 
 ALLOWED_HOSTS = [] + list(secret.get("ALLOWED_HOSTS", 'localhost').split(','))
+SITE_ID = int(secret.get("SITE_ID", 1))
 
 # Application definition
 
