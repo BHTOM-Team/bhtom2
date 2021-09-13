@@ -66,8 +66,6 @@ INSTALLED_APPS = [
     'bhtom2'
 ]
 
-SITE_ID = 1
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -187,13 +185,19 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
+        'graypy': {
+            'level': 'INFO',
+            'class': 'graypy.GELFTCPHandler',
+            'host': secret.get('GRAYLOG_HOST', 'localhost'),
+            'port': secret.get('GRAYLOG_PORT', 12201),
+        },
         'console': {
             'class': 'logging.StreamHandler',
         }
     },
     'loggers': {
         '': {
-            'handlers': ['console'],
+            'handlers': ['graypy', 'console'],
             'level': 'INFO'
         }
     }
