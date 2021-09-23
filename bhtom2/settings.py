@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 import logging.config
 import os
+import sys
 import tempfile
 
 from dotenv import dotenv_values
@@ -115,10 +116,18 @@ DATABASES = {
         'HOST': secret.get('POSTGRES_HOST', 'localhost'),
         'PORT': secret.get('POSTGRES_PORT', 5432),
         'TEST': {
-            'NAME': 'test_bhtom'
+            'NAME': 'bhtom'
         }
     },
 }
+
+# Test Database
+if 'test' in sys.argv:
+    DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3' # Django uses an in-memory database if sqlite3
+    DATABASES['default']['PASSWORD'] = secret.get("POSTGRES_TEST_PASSWORD", "")
+    DATABASES['default']['HOST'] = secret.get("POSTGRES_TEST_HOST", "localhost")
+    DATABASES['default']['PORT'] = secret.get("POSTGRES_TEST_PORT", 5432)
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
