@@ -88,6 +88,7 @@ def update_cpcs_lc(target: Target):
                 # Updating the last observation JD
                 latest_jd: float = np.max(np.array(lc_data['mjd']).astype(np.float)) + 2400000.5
 
+                # Don't update the last mag, since we only want Gaia mag as the last mag
                 update_last_jd(target, jd=latest_jd)
             except Exception as e:
                 logger.error(f'Exception while saving datapoint for target {cpcs_name}: {e}')

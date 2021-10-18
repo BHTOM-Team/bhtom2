@@ -1,7 +1,7 @@
 import json
 import os
 from decimal import Decimal
-from typing import Dict, Any
+from typing import Dict, Any, List
 from unittest.mock import patch
 
 from django.test import TestCase
@@ -52,9 +52,17 @@ class TestCPCSAlertsHarvester(TestCase):
         target.calib_server_name = "ivo://Gaia21efs"
         target.save()
 
+        # TODO: why is there an error while refreshing the ReducedDatumView?
+
         update_cpcs_lc(target)
 
-        rd: ReducedDatum = ReducedDatum.objects.all()
+        rds: ReducedDatum = ReducedDatum.objects.all()
         rded: ReducedDatumExtraData = ReducedDatumExtraData.objects.all()
 
-        self.assertTrue(os.path.exists(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv')))
+        values: List[Dict[str, Any]] = [json.loads(rd.value) for rd in rds]
+        mags: List[float] = [v['magnitude'] for v in values]
+        filters: List[str] = [v['filter'] for v in values]
+
+        self.assertEqual(len(rds), 3)
+        self.assertListEqual(mags, [16.771121978759766, 16.77216339111328, 16.722705841064453])
+        self.assertListEqual(filters, ['g(APASS)', 'g(APASS)', 'i(DECAPS)'])
