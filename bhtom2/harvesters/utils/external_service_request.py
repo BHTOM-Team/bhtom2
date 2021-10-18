@@ -5,8 +5,10 @@ from bhtom2.exceptions.external_service import InvalidExternalServiceResponseExc
 
 
 def query_external_service(url: str,
-                           service_name: str = 'External Service') -> str:
-    response: requests.Response = requests.get(url)
+                           service_name: str = 'External Service',
+                           **kwargs) -> str:
+
+    response: requests.Response = requests.get(url, **kwargs)
 
     status: int = response.status_code
 

@@ -241,7 +241,10 @@ def update_gaia_lc(target: Target):
             except Exception as e:
                 logger.error(f'Error while updating LC for target {target.name}: {e}')
 
-        refresh_reduced_data_view()
+        try:
+            refresh_reduced_data_view()
+        except Exception as e:
+            logger.error(f'Error while refreshing reduced data view: {e}')
 
         # Updating/storing the last JD
         update_last_jd(target=target,

@@ -39,6 +39,9 @@ DEBUG = True
 ALLOWED_HOSTS = [] + list(secret.get("ALLOWED_HOSTS", 'localhost').split(','))
 SITE_ID = int(secret.get("SITE_ID", 1))
 
+CPCS_BASE_URL = secret.get('CPCS_BASE_URL', None)
+CPCS_DATA_ACCESS_HASHTAG = secret.get('CPCS_DATA_ACCESS_HASHTAG', None)
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -209,7 +212,7 @@ LOGGING = {
             'handlers': ['graypy', 'console'],
             'level': 'INFO'
         }
-    }
+    },
 }
 
 # Caching
@@ -381,3 +384,5 @@ sentry_sdk.init(
     traces_sample_rate=1.0,
     send_default_pii=True
 )
+
+

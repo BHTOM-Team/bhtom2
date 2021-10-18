@@ -11,6 +11,10 @@ from tom_targets.models import Target
 
 from bhtom2.models.reduced_datum_extra import ReducedDatumExtraData, refresh_reduced_data_view
 from bhtom2.utils.observation_data_extra_data_utils import ObservationDatapointExtraData
+from bhtom2.utils.bhtom_logger import BHTOMLogger
+
+
+logger: BHTOMLogger = BHTOMLogger(__name__, '[AAVSO data fetch]')
 
 
 ACCEPTED_VALID_FLAGS: List[str] = ['V', 'Z']
@@ -31,6 +35,8 @@ def fetch_aavso_photometry(target: Target,
     target_name: str = target.name
     target_id: int = target.pk
 
+    logger.info(f'Fetching AAVSO photometry for {target_name}...')
+
     params = {
         "view": "api.delim",
         "ident": target_name,
@@ -48,15 +54,23 @@ def fetch_aavso_photometry(target: Target,
                                                           index_col=False,
                                                           error_bad_lines=False))
 
+        logger.info(f'AAVSO returned {len(result_df.index)} rows for {target_name}')
+
         for i, row in result_df.iterrows():
             save_row_to_db(target_id, row, settings.AAVSO_DATA_FETCH_URL)
+
+        logger.info(f'Saved {len(result_df.index)} rows of AAVSO data for {target_name}')
 
         cache.set(f'{target_id}_aavso', result_df.JD.max())
         refresh_reduced_data_view()
 
         return result_df, result.status_code
-    else:
+    elif status_code:
+        logger.error(f'AAVSO returned status code {status_code} for {target_name}')
         return None, status_code
+    else:
+        logger.error(f'AAVSO returned no status code for {target_name}')
+        return None, None
 
 
 def filter_data(df: pd.DataFrame) -> pd.DataFrame:
