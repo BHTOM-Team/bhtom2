@@ -1,22 +1,16 @@
 import json
-import os
 from decimal import Decimal
 from typing import Dict, Any, List
 from unittest.mock import patch
 
 from django.test import TestCase
 
-from django.conf import settings
 from tom_dataproducts.models import ReducedDatum
 from tom_targets.models import Target
 
-from bhtom2.harvesters.cpcs_alerts_harvester import update_cpcs_lc
+from bhtom2.harvesters.lightcurve.cpcs_lightcurve import update_cpcs_lc
 
-from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
-
-from pandas import DataFrame
-
-from bhtom2.models.reduced_datum_extra import ReducedDatumExtraData
+from bhtom2.models.view_reduceddatum import ReducedDatumExtraData
 
 
 correct_three_points: Dict[str, Any] = {
@@ -36,9 +30,9 @@ correct_three_points: Dict[str, Any] = {
 }
 
 
-class TestCPCSAlertsHarvester(TestCase):
+class TestCPCSLightcurve(TestCase):
 
-    @patch('bhtom2.harvesters.cpcs_alerts_harvester.query_external_service',
+    @patch('bhtom2.harvesters.lightcurve.cpcs_lightcurve.query_external_service',
            return_value=json.dumps(correct_three_points))
     def test_save_three_datapoints_if_correct(self, _):
         target: Target = Target(

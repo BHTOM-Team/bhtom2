@@ -112,14 +112,14 @@ WSGI_APPLICATION = 'bhtom2.wsgi.application'
 
 DATABASES = {
     'default': {
-        'NAME': 'bhtom',
+        'NAME': secret.get("POSTGRES_DB_NAME", 'bhtom'),
         'ENGINE': 'django.db.backends.postgresql',
-        'USER': 'bhtom',
+        'USER': secret.get("POSTGRES_DB_USER", 'bhtom'),
         'PASSWORD': secret.get("POSTGRES_PASSWORD", ""),
         'HOST': secret.get('POSTGRES_HOST', 'localhost'),
         'PORT': secret.get('POSTGRES_PORT', 5432),
         'TEST': {
-            'NAME': 'bhtom'
+            'NAME': secret.get("POSTGRES_TEST_DB_NAME", 'bhtom')
         }
     },
 }
@@ -130,6 +130,11 @@ if 'test' in sys.argv:
     DATABASES['default']['PASSWORD'] = secret.get("POSTGRES_TEST_PASSWORD", "")
     DATABASES['default']['HOST'] = secret.get("POSTGRES_TEST_HOST", "localhost")
     DATABASES['default']['PORT'] = secret.get("POSTGRES_TEST_PORT", 5432)
+
+
+MIGRATION_MODULES = {
+    'bhtom2': 'bhtom2.migrations'
+}
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
@@ -277,16 +282,18 @@ TOM_FACILITY_CLASSES = [
     'tom_observations.facilities.lt.LTFacility'
 ]
 
+# TODO: investigate why are they missing
+
 TOM_ALERT_CLASSES = [
     'tom_alerts.brokers.alerce.ALeRCEBroker',
     'tom_alerts.brokers.antares.ANTARESBroker',
     'tom_alerts.brokers.gaia.GaiaBroker',
     'tom_alerts.brokers.lasair.LasairBroker',
     'tom_alerts.brokers.mars.MARSBroker',
-    'tom_alerts.brokers.scimma.SCIMMABroker',
+    # 'tom_alerts.brokers.scimma.SCIMMABroker',
     'tom_alerts.brokers.scout.ScoutBroker',
     'tom_alerts.brokers.tns.TNSBroker',
-    'tom_alerts.brokers.fink.FinkBroker',
+    # 'tom_alerts.brokers.fink.FinkBroker',
 ]
 
 BROKERS = {
@@ -385,4 +392,4 @@ sentry_sdk.init(
     send_default_pii=True
 )
 
-
+GAIA_ALERTS_PATH: str = 'http://gsaweb.ast.cam.ac.uk/alerts'

@@ -1,0 +1,10 @@
+-- \set pswrd `echo "$POSTGRES_PASSWORD"`
+
+-- CREATE USER bhtom WITH PASSWORD 'bhtom';
+-- ALTER USER bhtom CREATEDB;
+
+CREATE DATABASE bhtom2;
+GRANT ALL PRIVILEGES ON DATABASE bhtom TO bhtom;
+
+CREATE DATABASE test_bhtom;
+GRANT ALL PRIVILEGES ON DATABASE test_bhtom TO bhtom;

@@ -16,7 +16,6 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[AAVSO data fetch]')
 
-
 ACCEPTED_VALID_FLAGS: List[str] = ['V', 'Z']
 # V - fully validated
 # Z - passed automatic validation tests

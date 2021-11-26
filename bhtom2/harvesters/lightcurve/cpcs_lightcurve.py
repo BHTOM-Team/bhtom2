@@ -1,5 +1,5 @@
 import json
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Tuple
 
 import numpy as np
 
@@ -8,13 +8,12 @@ from tom_dataproducts.models import ReducedDatum
 from tom_targets.models import Target
 from astropy.time import Time, TimezoneInfo
 
-from .utils.filter_name import filter_name
-from .utils.last_jd import update_last_jd
-from .utils.external_service_request import query_external_service
+from bhtom2.harvesters.utils.filter_name import filter_name
+from bhtom2.harvesters.utils.external_service_request import query_external_service
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
-from bhtom2.models.reduced_datum_extra import ReducedDatumExtraData, refresh_reduced_data_view
-from ..utils.observation_data_extra_data_utils import ObservationDatapointExtraData
+from bhtom2.models.view_reduceddatum import ReducedDatumExtraData
+from bhtom2.utils.observation_data_extra_data_utils import ObservationDatapointExtraData
 from django.conf import settings
 
 CPCS_BASE_URL: str = settings.CPCS_BASE_URL
@@ -27,19 +26,28 @@ def mag_error_with_calib_error(magerr: float, caliberr: float) -> float:
     return np.sqrt(magerr * magerr + caliberr * caliberr)
 
 
-def update_cpcs_lc(target: Target):
+def update_cpcs_lc(target: Target) -> Tuple[Optional[float],
+                                            Optional[float]]:
+    """
+    Read light curve from the CPCS server
+
+    :param target: target to update the Gaia CPCS lightcurve for
+    :return last_jd, last_mag: (JD of the last observation, mag of the last observation), (None, None) if no new lightcurve points
+    """
+
     try:
         cpcs_name: Optional[str] = target.calib_server_name
     except Exception as e:
-        cpcs_name: Optional[str] = None
         logger.error(f'Error while accessing calib_server_name for {target}: {e}')
-    if cpcs_name:
+        return None, None
 
+    if cpcs_name:
         response: str = query_external_service(f'{CPCS_BASE_URL}/get_alert_lc_data?alert_name={cpcs_name}',
                                                'CPCS', cookies={'hashtag': CPCS_DATA_ACCESS_HASHTAG})
         lc_data: Dict[str, Any] = json.loads(response)
 
-        print(lc_data)
+        last_jd: float = 0.0
+        last_mag: Optional[float] = None
 
         for mjd, magerr, observatory, caliberr, mag, catalog, filter, id in zip(
                 lc_data['mjd'], lc_data['magerr'], lc_data['observatory'], lc_data['caliberr'], lc_data['mag'],
@@ -85,17 +93,16 @@ def update_cpcs_lc(target: Target):
 
                 rd_extra_data.save()
 
-                # Updating the last observation JD
-                latest_jd: float = np.max(np.array(lc_data['mjd']).astype(np.float)) + 2400000.5
+                # Update last magnitude and JD
+                if jd > last_jd:
+                    last_jd = jd
+                    last_mag = mag
 
-                # Don't update the last mag, since we only want Gaia mag as the last mag
-                update_last_jd(target, jd=latest_jd)
             except Exception as e:
                 logger.error(f'Exception while saving datapoint for target {cpcs_name}: {e}')
                 continue
 
-        try:
-            refresh_reduced_data_view()
-        except Exception as e:
-            logger.error(f'Exception while refreshing reduced data views for {cpcs_name}: {e}')
+        last_jd = last_jd if last_jd > 0.0 else None
+        return last_jd, last_mag
 
+    return None, None
