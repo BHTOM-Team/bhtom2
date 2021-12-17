@@ -2,9 +2,6 @@ import json
 from io import StringIO
 from typing import Optional, Tuple
 
-from django.contrib.auth.models import User
-from django.core.cache import cache
-
 import pandas as pd
 from astropy.time import Time, TimezoneInfo
 from tom_dataproducts.models import ReducedDatum, DataProductGroup, DataProduct
@@ -15,7 +12,6 @@ from bhtom2 import settings
 from bhtom2.alert_services import AlertSource, alert_source_name
 from bhtom2.harvesters.utils.external_service_request import query_external_service
 from bhtom2.utils.bhtom_logger import BHTOMLogger
-from bhtom2.utils.observation_data_extra_data_utils import ObservationDatapointExtraData
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Gaia Alerts Lightcurve Update]')
 
@@ -35,17 +31,21 @@ def get_gaia_dataproduct_group() -> DataProductGroup:
 
 
 def get_gaia_observation_group(observation_record: ObservationRecord) -> ObservationGroup:
-    observation_group, created = ObservationGroup.objects.get_or_create(name="Gaia",
-                                                                        observation_records=observation_record)
+    observation_group, created = ObservationGroup.objects.get_or_create(name="Gaia")
 
     if created:
         observation_group.save()
+
+    observation_group.observation_records.add(observation_record)
 
     return observation_group
 
 
 def get_gaia_observation_record(target: Target) -> ObservationRecord:
-    observation_record, created = ObservationRecord.objects.get_or_create(name="Gaia", user=None, target=Target)
+    observation_record, created = ObservationRecord.objects.get_or_create(facility='Gaia',
+                                                                          user=None,
+                                                                          target=target,
+                                                                          parameters={'filters': 'g'})
 
     if created:
         observation_record.save()
@@ -57,21 +57,19 @@ def get_gaia_observation_record(target: Target) -> ObservationRecord:
 def get_gaia_dataproduct(target: Target) -> DataProduct:
     from bhtom2.dataproducts.dataproduct_extra_data import encode_extra_data
 
-    data_product, created = DataProduct.objects.get_or_create(target=Target,
-                                                              group=get_gaia_dataproduct_group(),
+    data_product, created = DataProduct.objects.get_or_create(target=target,
                                                               observation_record=get_gaia_observation_record(target),
                                                               extra_data=encode_extra_data(observer="Gaia"),
                                                               data_product_type="photometry")
 
     if created:
+        data_product.group.add(get_gaia_dataproduct_group().id)
         data_product.save()
 
     return data_product
 
 
-# Reads light curve from Gaia Alerts - used in updatereduceddata_gaia
-# this also updates the SUN separation
-# if update_me == false, only the SUN position gets updated, not the LC
+# Reads light curve from Gaia Alerts
 
 def update_gaia_lc(target: Target) -> Tuple[Optional[float],
                                             Optional[float]]:
