@@ -11,11 +11,11 @@ from tom_targets.models import Target
 
 from bhtom2.alert_services import AlertSource, alert_target_name
 from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
-from bhtom2.harvesters.utils.external_service_request import query_external_service
+from bhtom2.external_service.external_service_request import query_external_service
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
 ALERT_SOURCE: AlertSource = AlertSource.GAIA
-GAIA_ALERTS_CACHE_PATH: str = os.path.join(settings.BASE_DIR, "cache/gaia_alerts.csv")
+GAIA_ALERTS_CACHE_PATH: str = os.path.join(settings.BASE_DIR, "bhtom2/cache/gaia_alerts.csv")
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Gaia Alerts Harvester]')
 
@@ -28,9 +28,13 @@ except Exception as e:
 # Fetch CSV containing all alerts and save it to file (so that it doesn't have to be fetched every single request)
 def fetch_alerts_csv() -> str:
     gaia_alerts_response: str = query_external_service(f'{base_url}/alerts.csv', 'Gaia alerts')
+
     # Update Gaia alerts cache file
-    with open(GAIA_ALERTS_CACHE_PATH, 'w') as f:
-        f.write(gaia_alerts_response)
+    try:
+        with open(GAIA_ALERTS_CACHE_PATH, 'w+') as f:
+            f.write(gaia_alerts_response)
+    except FileNotFoundError:
+        logger.error(f'File {GAIA_ALERTS_CACHE_PATH} not found! Gaia alerts harvester response wasn\'t saved')
 
     return gaia_alerts_response
 

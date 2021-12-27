@@ -9,8 +9,8 @@ from tom_observations.models import ObservationRecord, ObservationGroup
 from tom_targets.models import Target
 
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
-from bhtom2.harvesters.lightcurve.lightcurve_update import LightcurveUpdateReport
-from bhtom2.harvesters.lightcurve.ztf_lightcurve_update import ZTFLightcurveUpdate
+from bhtom2.brokers.lightcurve_update import LightcurveUpdateReport
+from bhtom2.brokers.ztf_lightcurve_update import ZTFLightcurveUpdate
 
 sample_lightcurve_two_correct_lines = {'detections': [{'mjd': 59550.28425930021,
                                                        'candid': '1796284252615015007',
@@ -192,9 +192,9 @@ def create_second_sample_target() -> Target:
     return target
 
 
-class TestZTFLightcurveUpdate(TestCase):
+class ZTFLightcurveUpdateTestCase(TestCase):
 
-    @patch('bhtom2.harvesters.lightcurve.ztf_lightcurve_update.Alerce.query_lightcurve',
+    @patch('bhtom2.brokers.ztf_lightcurve_update.Alerce.query_lightcurve',
            return_value=sample_lightcurve_two_correct_lines)
     def test_dont_update_lightcurve_when_no_ztf_name(self, _):
         ztf_lightcurve_update: ZTFLightcurveUpdate = ZTFLightcurveUpdate()
@@ -218,7 +218,7 @@ class TestZTFLightcurveUpdate(TestCase):
         self.assertEqual(report.last_jd, None)
         self.assertEqual(report.last_mag, None)
 
-    @patch('bhtom2.harvesters.lightcurve.ztf_lightcurve_update.Alerce.query_lightcurve',
+    @patch('bhtom2.brokers.ztf_lightcurve_update.Alerce.query_lightcurve',
            return_value=sample_lightcurve_two_correct_lines)
     def test_update_lightcurve(self, _):
         ztf_lightcurve_update: ZTFLightcurveUpdate = ZTFLightcurveUpdate()
@@ -245,7 +245,7 @@ class TestZTFLightcurveUpdate(TestCase):
         self.assertEqual(report.last_jd, 2459550.88187500)
         self.assertEqual(report.last_mag, 18.522156)
 
-    @patch('bhtom2.harvesters.lightcurve.ztf_lightcurve_update.Alerce.query_lightcurve',
+    @patch('bhtom2.brokers.ztf_lightcurve_update.Alerce.query_lightcurve',
            return_value=sample_lightcurve_two_correct_lines_with_Nones)
     def test_update_lightcurve_dont_save_none_magnitude(self, _):
         ztf_lightcurve_update: ZTFLightcurveUpdate = ZTFLightcurveUpdate()
@@ -258,7 +258,7 @@ class TestZTFLightcurveUpdate(TestCase):
 
         self.assertEqual(len(rd), 1)
 
-    @patch('bhtom2.harvesters.lightcurve.ztf_lightcurve_update.Alerce.query_lightcurve',
+    @patch('bhtom2.brokers.ztf_lightcurve_update.Alerce.query_lightcurve',
            return_value=sample_lightcurve_two_correct_lines)
     def test_create_dataproduct(self, _):
         ztf_lightcurve_update: ZTFLightcurveUpdate = ZTFLightcurveUpdate()
@@ -277,7 +277,7 @@ class TestZTFLightcurveUpdate(TestCase):
         self.assertEqual(dp.extra_data, json.dumps({"observer": "ZTF"}))
         self.assertEqual(dp_group.name, "ZTF")
 
-    @patch('bhtom2.harvesters.lightcurve.ztf_lightcurve_update.Alerce.query_lightcurve',
+    @patch('bhtom2.brokers.ztf_lightcurve_update.Alerce.query_lightcurve',
            return_value=sample_lightcurve_two_correct_lines)
     def test_create_observation_record(self, _):
         ztf_lightcurve_update: ZTFLightcurveUpdate = ZTFLightcurveUpdate()
@@ -299,7 +299,7 @@ class TestZTFLightcurveUpdate(TestCase):
         self.assertEqual(obs.facility, "ZTF")
         self.assertEqual(obs_group.name, "ZTF")
 
-    @patch('bhtom2.harvesters.lightcurve.ztf_lightcurve_update.Alerce.query_lightcurve',
+    @patch('bhtom2.brokers.ztf_lightcurve_update.Alerce.query_lightcurve',
            return_value=sample_lightcurve_two_correct_lines)
     def test_only_one_dataproduct_per_filter_created_for_multiple_updates_for_one_target(self, _):
         ztf_lightcurve_update: ZTFLightcurveUpdate = ZTFLightcurveUpdate()
@@ -319,7 +319,7 @@ class TestZTFLightcurveUpdate(TestCase):
         self.assertEqual(len(data_products), 2)
         self.assertEqual(len(data_product_group), 1)
 
-    @patch('bhtom2.harvesters.lightcurve.ztf_lightcurve_update.Alerce.query_lightcurve',
+    @patch('bhtom2.brokers.ztf_lightcurve_update.Alerce.query_lightcurve',
            return_value=sample_lightcurve_two_correct_lines)
     def test_only_one_observation_record_per_filter_created_for_multiple_updates_for_one_target(self, _):
         ztf_lightcurve_update: ZTFLightcurveUpdate = ZTFLightcurveUpdate()

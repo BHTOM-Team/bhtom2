@@ -2,7 +2,7 @@ from django.test import TestCase
 from tom_targets.models import Target
 from typing import Optional
 
-from bhtom2.harvesters.utils.last_jd import update_last_jd
+from bhtom2.dataproducts.last_jd import update_last_jd
 
 
 class LastJDTestCase(TestCase):

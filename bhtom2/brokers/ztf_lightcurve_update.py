@@ -10,8 +10,8 @@ from tom_targets.models import Target
 
 from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
 from bhtom2.external_service.data_source_information import DataSource, ZTF_FILTERS, FILTERS
-from bhtom2.harvesters.lightcurve.lightcurve_update import LightcurveUpdate
-from bhtom2.harvesters.utils.filter_name import filter_name
+from bhtom2.brokers.lightcurve_update import LightcurveUpdate
+from bhtom2.external_service.filter_name import filter_name
 
 
 class ZTFLightcurveUpdate(LightcurveUpdate):

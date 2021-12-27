@@ -8,7 +8,7 @@ from django.test import TestCase
 from tom_dataproducts.models import ReducedDatum
 from tom_targets.models import Target
 
-from bhtom2.harvesters.lightcurve.cpcs_lightcurve import update_cpcs_lc
+from bhtom2.brokers.cpcs_lightcurve import update_cpcs_lc
 
 
 correct_three_points: Dict[str, Any] = {
@@ -28,7 +28,7 @@ correct_three_points: Dict[str, Any] = {
 }
 
 
-class TestCPCSLightcurve(TestCase):
+class CPCSLightcurveTest(TestCase):
 
     @patch('bhtom2.harvesters.lightcurve.cpcs_lightcurve.query_external_service',
            return_value=json.dumps(correct_three_points))

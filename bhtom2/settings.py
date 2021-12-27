@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'tom_observations',
     'tom_dataproducts',
     'tom_registration',
+    'rest_framework.authtoken',
     'bhtom2'
 ]
 
@@ -305,6 +306,7 @@ BROKERS = {
 }
 
 TOM_HARVESTER_CLASSES = [
+    'bhtom2.harvesters.target.gaia_alerts_harvester.GaiaAlertsHarvester',
     'tom_catalogs.harvesters.simbad.SimbadHarvester',
     'tom_catalogs.harvesters.ned.NEDHarvester',
     'tom_catalogs.harvesters.jplhorizons.JPLHorizonsHarvester',

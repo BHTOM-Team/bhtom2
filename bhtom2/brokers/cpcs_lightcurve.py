@@ -8,8 +8,8 @@ from tom_dataproducts.models import ReducedDatum
 from tom_targets.models import Target
 from astropy.time import Time, TimezoneInfo
 
-from bhtom2.harvesters.utils.filter_name import filter_name
-from bhtom2.harvesters.utils.external_service_request import query_external_service
+from bhtom2.external_service.filter_name import filter_name
+from bhtom2.external_service.external_service_request import query_external_service
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
 from bhtom2.utils.observation_data_extra_data_utils import ObservationDatapointExtraData

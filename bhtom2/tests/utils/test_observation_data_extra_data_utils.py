@@ -1,11 +1,6 @@
-from django.test import SimpleTestCase, TestCase
+from typing import Dict
 
-import json
-from typing import Any, Dict, Optional, List
-
-from astropy.io import ascii
-from tom_dataproducts.exceptions import InvalidFileFormatException
-from tom_dataproducts.models import DataProduct
+from django.test import SimpleTestCase
 
 from bhtom2.utils.observation_data_extra_data_utils import ObservationDatapointExtraData, decode_datapoint_extra_data
 

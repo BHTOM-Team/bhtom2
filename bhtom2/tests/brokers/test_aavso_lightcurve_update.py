@@ -8,8 +8,8 @@ from tom_dataproducts.models import ReducedDatum, DataProduct, DataProductGroup
 from tom_observations.models import ObservationGroup, ObservationRecord
 from tom_targets.models import Target
 
-from bhtom2.harvesters.lightcurve.aavso_lightcurve_update import AAVSOLightcurveUpdate
-from bhtom2.harvesters.lightcurve.lightcurve_update import LightcurveUpdateReport
+from bhtom2.brokers.aavso_lightcurve_update import AAVSOLightcurveUpdate
+from bhtom2.brokers.lightcurve_update import LightcurveUpdateReport
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
 
 
@@ -56,9 +56,9 @@ def create_second_sample_target() -> Target:
     return target
 
 
-class TestAAVSOLightcurveUpdate(TestCase):
+class AAVSOLightcurveUpdateTestCase(TestCase):
 
-    @patch('bhtom2.harvesters.lightcurve.aavso_lightcurve_update.query_external_service',
+    @patch('bhtom2.brokers.aavso_lightcurve_update.query_external_service',
            return_value=sample_lightcurve_two_correct_lines)
     def test_dont_update_lightcurve_when_no_gaia_name(self, _):
 
@@ -83,7 +83,7 @@ class TestAAVSOLightcurveUpdate(TestCase):
         self.assertEqual(report.last_jd, None)
         self.assertEqual(report.last_mag, None)
 
-    @patch('bhtom2.harvesters.lightcurve.aavso_lightcurve_update.query_external_service',
+    @patch('bhtom2.brokers.aavso_lightcurve_update.query_external_service',
            return_value=sample_lightcurve_two_correct_lines)
     def test_update_lightcurve(self, _):
 
@@ -109,7 +109,7 @@ class TestAAVSOLightcurveUpdate(TestCase):
         self.assertEqual(report.last_jd, 2459233.549045)
         self.assertEqual(report.last_mag, 13.087)
 
-    @patch('bhtom2.harvesters.lightcurve.aavso_lightcurve_update.query_external_service',
+    @patch('bhtom2.brokers.aavso_lightcurve_update.query_external_service',
            return_value=sample_lightcurve_two_correct_lines)
     def test_create_dataproduct(self, _):
 
@@ -129,7 +129,7 @@ class TestAAVSOLightcurveUpdate(TestCase):
         self.assertEqual(dp.extra_data, json.dumps({"observer": "Surname, Firstname"}))
         self.assertEqual(dp_group.name, "AAVSO")
 
-    @patch('bhtom2.harvesters.lightcurve.aavso_lightcurve_update.query_external_service',
+    @patch('bhtom2.brokers.aavso_lightcurve_update.query_external_service',
            return_value=sample_lightcurve_two_correct_lines)
     def test_create_observation_record(self, _):
 
@@ -153,7 +153,7 @@ class TestAAVSOLightcurveUpdate(TestCase):
         self.assertEqual(obs_group.name, "AAVSO")
 
 
-    @patch('bhtom2.harvesters.lightcurve.aavso_lightcurve_update.query_external_service',
+    @patch('bhtom2.brokers.aavso_lightcurve_update.query_external_service',
            return_value=sample_lightcurve_four_correct_lines)
     def test_only_one_dataproduct_per_filter_and_observer_created_for_multiple_updates_for_one_target(self, _):
 
@@ -173,7 +173,7 @@ class TestAAVSOLightcurveUpdate(TestCase):
         self.assertEqual(len(data_product_group), 1)
 
 
-    @patch('bhtom2.harvesters.lightcurve.aavso_lightcurve_update.query_external_service',
+    @patch('bhtom2.brokers.aavso_lightcurve_update.query_external_service',
            return_value=sample_lightcurve_four_correct_lines)
     def test_only_one_dataproduct_group_created_for_updates_for_two_targets(self, _):
 
@@ -192,7 +192,7 @@ class TestAAVSOLightcurveUpdate(TestCase):
         self.assertEqual(len(data_products), 8)
 
 
-    @patch('bhtom2.harvesters.lightcurve.aavso_lightcurve_update.query_external_service',
+    @patch('bhtom2.brokers.aavso_lightcurve_update.query_external_service',
            return_value=sample_lightcurve_four_correct_lines)
     def test_only_one_observation_record_per_filter_and_facility_created_for_multiple_updates_for_one_target(self, _):
 
@@ -212,7 +212,7 @@ class TestAAVSOLightcurveUpdate(TestCase):
         self.assertEqual(len(observation_group), 1)
 
 
-    @patch('bhtom2.harvesters.lightcurve.aavso_lightcurve_update.query_external_service',
+    @patch('bhtom2.brokers.aavso_lightcurve_update.query_external_service',
            return_value=sample_lightcurve_two_correct_lines)
     def test_only_one_observation_record_group_created_for_updates_for_two_targets(self, _):
 

@@ -1,4 +1,3 @@
-import json
 import os
 from decimal import Decimal
 from typing import Dict, Any
@@ -7,7 +6,6 @@ from unittest.mock import patch
 from django.test import TestCase
 
 from django.conf import settings
-from tom_dataproducts.models import ReducedDatum
 from tom_targets.models import Target
 
 from bhtom2.harvesters.gaia_alerts_harvester import fetch_alerts_csv, search_term_in_gaia_data, get, \
@@ -18,8 +16,6 @@ from pyfakefs.fake_filesystem_unittest import Patcher
 from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
 
 from pandas import DataFrame
-
-from bhtom2.models.view_reduceddatum import ReducedDatumExtraData
 
 sample_file_two_lines = """
 #Name, Date, RaDeg, DecDeg, AlertMag, HistoricMag, HistoricStdDev, Class, Published, Comment, TNSid
@@ -47,24 +43,24 @@ class TestGaiaAlertsHarvester(TestCase):
     @patch('bhtom2.harvesters.gaia_alerts_harvester.query_external_service', return_value="something")
     def test_create_csv_cache_file_if_not_present(self, _):
         with Patcher() as patcher:
-            patcher.fs.create_dir(os.path.join(settings.BASE_DIR, 'cache'))
+            patcher.fs.create_dir(os.path.join(settings.BASE_DIR, 'bhtom2/cache'))
             fetch_alerts_csv()
-            self.assertTrue(os.path.exists(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv')))
+            self.assertTrue(os.path.exists(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv')))
 
     @patch('bhtom2.harvesters.gaia_alerts_harvester.query_external_service', return_value="something")
     def test_update_csv_cache_file_if_present(self, _):
         with Patcher() as patcher:
             patcher.fs.create_dir(os.path.join(settings.BASE_DIR, 'cache'))
-            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv'))
+            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'))
             fetch_alerts_csv()
-            self.assertEqual(open(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv'), 'r').read(), "something")
+            self.assertEqual(open(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'), 'r').read(), "something")
 
     @patch('bhtom2.harvesters.gaia_alerts_harvester.query_external_service', return_value=sample_file_three_lines)
     def test_raise_no_result_exception_if_csv_correct_and_doesnt_contain_term_and_alerts_dont_contain_term(self, _):
         with Patcher() as patcher:
             patcher.fs.create_dir(os.path.join(settings.BASE_DIR, 'cache'))
-            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv'))
-            with open(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv'), 'w') as w:
+            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'))
+            with open(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'), 'w') as w:
                 w.write(sample_file_two_lines)
             self.assertRaises(NoResultException, search_term_in_gaia_data, "Something")
 
@@ -72,8 +68,8 @@ class TestGaiaAlertsHarvester(TestCase):
     def test_raise_invalid_exception_if_csv_correct_and_doesnt_contain_term_and_alerts_incorrect(self, _):
         with Patcher() as patcher:
             patcher.fs.create_dir(os.path.join(settings.BASE_DIR, 'cache'))
-            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv'))
-            with open(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv'), 'w') as w:
+            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'))
+            with open(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'), 'w') as w:
                 w.write(sample_file_two_lines)
             self.assertRaises(InvalidExternalServiceResponseException, search_term_in_gaia_data, "Something")
 
@@ -81,8 +77,8 @@ class TestGaiaAlertsHarvester(TestCase):
     def test_return_term_if_csv_correct_and_doesnt_contain_term_and_alerts_correct(self, _):
         with Patcher() as patcher:
             patcher.fs.create_dir(os.path.join(settings.BASE_DIR, 'cache'))
-            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv'))
-            with open(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv'), 'w') as w:
+            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'))
+            with open(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'), 'w') as w:
                 w.write(sample_file_two_lines)
             term_data: DataFrame = search_term_in_gaia_data("Gaia21edy")
             self.assertEqual(term_data['#Name'], "Gaia21edy")
@@ -93,8 +89,8 @@ class TestGaiaAlertsHarvester(TestCase):
     def test_return_term_if_csv_correct_and_contains_term(self, mocked_query):
         with Patcher() as patcher:
             patcher.fs.create_dir(os.path.join(settings.BASE_DIR, 'cache'))
-            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv'))
-            with open(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv'), 'w') as w:
+            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'))
+            with open(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'), 'w') as w:
                 w.write(sample_file_two_lines)
             term_data: DataFrame = search_term_in_gaia_data("Gaia21eeo")
             self.assertEqual(term_data['#Name'], "Gaia21eeo")
@@ -106,8 +102,8 @@ class TestGaiaAlertsHarvester(TestCase):
     def test_get_term_dict_if_csv_correct_and_doesnt_contain_term_and_alerts_correct(self, _):
         with Patcher() as patcher:
             patcher.fs.create_dir(os.path.join(settings.BASE_DIR, 'cache'))
-            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv'))
-            with open(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv'), 'w') as w:
+            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'))
+            with open(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'), 'w') as w:
                 w.write(sample_file_two_lines)
             term_result: Dict[str, Any] = get("Gaia21edy")
             expected_result: Dict[str, Any] = {
@@ -123,8 +119,8 @@ class TestGaiaAlertsHarvester(TestCase):
     def test_get_term_dict_if_csv_correct_and_contains_term(self, mocked_query):
         with Patcher() as patcher:
             patcher.fs.create_dir(os.path.join(settings.BASE_DIR, 'cache'))
-            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv'))
-            with open(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv'), 'w') as w:
+            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'))
+            with open(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'), 'w') as w:
                 w.write(sample_file_two_lines)
             term_result: Dict[str, Any] = get("Gaia21eeo")
             expected_result: Dict[str, Any] = {
@@ -141,8 +137,8 @@ class TestGaiaAlertsHarvester(TestCase):
     def test_get_target_if_csv_correct_and_doesnt_contain_term_and_alerts_correct(self, _):
         with Patcher() as patcher:
             patcher.fs.create_dir(os.path.join(settings.BASE_DIR, 'cache'))
-            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv'))
-            with open(os.path.join(settings.BASE_DIR, 'cache/gaia_alerts.csv'), 'w') as w:
+            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'))
+            with open(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'), 'w') as w:
                 w.write(sample_file_two_lines)
 
             harvester = GaiaAlertsHarvester()

@@ -10,9 +10,9 @@ from tom_targets.models import Target
 
 from bhtom2 import settings
 from bhtom2.external_service.data_source_information import DataSource, FILTERS
-from bhtom2.harvesters.lightcurve.lightcurve_update import LightcurveUpdate
-from bhtom2.harvesters.utils.external_service_request import query_external_service
-from bhtom2.harvesters.utils.filter_name import filter_name
+from bhtom2.brokers.lightcurve_update import LightcurveUpdate
+from bhtom2.external_service.external_service_request import query_external_service
+from bhtom2.external_service.filter_name import filter_name
 
 
 class GaiaLightcurveUpdate(LightcurveUpdate):
