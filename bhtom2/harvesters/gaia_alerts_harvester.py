@@ -9,12 +9,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from tom_catalogs.harvester import AbstractHarvester
 from tom_targets.models import Target
 
-from bhtom2.alert_services import AlertSource, alert_target_name
 from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
+from bhtom2.external_service.data_source_information import DataSource
 from bhtom2.external_service.external_service_request import query_external_service
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
-ALERT_SOURCE: AlertSource = AlertSource.GAIA
+ALERT_SOURCE: DataSource = DataSource.Gaia
 GAIA_ALERTS_CACHE_PATH: str = os.path.join(settings.BASE_DIR, "bhtom2/cache/gaia_alerts.csv")
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Gaia Alerts Harvester]')
