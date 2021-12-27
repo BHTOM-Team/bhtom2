@@ -20,6 +20,8 @@ from dotenv import dotenv_values
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
+from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -112,14 +114,14 @@ WSGI_APPLICATION = 'bhtom2.wsgi.application'
 
 DATABASES = {
     'default': {
-        'NAME': secret.get("POSTGRES_DB_NAME", 'bhtom'),
+        'NAME': secret.get("POSTGRES_DB_NAME", 'bhtom2'),
         'ENGINE': 'django.db.backends.postgresql',
         'USER': secret.get("POSTGRES_DB_USER", 'bhtom'),
         'PASSWORD': secret.get("POSTGRES_PASSWORD", ""),
         'HOST': secret.get('POSTGRES_HOST', 'localhost'),
         'PORT': secret.get('POSTGRES_PORT', 5432),
         'TEST': {
-            'NAME': secret.get("POSTGRES_TEST_DB_NAME", 'bhtom')
+            'NAME': secret.get("POSTGRES_TEST_DB_NAME", 'test_bhtom2')
         }
     },
 }
@@ -325,12 +327,12 @@ HARVESTERS = {
 #     {'name': 'dicovery_date', 'type': 'datetime'}
 # ]
 EXTRA_FIELDS = [
-    {'name': 'gaia_alert_name', 'type': 'string'},
-    {'name': 'calib_server_name', 'type': 'string'},
-    {'name': 'ztf_alert_name', 'type': 'string'},
-    {'name': 'aavso_name', 'type': 'string'},
+    {'name': TARGET_NAME_KEYS[DataSource.Gaia], 'type': 'string'},
+    {'name': TARGET_NAME_KEYS[DataSource.CPCS], 'type': 'string'},
+    {'name': TARGET_NAME_KEYS[DataSource.ZTF], 'type': 'string'},
+    {'name': TARGET_NAME_KEYS[DataSource.AAVSO], 'type': 'string'},
     {'name': 'gaiadr2_id', 'type': 'string'},
-    {'name': 'tns_id', 'type': 'string'},
+    {'name': TARGET_NAME_KEYS[DataSource.TNS], 'type': 'string'},
     {'name': 'classification', 'type': 'string'},
     {'name': 'tweet', 'type': 'boolean'},
     {'name': 'last_jd', 'type': 'number'},
@@ -339,7 +341,7 @@ EXTRA_FIELDS = [
     {'name': 'dicovery_date', 'type': 'datetime'},
     {'name': 'cadence', 'type': 'number'},
     {'name': 'sun_separation', 'type': 'number'},
-    {'name': 'dont_update_me', 'type': 'boolean'}]
+    {'name': 'dont_update_me', 'type': 'boolean', 'hidden': True}]
 
 # Authentication strategy can either be LOCKED (required login for all views)
 # or READ_ONLY (read only access to views)
@@ -393,3 +395,4 @@ sentry_sdk.init(
 )
 
 GAIA_ALERTS_PATH: str = 'http://gsaweb.ast.cam.ac.uk/alerts'
+AAVSO_API_PATH: str = 'https://www.aavso.org/vsx/index.php'

@@ -10,8 +10,6 @@ from tom_targets.models import Target
 
 from bhtom2.harvesters.lightcurve.cpcs_lightcurve import update_cpcs_lc
 
-from bhtom2.models.view_reduceddatum import ReducedDatumExtraData
-
 
 correct_three_points: Dict[str, Any] = {
     'mjd': [59481.8427481, 59481.8442782, 59483.1534276],
@@ -51,7 +49,6 @@ class TestCPCSLightcurve(TestCase):
         update_cpcs_lc(target)
 
         rds: ReducedDatum = ReducedDatum.objects.all()
-        rded: ReducedDatumExtraData = ReducedDatumExtraData.objects.all()
 
         values: List[Dict[str, Any]] = [json.loads(rd.value) for rd in rds]
         mags: List[float] = [v['magnitude'] for v in values]
