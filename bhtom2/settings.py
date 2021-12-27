@@ -288,9 +288,9 @@ TOM_FACILITY_CLASSES = [
 # TODO: investigate why are they missing
 
 TOM_ALERT_CLASSES = [
+    'bhtom2.brokers.gaia_alerts.GaiaAlertsBroker',
     'tom_alerts.brokers.alerce.ALeRCEBroker',
     'tom_alerts.brokers.antares.ANTARESBroker',
-    'tom_alerts.brokers.gaia.GaiaBroker',
     'tom_alerts.brokers.lasair.LasairBroker',
     'tom_alerts.brokers.mars.MARSBroker',
     # 'tom_alerts.brokers.scimma.SCIMMABroker',
@@ -396,5 +396,5 @@ sentry_sdk.init(
     send_default_pii=True
 )
 
-GAIA_ALERTS_PATH: str = 'http://gsaweb.ast.cam.ac.uk/alerts'
+GAIA_ALERTS_PATH: str = 'http://gsaweb.ast.cam.ac.uk'
 AAVSO_API_PATH: str = 'https://www.aavso.org/vsx/index.php'

@@ -10,7 +10,7 @@ from tom_targets.models import Target
 
 from bhtom2.brokers.lightcurve_update import LightcurveUpdateReport
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
-from bhtom2.brokers.gaia_lightcurve_update import GaiaLightcurveUpdate
+from bhtom2.brokers.gaia_alerts import GaiaAlertsBroker
 
 sample_file_two_lines = """
 #Name, Date, RaDeg, DecDeg, AlertMag, HistoricMag, HistoricStdDev, Class, Published, Comment, TNSid
@@ -63,11 +63,11 @@ def create_second_sample_target() -> Target:
 
 class GaiaLightcurveUpdateTestCase(TestCase):
 
-    @patch('bhtom2.brokers.gaia_lightcurve_update.query_external_service',
+    @patch('bhtom2.brokers.gaia_alerts.query_external_service',
            return_value=sample_lightcurve_three_correct_lines)
     def test_dont_update_lightcurve_when_no_gaia_name(self, _):
 
-        gaia_lightcurve_update: GaiaLightcurveUpdate = GaiaLightcurveUpdate()
+        gaia_alerts_broker: GaiaAlertsBroker = GaiaAlertsBroker()
 
         target: Target = Target(
             name="Gaia21een",
@@ -79,7 +79,7 @@ class GaiaLightcurveUpdateTestCase(TestCase):
 
         target.save()
 
-        report: LightcurveUpdateReport = gaia_lightcurve_update.update_lightcurve(target)
+        report: LightcurveUpdateReport = gaia_alerts_broker.process_reduced_data(target)
 
         rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
 
@@ -88,41 +88,41 @@ class GaiaLightcurveUpdateTestCase(TestCase):
         self.assertEqual(report.last_jd, None)
         self.assertEqual(report.last_mag, None)
 
-    @patch('bhtom2.brokers.gaia_lightcurve_update.query_external_service',
+    @patch('bhtom2.brokers.gaia_alerts.query_external_service',
            return_value=sample_lightcurve_three_correct_lines)
     def test_update_lightcurve(self, _):
 
-        gaia_lightcurve_update: GaiaLightcurveUpdate = GaiaLightcurveUpdate()
+        gaia_alerts_broker: GaiaAlertsBroker = GaiaAlertsBroker()
 
         target: Target = create_sample_target()
 
-        report: LightcurveUpdateReport = gaia_lightcurve_update.update_lightcurve(target)
+        report: LightcurveUpdateReport = gaia_alerts_broker.process_reduced_data(target)
 
         rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
 
         self.assertEqual(len(rd), 1)
 
-        self.assertEqual(rd[0].value, json.dumps({
+        self.assertEqual(rd[0].value, {
             'magnitude': 18.91,
             'filter': 'g(Gaia)',
-            'error': 0,
+            'error': -1.3434,
             'jd': 2456961.56970
-        }))
+        })
         self.assertEqual(rd[0].data_type, 'photometry')
         self.assertEqual(rd[0].target, target)
         self.assertEqual(report.new_points, 1)
         self.assertEqual(report.last_jd, 2456961.56970)
         self.assertEqual(report.last_mag, 18.91)
 
-    @patch('bhtom2.brokers.gaia_lightcurve_update.query_external_service',
+    @patch('bhtom2.brokers.gaia_alerts.query_external_service',
            return_value=sample_lightcurve_three_correct_lines)
     def test_create_dataproduct(self, _):
 
-        gaia_lightcurve_update: GaiaLightcurveUpdate = GaiaLightcurveUpdate()
+        gaia_alerts_broker: GaiaAlertsBroker = GaiaAlertsBroker()
 
         target: Target = create_sample_target()
 
-        gaia_lightcurve_update.update_lightcurve(target)
+        gaia_alerts_broker.process_reduced_data(target)
 
         rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
 
@@ -134,15 +134,15 @@ class GaiaLightcurveUpdateTestCase(TestCase):
         self.assertEqual(dp.extra_data, json.dumps({"observer": "Gaia"}))
         self.assertEqual(dp_group.name, "Gaia")
 
-    @patch('bhtom2.brokers.gaia_lightcurve_update.query_external_service',
+    @patch('bhtom2.brokers.gaia_alerts.query_external_service',
            return_value=sample_lightcurve_three_correct_lines)
     def test_create_observation_record(self, _):
 
-        gaia_lightcurve_update: GaiaLightcurveUpdate = GaiaLightcurveUpdate()
+        gaia_alerts_broker: GaiaAlertsBroker = GaiaAlertsBroker()
 
         target: Target = create_sample_target()
 
-        gaia_lightcurve_update.update_lightcurve(target)
+        gaia_alerts_broker.process_reduced_data(target)
 
         rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
 
@@ -158,20 +158,20 @@ class GaiaLightcurveUpdateTestCase(TestCase):
         self.assertEqual(obs_group.name, "Gaia")
 
 
-    @patch('bhtom2.brokers.gaia_lightcurve_update.query_external_service',
+    @patch('bhtom2.brokers.gaia_alerts.query_external_service',
            return_value=sample_lightcurve_three_correct_lines)
     def test_only_one_dataproduct_created_for_multiple_updates_for_one_target(self, _):
 
-        gaia_lightcurve_update: GaiaLightcurveUpdate = GaiaLightcurveUpdate()
-        gaia_lightcurve_update_2: GaiaLightcurveUpdate = GaiaLightcurveUpdate()
+        gaia_alerts_broker: GaiaAlertsBroker = GaiaAlertsBroker()
+        gaia_alerts_broker_2: GaiaAlertsBroker = GaiaAlertsBroker()
 
         target: Target = create_sample_target()
 
         target.save()
 
-        gaia_lightcurve_update.update_lightcurve(target)
-        gaia_lightcurve_update.update_lightcurve(target)
-        gaia_lightcurve_update_2.update_lightcurve(target)
+        gaia_alerts_broker.process_reduced_data(target)
+        gaia_alerts_broker.process_reduced_data(target)
+        gaia_alerts_broker_2.process_reduced_data(target)
 
         data_products: List[DataProduct] = list(DataProduct.objects.all().filter(target=target))
         data_product_group: List[DataProductGroup] = list(DataProductGroup.objects.all().filter(name="Gaia"))
@@ -180,17 +180,17 @@ class GaiaLightcurveUpdateTestCase(TestCase):
         self.assertEqual(len(data_product_group), 1)
 
 
-    @patch('bhtom2.brokers.gaia_lightcurve_update.query_external_service',
+    @patch('bhtom2.brokers.gaia_alerts.query_external_service',
            return_value=sample_lightcurve_three_correct_lines)
     def test_only_one_dataproduct_group_created_for_updates_for_two_targets(self, _):
 
-        gaia_lightcurve_update: GaiaLightcurveUpdate = GaiaLightcurveUpdate()
+        gaia_alerts_broker: GaiaAlertsBroker = GaiaAlertsBroker()
 
         target1: Target = create_sample_target()
         target2: Target = create_second_sample_target()
 
-        gaia_lightcurve_update.update_lightcurve(target1)
-        gaia_lightcurve_update.update_lightcurve(target2)
+        gaia_alerts_broker.process_reduced_data(target1)
+        gaia_alerts_broker.process_reduced_data(target2)
 
         data_product_group: List[DataProductGroup] = list(DataProductGroup.objects.all().filter(name="Gaia"))
         data_products: List[DataProduct] = list(data_product_group[0].dataproduct_set.all())
@@ -199,18 +199,18 @@ class GaiaLightcurveUpdateTestCase(TestCase):
         self.assertEqual(len(data_products), 2)
 
 
-    @patch('bhtom2.brokers.gaia_lightcurve_update.query_external_service',
+    @patch('bhtom2.brokers.gaia_alerts.query_external_service',
            return_value=sample_lightcurve_three_correct_lines)
     def test_only_one_observation_record_created_for_multiple_updates_for_one_target(self, _):
 
-        gaia_lightcurve_update: GaiaLightcurveUpdate = GaiaLightcurveUpdate()
-        gaia_lightcurve_update_2: GaiaLightcurveUpdate = GaiaLightcurveUpdate()
+        gaia_alerts_broker: GaiaAlertsBroker = GaiaAlertsBroker()
+        gaia_alerts_broker_2: GaiaAlertsBroker = GaiaAlertsBroker()
 
         target: Target = create_sample_target()
 
-        gaia_lightcurve_update.update_lightcurve(target)
-        gaia_lightcurve_update.update_lightcurve(target)
-        gaia_lightcurve_update_2.update_lightcurve(target)
+        gaia_alerts_broker.process_reduced_data(target)
+        gaia_alerts_broker.process_reduced_data(target)
+        gaia_alerts_broker_2.process_reduced_data(target)
 
         observation_record: List[ObservationRecord] = list(ObservationRecord.objects.all().filter(target=target))
         observation_group: List[ObservationGroup] = list(ObservationGroup.objects.all().filter(name="Gaia"))
@@ -219,17 +219,17 @@ class GaiaLightcurveUpdateTestCase(TestCase):
         self.assertEqual(len(observation_group), 1)
 
 
-    @patch('bhtom2.brokers.gaia_lightcurve_update.query_external_service',
+    @patch('bhtom2.brokers.gaia_alerts.query_external_service',
            return_value=sample_lightcurve_three_correct_lines)
     def test_only_one_observation_record_group_created_for_updates_for_two_targets(self, _):
 
-        gaia_lightcurve_update: GaiaLightcurveUpdate = GaiaLightcurveUpdate()
+        gaia_alerts_broker: GaiaAlertsBroker = GaiaAlertsBroker()
 
         target1: Target = create_sample_target()
         target2: Target = create_second_sample_target()
 
-        gaia_lightcurve_update.update_lightcurve(target1)
-        gaia_lightcurve_update.update_lightcurve(target2)
+        gaia_alerts_broker.process_reduced_data(target1)
+        gaia_alerts_broker.process_reduced_data(target2)
 
         observation_group: List[ObservationGroup] = list(ObservationGroup.objects.all().filter(name="Gaia"))
         observation_records: List[ObservationRecord] = list(observation_group[0].observation_records.all())
