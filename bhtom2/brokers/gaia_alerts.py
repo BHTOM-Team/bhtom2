@@ -8,7 +8,6 @@ from astropy.time import Time, TimezoneInfo
 from bs4 import BeautifulSoup
 from dateutil.parser import parse
 from django import forms
-from requests.exceptions import HTTPError
 from tom_alerts.alerts import GenericAlert
 from tom_alerts.alerts import GenericQueryForm
 from tom_dataproducts.models import ReducedDatum
@@ -164,8 +163,8 @@ class GaiaAlertsBroker(BHTOMBroker):
             lc_url = f'{self.__base_url}/alerts/alert/{alert_name}/lightcurve.csv'
             alert_url = f'{self.__base_url}/{alert_link}'
         elif target:
-            lc_url = f'{self.__base_url}/{gaia_name}/lightcurve.csv'
             alert_url = f'{self.__base_url}/alerts/alert/{gaia_name}/'
+            lc_url = f'{alert_url}/lightcurve.csv'
         else:
             return
 

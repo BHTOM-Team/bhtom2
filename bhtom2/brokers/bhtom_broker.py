@@ -1,17 +1,15 @@
-from abc import ABC
-
-from tom_alerts.alerts import GenericBroker, GenericQueryForm
-
 from collections import namedtuple
 from functools import lru_cache
-from typing import List, Any, Optional, Iterable, Tuple
+from typing import List, Optional
 
 import numpy as np
-from tom_dataproducts.models import DataProductGroup, DataProduct, ReducedDatum
+from tom_alerts.alerts import GenericBroker
+from tom_dataproducts.models import DataProductGroup, DataProduct
 from tom_observations.models import ObservationRecord, ObservationGroup
 from tom_targets.models import Target
 
-from bhtom2.external_service.data_source_information import DataSource, FILTERS, TARGET_NAME_KEYS
+from bhtom2.external_service.data_source_information import DataSource, FILTERS, TARGET_NAME_KEYS, \
+    PHOTOMETRY_BROKER_DATAPRODUCT_TYPE
 from bhtom2.external_service.filter_name import filter_name
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
@@ -106,7 +104,7 @@ class BHTOMBroker(GenericBroker):
                                                                                                                  filter,
                                                                                                                  observatory_name),
                                                                   extra_data=encode_extra_data(observer=observer_name),
-                                                                  data_product_type="photometry")
+                                                                  data_product_type=PHOTOMETRY_BROKER_DATAPRODUCT_TYPE)
 
         if created:
             data_product.group.add(self.__data_product_group.id)
