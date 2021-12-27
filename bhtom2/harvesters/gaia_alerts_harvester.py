@@ -10,7 +10,7 @@ from tom_catalogs.harvester import AbstractHarvester
 from tom_targets.models import Target
 
 from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
-from bhtom2.external_service.data_source_information import DataSource
+from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
 from bhtom2.external_service.external_service_request import query_external_service
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
@@ -81,7 +81,7 @@ def get(term: str):
     # #Name, RaDeg, DecDeg, ...
     # so the spaces are mandatory in column names if not preprocessed before
     catalog_data: Dict[str, Any] = {
-        alert_target_name[AlertSource.GAIA]: term_data["#Name"],
+        TARGET_NAME_KEYS[DataSource.Gaia]: term_data["#Name"],
         "ra": Decimal(term_data[" RaDeg"]),
         "dec": Decimal(term_data[" DecDeg"]),
         "disc": term_data[" Date"],
@@ -103,7 +103,7 @@ class GaiaAlertsHarvester(AbstractHarvester):
         # catalog_data contains now all fields needed to create a target
         target = super().to_target()
 
-        gaia_name: str = self.catalog_data[alert_target_name[AlertSource.GAIA]]
+        gaia_name: str = self.catalog_data[TARGET_NAME_KEYS[DataSource.Gaia]]
         ra: str = self.catalog_data["ra"]
         dec: str = self.catalog_data["dec"]
         disc: str = self.catalog_data["disc"]
@@ -128,13 +128,12 @@ class GaiaAlertsHarvester(AbstractHarvester):
             target.dec = dec
             target.epoch = 2000
 
-            target.gaia_alert_name = gaia_name
+            target.__setattr__(TARGET_NAME_KEYS[DataSource.Gaia], gaia_name)
+
             target.jdlastobs = 0.
             target.priority = 0.
             target.classification = classif
             target.discovery_date = disc
-            target.ztf_alert_name = ''
-            target.calib_server_name = ''
             target.cadence = 1.
 
             # TODO: extra fields?
