@@ -289,14 +289,16 @@ TOM_FACILITY_CLASSES = [
 
 TOM_ALERT_CLASSES = [
     'bhtom2.brokers.gaia_alerts.GaiaAlertsBroker',
+    'bhtom2.brokers.aavso.AAVSOBroker',
+    'bhtom2.brokers.ztf.ZTFBroker',
     'tom_alerts.brokers.alerce.ALeRCEBroker',
     'tom_alerts.brokers.antares.ANTARESBroker',
     'tom_alerts.brokers.lasair.LasairBroker',
     'tom_alerts.brokers.mars.MARSBroker',
-    # 'tom_alerts.brokers.scimma.SCIMMABroker',
+    'tom_alerts.brokers.scimma.SCIMMABroker',
     'tom_alerts.brokers.scout.ScoutBroker',
     'tom_alerts.brokers.tns.TNSBroker',
-    # 'tom_alerts.brokers.fink.FinkBroker',
+    'tom_alerts.brokers.fink.FinkBroker',
 ]
 
 BROKERS = {

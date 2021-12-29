@@ -26,12 +26,16 @@ def g_gaia_error(mag: float) -> float:
     a2 = 0.26
     b2 = -6.26
 
+    error = 0.0
+
     if mag < 13.5:
-        return a1 * 13.5 + b1
+        error: float = a1 * 13.5 + b1
     elif 13.5 < mag < 17:
-        return a1 * mag + b1
+        error: float = a1 * mag + b1
     elif mag > 17:
-        return a2 * mag + b2
+        error: float = a2 * mag + b2
+
+    return 10**error if error>0.0 else 0.0
 
 
 class GaiaQueryForm(GenericQueryForm):

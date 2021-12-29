@@ -1,4 +1,3 @@
-import json
 from typing import Dict, Optional, Any
 
 from alerce.core import Alerce
@@ -14,6 +13,9 @@ from bhtom2.models.reduced_datum_value import reduced_datum_value
 
 
 class ZTFBroker(BHTOMBroker):
+
+    name = DataSource.ZTF.name
+
     def __init__(self):
         super().__init__(DataSource.ZTF)
 
