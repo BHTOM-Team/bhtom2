@@ -4,13 +4,12 @@ from typing import List, Set
 from unittest.mock import patch
 
 from django.test import TestCase
-from tom_dataproducts.models import ReducedDatum, DataProduct, DataProductGroup
-from tom_observations.models import ObservationRecord, ObservationGroup
+from tom_dataproducts.models import ReducedDatum
 from tom_targets.models import Target
 
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
-from bhtom2.brokers.lightcurve_update import LightcurveUpdateReport
-from bhtom2.brokers.ztf_lightcurve_update import ZTFLightcurveUpdate
+from bhtom2.brokers.bhtom_broker import LightcurveUpdateReport
+from bhtom2.brokers.ztf import ZTFBroker
 
 sample_lightcurve_two_correct_lines = {'detections': [{'mjd': 59550.28425930021,
                                                        'candid': '1796284252615015007',
@@ -187,17 +186,17 @@ def create_second_sample_target() -> Target:
         epoch=2000,
     )
 
-    target.save(extras={TARGET_NAME_KEYS[DataSource.GAIA]: "ZTF21acqspkc"})
+    target.save(extras={TARGET_NAME_KEYS[DataSource.ZTF]: "ZTF21acqspkc"})
 
     return target
 
 
 class ZTFLightcurveUpdateTestCase(TestCase):
 
-    @patch('bhtom2.brokers.ztf_lightcurve_update.Alerce.query_lightcurve',
+    @patch('bhtom2.brokers.ztf.Alerce.query_lightcurve',
            return_value=sample_lightcurve_two_correct_lines)
     def test_dont_update_lightcurve_when_no_ztf_name(self, _):
-        ztf_lightcurve_update: ZTFLightcurveUpdate = ZTFLightcurveUpdate()
+        ztf_broker: ZTFBroker = ZTFBroker()
 
         target: Target = Target(
             name="ZTF21acqpcmx",
@@ -209,7 +208,7 @@ class ZTFLightcurveUpdateTestCase(TestCase):
 
         target.save()
 
-        report: LightcurveUpdateReport = ztf_lightcurve_update.update_lightcurve(target)
+        report: LightcurveUpdateReport = ztf_broker.process_reduced_data(target)
 
         rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
 
@@ -218,127 +217,44 @@ class ZTFLightcurveUpdateTestCase(TestCase):
         self.assertEqual(report.last_jd, None)
         self.assertEqual(report.last_mag, None)
 
-    @patch('bhtom2.brokers.ztf_lightcurve_update.Alerce.query_lightcurve',
+    @patch('bhtom2.brokers.ztf.Alerce.query_lightcurve',
            return_value=sample_lightcurve_two_correct_lines)
     def test_update_lightcurve(self, _):
-        ztf_lightcurve_update: ZTFLightcurveUpdate = ZTFLightcurveUpdate()
+        ztf_broker: ZTFBroker = ZTFBroker()
 
         target: Target = create_sample_target()
 
         target.save()
 
-        report: LightcurveUpdateReport = ztf_lightcurve_update.update_lightcurve(target)
+        report: LightcurveUpdateReport = ztf_broker.process_reduced_data(target)
 
         rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
 
         self.assertEqual(len(rd), 2)
 
-        self.assertEqual(rd[0].value, json.dumps({
+        self.assertEqual(rd[0].value, {
             'magnitude': 18.492537,
             'filter': 'g(ZTF)',
             'error': 0.07564124,
-            'jd': 2459550.78425930
-        }))
+            'jd': 2459550.78425930,
+            'observer': 'ZTF',
+            'facility': 'ZTF'
+        })
         self.assertEqual(rd[0].data_type, 'photometry')
         self.assertEqual(rd[0].target, target)
         self.assertEqual(report.new_points, 2)
         self.assertEqual(report.last_jd, 2459550.88187500)
         self.assertEqual(report.last_mag, 18.522156)
 
-    @patch('bhtom2.brokers.ztf_lightcurve_update.Alerce.query_lightcurve',
+    @patch('bhtom2.brokers.ztf.Alerce.query_lightcurve',
            return_value=sample_lightcurve_two_correct_lines_with_Nones)
     def test_update_lightcurve_dont_save_none_magnitude(self, _):
-        ztf_lightcurve_update: ZTFLightcurveUpdate = ZTFLightcurveUpdate()
+        ztf_broker: ZTFBroker = ZTFBroker()
 
         target: Target = create_sample_target()
 
-        ztf_lightcurve_update.update_lightcurve(target)
+        ztf_broker.process_reduced_data(target)
 
         rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
 
         self.assertEqual(len(rd), 1)
-
-    @patch('bhtom2.brokers.ztf_lightcurve_update.Alerce.query_lightcurve',
-           return_value=sample_lightcurve_two_correct_lines)
-    def test_create_dataproduct(self, _):
-        ztf_lightcurve_update: ZTFLightcurveUpdate = ZTFLightcurveUpdate()
-
-        target: Target = create_sample_target()
-
-        ztf_lightcurve_update.update_lightcurve(target)
-
-        rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
-
-        dp: DataProduct = rd[0].data_product
-        dp_group: DataProductGroup = dp.group.all()[0]
-
-        self.assertEqual(dp.target, target)
-        self.assertEqual(dp.data_product_type, "photometry")
-        self.assertEqual(dp.extra_data, json.dumps({"observer": "ZTF"}))
-        self.assertEqual(dp_group.name, "ZTF")
-
-    @patch('bhtom2.brokers.ztf_lightcurve_update.Alerce.query_lightcurve',
-           return_value=sample_lightcurve_two_correct_lines)
-    def test_create_observation_record(self, _):
-        ztf_lightcurve_update: ZTFLightcurveUpdate = ZTFLightcurveUpdate()
-
-        target: Target = create_sample_target()
-
-        ztf_lightcurve_update.update_lightcurve(target)
-
-        rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
-
-        dp: DataProduct = rd[0].data_product
-
-        obs: ObservationRecord = dp.observation_record
-
-        obs_group: ObservationGroup = obs.observationgroup_set.all()[0]
-
-        self.assertEqual(obs.target, target)
-        self.assertEqual(obs.user, None)
-        self.assertEqual(obs.facility, "ZTF")
-        self.assertEqual(obs_group.name, "ZTF")
-
-    @patch('bhtom2.brokers.ztf_lightcurve_update.Alerce.query_lightcurve',
-           return_value=sample_lightcurve_two_correct_lines)
-    def test_only_one_dataproduct_per_filter_created_for_multiple_updates_for_one_target(self, _):
-        ztf_lightcurve_update: ZTFLightcurveUpdate = ZTFLightcurveUpdate()
-        ztf_lightcurve_update2: ZTFLightcurveUpdate = ZTFLightcurveUpdate()
-
-        target: Target = create_sample_target()
-
-        target.save()
-
-        ztf_lightcurve_update.update_lightcurve(target)
-        ztf_lightcurve_update.update_lightcurve(target)
-        ztf_lightcurve_update2.update_lightcurve(target)
-
-        data_products: List[DataProduct] = list(DataProduct.objects.all().filter(target=target))
-        data_product_group: List[DataProductGroup] = list(DataProductGroup.objects.all().filter(name="ZTF"))
-
-        self.assertEqual(len(data_products), 2)
-        self.assertEqual(len(data_product_group), 1)
-
-    @patch('bhtom2.brokers.ztf_lightcurve_update.Alerce.query_lightcurve',
-           return_value=sample_lightcurve_two_correct_lines)
-    def test_only_one_observation_record_per_filter_created_for_multiple_updates_for_one_target(self, _):
-        ztf_lightcurve_update: ZTFLightcurveUpdate = ZTFLightcurveUpdate()
-        ztf_lightcurve_update2: ZTFLightcurveUpdate = ZTFLightcurveUpdate()
-
-        target: Target = create_sample_target()
-
-        target.save()
-
-        ztf_lightcurve_update.update_lightcurve(target)
-        ztf_lightcurve_update.update_lightcurve(target)
-        ztf_lightcurve_update2.update_lightcurve(target)
-
-        observation_record: List[ObservationRecord] = list(ObservationRecord.objects.all().filter(target=target))
-        observation_group: List[ObservationGroup] = list(ObservationGroup.objects.all().filter(name="ZTF"))
-
-        filters: Set[str] = set([obr.parameters.get('filter') for obr in observation_record])
-
-        self.assertEqual(len(observation_record), 2)
-        self.assertEqual(filters, {'g(ZTF)', 'r(ZTF)'})
-
-        self.assertEqual(len(observation_group), 1)

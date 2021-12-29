@@ -4,16 +4,19 @@ from typing import List, Optional
 
 import numpy as np
 from tom_alerts.alerts import GenericBroker
-from tom_dataproducts.models import DataProductGroup, DataProduct
-from tom_observations.models import ObservationRecord, ObservationGroup
 from tom_targets.models import Target
 
-from bhtom2.external_service.data_source_information import DataSource, FILTERS, TARGET_NAME_KEYS, \
-    PHOTOMETRY_BROKER_DATAPRODUCT_TYPE
+from bhtom2.external_service.data_source_information import DataSource, FILTERS, TARGET_NAME_KEYS
 from bhtom2.external_service.filter_name import filter_name
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
 LightcurveUpdateReport = namedtuple('LightcurveUpdateReport', ['new_points', 'last_jd', 'last_mag'])
+
+
+def return_for_no_new_points() -> LightcurveUpdateReport:
+    return LightcurveUpdateReport(new_points=0,
+                                  last_jd=None,
+                                  last_mag=None)
 
 
 class BHTOMBroker(GenericBroker):
@@ -26,17 +29,8 @@ class BHTOMBroker(GenericBroker):
         self.__last_mag: Optional[np.float64] = None
         self.__target_name_key: str = TARGET_NAME_KEYS[self.__data_source]
 
-        data_product_group, created = DataProductGroup.objects.get_or_create(name=self.__data_source.name)
-        if created:
-            data_product_group.save()
-
-        self.__data_product_group: DataProductGroup = data_product_group
-
-        observation_group, created = ObservationGroup.objects.get_or_create(name=self.__data_source.name)
-        if created:
-            observation_group.save()
-
-        self.__observation_group: ObservationGroup = observation_group
+    def filter_name(self, filter: str) -> str:
+        return filter_name(filter, self.__data_source.name)
 
     @property
     def data_source(self) -> DataSource:
@@ -45,14 +39,6 @@ class BHTOMBroker(GenericBroker):
     @property
     def logger(self) -> BHTOMLogger:
         return self.__logger
-
-    @property
-    def data_product_group(self) -> DataProductGroup:
-        return self.__data_product_group
-
-    @property
-    def observation_group(self) -> ObservationGroup:
-        return self.__observation_group
 
     @property
     def last_jd(self) -> Optional[float]:
@@ -71,46 +57,6 @@ class BHTOMBroker(GenericBroker):
             self.__logger.error(f'Error while accessing internal name for {target.name}: {e}')
 
         return internal_name
-
-    @lru_cache(maxsize=32)
-    def get_observation_record(self,
-                               target: Target,
-                               filter: str,
-                               observatory_name: str) -> ObservationRecord:
-        observation_record, created = ObservationRecord.objects.get_or_create(facility=observatory_name,
-                                                                              user=None,
-                                                                              target=target,
-                                                                              parameters={
-                                                                                  'filter': filter_name(filter,
-                                                                                                        self.__data_source.name)
-                                                                              })
-
-        if created:
-            observation_record.save()
-            observation_record.observationgroup_set.add(self.__observation_group)
-
-        return observation_record
-
-    @lru_cache(maxsize=32)
-    def get_dataproduct(self,
-                        target: Target,
-                        filter: str,
-                        observatory_name: str,
-                        observer_name: str) -> DataProduct:
-        from bhtom2.dataproducts.dataproduct_extra_data import encode_extra_data
-
-        data_product, created = DataProduct.objects.get_or_create(target=target,
-                                                                  observation_record=self.get_observation_record(target,
-                                                                                                                 filter,
-                                                                                                                 observatory_name),
-                                                                  extra_data=encode_extra_data(observer=observer_name),
-                                                                  data_product_type=PHOTOMETRY_BROKER_DATAPRODUCT_TYPE)
-
-        if created:
-            data_product.group.add(self.__data_product_group.id)
-            data_product.save()
-
-        return data_product
 
     def update_last_jd_and_mag(self, last_jd: Optional[np.float64], last_mag: Optional[np.float64]):
         if not last_jd:

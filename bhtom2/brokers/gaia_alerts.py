@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Optional, List
+from typing import Optional, List, Any, Dict
 
 import astropy.units as u
 from astropy.coordinates import SkyCoord
@@ -17,6 +17,7 @@ from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport
 from bhtom2.external_service.data_source_information import DataSource, FILTERS
 from bhtom2.external_service.external_service_request import query_external_service
 from bhtom2.external_service.filter_name import filter_name
+from bhtom2.models.reduced_datum_value import reduced_datum_value
 
 
 def g_gaia_error(mag: float) -> float:
@@ -191,12 +192,10 @@ class GaiaAlertsBroker(BHTOMBroker):
                         jd = Time(float(data_jd), format='jd', scale='utc')
                         jd.to_datetime(timezone=TimezoneInfo())
 
-                        value = {
-                            "magnitude": mag,
-                            "filter": self.__filter,
-                            "error": g_gaia_error(mag),
-                            "jd": jd.value
-                        }
+                        value: Dict[str, Any] = reduced_datum_value(mag=mag, filter=self.__filter,
+                                                                    error=g_gaia_error(mag), jd=jd.value,
+                                                                    observer=self.__OBSERVER_NAME,
+                                                                    facility=self.__FACILITY_NAME)
 
                         rd, _ = ReducedDatum.objects.get_or_create(
                             timestamp=jd.to_datetime(timezone=TimezoneInfo()),
@@ -204,9 +203,6 @@ class GaiaAlertsBroker(BHTOMBroker):
                             source_name=self.name,
                             source_location=alert_url,
                             data_type='photometry',
-                            data_product=self.get_dataproduct(target, self.__filter,
-                                                              self.__FACILITY_NAME,
-                                                              self.__OBSERVER_NAME),
                             target=target)
                         rd.save()
                         new_points += 1
