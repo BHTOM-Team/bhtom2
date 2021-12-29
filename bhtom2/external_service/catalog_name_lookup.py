@@ -6,11 +6,13 @@ import requests
 from astroquery.simbad import Simbad
 from django.conf import settings
 from tom_targets.models import Target
+from alerce.core import Alerce
 
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Catalog name lookup]')
+alerce: Alerce = Alerce()
 
 TNS_SEARCH_URL_SLUG: str = "search"
 TNS_OBJECT_URL_SLUG: str = "object"
@@ -125,6 +127,26 @@ TNS_OBJECT_URL_SLUG: str = "object"
 #     else:
 #         logger.error(f'{LOG_PREFIX} No TNS internal names found in response {response}')
 #         raise TNSReplyError(f'No TNS internal names in response.')
+
+
+def query_all_services(target: Target) -> Dict[str, str]:
+    alerce_result: Dict[str, str] = query_alerce_for_names(target)
+    simbad_result: Dict[str, str] = query_simbad_for_names(target)
+
+    return {**alerce_result, **simbad_result}
+
+
+def query_alerce_for_names(target: Target) -> Dict[str, str]:
+    query: Dict[str, Any] = alerce.query_objects(ra=target.ra, dec=target.dec, radius=1., format='json')
+
+    # TODO: if more, then check with smaller radius
+    if len(query.get('items', [])) == 1:
+        ztf_name: Optional[str] = query['items'][0].get('oid')
+
+        if ztf_name:
+            return {TARGET_NAME_KEYS[DataSource.ZTF]: ztf_name}
+
+    return {}
 
 
 def query_simbad_for_names(target: Target) -> Dict[str, str]:

@@ -14,8 +14,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
+from tom_targets.views import TargetDetailView
 
 urlpatterns = [
     path('', include('tom_registration.registration_flows.approval_required.urls', namespace='registration')),
     path('', include('tom_common.urls')),
+    path('targets/<int:pk>/', TargetDetailView.as_view(template_name='tom_targets/target_detail.html'), name='detail'),
 ]
