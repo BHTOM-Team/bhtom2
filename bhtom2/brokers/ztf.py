@@ -9,7 +9,7 @@ from tom_targets.models import Target
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
 from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
 from bhtom2.external_service.data_source_information import DataSource, ZTF_FILTERS, FILTERS
-from bhtom2.models.reduced_datum_value import reduced_datum_value
+from bhtom2.models.reduced_datum_value import reduced_datum_value, reduced_datum_non_detection_value
 
 
 class ZTFBroker(BHTOMBroker):
@@ -79,6 +79,41 @@ class ZTFBroker(BHTOMBroker):
                     self.update_last_jd_and_mag(mjd.jd, mag)
             except Exception as e:
                 self.logger.error(f'Error while processing reduced datapoint for {target.name} with '
+                                  f'ZTF name {ztf_name}: {e}')
+
+        for entry in query['non_detections']:
+
+            try:
+                mjd: Time = Time(entry['mjd'], format='mjd', scale='utc')
+                limit: float = float(entry['diffmaglim'])
+
+                if limit is not None:
+                    self.logger.debug(f'None non-detection for target {target.name}')
+
+                    filter: str = ZTF_FILTERS[int(entry['fid'])]
+
+                    if filter not in FILTERS[self.data_source]:
+                        self.logger.warning(f'Invalid ZTF filter for {target.name}: {filter}')
+
+                    value: Dict[str, Any] = reduced_datum_non_detection_value(limit=limit,
+                                                                              filter=self.filter_name(filter),
+                                                                              jd=mjd.jd,
+                                                                              observer=self.__OBSERVER_NAME,
+                                                                              facility=self.__FACILITY_NAME)
+
+                    rd, _ = ReducedDatum.objects.get_or_create(
+                        timestamp=mjd.to_datetime(timezone=TimezoneInfo()),
+                        value=value,
+                        source_name='ALeRCE',
+                        source_location='ALeRCE',
+                        data_type='photometry',
+                        target=target)
+
+                    rd.save()
+                    new_points += 1
+
+            except Exception as e:
+                self.logger.error(f'Error while processing reduced non-detection datapoint for {target.name} with '
                                   f'ZTF name {ztf_name}: {e}')
 
         return LightcurveUpdateReport(new_points=new_points,

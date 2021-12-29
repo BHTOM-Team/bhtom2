@@ -79,20 +79,7 @@ sample_lightcurve_two_correct_lines = {'detections': [{'mjd': 59550.28425930021,
                                                        'parent_candid': None}],
                                        'non_detections': [{'mjd': 59522.34593749978,
                                                            'fid': 2,
-                                                           'diffmaglim': 20.4739},
-                                                          {'mjd': 59522.454074100126, 'fid': 1, 'diffmaglim': 20.8706},
-                                                          {'mjd': 59524.44842590019, 'fid': 2, 'diffmaglim': 20.6626},
-                                                          {'mjd': 59524.516979199834, 'fid': 1, 'diffmaglim': 20.9345},
-                                                          {'mjd': 59526.450405099895, 'fid': 1, 'diffmaglim': 20.8343},
-                                                          {'mjd': 59526.50885420013, 'fid': 2, 'diffmaglim': 20.5514},
-                                                          {'mjd': 59529.415011600126, 'fid': 2, 'diffmaglim': 20.2561},
-                                                          {'mjd': 59529.51506939996, 'fid': 1, 'diffmaglim': 20.4769},
-                                                          {'mjd': 59531.393124999944, 'fid': 1, 'diffmaglim': 20.7168},
-                                                          {'mjd': 59531.44623839995, 'fid': 2, 'diffmaglim': 20.6564},
-                                                          {'mjd': 59536.43453700002, 'fid': 1, 'diffmaglim': 19.5238},
-                                                          {'mjd': 59536.488622699864, 'fid': 2, 'diffmaglim': 20.0576},
-                                                          {'mjd': 59538.3020601999, 'fid': 2, 'diffmaglim': 19.4798},
-                                                          {'mjd': 59538.39106479986, 'fid': 1, 'diffmaglim': 19.4221}]}
+                                                           'diffmaglim': 20.4739}]}
 
 sample_lightcurve_two_correct_lines_with_Nones = {'detections': [{'mjd': 59550.28425930021,
                                                                   'candid': '1796284252615015007',
@@ -230,7 +217,7 @@ class ZTFLightcurveUpdateTestCase(TestCase):
 
         rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
 
-        self.assertEqual(len(rd), 2)
+        self.assertEqual(len(rd), 3)
 
         self.assertEqual(rd[0].value, {
             'magnitude': 18.492537,
@@ -242,7 +229,35 @@ class ZTFLightcurveUpdateTestCase(TestCase):
         })
         self.assertEqual(rd[0].data_type, 'photometry')
         self.assertEqual(rd[0].target, target)
-        self.assertEqual(report.new_points, 2)
+        self.assertEqual(report.new_points, 3)
+        self.assertEqual(report.last_jd, 2459550.88187500)
+        self.assertEqual(report.last_mag, 18.522156)
+
+    @patch('bhtom2.brokers.ztf.Alerce.query_lightcurve',
+           return_value=sample_lightcurve_two_correct_lines)
+    def test_update_lightcurve_save_non_detection(self, _):
+        ztf_broker: ZTFBroker = ZTFBroker()
+
+        target: Target = create_sample_target()
+
+        target.save()
+
+        report: LightcurveUpdateReport = ztf_broker.process_reduced_data(target)
+
+        rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
+
+        self.assertEqual(len(rd), 3)
+
+        self.assertEqual(rd[2].value, {
+            'limit': 20.4739,
+            'filter': 'r(ZTF)',
+            'jd': 2459522.84593750,
+            'observer': 'ZTF',
+            'facility': 'ZTF'
+        })
+        self.assertEqual(rd[0].data_type, 'photometry')
+        self.assertEqual(rd[0].target, target)
+        self.assertEqual(report.new_points, 3)
         self.assertEqual(report.last_jd, 2459550.88187500)
         self.assertEqual(report.last_mag, 18.522156)
 
