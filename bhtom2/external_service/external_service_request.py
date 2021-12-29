@@ -26,3 +26,19 @@ def query_external_service(url: str,
 
     return response_text
 
+
+"""
+    except requests.exceptions.ConnectionError:
+        logger.error(f'{LOG_PREFIX} Connection error while requesting TNS')
+        raise TNSConnectionError(f'Connection error while requesting TNS. Please try again later.')
+    except requests.exceptions.Timeout:
+        logger.error(f'{LOG_PREFIX} Timeout while requesting TNS')
+        raise TNSConnectionError(f'Timeout while requesting TNS. Please try again later.')
+    except requests.exceptions.RequestException:
+        logger.error(f'{LOG_PREFIX} Request exception while requesting TNS: {e}')
+        raise TNSConnectionError(f'Unexpected network error occurred while requesting TNS.')
+
+    if not response:
+        logger.error(f'{LOG_PREFIX} No respose returned for {target_url}')
+        raise TNSConnectionError(f'No response from TNS. Please try again later.')
+"""

@@ -70,7 +70,7 @@ INSTALLED_APPS = [
     'tom_dataproducts',
     'tom_registration',
     'rest_framework.authtoken',
-    'bhtom2'
+    'bhtom2.apps.BHTOM2Config'
 ]
 
 MIDDLEWARE = [
@@ -308,11 +308,11 @@ BROKERS = {
 }
 
 TOM_HARVESTER_CLASSES = [
-    'bhtom2.harvesters.gaia_alerts_harvester.GaiaAlertsHarvester',
+    'bhtom2.harvesters.gaia_alerts.GaiaAlertsHarvester',
+    'bhtom2.harvesters.tns.TNSHarvester',
     'tom_catalogs.harvesters.simbad.SimbadHarvester',
     'tom_catalogs.harvesters.ned.NEDHarvester',
     'tom_catalogs.harvesters.jplhorizons.JPLHorizonsHarvester',
-    'tom_catalogs.harvesters.tns.TNSHarvester',
 ]
 
 HARVESTERS = {
@@ -335,7 +335,7 @@ EXTRA_FIELDS = [
     {'name': TARGET_NAME_KEYS[DataSource.CPCS], 'type': 'string'},
     {'name': TARGET_NAME_KEYS[DataSource.ZTF], 'type': 'string'},
     {'name': TARGET_NAME_KEYS[DataSource.AAVSO], 'type': 'string'},
-    {'name': 'gaiadr2_id', 'type': 'string'},
+    {'name': TARGET_NAME_KEYS[DataSource.GAIA_DR2], 'type': 'string'},
     {'name': TARGET_NAME_KEYS[DataSource.TNS], 'type': 'string'},
     {'name': 'classification', 'type': 'string'},
     {'name': 'tweet', 'type': 'boolean'},
@@ -362,7 +362,7 @@ TARGET_PERMISSIONS_ONLY = True
 OPEN_URLS = []
 
 HOOKS = {
-    'target_post_save': 'tom_common.hooks.target_post_save',
+    'target_post_save': 'bhtom2.hooks.target_post_save',
     'observation_change_state': 'tom_common.hooks.observation_change_state',
     'data_product_post_upload': 'tom_dataproducts.hooks.data_product_post_upload',
     'data_product_post_save': 'tom_dataproducts.hooks.data_product_post_save',

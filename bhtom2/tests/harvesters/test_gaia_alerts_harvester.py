@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.conf import settings
 from tom_targets.models import Target
 
-from bhtom2.harvesters.gaia_alerts_harvester import fetch_alerts_csv, search_term_in_gaia_data, get, \
+from bhtom2.harvesters.gaia_alerts import fetch_alerts_csv, search_term_in_gaia_data, get, \
     GaiaAlertsHarvester
 
 from pyfakefs.fake_filesystem_unittest import Patcher

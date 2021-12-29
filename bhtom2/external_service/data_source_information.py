@@ -9,6 +9,7 @@ class DataSource(Enum):
     AAVSO = auto()
     TNS = auto()
     ASASSN = auto()
+    GAIA_DR2 = auto()
 
 
 TARGET_NAME_KEYS: Dict[DataSource, str] = {
@@ -18,6 +19,7 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.AAVSO: "AAVSO name",
     DataSource.TNS: "TNS name",
     DataSource.ASASSN: "ASASSN name",
+    DataSource.GAIA_DR2: "Gaia DR2 id"
 }
 
 
