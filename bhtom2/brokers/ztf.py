@@ -1,37 +1,20 @@
 import math
-from typing import Dict, Optional, Any
+from typing import Optional, List, Any, Dict
 
 from alerce.core import Alerce
 from alerce.exceptions import APIError, ObjectNotFoundError
 from astropy.time import Time, TimezoneInfo
-from tom_alerts.alerts import GenericQueryForm
-from tom_dataproducts.models import ReducedDatum
-from tom_targets.models import Target
-
-from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
-from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
-from bhtom2.external_service.data_source_information import DataSource, ZTF_FILTERS, FILTERS
-from bhtom2.models.reduced_datum_value import reduced_datum_value, reduced_datum_non_detection_value
-
-import json
-import re
-from typing import Optional, List, Any, Dict
-
-import astropy.units as u
-from astropy.coordinates import SkyCoord
-from astropy.time import Time, TimezoneInfo
-from bs4 import BeautifulSoup
-from dateutil.parser import parse
 from django import forms
 from tom_alerts.alerts import GenericAlert
 from tom_alerts.alerts import GenericQueryForm
 from tom_dataproducts.models import ReducedDatum
+from tom_targets.models import Target
 
-from bhtom2 import settings
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport
+from bhtom2.brokers.bhtom_broker import return_for_no_new_points
+from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
 from bhtom2.external_service.data_source_information import DataSource, FILTERS
-from bhtom2.external_service.external_service_request import query_external_service
-from bhtom2.external_service.filter_name import filter_name
+from bhtom2.external_service.data_source_information import ZTF_FILTERS
 from bhtom2.models.reduced_datum_value import reduced_datum_value
 
 
@@ -64,6 +47,7 @@ class ZTFQueryForm(GenericQueryForm):
 class ZTFBroker(BHTOMBroker):
 
     name = DataSource.ZTF.name
+    form = None
 
     def __init__(self):
         super().__init__(DataSource.ZTF)

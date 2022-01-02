@@ -24,6 +24,7 @@ timezone_info: TimezoneInfo = TimezoneInfo()
 class AAVSOBroker(BHTOMBroker):
 
     name = DataSource.AAVSO.name
+    form = None
 
     def __init__(self):
         super().__init__(DataSource.AAVSO)
