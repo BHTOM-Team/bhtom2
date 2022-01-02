@@ -310,6 +310,7 @@ BROKERS = {
 TOM_HARVESTER_CLASSES = [
     'bhtom2.harvesters.gaia_alerts.GaiaAlertsHarvester',
     'bhtom2.harvesters.tns.TNSHarvester',
+    'bhtom2.harvesters.antares.ANTARESHarvester',
     'tom_catalogs.harvesters.simbad.SimbadHarvester',
     'tom_catalogs.harvesters.ned.NEDHarvester',
     'tom_catalogs.harvesters.jplhorizons.JPLHorizonsHarvester',
