@@ -9,6 +9,7 @@ class DataSource(Enum):
     AAVSO = auto()
     TNS = auto()
     ASASSN = auto()
+    ANTARES = auto()
     GAIA_DR2 = auto()
 
 
@@ -19,6 +20,7 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.AAVSO: "AAVSO name",
     DataSource.TNS: "TNS name",
     DataSource.ASASSN: "ASASSN name",
+    DataSource.ANTARES: "ANTARES name",
     DataSource.GAIA_DR2: "Gaia DR2 id"
 }
 
@@ -27,6 +29,7 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.Gaia: ["g"],
     DataSource.ZTF: ["g", "i", "r"],
     DataSource.AAVSO: ["V", "I", "R"],
+    DataSource.ANTARES: ["R", "g"]
 }
 
 

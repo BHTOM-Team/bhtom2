@@ -127,9 +127,6 @@ class GaiaAlertsHarvester(AbstractHarvester):
             target.ra = ra
             target.dec = dec
             target.epoch = 2000
-
-            target.__setattr__(TARGET_NAME_KEYS[DataSource.Gaia], gaia_name)
-
             target.jdlastobs = 0.
             target.priority = 0.
             target.classification = classif

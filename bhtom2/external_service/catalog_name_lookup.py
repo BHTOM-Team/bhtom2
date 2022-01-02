@@ -7,6 +7,8 @@ from astroquery.simbad import Simbad
 from django.conf import settings
 from tom_targets.models import Target
 from alerce.core import Alerce
+import antares_client.search as antares
+from astropy.coordinates import Angle, SkyCoord
 
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
@@ -130,21 +132,27 @@ TNS_OBJECT_URL_SLUG: str = "object"
 
 
 def query_all_services(target: Target) -> Dict[str, str]:
-    alerce_result: Dict[str, str] = query_alerce_for_names(target)
+    alerce_result: Dict[str, str] = query_antares_for_names(target)
     simbad_result: Dict[str, str] = query_simbad_for_names(target)
 
     return {**alerce_result, **simbad_result}
 
 
-def query_alerce_for_names(target: Target) -> Dict[str, str]:
-    query: Dict[str, Any] = alerce.query_objects(ra=target.ra, dec=target.dec, radius=1., format='json')
+def query_antares_for_names(target: Target) -> Dict[str, str]:
+    coordinates: SkyCoord = SkyCoord(ra=target.ra, dec=target.dec, unit="deg")
+    radius: Angle = Angle(1, unit="arcsec")
 
-    # TODO: if more, then check with smaller radius
-    if len(query.get('items', [])) == 1:
-        ztf_name: Optional[str] = query['items'][0].get('oid')
+    target: Optional[Any] = None
 
-        if ztf_name:
-            return {TARGET_NAME_KEYS[DataSource.ZTF]: ztf_name}
+    for locus in antares.cone_search(coordinates, radius):
+        target = locus
+        break
+
+    if target:
+        return {
+            TARGET_NAME_KEYS[DataSource.ANTARES]: target.locus_id,
+            TARGET_NAME_KEYS[DataSource.ZTF]: target.properties.get('ztf_object_id', '')
+        }
 
     return {}
 

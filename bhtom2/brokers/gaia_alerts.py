@@ -13,7 +13,7 @@ from tom_alerts.alerts import GenericQueryForm
 from tom_dataproducts.models import ReducedDatum
 
 from bhtom2 import settings
-from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport
+from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
 from bhtom2.external_service.data_source_information import DataSource, FILTERS
 from bhtom2.external_service.external_service_request import query_external_service
 from bhtom2.external_service.filter_name import filter_name
@@ -35,7 +35,7 @@ def g_gaia_error(mag: float) -> float:
     elif mag > 17:
         error: float = a2 * mag + b2
 
-    return 10**error if error>0.0 else 0.0
+    return 10**error
 
 
 class GaiaQueryForm(GenericQueryForm):
@@ -100,12 +100,13 @@ class GaiaAlertsBroker(BHTOMBroker):
 
         if parameters['cone'] is not None and len(parameters['cone']) > 0:
             cone_params = parameters['cone'].split(',')
-            parameters['cone_ra'] = float(cone_params[0])
-            parameters['cone_dec'] = float(cone_params[1])
-            parameters['cone_radius'] = float(cone_params[2]) * u.deg
-            parameters['cone_centre'] = SkyCoord(float(cone_params[0]),
-                                                 float(cone_params[1]),
-                                                 frame="icrs", unit="deg")
+            if len(cone_params) > 3:
+                parameters['cone_ra'] = float(cone_params[0])
+                parameters['cone_dec'] = float(cone_params[1])
+                parameters['cone_radius'] = float(cone_params[2]) * u.deg
+                parameters['cone_centre'] = SkyCoord(float(cone_params[0]),
+                                                     float(cone_params[1]),
+                                                     frame="icrs", unit="deg")
 
         filtered_alerts = []
         if parameters.get('target_name'):
@@ -156,9 +157,7 @@ class GaiaAlertsBroker(BHTOMBroker):
 
         if not gaia_name:
             self.logger.debug(f'No Gaia name for {target.name}')
-            return LightcurveUpdateReport(new_points=0,
-                                          last_jd=None,
-                                          last_mag=None)
+            return return_for_no_new_points()
 
         self.logger.debug(f'Updating Gaia Alerts lightcurve for {gaia_name}, target: {target.name}')
 
@@ -194,7 +193,6 @@ class GaiaAlertsBroker(BHTOMBroker):
                         mag: float = float(data_mag)
 
                         jd = Time(float(data_jd), format='jd', scale='utc')
-                        jd.to_datetime(timezone=TimezoneInfo())
 
                         value: Dict[str, Any] = reduced_datum_value(mag=mag, filter=self.__filter,
                                                                     error=g_gaia_error(mag), jd=jd.value,

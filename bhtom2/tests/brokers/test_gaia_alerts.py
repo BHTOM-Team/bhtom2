@@ -103,7 +103,7 @@ class GaiaLightcurveUpdateTestCase(TestCase):
         self.assertEqual(rd[0].value, {
             'magnitude': 18.91,
             'filter': 'g(Gaia)',
-            'error': -1.3434,
+            'error': 0.04535237134514455,
             'jd': 2456961.56970,
             'observer': 'Gaia',
             'facility': 'Gaia'
