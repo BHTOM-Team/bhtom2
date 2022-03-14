@@ -6,7 +6,8 @@ def reduced_datum_value(mag: float,
                         error: float,
                         jd: float,
                         observer: Optional[str] = None,
-                        facility: Optional[str] = None) -> Dict[str, Any]:
+                        facility: Optional[str] = None,
+                        hjd: Optional[float] = None) -> Dict[str, Any]:
     result: Dict[str, Any] = {
         "magnitude": mag,
         "filter": filter,
@@ -18,6 +19,8 @@ def reduced_datum_value(mag: float,
         result["observer"] = observer
     if facility:
         result["facility"] = facility
+    if hjd:
+        result["hjd"] = hjd
 
     return result
 
@@ -26,7 +29,8 @@ def reduced_datum_non_detection_value(limit: float,
                                       filter: str,
                                       jd: float,
                                       observer: Optional[str] = None,
-                                      facility: Optional[str] = None) -> Dict[str, Any]:
+                                      facility: Optional[str] = None,
+                                      hjd: Optional[float] = None) -> Dict[str, Any]:
     result: Dict[str, Any] = {
         "limit": limit,
         "filter": filter,
@@ -37,5 +41,7 @@ def reduced_datum_non_detection_value(limit: float,
         result["observer"] = observer
     if facility:
         result["facility"] = facility
+    if hjd:
+        result["hjd"] = hjd
 
     return result

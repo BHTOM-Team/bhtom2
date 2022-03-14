@@ -337,8 +337,10 @@ EXTRA_FIELDS = [
     {'name': TARGET_NAME_KEYS[DataSource.ZTF], 'type': 'string'},
     {'name': TARGET_NAME_KEYS[DataSource.AAVSO], 'type': 'string'},
     {'name': TARGET_NAME_KEYS[DataSource.GAIA_DR2], 'type': 'string'},
+    {'name': TARGET_NAME_KEYS[DataSource.ZTF_DR8], 'type': 'string'},
     {'name': TARGET_NAME_KEYS[DataSource.TNS], 'type': 'string'},
     {'name': TARGET_NAME_KEYS[DataSource.ANTARES], 'type': 'string'},
+    {'name': 'E(V-I)', 'type': 'number'},
     {'name': 'classification', 'type': 'string'},
     {'name': 'tweet', 'type': 'boolean'},
     {'name': 'last_jd', 'type': 'number'},
@@ -402,3 +404,4 @@ sentry_sdk.init(
 
 GAIA_ALERTS_PATH: str = 'http://gsaweb.ast.cam.ac.uk'
 AAVSO_API_PATH: str = 'https://www.aavso.org/vsx/index.php'
+ZTF_DR_PATH: str = 'https://irsa.ipac.caltech.edu/cgi-bin/ZTF/nph_light_curves'

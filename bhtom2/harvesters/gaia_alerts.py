@@ -27,7 +27,7 @@ except Exception as e:
 
 # Fetch CSV containing all alerts and save it to file (so that it doesn't have to be fetched every single request)
 def fetch_alerts_csv() -> str:
-    gaia_alerts_response: str = query_external_service(f'{base_url}/alerts.csv', 'Gaia alerts')
+    gaia_alerts_response: str = query_external_service(f'{base_url}/alerts/alerts.csv', 'Gaia alerts')
 
     # Update Gaia alerts cache file
     try:

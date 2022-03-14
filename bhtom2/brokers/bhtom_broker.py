@@ -48,15 +48,18 @@ class BHTOMBroker(GenericBroker):
     def last_mag(self) -> Optional[float]:
         return self.__last_mag
 
+    @property
+    def target_name_key(self) -> str:
+        return self.__target_name_key
+
     @lru_cache(maxsize=32)
     def get_target_name(self, target: Target) -> Optional[str]:
-        internal_name: Optional[str] = None
         try:
-            internal_name: str = target.targetextra_set.get(key=self.__target_name_key).value
+            internal_name: str = target.extra_fields[self.target_name_key]
         except Exception as e:
             self.__logger.error(f'Error while accessing internal name for {target.name}: {e}')
-
-        return internal_name
+            return ''
+        return internal_name if internal_name else ''
 
     def update_last_jd_and_mag(self, last_jd: Optional[np.float64], last_mag: Optional[np.float64]):
         if not last_jd:

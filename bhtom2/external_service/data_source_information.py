@@ -11,6 +11,7 @@ class DataSource(Enum):
     ASASSN = auto()
     ANTARES = auto()
     GAIA_DR2 = auto()
+    ZTF_DR8 = auto()
 
 
 TARGET_NAME_KEYS: Dict[DataSource, str] = {
@@ -21,7 +22,8 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.TNS: "TNS name",
     DataSource.ASASSN: "ASASSN name",
     DataSource.ANTARES: "ANTARES name",
-    DataSource.GAIA_DR2: "Gaia DR2 id"
+    DataSource.GAIA_DR2: "Gaia DR2 id",
+    DataSource.ZTF_DR8: "ZTF DR8 id"
 }
 
 
@@ -29,7 +31,8 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.Gaia: ["g"],
     DataSource.ZTF: ["g", "i", "r"],
     DataSource.AAVSO: ["V", "I", "R"],
-    DataSource.ANTARES: ["R", "g"]
+    DataSource.ANTARES: ["R", "g"],
+    DataSource.ZTF_DR8: ["g", "i", "r"]
 }
 
 
@@ -39,5 +42,6 @@ AAVSO_ACCEPTED_FLAGS: List[str] = ["V", "Z"]
 
 
 ZTF_FILTERS: Dict[int, str] = {1: 'g', 2: 'r', 3: 'i'}
+ZTF_DR8_FILTERS: Dict[str, str] = {'zr': 'r', 'zg': 'g', 'zi': 'i'}
 
 PHOTOMETRY_BROKER_DATAPRODUCT_TYPE: str = 'broker_photometry'

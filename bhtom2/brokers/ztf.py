@@ -1,137 +1,139 @@
 import math
-from typing import Optional, List, Any, Dict
+from io import StringIO
+from typing import Optional, List, Any, Dict, Tuple, Type
 
-from alerce.core import Alerce
+import numpy as np
 from alerce.exceptions import APIError, ObjectNotFoundError
 from astropy.time import Time, TimezoneInfo
-from django import forms
-from tom_alerts.alerts import GenericAlert
-from tom_alerts.alerts import GenericQueryForm
+from numpy import genfromtxt
 from tom_dataproducts.models import ReducedDatum
-from tom_targets.models import Target
+from tom_targets.models import Target, TargetExtra
 
-from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport
-from bhtom2.brokers.bhtom_broker import return_for_no_new_points
+from bhtom2 import settings
+from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
 from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
-from bhtom2.external_service.data_source_information import DataSource, FILTERS
-from bhtom2.external_service.data_source_information import ZTF_FILTERS
+from bhtom2.external_service.data_source_information import DataSource, FILTERS, TARGET_NAME_KEYS, ZTF_DR8_FILTERS
+from bhtom2.external_service.external_service_request import query_external_service
 from bhtom2.models.reduced_datum_value import reduced_datum_value
 
 
-class ZTFQueryForm(GenericQueryForm):
-
-    target_name = forms.CharField(required=False)
-
-    cone = forms.CharField(
-        required=False,
-        label='Cone Search',
-        help_text='RA,Dec,radius in arcsecs'
-    )
-
-    def clean_cone(self):
-        cone = self.cleaned_data['cone']
-        if cone:
-            cone_params = cone.split(',')
-            if len(cone_params) != 3:
-                raise forms.ValidationError('Cone search parameters must be in the format \'RA,Dec,Radius\'.')
-        return cone
-
-    def clean(self):
-        super().clean()
-        if not (self.cleaned_data.get('target_name') or self.cleaned_data.get('cone')):
-            raise forms.ValidationError('Please enter either a target name or cone search parameters.')
-        elif self.cleaned_data.get('target_name') and self.cleaned_data.get('cone'):
-            raise forms.ValidationError('Please only enter one of target name or cone search parameters.')
-
-
+# For DR8
 class ZTFBroker(BHTOMBroker):
 
-    name = DataSource.ZTF.name
+    name = DataSource.ZTF_DR8
     form = None
 
     def __init__(self):
-        super().__init__(DataSource.ZTF)
+        super().__init__(DataSource.ZTF_DR8)
 
-        self.__alerce: Alerce = Alerce()
+        try:
+            self.__base_url: str = settings.ZTF_DR_PATH
+        except Exception as e:
+            self.logger.error(f'No ZTF_DR_PATH in settings found!')
+            self.__base_url = 'https://irsa.ipac.caltech.edu/cgi-bin/ZTF/nph_light_curves'
 
         self.__FACILITY_NAME: str = "ZTF"
         self.__OBSERVER_NAME: str = "ZTF"
 
+        # 2 arcseconds
+        self.__MATCHING_RADIUS: float = 2*0.000278
+
     def fetch_alerts(self, parameters):
-
-        response: List[Any] = []
-
-        if parameters['cone'] is not None and len(parameters['cone']) > 0:
-            cone_params = parameters['cone'].split(',')
-            if len(cone_params) > 3:
-                parameters['cone_ra'] = float(cone_params[0])
-                parameters['cone_dec'] = float(cone_params[1])
-                parameters['cone_radius'] = float(cone_params[2])
-
-                query: Dict[str, Any] = self.__alerce.query_objects(ra=parameters['cone_ra'],
-                                                                    dec=parameters['cone_dec'],
-                                                                    radius=parameters['cone_radius'])
-                response.extend(query.get('items', []))
-
-        if parameters['target_name']:
-            query: Dict[str, Any] = self.__alerce.query_objects(name=parameters['target_name'])
-            response.extend(query.get('items', []))
-
-        return response
+        pass
 
     def fetch_alert(self, target_name):
-
-        alert_list = list(self.fetch_alerts({'target_name': target_name, 'cone': None}))
-
-        if len(alert_list) == 1:
-            return alert_list[0]
-        else:
-            return {}
+        pass
 
 
     def to_generic_alert(self, alert):
-        return GenericAlert(
-            timestamp=Time(alert.get('firstmjd', 0.0), format='mjd', scale='utc').to_datetime(timezone=TimezoneInfo()),
-            id=alert.get('oid', ''),
-            name=alert.get('oid', ''),
-            ra=alert.get('meanra', 0.0),
-            dec=alert.get('meandec', 0.0)
-        )
+        pass
+
+    def save_ztf_dr8_name_if_missing(self, target: Target, ztf_dr8_id: int):
+        if not self.get_target_name(target):
+            te, _ = TargetExtra.objects.update_or_create(target=target.id,
+                                                         key=self.target_name_key,
+                                                         defaults={
+                                                             'value': str(ztf_dr8_id)
+                                                         })
+            te.save()
 
     def process_reduced_data(self, target: Target, alert=None) -> Optional[LightcurveUpdateReport]:
 
         ztf_name: Optional[str] = self.get_target_name(target)
+        base_url: str = self.__base_url
 
-        if not ztf_name:
-            self.logger.debug(f'No ZTF name for {target.name}')
-            return return_for_no_new_points()
+        self.logger.debug(f'Updating ZTF Data Releases for {target.name} with ZTF oid {ztf_name}')
 
-        self.logger.debug(f'Updating ZTF Alerts Lightcurve for {target.name} with ZTF name {ztf_name}')
+        print_with_sign = lambda i: ("+" if i > 0 else "") + str(i)
+
+        query_parameters: Dict[str, Any] = {
+            "POS": f'CIRCLE{print_with_sign(target.ra)}{print_with_sign(target.dec)}{print_with_sign(self.__MATCHING_RADIUS)}',
+            "BAD_CATFLAGS_MASK": str(32768),
+            "FORMAT": "csv",
+            "COLLECTION": "ztf_dr8",
+        }
+
+        # "https://irsa.ipac.caltech.edu/cgi-bin/ZTF/nph_light_curves?POS=CIRCLE+255.9302+11.8654+0.0028&BANDNAME=r&NOBS_MIN=3&TIME=58194.0+58483.0&BAD_CATFLAGS_MASK=32768&FORMAT=csv"
 
         try:
-            query: Dict[str, Any] = self.__alerce.query_lightcurve(ztf_name)
+            response: str = query_external_service(base_url, service_name=DataSource.ZTF.name,
+                                                   params="&".join("%s=%s" % (k, v) for k, v in query_parameters.items()))
         # No such object on ZTF
         except ObjectNotFoundError as e:
             raise NoResultException(f'No ZTF data found for {target.name} with ZTF name {ztf_name}')
         except APIError as e:
-            raise InvalidExternalServiceResponseException(f'Invalid ALeRCE response for {target.name}: {e}')
+            raise InvalidExternalServiceResponseException(f'Invalid ZTF response for {target.name}: {e}')
+        except Exception as e:
+            self.logger.error(f'Error while updating ZTF DR8 for {target.name} with ZTF name {ztf_name}: {e}')
+            return return_for_no_new_points()
+
+        buffer: StringIO = StringIO(str(response))
+
+        # 0, 1, 2, 3, 4, 5, 6
+        # 7, 8, 9, 10, 11, 12,
+        # 13, 14, 15, 16, 17, 18,
+        # 19, 20, 21, 22, 23
+        # oid,expid,hjd,mjd,mag,magerr,catflags,
+        # filtercode,ra,dec,chi,sharp,filefracday,
+        # field,ccdid,qid,limitmag,magzp,magzprms,
+        # clrcoeff,clrcounc,exptime,airmass,programid
+
+        # Read only the interesting columns
+        # oid, hjd, mjd, mag, magerr, filtercode
+        columns: List[int] = [0, 2, 3, 4, 5, 7]
+
+        dtype: List[Tuple[str, Type]] = [
+            ('oid', int),
+            ('hjd', float),
+            ('mjd', float),
+            ('mag', float),
+            ('magerr', float),
+            ('filtercode', 'U2'),
+        ]
+
+        data = genfromtxt(buffer, delimiter=',', usecols=columns, dtype=dtype)
 
         new_points: int = 0
 
-        for entry in query['detections']:
+        if len(data.shape) > 1 and data.shape[0] > 2:
+            self.save_ztf_dr8_name_if_missing(target, data[1]['oid'])
+        else:
+            return return_for_no_new_points()
 
+        # Omit the header
+        for entry in data[1:]:
             try:
                 mjd: Time = Time(entry['mjd'], format='mjd', scale='utc')
-                mag: float = float(entry['magpsf_corr'])
+                mag: float = float(entry['mag'])
 
                 if (mag is not None) and (not math.isnan(mag)):
                     self.logger.debug(f'None magnitude for target {target.name}')
 
                     magerr: float = float(entry['sigmapsf_corr'])
-                    filter: str = ZTF_FILTERS[int(entry['fid'])]
+                    filter: str = ZTF_DR8_FILTERS[entry['filtercode']]
 
                     if filter not in FILTERS[self.data_source]:
-                        self.logger.warning(f'Invalid ZTF filter for {target.name}: {filter}')
+                        self.logger.warning(f'Invalid ZTF DR8 filter for {target.name}: {filter}')
 
                     # Non detections have an error of 100.
                     if magerr > 1.:
@@ -141,13 +143,14 @@ class ZTFBroker(BHTOMBroker):
                         value: Dict[str, Any] = reduced_datum_value(mag=mag, filter=self.filter_name(filter),
                                                                     error=magerr, jd=mjd.jd,
                                                                     observer=self.__OBSERVER_NAME,
-                                                                    facility=self.__FACILITY_NAME)
+                                                                    facility=self.__FACILITY_NAME,
+                                                                    hjd=entry['hjd'])
 
                     rd, _ = ReducedDatum.objects.get_or_create(
                         timestamp=mjd.to_datetime(timezone=TimezoneInfo()),
                         value=value,
-                        source_name='ALeRCE',
-                        source_location='ALeRCE',
+                        source_name='ZTF DR8',
+                        source_location=self.__base_url,
                         data_type='photometry',
                         target=target)
 
@@ -157,7 +160,7 @@ class ZTFBroker(BHTOMBroker):
                     self.update_last_jd_and_mag(mjd.jd, mag)
             except Exception as e:
                 self.logger.error(f'Error while processing reduced datapoint for {target.name} with '
-                                  f'ZTF name {ztf_name}: {e}')
+                                  f'ZTF DR8 oid {ztf_name}: {e}')
                 continue
 
         return LightcurveUpdateReport(new_points=new_points,
