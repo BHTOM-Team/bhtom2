@@ -4,8 +4,8 @@ from typing import List, Set
 from unittest.mock import patch
 
 from django.test import TestCase
-from tom_dataproducts.models import ReducedDatum
-from tom_targets.models import Target
+from bhtom_base.tom_dataproducts.models import ReducedDatum
+from bhtom_base.tom_targets.models import Target
 
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
 from bhtom2.brokers.bhtom_broker import LightcurveUpdateReport
@@ -217,20 +217,22 @@ class ZTFLightcurveUpdateTestCase(TestCase):
 
         rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
 
-        self.assertEqual(len(rd), 2)
+        self.assertEqual(len(rd), 3)
 
-        self.assertEqual(rd[0].value, {
-            'magnitude': 18.492537,
-            'filter': 'g(ZTF_DR8)',
-            'error': 0.07564124,
-            'jd': 2459550.78425930,
-            'observer': 'ZTF',
-            'facility': 'ZTF'
-        })
-        self.assertEqual(rd[0].data_type, 'photometry')
-        self.assertEqual(rd[0].target, target)
-        self.assertEqual(report.new_points, 2)
-        # self.assertEqual(report.last_jd, 2459550.88187500)
+        detections: ReducedDatum = ReducedDatum.objects.filter(data_type='photometry', mjd__lt=59550.3)[0]
+
+        self.assertEqual(detections.data_type, 'photometry')
+        self.assertEqual(detections.target, target)
+        self.assertEqual(report.new_points, 3)
+
+        self.assertAlmostEqual(detections.value, 18.492537, 3)
+        self.assertEqual(detections.filter, 'g(ZTF_DR8)')
+        self.assertEqual(detections.observer, 'ZTF')
+        self.assertEqual(detections.facility, 'ZTF')
+        self.assertAlmostEqual(detections.error, 0.07564, 3)
+        self.assertAlmostEqual(detections.mjd, 59550.28425930, 3)
+
+        self.assertEqual(report.last_jd, 2459550.88187500)
         self.assertEqual(report.last_mag, 18.522156)
 
     @patch('bhtom2.brokers.ztf.query_external_service',
@@ -246,19 +248,19 @@ class ZTFLightcurveUpdateTestCase(TestCase):
 
         rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
 
-        self.assertEqual(len(rd), 2)
+        self.assertEqual(len(rd), 3)
 
-        # self.assertEqual(rd[2].value, {
-        #     'limit': 20.4739,
-        #     'filter': 'r(ZTF)',
-        #     'jd': 2459522.84593750,
-        #     'observer': 'ZTF',
-        #     'facility': 'ZTF'
-        # })
-        self.assertEqual(rd[0].data_type, 'photometry')
-        self.assertEqual(rd[0].target, target)
-        self.assertEqual(report.new_points, 2)
-        # self.assertEqual(report.last_jd, 2459550.88187500)
+        nondetection: ReducedDatum = ReducedDatum.objects.filter(data_type='photometry_nondetection')[0]
+
+        self.assertEqual(nondetection.data_type, 'photometry_nondetection')
+        self.assertEqual(nondetection.target, target)
+        self.assertEqual(nondetection.filter, 'r(ZTF_DR8)')
+        self.assertEqual(nondetection.observer, 'ZTF')
+        self.assertEqual(nondetection.facility, 'ZTF')
+        self.assertAlmostEqual(nondetection.value, 20.4739, 3)
+        self.assertAlmostEqual(nondetection.mjd, 59522.34593750, 3)
+
+        self.assertEqual(report.new_points, 3)
         self.assertEqual(report.last_mag, 18.522156)
 
     @patch('bhtom2.brokers.ztf.query_external_service',

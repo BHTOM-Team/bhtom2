@@ -1,10 +1,9 @@
 from typing import Dict, Optional
-from tom_targets.models import Target, TargetExtra
 
 from bhtom2.external_service.catalog_name_lookup import query_all_services
 from bhtom2.utils.bhtom_logger import BHTOMLogger
-from bhtom2.utils.coordinate_utils import fill_galactic_coordinates
 from bhtom2.utils.extinction import ogle_extinction
+from bhtom_base.tom_targets.models import TargetExtra
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Hooks]')
 

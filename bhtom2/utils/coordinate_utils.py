@@ -1,5 +1,6 @@
-from astropy.coordinates import SkyCoord, Galactic
-from tom_targets.models import Target
+from astropy.coordinates import Angle, SkyCoord
+import astropy.units as u
+from bhtom_base.tom_targets.models import Target
 
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
@@ -24,7 +25,7 @@ def fill_galactic_coordinates(target: Target) -> Target:
         return target
 
     coordinates: SkyCoord = SkyCoord(ra=target.ra,
-                                     dec=target.dec,
+                                     dec=Angle(target.dec, unit=u.deg).wrap_at('90d').degree,
                                      unit='deg')
     target.galactic_lat = coordinates.galactic.b.degree
     target.galactic_lng = coordinates.galactic.l.degree

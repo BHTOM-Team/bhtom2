@@ -3,8 +3,8 @@ from typing import List
 from unittest.mock import patch
 
 from django.test import TestCase
-from tom_dataproducts.models import ReducedDatum
-from tom_targets.models import Target
+from bhtom_base.tom_dataproducts.models import ReducedDatum
+from bhtom_base.tom_targets.models import Target
 
 from bhtom2.brokers.aavso import AAVSOBroker
 from bhtom2.brokers.bhtom_broker import LightcurveUpdateReport
@@ -90,16 +90,17 @@ class AAVSOBrokerTestCase(TestCase):
 
         report: LightcurveUpdateReport = aavso_broker.process_reduced_data(target)
 
-        rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
+        rd: List[ReducedDatum] = list(ReducedDatum.objects.all().order_by('mjd'))
 
-        self.assertEqual(len(rd), 2)
+        rd: List[ReducedDatum]
 
-        self.assertEqual(rd[0].value['magnitude'], 13.068)
-        self.assertEqual(rd[0].value['filter'], 'V(AAVSO)')
-        self.assertAlmostEqual(rd[0].value['error'], 0.011, 3)
-        self.assertAlmostEqual(rd[0].value['jd'], 2459233.548478, 6)
+        self.assertEqual(rd[0].value, 13.068)
+        self.assertEqual(rd[0].filter, 'V(AAVSO)')
+        self.assertAlmostEqual(rd[0].error, 0.011, 3)
+        self.assertAlmostEqual(rd[0].mjd, 59233.048478, 6)
         self.assertEqual(rd[0].data_type, 'photometry')
         self.assertEqual(rd[0].target, target)
+
         self.assertEqual(report.new_points, 2)
         self.assertEqual(report.last_jd, 2459233.549045)
         self.assertEqual(report.last_mag, 13.087)
