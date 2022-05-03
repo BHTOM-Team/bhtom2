@@ -14,7 +14,7 @@ from crispy_forms.layout import Div, Fieldset, Layout, HTML
 from django import forms
 import marshmallow
 
-from tom_alerts.alerts import GenericBroker, GenericQueryForm, GenericAlert
+from tom_alerts.alerts import GenericQueryForm, GenericAlert
 from tom_dataproducts.models import ReducedDatum
 from tom_targets.models import Target, TargetName
 

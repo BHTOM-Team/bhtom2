@@ -1,8 +1,8 @@
 import math
 from io import StringIO
+import json
 from typing import Optional, List, Any, Dict, Tuple, Type
 
-import numpy as np
 from alerce.exceptions import APIError, ObjectNotFoundError
 from astropy.time import Time, TimezoneInfo
 from numpy import genfromtxt
@@ -50,7 +50,7 @@ class ZTFBroker(BHTOMBroker):
 
     def save_ztf_dr8_name_if_missing(self, target: Target, ztf_dr8_id: int):
         if not self.get_target_name(target):
-            te, _ = TargetExtra.objects.update_or_create(target=target.id,
+            te, _ = TargetExtra.objects.update_or_create(target=target,
                                                          key=self.target_name_key,
                                                          defaults={
                                                              'value': str(ztf_dr8_id)
@@ -64,6 +64,10 @@ class ZTFBroker(BHTOMBroker):
 
         self.logger.debug(f'Updating ZTF Data Releases for {target.name} with ZTF oid {ztf_name}')
 
+        if ztf_name is None or ztf_name == '':
+            self.logger.debug(f'No ZTF DR8 id for {target.name}')
+            return return_for_no_new_points()
+
         print_with_sign = lambda i: ("+" if i > 0 else "") + str(i)
 
         query_parameters: Dict[str, Any] = {
@@ -76,8 +80,8 @@ class ZTFBroker(BHTOMBroker):
         # "https://irsa.ipac.caltech.edu/cgi-bin/ZTF/nph_light_curves?POS=CIRCLE+255.9302+11.8654+0.0028&BANDNAME=r&NOBS_MIN=3&TIME=58194.0+58483.0&BAD_CATFLAGS_MASK=32768&FORMAT=csv"
 
         try:
-            response: str = query_external_service(base_url, service_name=DataSource.ZTF.name,
-                                                   params="&".join("%s=%s" % (k, v) for k, v in query_parameters.items()))
+            response: Dict[str, Any] = query_external_service(base_url, service_name=DataSource.ZTF.name,
+                                                              params="&".join("%s=%s" % (k, v) for k, v in query_parameters.items()))
         # No such object on ZTF
         except ObjectNotFoundError as e:
             raise NoResultException(f'No ZTF data found for {target.name} with ZTF name {ztf_name}')
@@ -86,8 +90,6 @@ class ZTFBroker(BHTOMBroker):
         except Exception as e:
             self.logger.error(f'Error while updating ZTF DR8 for {target.name} with ZTF name {ztf_name}: {e}')
             return return_for_no_new_points()
-
-        buffer: StringIO = StringIO(str(response))
 
         # 0, 1, 2, 3, 4, 5, 6
         # 7, 8, 9, 10, 11, 12,
@@ -100,37 +102,38 @@ class ZTFBroker(BHTOMBroker):
 
         # Read only the interesting columns
         # oid, hjd, mjd, mag, magerr, filtercode
-        columns: List[int] = [0, 2, 3, 4, 5, 7]
 
-        dtype: List[Tuple[str, Type]] = [
-            ('oid', int),
-            ('hjd', float),
-            ('mjd', float),
-            ('mag', float),
-            ('magerr', float),
-            ('filtercode', 'U2'),
-        ]
+        # detections:
+        # 'mjd', 'candid', 'fid', 'pid', 'diffmaglim', 'isdiffpos', 'nid', 'distnr', 'magpsf', 'magpsf_corr',
+        # 'magpsf_corr_ext', 'magap', 'magap_corr', 'sigmapsf', 'sigmapsf_corr', 'sigmapsf_corr_ext', 'sigmagap',
+        # 'sigmagap_corr', 'ra', 'dec', 'rb', 'rbversion', 'drb', 'magapbig', 'sigmagapbig', 'rfid', 'has_stamp',
+        # 'corrected', 'dubious', 'candid_alert', 'step_id_corr', 'phase', 'parent_candid'
 
-        data = genfromtxt(buffer, delimiter=',', usecols=columns, dtype=dtype)
+        # non_detections:
+        # mjd, fid, diffmaglim
+
+        # TODO: add non-detections
+
+        detections = response['detections']
 
         new_points: int = 0
 
-        if len(data.shape) > 1 and data.shape[0] > 2:
-            self.save_ztf_dr8_name_if_missing(target, data[1]['oid'])
+        if len(detections) > 0:
+            self.save_ztf_dr8_name_if_missing(target, detections[0]['pid'])
         else:
             return return_for_no_new_points()
 
         # Omit the header
-        for entry in data[1:]:
+        for entry in detections:
             try:
                 mjd: Time = Time(entry['mjd'], format='mjd', scale='utc')
-                mag: float = float(entry['mag'])
+                mag: float = float(entry['magpsf_corr'])
 
                 if (mag is not None) and (not math.isnan(mag)):
                     self.logger.debug(f'None magnitude for target {target.name}')
 
                     magerr: float = float(entry['sigmapsf_corr'])
-                    filter: str = ZTF_DR8_FILTERS[entry['filtercode']]
+                    filter: str = ZTF_DR8_FILTERS[entry['fid']]
 
                     if filter not in FILTERS[self.data_source]:
                         self.logger.warning(f'Invalid ZTF DR8 filter for {target.name}: {filter}')
@@ -143,8 +146,7 @@ class ZTFBroker(BHTOMBroker):
                         value: Dict[str, Any] = reduced_datum_value(mag=mag, filter=self.filter_name(filter),
                                                                     error=magerr, jd=mjd.jd,
                                                                     observer=self.__OBSERVER_NAME,
-                                                                    facility=self.__FACILITY_NAME,
-                                                                    hjd=entry['hjd'])
+                                                                    facility=self.__FACILITY_NAME)
 
                     rd, _ = ReducedDatum.objects.get_or_create(
                         timestamp=mjd.to_datetime(timezone=TimezoneInfo()),

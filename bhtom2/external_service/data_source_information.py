@@ -42,6 +42,6 @@ AAVSO_ACCEPTED_FLAGS: List[str] = ["V", "Z"]
 
 
 ZTF_FILTERS: Dict[int, str] = {1: 'g', 2: 'r', 3: 'i'}
-ZTF_DR8_FILTERS: Dict[str, str] = {'zr': 'r', 'zg': 'g', 'zi': 'i'}
+ZTF_DR8_FILTERS: Dict[str, str] = {1: 'g', 2: 'r', 3: 'i'}
 
 PHOTOMETRY_BROKER_DATAPRODUCT_TYPE: str = 'broker_photometry'

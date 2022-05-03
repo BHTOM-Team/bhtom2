@@ -159,7 +159,7 @@ def create_sample_target() -> Target:
         epoch=2000,
     )
 
-    target.save(extras={TARGET_NAME_KEYS[DataSource.ZTF]: "ZTF21acqpcmx"})
+    target.save(extras={TARGET_NAME_KEYS[DataSource.ZTF_DR8]: "1796284252615"})
 
     return target
 
@@ -173,14 +173,14 @@ def create_second_sample_target() -> Target:
         epoch=2000,
     )
 
-    target.save(extras={TARGET_NAME_KEYS[DataSource.ZTF]: "ZTF21acqspkc"})
+    target.save(extras={TARGET_NAME_KEYS[DataSource.ZTF_DR8]: "1796284252616"})
 
     return target
 
 
 class ZTFLightcurveUpdateTestCase(TestCase):
 
-    @patch('bhtom2.brokers.ztf.Alerce.query_lightcurve',
+    @patch('bhtom2.brokers.ztf.query_external_service',
            return_value=sample_lightcurve_two_correct_lines)
     def test_dont_update_lightcurve_when_no_ztf_name(self, _):
         ztf_broker: ZTFBroker = ZTFBroker()
@@ -204,7 +204,7 @@ class ZTFLightcurveUpdateTestCase(TestCase):
         self.assertEqual(report.last_jd, None)
         self.assertEqual(report.last_mag, None)
 
-    @patch('bhtom2.brokers.ztf.Alerce.query_lightcurve',
+    @patch('bhtom2.brokers.ztf.query_external_service',
            return_value=sample_lightcurve_two_correct_lines)
     def test_update_lightcurve(self, _):
         ztf_broker: ZTFBroker = ZTFBroker()
@@ -221,7 +221,7 @@ class ZTFLightcurveUpdateTestCase(TestCase):
 
         self.assertEqual(rd[0].value, {
             'magnitude': 18.492537,
-            'filter': 'g(ZTF)',
+            'filter': 'g(ZTF_DR8)',
             'error': 0.07564124,
             'jd': 2459550.78425930,
             'observer': 'ZTF',
@@ -233,7 +233,7 @@ class ZTFLightcurveUpdateTestCase(TestCase):
         # self.assertEqual(report.last_jd, 2459550.88187500)
         self.assertEqual(report.last_mag, 18.522156)
 
-    @patch('bhtom2.brokers.ztf.Alerce.query_lightcurve',
+    @patch('bhtom2.brokers.ztf.query_external_service',
            return_value=sample_lightcurve_two_correct_lines)
     def test_update_lightcurve_save_non_detection(self, _):
         ztf_broker: ZTFBroker = ZTFBroker()
@@ -261,7 +261,7 @@ class ZTFLightcurveUpdateTestCase(TestCase):
         # self.assertEqual(report.last_jd, 2459550.88187500)
         self.assertEqual(report.last_mag, 18.522156)
 
-    @patch('bhtom2.brokers.ztf.Alerce.query_lightcurve',
+    @patch('bhtom2.brokers.ztf.query_external_service',
            return_value=sample_lightcurve_two_correct_lines_with_Nones)
     def test_update_lightcurve_dont_save_none_magnitude(self, _):
         ztf_broker: ZTFBroker = ZTFBroker()

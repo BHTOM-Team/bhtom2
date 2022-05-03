@@ -42,6 +42,8 @@ To run the tests provide your local database data in the ``.bhtom.env`` file.
 
 ``ALTER USER bhtom CREATEDB;``
 
+- Django>4.0 does not support Postgres<10 anymore. Make sure that you have the newest version.
+
 - Make sure to allow for dev_entrypoint.sh execution.
 
 ``chmod +x dev_entrypoint.sh`` in UNIX-based systems (Linux, Mac OS)
