@@ -10,15 +10,15 @@ from guardian.shortcuts import get_objects_for_user
 from plotly import offline
 import plotly.graph_objs as go
 
-from tom_dataproducts.forms import DataProductUploadForm
-from tom_dataproducts.models import DataProduct, ReducedDatum
-from tom_dataproducts.processors.data_serializers import SpectrumSerializer
-from tom_observations.models import ObservationRecord
-from tom_targets.models import Target
+from bhtom_dataproducts.forms import DataProductUploadForm
+from bhtom_dataproducts.models import DataProduct, ReducedDatum
+from bhtom_dataproducts.processors.data_serializers import SpectrumSerializer
+from bhtom_observations.models import ObservationRecord
+from bhtom_targets.models import Target
 
 register = template.Library()
 
-@register.inclusion_tag('tom_dataproducts/partials/recent_photometry.html')
+@register.inclusion_tag('bhtom_dataproducts/partials/recent_photometry.html')
 def recent_photometry(target, limit=1):
     """
     Displays a table of the most recent photometric points for a target.
@@ -28,7 +28,7 @@ def recent_photometry(target, limit=1):
                      if rd.value.get('magnitude')]}
 
 
-@register.inclusion_tag('tom_dataproducts/partials/dataproduct_list_for_target.html', takes_context=True)
+@register.inclusion_tag('bhtom_dataproducts/partials/dataproduct_list_for_target.html', takes_context=True)
 def dataproduct_list_for_target(context, target):
     """
     Given a ``Target``, returns a list of ``DataProduct`` objects associated with that ``Target``
@@ -37,14 +37,14 @@ def dataproduct_list_for_target(context, target):
         target_products_for_user = target.dataproduct_set.all()
     else:
         target_products_for_user = get_objects_for_user(
-            context['request'].user, 'tom_dataproducts.view_dataproduct', klass=target.dataproduct_set.all())
+            context['request'].user, 'bhtom_dataproducts.view_dataproduct', klass=target.dataproduct_set.all())
     return {
         'products': target_products_for_user,
         'target': target
     }
 
 
-@register.inclusion_tag('tom_dataproducts/partials/saved_dataproduct_list_for_observation.html')
+@register.inclusion_tag('bhtom_dataproducts/partials/saved_dataproduct_list_for_observation.html')
 def dataproduct_list_for_observation_saved(data_products, request):
     """
     Given a dictionary of dataproducts from an ``ObservationRecord``, returns the subset that are saved to the TOM. This
@@ -59,7 +59,7 @@ def dataproduct_list_for_observation_saved(data_products, request):
     return {'products_page': products_page}
 
 
-@register.inclusion_tag('tom_dataproducts/partials/unsaved_dataproduct_list_for_observation.html')
+@register.inclusion_tag('bhtom_dataproducts/partials/unsaved_dataproduct_list_for_observation.html')
 def dataproduct_list_for_observation_unsaved(data_products):
     """
     Given a dictionary of dataproducts from an ``ObservationRecord``, returns a list of the subset that are not saved to
@@ -71,7 +71,7 @@ def dataproduct_list_for_observation_unsaved(data_products):
     return {'products': data_products['unsaved']}
 
 
-@register.inclusion_tag('tom_dataproducts/partials/dataproduct_list.html', takes_context=True)
+@register.inclusion_tag('bhtom_dataproducts/partials/dataproduct_list.html', takes_context=True)
 def dataproduct_list_all(context):
     """
     Returns the full list of data products in the TOM, with the most recent first.
@@ -79,20 +79,20 @@ def dataproduct_list_all(context):
     if settings.TARGET_PERMISSIONS_ONLY:
         products = DataProduct.objects.all().order_by('-created')
     else:
-        products = get_objects_for_user(context['request'].user, 'tom_dataproducts.view_dataproduct')
+        products = get_objects_for_user(context['request'].user, 'bhtom_dataproducts.view_dataproduct')
     return {'products': products}
 
 
-@register.inclusion_tag('tom_dataproducts/partials/upload_dataproduct.html', takes_context=True)
+@register.inclusion_tag('bhtom_dataproducts/partials/upload_dataproduct.html', takes_context=True)
 def upload_dataproduct(context, obj):
     user = context['user']
     initial = {}
     if isinstance(obj, Target):
         initial['target'] = obj
-        initial['referrer'] = reverse('tom_targets:detail', args=(obj.id,))
+        initial['referrer'] = reverse('bhtom_targets:detail', args=(obj.id,))
     elif isinstance(obj, ObservationRecord):
         initial['observation_record'] = obj
-        initial['referrer'] = reverse('tom_observations:detail', args=(obj.id,))
+        initial['referrer'] = reverse('bhtom_observations:detail', args=(obj.id,))
     form = DataProductUploadForm(initial=initial)
     if not settings.TARGET_PERMISSIONS_ONLY:
         if user.is_superuser:
@@ -102,7 +102,7 @@ def upload_dataproduct(context, obj):
     return {'data_product_form': form}
 
 
-@register.inclusion_tag('tom_dataproducts/partials/photometry_for_target.html', takes_context=True)
+@register.inclusion_tag('bhtom_dataproducts/partials/photometry_for_target.html', takes_context=True)
 def photometry_for_target(context, target, width=700, height=600, background=None, label_color=None, grid=True):
     """
     Renders a photometric plot for a target.
@@ -137,7 +137,7 @@ def photometry_for_target(context, target, width=700, height=600, background=Non
         datums = ReducedDatum.objects.filter(target=target, data_type=settings.DATA_PRODUCT_TYPES['photometry'][0])
     else:
         datums = get_objects_for_user(context['request'].user,
-                                      'tom_dataproducts.view_reduceddatum',
+                                      'bhtom_dataproducts.view_reduceddatum',
                                       klass=ReducedDatum.objects.filter(
                                         target=target,
                                         data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]))
@@ -195,7 +195,7 @@ def photometry_for_target(context, target, width=700, height=600, background=Non
     }
 
 
-@register.inclusion_tag('tom_dataproducts/partials/spectroscopy_for_target.html', takes_context=True)
+@register.inclusion_tag('bhtom_dataproducts/partials/spectroscopy_for_target.html', takes_context=True)
 def spectroscopy_for_target(context, target, dataproduct=None):
     """
     Renders a spectroscopic plot for a ``Target``. If a ``DataProduct`` is specified, it will only render a plot with
@@ -211,7 +211,7 @@ def spectroscopy_for_target(context, target, dataproduct=None):
         datums = ReducedDatum.objects.filter(data_product__in=spectral_dataproducts)
     else:
         datums = get_objects_for_user(context['request'].user,
-                                      'tom_dataproducts.view_reduceddatum',
+                                      'bhtom_dataproducts.view_reduceddatum',
                                       klass=ReducedDatum.objects.filter(data_product__in=spectral_dataproducts))
     for datum in datums:
         deserialized = SpectrumSerializer().deserialize(datum.value)
@@ -237,6 +237,6 @@ def spectroscopy_for_target(context, target, dataproduct=None):
     }
 
 
-@register.inclusion_tag('tom_dataproducts/partials/update_broker_data_button.html', takes_context=True)
+@register.inclusion_tag('bhtom_dataproducts/partials/update_broker_data_button.html', takes_context=True)
 def update_broker_data_button(context):
     return {'query_params': urlencode(context['request'].GET.dict())}

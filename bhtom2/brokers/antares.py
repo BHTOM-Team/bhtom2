@@ -16,9 +16,9 @@ from django import forms
 import marshmallow
 from django.db import transaction
 
-from tom_alerts.alerts import GenericQueryForm, GenericAlert
-from tom_dataproducts.models import ReducedDatum, DatumValue
-from tom_targets.models import Target, TargetName
+from bhtom_alerts.alerts import GenericQueryForm, GenericAlert
+from bhtom_dataproducts.models import ReducedDatum, DatumValue
+from bhtom_targets.models import Target, TargetName
 
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, return_for_no_new_points
 from bhtom2.brokers.lightcurve_update import LightcurveUpdateReport

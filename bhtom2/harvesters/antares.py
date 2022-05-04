@@ -1,8 +1,8 @@
 from typing import Optional
 
 from django.core.exceptions import ObjectDoesNotExist
-from tom_catalogs.harvester import AbstractHarvester
-from tom_targets.models import Target
+from bhtom_catalogs.harvester import AbstractHarvester
+from bhtom_targets.models import Target
 
 from antares_client.search import get_by_ztf_object_id, get_by_id
 from antares_client._api.models import Locus

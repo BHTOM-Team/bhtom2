@@ -1,5 +1,5 @@
 from django.test import TestCase
-from tom_targets.models import Target
+from bhtom_targets.models import Target
 from typing import Optional
 
 from bhtom2.dataproducts.last_jd import update_last_jd

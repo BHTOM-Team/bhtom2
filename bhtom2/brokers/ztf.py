@@ -11,8 +11,8 @@ from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, ret
 from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
 from bhtom2.external_service.data_source_information import DataSource, FILTERS, ZTF_DR8_FILTERS
 from bhtom2.external_service.external_service_request import query_external_service
-from tom_dataproducts.models import ReducedDatum, DatumValue
-from tom_targets.models import Target, TargetExtra
+from bhtom_dataproducts.models import ReducedDatum, DatumValue
+from bhtom_targets.models import Target, TargetExtra
 
 
 # For DR8

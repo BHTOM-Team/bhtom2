@@ -1,5 +1,5 @@
 from django.test import TestCase
-from tom_targets.models import Target
+from bhtom_targets.models import Target
 
 from bhtom2.utils.coordinate_utils import fill_galactic_coordinates
 

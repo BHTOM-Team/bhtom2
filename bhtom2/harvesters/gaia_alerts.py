@@ -6,8 +6,8 @@ from typing import Optional, Dict, Any
 import pandas as pd
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from tom_catalogs.harvester import AbstractHarvester
-from tom_targets.models import Target
+from bhtom_catalogs.harvester import AbstractHarvester
+from bhtom_targets.models import Target
 
 from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
