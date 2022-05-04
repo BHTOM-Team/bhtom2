@@ -1,3 +1,6 @@
 [submodule "bhtom_base"]
 	path = bhtom_base
 	url = https://github.com/maja-jablonska/bhtom_base
+[submodule "bhtom_registration"]
+	path = bhtom_registration
+	url = https://github.com/maja-jablonska/bhtom_registration
