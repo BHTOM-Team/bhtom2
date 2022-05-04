@@ -67,7 +67,7 @@ services:
       - ./data/db:/docker-entrypoint-initdb.d/
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
-      - POSTGRES_DB=bhtom
+      - POSTGRES_DB=bhtom2
       - POSTGRES_USER=bhtom
       - POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
     ports:

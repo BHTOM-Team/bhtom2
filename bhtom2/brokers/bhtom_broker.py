@@ -3,8 +3,8 @@ from functools import lru_cache
 from typing import List, Optional
 
 import numpy as np
-from tom_alerts.alerts import GenericBroker
-from tom_targets.models import Target
+from bhtom_base.bhtom_alerts.alerts import GenericBroker
+from bhtom_base.bhtom_targets.models import Target
 
 from bhtom2.external_service.data_source_information import DataSource, FILTERS, TARGET_NAME_KEYS
 from bhtom2.external_service.filter_name import filter_name

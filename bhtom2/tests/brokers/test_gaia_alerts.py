@@ -3,8 +3,8 @@ from typing import List
 from unittest.mock import patch
 
 from django.test import TestCase
-from tom_dataproducts.models import ReducedDatum
-from tom_targets.models import Target
+from bhtom_base.bhtom_dataproducts.models import ReducedDatum
+from bhtom_base.bhtom_targets.models import Target
 
 from bhtom2.brokers.bhtom_broker import LightcurveUpdateReport
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS

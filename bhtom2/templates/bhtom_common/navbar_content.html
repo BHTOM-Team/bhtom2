@@ -1,7 +1,7 @@
 {% load bootstrap4 %}
 {% comment %}
-The following nav-item list elements (li) are included in the tom_common/base.html navbar-nav (ul).
-For customization instructions, see tom_common/base.html
+The following nav-item list elements (li) are included in the bhtom_common/base.html navbar-nav (ul).
+For customization instructions, see bhtom_common/base.html
 {% endcomment %}
 
 <li class="nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
@@ -21,21 +21,21 @@ For customization instructions, see tom_common/base.html
     <a class="nav-link dropdown-toggle" data-toggle="dropdown">Observations</a>
     <ul class="dropdown-menu">
         <li class="nav-item {% if request.resolver_match.namespace == 'observations' %}active{% endif %}">
-            <a class="nav-link" href="{% url 'tom_observations:list' %}" style="color:black">Observations</a>
+            <a class="nav-link" href="{% url 'bhtom_base.bhtom_observations:list' %}" style="color:black">Observations</a>
         </li>
         <li class="nav-item {% if request.resolver_match.namespace == 'observations' %}active{% endif %}">
-            <a class="nav-link" href="{% url 'tom_observations:group-list' %}" style="color:black">Observation Groups</a>
+            <a class="nav-link" href="{% url 'bhtom_base.bhtom_observations:group-list' %}" style="color:black">Observation Groups</a>
         </li>
         <li class="nav-item {% if request.resolver_match.namespace == 'observations' %}active{% endif %}">
-            <a class="nav-link" href="{% url 'tom_observations:template-list' %}" style="color:black">Observation Templates</a>
+            <a class="nav-link" href="{% url 'bhtom_base.bhtom_observations:template-list' %}" style="color:black">Observation Templates</a>
         </li>
         <li class="nav-item {% if request.resolver_match.namespace == 'observations' %}active{% endif %}">
-            <a class="nav-link" href="{% url 'tom_observations:facility-status' %}" style="color:black">Facility Status</a>
+            <a class="nav-link" href="{% url 'bhtom_base.bhtom_observations:facility-status' %}" style="color:black">Facility Status</a>
         </li>
     </ul>
 </li>
 <li class="nav-item {% if request.resolver_match.namespace == 'dataproducts' %}active{% endif %}">
-    <a class="nav-link" href="{% url 'tom_dataproducts:list' %}">Data</a>
+    <a class="nav-link" href="{% url 'bhtom_base.bhtom_dataproducts:list' %}">Data</a>
 </li>
 <li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
     <a class="nav-link" href="{% url 'user-list' %}">Users</a>

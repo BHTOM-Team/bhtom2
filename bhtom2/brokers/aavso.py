@@ -8,8 +8,8 @@ from astropy.time import TimezoneInfo, Time
 from django.conf import settings
 from django.db import transaction
 
-from tom_dataproducts.models import ReducedDatum, DatumValue
-from tom_targets.models import Target
+from bhtom_base.bhtom_dataproducts.models import ReducedDatum, DatumValue
+from bhtom_base.bhtom_targets.models import Target
 
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
 from bhtom2.external_service.data_source_information import DataSource, AAVSO_ACCEPTED_FLAGS, FILTERS

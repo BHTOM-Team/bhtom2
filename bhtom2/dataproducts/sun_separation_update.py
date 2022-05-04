@@ -4,7 +4,7 @@ from typing import Optional, Any
 from astropy import units as u
 from astropy.coordinates import get_sun, SkyCoord
 from astropy.time import Time
-from tom_targets.models import Target
+from bhtom_base.bhtom_targets.models import Target
 
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 

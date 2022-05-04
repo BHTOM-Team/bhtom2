@@ -2,7 +2,7 @@ from typing import Optional
 from unittest.mock import patch
 
 from django.test import TestCase
-from tom_targets.models import Target
+from bhtom_base.bhtom_targets.models import Target
 
 from bhtom2.utils.extinction import ogle_extinction
 

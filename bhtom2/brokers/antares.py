@@ -1,7 +1,7 @@
 import logging
 import math
 from datetime import datetime
-from typing import Optional, Any, Dict, List, Tuple
+from typing import Optional, List, Tuple
 
 import pandas as pd
 import requests
@@ -16,9 +16,9 @@ from django import forms
 import marshmallow
 from django.db import transaction
 
-from tom_alerts.alerts import GenericQueryForm, GenericAlert
-from tom_dataproducts.models import ReducedDatum, DatumValue
-from tom_targets.models import Target, TargetName
+from bhtom_base.bhtom_alerts.alerts import GenericQueryForm, GenericAlert
+from bhtom_base.bhtom_dataproducts.models import ReducedDatum, DatumValue
+from bhtom_base.bhtom_targets.models import Target, TargetName
 
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, return_for_no_new_points
 from bhtom2.brokers.lightcurve_update import LightcurveUpdateReport

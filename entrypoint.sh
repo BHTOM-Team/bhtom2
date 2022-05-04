@@ -20,7 +20,7 @@ fi
 
 echo "Collecting static..."
 
-while ! python manage.py collectstatic --no-input 2>&1; do
+while ! python3 manage.py collectstatic --no-input 2>&1; do
   echo "Collecting static..."
   sleep 3
 done
@@ -31,16 +31,11 @@ done
 #  echo "making migrations..."
 #  sleep 3
 #done
-#
-#while ! python manage.py makemigrations bhtom2 2>&1; do
-#  echo "making migrations for bhtom2..."
-#  sleep 3
-#done
 
 echo "Migrating..."
 
 # Wait for few minute and run db migraiton
-while ! python manage.py migrate  2>&1; do
+while ! python3 manage.py migrate  2>&1; do
    echo "Migration is in progress..."
    sleep 3
 done
@@ -49,6 +44,6 @@ echo "Django docker is fully configured."
 
 echo "Running server..."
 
-python manage.py runserver 0.0.0.0:8000
+python3 manage.py runserver 0.0.0.0:8000
 
 exec "$@"

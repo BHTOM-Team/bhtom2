@@ -1,4 +1,4 @@
-{% load static bootstrap4 tom_common_extras %}
+{% load static bootstrap4 bhtom_common_extras %}
 <!doctype html>
 <html lang="en">
   <head>
@@ -8,7 +8,7 @@
 
     <!-- Bootstrap CSS -->
     {% bootstrap_css %}
-    <link rel="stylesheet" href="{% static 'tom_common/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
     {% block additional_css %}
     {% endblock %}
     <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}"/>
@@ -31,16 +31,16 @@
           in the navbar-nav (ul).
 
           To customize your navbar-nav in your TOM:
-          1. Create a templates/tom_common directory at the project level.
-          2. Copy tom_common/templates/tom_common/navbar_content.html to your project's
-             templates/tom_common directory.
+          1. Create a templates/bhtom_common directory at the project level.
+          2. Copy bhtom_common/templates/bhtom_common/navbar_content.html to your project's
+             templates/bhtom_common directory.
           3. Customize your navbar content by editing your navbar_content.html.
 
           For more information,
           see the Django tutorial, "Writing your first Django app",
           Part 7, Section "Customize the admin look and feel"
           {% endcomment %}
-          {% include 'tom_common/navbar_content.html' %}
+          {% include 'bhtom_common/navbar_content.html' %}
 
         </ul>
         <ul class="navbar-nav ml-auto" id="login-buttons">
