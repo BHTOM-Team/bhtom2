@@ -3,8 +3,8 @@ from typing import Any, Optional, Iterable, Tuple
 
 import numpy as np
 
-from bhtom_base.tom_dataproducts.models import ReducedDatum
-from bhtom_base.tom_targets.models import Target
+from tom_dataproducts.models import ReducedDatum
+from tom_targets.models import Target
 
 LightcurveUpdateReport = namedtuple('LightcurveUpdateReport', ['new_points', 'last_jd', 'last_mag'])
 

@@ -2,8 +2,8 @@ import json
 from typing import Any, Dict, Optional, List
 
 from astropy.io import ascii
-from bhtom_base.tom_dataproducts.exceptions import InvalidFileFormatException
-from bhtom_base.tom_dataproducts.models import DataProduct
+from tom_dataproducts.exceptions import InvalidFileFormatException
+from tom_dataproducts.models import DataProduct
 
 FACILITY_NAME_KEY: str = "facility"
 OBSERVATION_TIME_KEY: str = "observation_time"

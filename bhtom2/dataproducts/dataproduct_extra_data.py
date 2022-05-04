@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional, Any
 import json
 
-from bhtom_base.tom_dataproducts.models import DataProduct
+from tom_dataproducts.models import DataProduct
 
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 

@@ -16,15 +16,14 @@ from django import forms
 import marshmallow
 from django.db import transaction
 
-from bhtom_base.tom_alerts.alerts import GenericQueryForm, GenericAlert
-from bhtom_base.tom_dataproducts.models import ReducedDatum, DatumValue
-from bhtom_base.tom_targets.models import Target, TargetName
+from tom_alerts.alerts import GenericQueryForm, GenericAlert
+from tom_dataproducts.models import ReducedDatum, DatumValue
+from tom_targets.models import Target, TargetName
 
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, return_for_no_new_points
 from bhtom2.brokers.lightcurve_update import LightcurveUpdateReport
 from bhtom2.external_service.data_source_information import DataSource
 from bhtom2.external_service.filter_name import filter_name
-from bhtom2.models.reduced_datum_value import reduced_datum_value
 
 logger = logging.getLogger(__name__)
 

@@ -4,8 +4,8 @@ from typing import List, Set
 from unittest.mock import patch
 
 from django.test import TestCase
-from bhtom_base.tom_dataproducts.models import ReducedDatum
-from bhtom_base.tom_targets.models import Target
+from tom_dataproducts.models import ReducedDatum
+from tom_targets.models import Target
 
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
 from bhtom2.brokers.bhtom_broker import LightcurveUpdateReport

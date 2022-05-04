@@ -1,6 +1,6 @@
 from astropy.coordinates import Angle, SkyCoord
 import astropy.units as u
-from bhtom_base.tom_targets.models import Target
+from tom_targets.models import Target
 
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
