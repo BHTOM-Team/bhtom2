@@ -6,7 +6,7 @@ from unittest.mock import patch
 from django.test import TestCase
 
 from django.conf import settings
-from tom_targets.models import Target
+from bhtom_base.tom_targets.models import Target
 
 from bhtom2.harvesters.gaia_alerts import fetch_alerts_csv, search_term_in_gaia_data, get, \
     GaiaAlertsHarvester

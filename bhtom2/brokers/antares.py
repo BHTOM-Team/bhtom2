@@ -1,6 +1,7 @@
 import logging
 import math
-from typing import Optional, Any, Dict
+from datetime import datetime
+from typing import Optional, Any, Dict, List, Tuple
 
 import pandas as pd
 import requests
@@ -13,10 +14,11 @@ from astropy.time import Time, TimezoneInfo
 from crispy_forms.layout import Div, Fieldset, Layout, HTML
 from django import forms
 import marshmallow
+from django.db import transaction
 
-from tom_alerts.alerts import GenericQueryForm, GenericAlert
-from tom_dataproducts.models import ReducedDatum
-from tom_targets.models import Target, TargetName
+from bhtom_base.tom_alerts.alerts import GenericQueryForm, GenericAlert
+from bhtom_base.tom_dataproducts.models import ReducedDatum, DatumValue
+from bhtom_base.tom_targets.models import Target, TargetName
 
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, return_for_no_new_points
 from bhtom2.brokers.lightcurve_update import LightcurveUpdateReport
@@ -434,6 +436,7 @@ class ANTARESBroker(BHTOMBroker):
             return_for_no_new_points()
 
         new_points: int = 0
+        data: List[Tuple[datetime, DatumValue]] = []
 
         for _, row in lightcurve.iterrows():
             try:
@@ -446,19 +449,11 @@ class ANTARESBroker(BHTOMBroker):
 
                 # Detection
                 if not math.isnan(mag):
-                    value: Dict[str, Any] = reduced_datum_value(mag=mag, filter=filter,
-                                                                error=magerr, jd=mjd.jd,
-                                                                observer=self.__OBSERVER_NAME,
-                                                                facility=self.__FACILITY_NAME)
-                    rd, _ = ReducedDatum.objects.get_or_create(
-                        timestamp=mjd.to_datetime(timezone=TimezoneInfo()),
-                        value=value,
-                        source_name=self.name,
-                        source_location=f'https://antares.noirlab.edu/loci/{antares_name}',
-                        data_type='photometry',
-                        target=target)
-                    rd.save()
-                    new_points += 1
+                    data.append((mjd.to_datetime(timezone=TimezoneInfo()),
+                                 DatumValue(value=mag,
+                                            filter=filter,
+                                            mjd=mjd.mjd,
+                                            error=magerr)))
 
                     self.update_last_jd_and_mag(mjd.jd, mag)
 
@@ -467,6 +462,22 @@ class ANTARESBroker(BHTOMBroker):
                 self.logger.error(f'Error while processing reduced datapoint for target {target.name} with '
                                   f'ANTARES name {antares_name}: {e}')
                 continue
+
+        try:
+            data = list(set(data))
+            reduced_datums = [ReducedDatum(target=target, data_type='photometry',
+                                           timestamp=datum[0], mjd=datum[1].mjd, value=datum[1].value,
+                                           source_name=self.name,
+                                           source_location=f'https://antares.noirlab.edu/loci/{antares_name}',
+                                           error=datum[1].error,
+                                           filter=datum[1].filter, observer=self.__OBSERVER_NAME,
+                                           facility=self.__FACILITY_NAME) for datum in data]
+            with transaction.atomic():
+                new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))
+        except Exception as e:
+            self.logger.error(f'Error while saving reduced datapoints for target {target.name} with '
+                              f'ANTARES name {antares_name}: {e}')
+            return return_for_no_new_points()
 
         return LightcurveUpdateReport(new_points=new_points,
                                       last_jd=self.last_jd,

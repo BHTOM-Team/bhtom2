@@ -1,25 +1,22 @@
 import math
-from io import StringIO
-import json
-from typing import Optional, List, Any, Dict, Tuple, Type
+from datetime import datetime
+from typing import Optional, Any, Dict, List, Tuple
 
 from alerce.exceptions import APIError, ObjectNotFoundError
 from astropy.time import Time, TimezoneInfo
-from numpy import genfromtxt
-from tom_dataproducts.models import ReducedDatum
-from tom_targets.models import Target, TargetExtra
+from django.db import transaction
 
 from bhtom2 import settings
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
 from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
-from bhtom2.external_service.data_source_information import DataSource, FILTERS, TARGET_NAME_KEYS, ZTF_DR8_FILTERS
+from bhtom2.external_service.data_source_information import DataSource, FILTERS, ZTF_DR8_FILTERS
 from bhtom2.external_service.external_service_request import query_external_service
-from bhtom2.models.reduced_datum_value import reduced_datum_value
+from bhtom_base.tom_dataproducts.models import ReducedDatum, DatumValue
+from bhtom_base.tom_targets.models import Target, TargetExtra
 
 
 # For DR8
 class ZTFBroker(BHTOMBroker):
-
     name = DataSource.ZTF_DR8
     form = None
 
@@ -36,14 +33,13 @@ class ZTFBroker(BHTOMBroker):
         self.__OBSERVER_NAME: str = "ZTF"
 
         # 2 arcseconds
-        self.__MATCHING_RADIUS: float = 2*0.000278
+        self.__MATCHING_RADIUS: float = 2 * 0.000278
 
     def fetch_alerts(self, parameters):
         pass
 
     def fetch_alert(self, target_name):
         pass
-
 
     def to_generic_alert(self, alert):
         pass
@@ -81,7 +77,8 @@ class ZTFBroker(BHTOMBroker):
 
         try:
             response: Dict[str, Any] = query_external_service(base_url, service_name=DataSource.ZTF.name,
-                                                              params="&".join("%s=%s" % (k, v) for k, v in query_parameters.items()))
+                                                              params="&".join("%s=%s" % (k, v) for k, v in
+                                                                              query_parameters.items()))
         # No such object on ZTF
         except ObjectNotFoundError as e:
             raise NoResultException(f'No ZTF data found for {target.name} with ZTF name {ztf_name}')
@@ -90,18 +87,6 @@ class ZTFBroker(BHTOMBroker):
         except Exception as e:
             self.logger.error(f'Error while updating ZTF DR8 for {target.name} with ZTF name {ztf_name}: {e}')
             return return_for_no_new_points()
-
-        # 0, 1, 2, 3, 4, 5, 6
-        # 7, 8, 9, 10, 11, 12,
-        # 13, 14, 15, 16, 17, 18,
-        # 19, 20, 21, 22, 23
-        # oid,expid,hjd,mjd,mag,magerr,catflags,
-        # filtercode,ra,dec,chi,sharp,filefracday,
-        # field,ccdid,qid,limitmag,magzp,magzprms,
-        # clrcoeff,clrcounc,exptime,airmass,programid
-
-        # Read only the interesting columns
-        # oid, hjd, mjd, mag, magerr, filtercode
 
         # detections:
         # 'mjd', 'candid', 'fid', 'pid', 'diffmaglim', 'isdiffpos', 'nid', 'distnr', 'magpsf', 'magpsf_corr',
@@ -115,15 +100,17 @@ class ZTFBroker(BHTOMBroker):
         # TODO: add non-detections
 
         detections = response['detections']
+        nondetections = response['non_detections']
 
         new_points: int = 0
+
+        data: List[Tuple[datetime, DatumValue]] = []
 
         if len(detections) > 0:
             self.save_ztf_dr8_name_if_missing(target, detections[0]['pid'])
         else:
             return return_for_no_new_points()
 
-        # Omit the header
         for entry in detections:
             try:
                 mjd: Time = Time(entry['mjd'], format='mjd', scale='utc')
@@ -138,32 +125,58 @@ class ZTFBroker(BHTOMBroker):
                     if filter not in FILTERS[self.data_source]:
                         self.logger.warning(f'Invalid ZTF DR8 filter for {target.name}: {filter}')
 
-                    # Non detections have an error of 100.
-                    if magerr > 1.:
-                        continue
 
-                    else:
-                        value: Dict[str, Any] = reduced_datum_value(mag=mag, filter=self.filter_name(filter),
-                                                                    error=magerr, jd=mjd.jd,
-                                                                    observer=self.__OBSERVER_NAME,
-                                                                    facility=self.__FACILITY_NAME)
-
-                    rd, _ = ReducedDatum.objects.get_or_create(
-                        timestamp=mjd.to_datetime(timezone=TimezoneInfo()),
-                        value=value,
-                        source_name='ZTF DR8',
-                        source_location=self.__base_url,
-                        data_type='photometry',
-                        target=target)
-
-                    rd.save()
-                    new_points += 1
+                    data.append((mjd.to_datetime(timezone=TimezoneInfo()),
+                                 DatumValue(value=mag,
+                                            error=magerr,
+                                            mjd=mjd.mjd,
+                                            filter=self.filter_name(filter),
+                                            data_type='photometry')))
 
                     self.update_last_jd_and_mag(mjd.jd, mag)
             except Exception as e:
                 self.logger.error(f'Error while processing reduced datapoint for {target.name} with '
                                   f'ZTF DR8 oid {ztf_name}: {e}')
                 continue
+
+        for entry in nondetections:
+            try:
+                mjd: Time = Time(entry['mjd'], format='mjd', scale='utc')
+                mag: float = float(entry['diffmaglim'])
+
+                if (mag is not None) and (not math.isnan(mag)):
+                    self.logger.debug(f'None limit magnitude for target {target.name}')
+
+                    filter: str = ZTF_DR8_FILTERS[entry['fid']]
+
+                    if filter not in FILTERS[self.data_source]:
+                        self.logger.warning(f'Invalid ZTF DR8 filter for {target.name}: {filter}')
+
+                    data.append((mjd.to_datetime(timezone=TimezoneInfo()),
+                                 DatumValue(value=mag,
+                                            mjd=mjd.mjd,
+                                            filter=self.filter_name(filter),
+                                            data_type='photometry_nondetection')))
+            except Exception as e:
+                self.logger.error(f'Error while processing non-detection reduced datapoint for {target.name} with '
+                                  f'ZTF DR8 oid {ztf_name}: {e}')
+                continue
+
+        try:
+            data = list(set(data))
+            reduced_datums = [ReducedDatum(target=target, data_type=datum[1].data_type,
+                                           timestamp=datum[0], mjd=datum[1].mjd, value=datum[1].value,
+                                           source_name=self.name,
+                                           source_location=self.__base_url,
+                                           error=datum[1].error,
+                                           filter=datum[1].filter, observer=self.__OBSERVER_NAME,
+                                           facility=self.__FACILITY_NAME) for datum in data]
+            with transaction.atomic():
+                new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))
+        except Exception as e:
+            self.logger.error(f'Error while saving reduced datapoints for {target.name} with '
+                              f'ZTF DR8 oid {ztf_name}: {e}')
+            return return_for_no_new_points()
 
         return LightcurveUpdateReport(new_points=new_points,
                                       last_jd=self.last_jd,

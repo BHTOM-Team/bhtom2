@@ -3,8 +3,8 @@ from typing import List
 from unittest.mock import patch
 
 from django.test import TestCase
-from tom_dataproducts.models import ReducedDatum
-from tom_targets.models import Target
+from bhtom_base.tom_dataproducts.models import ReducedDatum
+from bhtom_base.tom_targets.models import Target
 
 from bhtom2.brokers.bhtom_broker import LightcurveUpdateReport
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
@@ -27,6 +27,7 @@ sample_lightcurve_three_correct_lines = """
 #Date JD(TCB) averagemag
 2014-09-19 02:49:08,2456919.61745,untrusted
 2014-09-20 02:49:08,2456920.61745,NaN
+2014-10-31 1:40:22,2456961.56970,18.91
 2014-10-31 1:40:22,2456961.56970,18.91
 """
 
@@ -100,16 +101,15 @@ class GaiaLightcurveUpdateTestCase(TestCase):
 
         self.assertEqual(len(rd), 1)
 
-        self.assertEqual(rd[0].value, {
-            'magnitude': 18.91,
-            'filter': 'g(Gaia)',
-            'error': 0.04535237134514455,
-            'jd': 2456961.56970,
-            'observer': 'Gaia',
-            'facility': 'Gaia'
-        })
         self.assertEqual(rd[0].data_type, 'photometry')
         self.assertEqual(rd[0].target, target)
+        self.assertEqual(rd[0].value, 18.91)
+        self.assertEqual(rd[0].filter, 'g(Gaia)')
+        self.assertEqual(rd[0].observer, 'Gaia')
+        self.assertEqual(rd[0].facility, 'Gaia')
+        self.assertAlmostEqual(rd[0].error, 0.0453, 3)
+        self.assertAlmostEqual(rd[0].mjd, 56961.06970, 3)
+
         self.assertEqual(report.new_points, 1)
         self.assertEqual(report.last_jd, 2456961.56970)
         self.assertEqual(report.last_mag, 18.91)

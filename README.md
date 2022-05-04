@@ -36,6 +36,20 @@ This file is copied to bhtom2 directory in the Docker container and used the sam
 
 To run the tests provide your local database data in the ``.bhtom.env`` file.
 
+Run the test using the following commands (in the main folder):
+
+The bhtom2 part:
+
+```bash
+python manage.py test
+```
+
+The forked bhtom_base (this might take a while, there are over 300 tests):
+
+```bash
+python manage.py test bhtom_base
+```
+
 # Troubleshooting
 
 - Make sure that the ``bhtom`` user has the permission to create the test database. You might need to alter user in your local DB:

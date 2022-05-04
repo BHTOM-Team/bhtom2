@@ -1,15 +1,10 @@
 from collections import namedtuple
-from functools import lru_cache
-from typing import List, Any, Optional, Iterable, Tuple
+from typing import Any, Optional, Iterable, Tuple
 
 import numpy as np
-from tom_dataproducts.models import DataProductGroup, DataProduct, ReducedDatum
-from tom_observations.models import ObservationRecord, ObservationGroup
-from tom_targets.models import Target
 
-from bhtom2.external_service.data_source_information import DataSource, FILTERS, TARGET_NAME_KEYS
-from bhtom2.external_service.filter_name import filter_name
-from bhtom2.utils.bhtom_logger import BHTOMLogger
+from bhtom_base.tom_dataproducts.models import ReducedDatum
+from bhtom_base.tom_targets.models import Target
 
 LightcurveUpdateReport = namedtuple('LightcurveUpdateReport', ['new_points', 'last_jd', 'last_mag'])
 

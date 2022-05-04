@@ -1,6 +1,7 @@
 import json
 import re
-from typing import Optional, List, Any, Dict
+from datetime import datetime
+from typing import Optional, List, Tuple
 
 import astropy.units as u
 from astropy.coordinates import SkyCoord
@@ -8,16 +9,18 @@ from astropy.time import Time, TimezoneInfo
 from bs4 import BeautifulSoup
 from dateutil.parser import parse
 from django import forms
-from tom_alerts.alerts import GenericAlert
-from tom_alerts.alerts import GenericQueryForm
-from tom_dataproducts.models import ReducedDatum
+from django.db import transaction
+
+from bhtom_base.tom_alerts.alerts import GenericAlert
+from bhtom_base.tom_alerts.alerts import GenericQueryForm
+from bhtom_base.tom_dataproducts.models import ReducedDatum
 
 from bhtom2 import settings
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
 from bhtom2.external_service.data_source_information import DataSource, FILTERS
 from bhtom2.external_service.external_service_request import query_external_service
 from bhtom2.external_service.filter_name import filter_name
-from bhtom2.models.reduced_datum_value import reduced_datum_value
+from bhtom_base.tom_dataproducts.models import DatumValue
 
 
 def g_gaia_error(mag: float) -> float:
@@ -35,7 +38,7 @@ def g_gaia_error(mag: float) -> float:
     elif mag > 17:
         error: float = a2 * mag + b2
 
-    return 10**error
+    return 10 ** error
 
 
 class GaiaQueryForm(GenericQueryForm):
@@ -63,7 +66,6 @@ class GaiaQueryForm(GenericQueryForm):
 
 
 class GaiaAlertsBroker(BHTOMBroker):
-
     name = DataSource.Gaia.name
     form = GaiaQueryForm
 
@@ -176,6 +178,8 @@ class GaiaAlertsBroker(BHTOMBroker):
         html_data: List[str] = response.split('\n')
         new_points: int = 0
 
+        data: List[Tuple[datetime, DatumValue]] = []
+
         # The data contains alert name at the top: we wish to skip the first 3 lines
         for entry in html_data[2:]:
             phot_data = entry.split(',')
@@ -189,29 +193,37 @@ class GaiaAlertsBroker(BHTOMBroker):
 
                 try:
                     if 'untrusted' not in data_mag and 'null' not in data_mag and 'NaN' not in data_mag:
-
                         mag: float = float(data_mag)
 
                         jd = Time(float(data_jd), format='jd', scale='utc')
 
-                        value: Dict[str, Any] = reduced_datum_value(mag=mag, filter=self.__filter,
-                                                                    error=g_gaia_error(mag), jd=jd.value,
-                                                                    observer=self.__OBSERVER_NAME,
-                                                                    facility=self.__FACILITY_NAME)
-
-                        rd, _ = ReducedDatum.objects.get_or_create(
-                            timestamp=jd.to_datetime(timezone=TimezoneInfo()),
-                            value=value,
-                            source_name=self.name,
-                            source_location=alert_url,
-                            data_type='photometry',
-                            target=target)
-                        rd.save()
-                        new_points += 1
+                        data.append((
+                            jd.to_datetime(timezone=TimezoneInfo()),
+                            DatumValue(
+                                value=mag,
+                                error=g_gaia_error(mag),
+                                filter=self.__filter,
+                                mjd=jd.mjd)))
 
                         self.update_last_jd_and_mag(jd.value, mag)
                 except Exception as e:
                     self.logger.error(f'Error while processing reduced datapoint for {target.name}: {e}')
+                    continue
+
+        try:
+            data = list(set(data))
+            reduced_datums = [ReducedDatum(target=target, data_type='photometry',
+                                           timestamp=datum[0], mjd=datum[1].mjd, value=datum[1].value,
+                                           source_name=self.name,
+                                           source_location=alert_url,
+                                           error=datum[1].error,
+                                           filter=datum[1].filter, observer=self.__OBSERVER_NAME,
+                                           facility=self.__FACILITY_NAME) for datum in data]
+            with transaction.atomic():
+                new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))
+        except Exception as e:
+            self.logger.error(f'Error while saving reduced datapoints for {target.name}: {e}')
+            return return_for_no_new_points()
 
         return LightcurveUpdateReport(new_points=new_points,
                                       last_jd=self.last_jd,

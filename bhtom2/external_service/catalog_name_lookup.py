@@ -1,17 +1,13 @@
-import json
-from collections import OrderedDict
 from typing import Any, Dict, List, Optional
 
-import requests
-from astroquery.simbad import Simbad
-from django.conf import settings
-from tom_targets.models import Target
-from alerce.core import Alerce
 import antares_client.search as antares
+from alerce.core import Alerce
 from astropy.coordinates import Angle, SkyCoord
+from astroquery.simbad import Simbad
 
-from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
+from bhtom2.utils.bhtom_logger import BHTOMLogger
+from bhtom_base.tom_targets.models import Target
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Catalog name lookup]')
 alerce: Alerce = Alerce()
@@ -139,22 +135,26 @@ def query_all_services(target: Target) -> Dict[str, str]:
 
 
 def query_antares_for_names(target: Target) -> Dict[str, str]:
-    coordinates: SkyCoord = SkyCoord(ra=target.ra, dec=target.dec, unit="deg")
-    radius: Angle = Angle(1, unit="arcsec")
+    try:
+        coordinates: SkyCoord = SkyCoord(ra=target.ra, dec=target.dec, unit="deg")
+        radius: Angle = Angle(1, unit="arcsec")
 
-    target: Optional[Any] = None
+        target: Optional[Any] = None
 
-    for locus in antares.cone_search(coordinates, radius):
-        target = locus
-        break
+        for locus in antares.cone_search(coordinates, radius):
+            target = locus
+            break
 
-    if target:
-        return {
-            TARGET_NAME_KEYS[DataSource.ANTARES]: target.locus_id,
-            TARGET_NAME_KEYS[DataSource.ZTF]: target.properties.get('ztf_object_id', '')
-        }
+        if target:
+            return {
+                TARGET_NAME_KEYS[DataSource.ANTARES]: target.locus_id,
+                TARGET_NAME_KEYS[DataSource.ZTF]: target.properties.get('ztf_object_id', '')
+            }
 
-    return {}
+        return {}
+    except Exception as e:
+        logger.error(f'Exception when querying antares for target {target.name}: {e}')
+        return {}
 
 
 def query_simbad_for_names(target: Target) -> Dict[str, str]:

@@ -1,0 +1,3 @@
+[submodule "bhtom_base"]
+	path = bhtom_base
+	url = https://github.com/maja-jablonska/bhtom_base

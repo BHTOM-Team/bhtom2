@@ -1,4 +1,4 @@
-from tom_targets.models import Target
+from bhtom_base.tom_targets.models import Target
 import logging
 from typing import Optional
 from sentry_sdk import capture_exception
