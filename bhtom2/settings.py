@@ -17,9 +17,6 @@ import tempfile
 
 from dotenv import dotenv_values
 
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
-
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
 
 
@@ -57,21 +54,21 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django_extensions',
     'guardian',
-    'bhtom_base.bhtom_common',
+    'bhtom_base.bhtom_common.apps.TomCommonConfig',
     'django_comments',
     'bootstrap4',
     'crispy_forms',
     'rest_framework',
     'django_filters',
     'django_gravatar',
-    'bhtom_base.bhtom_targets',
-    'bhtom_base.bhtom_alerts',
-    'bhtom_base.bhtom_catalogs',
-    'bhtom_base.bhtom_observations',
-    'bhtom_base.bhtom_dataproducts',
-    'bhtom_custom_registration.bhtom_registration',
+    'bhtom_base.bhtom_targets.apps.TomTargetsConfig',
+    'bhtom_base.bhtom_alerts.apps.TomAlertsConfig',
+    'bhtom_base.bhtom_catalogs.apps.TomCatalogsConfig',
+    'bhtom_base.bhtom_observations.apps.TomObservationsConfig',
+    'bhtom_base.bhtom_dataproducts.apps.TomDataproductsConfig',
+    'bhtom_custom_registration.bhtom_registration.apps.TomRegistrationConfig',
     'rest_framework.authtoken',
-    'bhtom2'
+    'bhtom2.apps.BHTOM2Config'
 ]
 
 MIDDLEWARE = [
@@ -394,13 +391,6 @@ try:
     from local_settings import * # noqa
 except ImportError:
     pass
-
-sentry_sdk.init(
-    dsn=secret.get('SENTRY_SDK_DSN', ''),
-    integrations=[DjangoIntegration()],
-    traces_sample_rate=1.0,
-    send_default_pii=True
-)
 
 GAIA_ALERTS_PATH: str = 'http://gsaweb.ast.cam.ac.uk'
 AAVSO_API_PATH: str = 'https://www.aavso.org/vsx/index.php'
