@@ -1,3 +1,7 @@
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/maja-jablonska/bhtom2/Django%20CI)
+
+# BHTom 2
+
 # Local development
 
 Development is done best on the local environment. This way you can generate new migrations in case of
