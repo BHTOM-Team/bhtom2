@@ -1,4 +1,4 @@
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/maja-jablonska/bhtom2/Django%20CI)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/maja-jablonska/bhtom2/Django%20CI) ![GitHub issues](https://img.shields.io/github/issues/maja-jablonska/bhtom2) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/maja-jablonska/bhtom2) ![GitHub contributors](https://img.shields.io/github/contributors/maja-jablonska/bhtom2) ![GitHub last commit](https://img.shields.io/github/last-commit/maja-jablonska/bhtom2)
 
 # BHTom 2
 
