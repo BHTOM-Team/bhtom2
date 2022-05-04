@@ -19,7 +19,7 @@ from bhtom_targets.views import TargetDetailView
 from bhtom2.views import BrokerQueryListView
 
 urlpatterns = [
-    path('', include('tom_registration.registration_flows.approval_required.urls', namespace='registration')),
+    path('', include('bhtom_registration.registration_flows.approval_required.urls', namespace='registration')),
     path('alerts/query/list/', BrokerQueryListView.as_view(template_name='bhtom_alerts/brokerquery_list.html'), name='alerts:list'),
     path('targets/<int:pk>/', TargetDetailView.as_view(template_name='bhtom_targets/target_detail.html'), name='detail'),
     path('', include('bhtom_common.urls')),

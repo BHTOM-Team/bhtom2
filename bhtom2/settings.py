@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django_extensions',
     'guardian',
+    'bhtom_base',
     'bhtom_common',
     'django_comments',
     'bootstrap4',
@@ -68,7 +69,7 @@ INSTALLED_APPS = [
     'bhtom_catalogs',
     'bhtom_observations',
     'bhtom_dataproducts',
-    'tom_registration',
+    'bhtom_registration',
     'rest_framework.authtoken',
     'bhtom2'
 ]
@@ -84,7 +85,7 @@ MIDDLEWARE = [
     'bhtom_common.middleware.Raise403Middleware',
     'bhtom_common.middleware.ExternalServiceMiddleware',
     'bhtom_common.middleware.AuthStrategyMiddleware',
-    'tom_registration.middleware.RedirectAuthenticatedUsersFromRegisterMiddleware',
+    'bhtom_registration.middleware.RedirectAuthenticatedUsersFromRegisterMiddleware',
 ]
 
 ROOT_URLCONF = 'bhtom2.urls'
