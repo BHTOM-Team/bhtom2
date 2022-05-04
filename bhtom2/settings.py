@@ -56,18 +56,18 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django_extensions',
     'guardian',
-    'bhtom_base.tom_common',
+    'tom_common',
     'django_comments',
     'bootstrap4',
     'crispy_forms',
     'rest_framework',
     'django_filters',
     'django_gravatar',
-    'bhtom_base.tom_targets',
-    'bhtom_base.tom_alerts',
-    'bhtom_base.tom_catalogs',
-    'bhtom_base.tom_observations',
-    'bhtom_base.tom_dataproducts',
+    'tom_targets',
+    'tom_alerts',
+    'tom_catalogs',
+    'tom_observations',
+    'tom_dataproducts',
     'tom_registration',
     'rest_framework.authtoken',
     'bhtom2.apps.BHTOM2Config'
@@ -81,9 +81,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'bhtom_base.tom_common.middleware.Raise403Middleware',
-    'bhtom_base.tom_common.middleware.ExternalServiceMiddleware',
-    'bhtom_base.tom_common.middleware.AuthStrategyMiddleware',
+    'tom_common.middleware.Raise403Middleware',
+    'tom_common.middleware.ExternalServiceMiddleware',
+    'tom_common.middleware.AuthStrategyMiddleware',
     'tom_registration.middleware.RedirectAuthenticatedUsersFromRegisterMiddleware',
 ]
 
@@ -275,27 +275,27 @@ DATA_PRODUCT_TYPES = {
 }
 
 DATA_PROCESSORS = {
-    'photometry': 'bhtom_base.tom_dataproducts.processors.photometry_processor.PhotometryProcessor',
-    'spectroscopy': 'bhtom_base.tom_dataproducts.processors.spectroscopy_processor.SpectroscopyProcessor',
+    'photometry': 'tom_dataproducts.processors.photometry_processor.PhotometryProcessor',
+    'spectroscopy': 'tom_dataproducts.processors.spectroscopy_processor.SpectroscopyProcessor',
 }
 
 TOM_FACILITY_CLASSES = [
-    'bhtom_base.tom_observations.facilities.lco.LCOFacility',
-    'bhtom_base.tom_observations.facilities.gemini.GEMFacility',
-    'bhtom_base.tom_observations.facilities.soar.SOARFacility',
-    'bhtom_base.tom_observations.facilities.lt.LTFacility'
+    'tom_observations.facilities.lco.LCOFacility',
+    'tom_observations.facilities.gemini.GEMFacility',
+    'tom_observations.facilities.soar.SOARFacility',
+    'tom_observations.facilities.lt.LTFacility'
 ]
 
 # TODO: investigate why are they missing
 
 TOM_ALERT_CLASSES = [
-    'bhtom_base.tom_alerts.brokers.alerce.ALeRCEBroker',
-    'bhtom_base.tom_alerts.brokers.lasair.LasairBroker',
-    'bhtom_base.tom_alerts.brokers.mars.MARSBroker',
-    'bhtom_base.tom_alerts.brokers.scimma.SCIMMABroker',
-    'bhtom_base.tom_alerts.brokers.scout.ScoutBroker',
-    'bhtom_base.tom_alerts.brokers.tns.TNSBroker',
-    'bhtom_base.tom_alerts.brokers.fink.FinkBroker',
+    'tom_alerts.brokers.alerce.ALeRCEBroker',
+    'tom_alerts.brokers.lasair.LasairBroker',
+    'tom_alerts.brokers.mars.MARSBroker',
+    'tom_alerts.brokers.scimma.SCIMMABroker',
+    'tom_alerts.brokers.scout.ScoutBroker',
+    'tom_alerts.brokers.tns.TNSBroker',
+    'tom_alerts.brokers.fink.FinkBroker',
     'bhtom2.brokers.gaia_alerts.GaiaAlertsBroker',
     'bhtom2.brokers.aavso.AAVSOBroker',
     'bhtom2.brokers.ztf.ZTFBroker',
@@ -312,9 +312,9 @@ TOM_HARVESTER_CLASSES = [
     'bhtom2.harvesters.gaia_alerts.GaiaAlertsHarvester',
     'bhtom2.harvesters.tns.TNSHarvester',
     'bhtom2.harvesters.antares.ANTARESHarvester',
-    'bhtom_base.tom_catalogs.harvesters.simbad.SimbadHarvester',
-    'bhtom_base.tom_catalogs.harvesters.ned.NEDHarvester',
-    'bhtom_base.tom_catalogs.harvesters.jplhorizons.JPLHorizonsHarvester',
+    'tom_catalogs.harvesters.simbad.SimbadHarvester',
+    'tom_catalogs.harvesters.ned.NEDHarvester',
+    'tom_catalogs.harvesters.jplhorizons.JPLHorizonsHarvester',
 ]
 
 HARVESTERS = {
@@ -368,10 +368,10 @@ OPEN_URLS = []
 
 HOOKS = {
     'target_post_save': 'bhtom2.hooks.target_post_save',
-    'observation_change_state': 'bhtom_base.tom_common.hooks.observation_change_state',
-    'data_product_post_upload': 'bhtom_base.tom_dataproducts.hooks.data_product_post_upload',
-    'data_product_post_save': 'bhtom_base.tom_dataproducts.hooks.data_product_post_save',
-    'multiple_data_products_post_save': 'bhtom_base.tom_dataproducts.hooks.multiple_data_products_post_save',
+    'observation_change_state': 'tom_common.hooks.observation_change_state',
+    'data_product_post_upload': 'tom_dataproducts.hooks.data_product_post_upload',
+    'data_product_post_save': 'tom_dataproducts.hooks.data_product_post_save',
+    'multiple_data_products_post_save': 'tom_dataproducts.hooks.multiple_data_products_post_save',
 }
 
 AUTO_THUMBNAILS = False
