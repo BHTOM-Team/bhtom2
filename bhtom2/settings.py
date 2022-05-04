@@ -70,7 +70,7 @@ INSTALLED_APPS = [
     'tom_dataproducts',
     'tom_registration',
     'rest_framework.authtoken',
-    'bhtom2.apps.BHTOM2Config'
+    'bhtom2'
 ]
 
 MIDDLEWARE = [
