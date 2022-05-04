@@ -1,7 +1,7 @@
 from django_filters.views import FilterView
-from bhtom_alerts.alerts import get_service_classes
-from bhtom_alerts.models import BrokerQuery
-from bhtom_alerts.views import BrokerQueryFilter
+from bhtom_base.bhtom_alerts.alerts import get_service_classes
+from bhtom_base.bhtom_alerts.models import BrokerQuery
+from bhtom_base.bhtom_alerts.views import BrokerQueryFilter
 
 
 class BrokerQueryListView(FilterView):

@@ -3,7 +3,7 @@ from typing import Dict, Optional
 from bhtom2.external_service.catalog_name_lookup import query_all_services
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom2.utils.extinction import ogle_extinction
-from bhtom_targets.models import TargetExtra
+from bhtom_base.bhtom_targets.models import TargetExtra
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Hooks]')
 

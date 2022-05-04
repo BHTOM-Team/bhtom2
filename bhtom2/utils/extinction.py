@@ -3,7 +3,7 @@ from typing import Optional
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astroquery.ogle import Ogle
-from bhtom_targets.models import Target
+from bhtom_base.bhtom_targets.models import Target
 
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 

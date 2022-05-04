@@ -11,16 +11,16 @@ from dateutil.parser import parse
 from django import forms
 from django.db import transaction
 
-from bhtom_alerts.alerts import GenericAlert
-from bhtom_alerts.alerts import GenericQueryForm
-from bhtom_dataproducts.models import ReducedDatum
+from bhtom_base.bhtom_alerts.alerts import GenericAlert
+from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
+from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 
 from bhtom2 import settings
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
 from bhtom2.external_service.data_source_information import DataSource, FILTERS
 from bhtom2.external_service.external_service_request import query_external_service
 from bhtom2.external_service.filter_name import filter_name
-from bhtom_dataproducts.models import DatumValue
+from bhtom_base.bhtom_dataproducts.models import DatumValue
 
 
 def g_gaia_error(mag: float) -> float:

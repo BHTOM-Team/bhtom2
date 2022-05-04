@@ -24,6 +24,7 @@ from bhtom2.external_service.data_source_information import DataSource, TARGET_N
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Environment variables
@@ -56,20 +57,19 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django_extensions',
     'guardian',
-    'bhtom_base',
-    'bhtom_common',
+    'bhtom_base.bhtom_common',
     'django_comments',
     'bootstrap4',
     'crispy_forms',
     'rest_framework',
     'django_filters',
     'django_gravatar',
-    'bhtom_targets',
-    'bhtom_alerts',
-    'bhtom_catalogs',
-    'bhtom_observations',
-    'bhtom_dataproducts',
-    'bhtom_registration',
+    'bhtom_base.bhtom_targets',
+    'bhtom_base.bhtom_alerts',
+    'bhtom_base.bhtom_catalogs',
+    'bhtom_base.bhtom_observations',
+    'bhtom_base.bhtom_dataproducts',
+    'bhtom_custom_registration.bhtom_registration',
     'rest_framework.authtoken',
     'bhtom2'
 ]
@@ -82,10 +82,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'bhtom_common.middleware.Raise403Middleware',
-    'bhtom_common.middleware.ExternalServiceMiddleware',
-    'bhtom_common.middleware.AuthStrategyMiddleware',
-    'bhtom_registration.middleware.RedirectAuthenticatedUsersFromRegisterMiddleware',
+    'bhtom_base.bhtom_common.middleware.Raise403Middleware',
+    'bhtom_base.bhtom_common.middleware.ExternalServiceMiddleware',
+    'bhtom_base.bhtom_common.middleware.AuthStrategyMiddleware',
+    'bhtom_custom_registration.bhtom_registration.middleware.RedirectAuthenticatedUsersFromRegisterMiddleware',
 ]
 
 ROOT_URLCONF = 'bhtom2.urls'
@@ -276,25 +276,25 @@ DATA_PRODUCT_TYPES = {
 }
 
 DATA_PROCESSORS = {
-    'photometry': 'bhtom_dataproducts.processors.photometry_processor.PhotometryProcessor',
-    'spectroscopy': 'bhtom_dataproducts.processors.spectroscopy_processor.SpectroscopyProcessor',
+    'photometry': 'bhtom_base.bhtom_dataproducts.processors.photometry_processor.PhotometryProcessor',
+    'spectroscopy': 'bhtom_base.bhtom_dataproducts.processors.spectroscopy_processor.SpectroscopyProcessor',
 }
 
 TOM_FACILITY_CLASSES = [
-    'bhtom_observations.facilities.lco.LCOFacility',
-    'bhtom_observations.facilities.gemini.GEMFacility',
-    'bhtom_observations.facilities.soar.SOARFacility',
-    'bhtom_observations.facilities.lt.LTFacility'
+    'bhtom_base.bhtom_observations.facilities.lco.LCOFacility',
+    'bhtom_base.bhtom_observations.facilities.gemini.GEMFacility',
+    'bhtom_base.bhtom_observations.facilities.soar.SOARFacility',
+    'bhtom_base.bhtom_observations.facilities.lt.LTFacility'
 ]
 
 TOM_ALERT_CLASSES = [
-    'bhtom_alerts.brokers.alerce.ALeRCEBroker',
-    'bhtom_alerts.brokers.lasair.LasairBroker',
-    'bhtom_alerts.brokers.mars.MARSBroker',
-    'bhtom_alerts.brokers.scimma.SCIMMABroker',
-    'bhtom_alerts.brokers.scout.ScoutBroker',
-    'bhtom_alerts.brokers.tns.TNSBroker',
-    'bhtom_alerts.brokers.fink.FinkBroker',
+    'bhtom_base.bhtom_alerts.brokers.alerce.ALeRCEBroker',
+    'bhtom_base.bhtom_alerts.brokers.lasair.LasairBroker',
+    'bhtom_base.bhtom_alerts.brokers.mars.MARSBroker',
+    'bhtom_base.bhtom_alerts.brokers.scimma.SCIMMABroker',
+    'bhtom_base.bhtom_alerts.brokers.scout.ScoutBroker',
+    'bhtom_base.bhtom_alerts.brokers.tns.TNSBroker',
+    'bhtom_base.bhtom_alerts.brokers.fink.FinkBroker',
     'bhtom2.brokers.gaia_alerts.GaiaAlertsBroker',
     'bhtom2.brokers.aavso.AAVSOBroker',
     'bhtom2.brokers.ztf.ZTFBroker',
@@ -311,9 +311,9 @@ TOM_HARVESTER_CLASSES = [
     'bhtom2.harvesters.gaia_alerts.GaiaAlertsHarvester',
     'bhtom2.harvesters.tns.TNSHarvester',
     'bhtom2.harvesters.antares.ANTARESHarvester',
-    'bhtom_catalogs.harvesters.simbad.SimbadHarvester',
-    'bhtom_catalogs.harvesters.ned.NEDHarvester',
-    'bhtom_catalogs.harvesters.jplhorizons.JPLHorizonsHarvester',
+    'bhtom_base.bhtom_catalogs.harvesters.simbad.SimbadHarvester',
+    'bhtom_base.bhtom_catalogs.harvesters.ned.NEDHarvester',
+    'bhtom_base.bhtom_catalogs.harvesters.jplhorizons.JPLHorizonsHarvester',
 ]
 
 HARVESTERS = {
@@ -367,10 +367,10 @@ OPEN_URLS = []
 
 HOOKS = {
     'target_post_save': 'bhtom2.hooks.target_post_save',
-    'observation_change_state': 'bhtom_common.hooks.observation_change_state',
-    'data_product_post_upload': 'bhtom_dataproducts.hooks.data_product_post_upload',
-    'data_product_post_save': 'bhtom_dataproducts.hooks.data_product_post_save',
-    'multiple_data_products_post_save': 'bhtom_dataproducts.hooks.multiple_data_products_post_save',
+    'observation_change_state': 'bhtom_base.bhtom_common.hooks.observation_change_state',
+    'data_product_post_upload': 'bhtom_base.bhtom_dataproducts.hooks.data_product_post_upload',
+    'data_product_post_save': 'bhtom_base.bhtom_dataproducts.hooks.data_product_post_save',
+    'multiple_data_products_post_save': 'bhtom_base.bhtom_dataproducts.hooks.multiple_data_products_post_save',
 }
 
 AUTO_THUMBNAILS = False

@@ -14,13 +14,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
-from bhtom_targets.views import TargetDetailView
+
+from bhtom_base.bhtom_targets.views import TargetDetailView
 
 from bhtom2.views import BrokerQueryListView
 
 urlpatterns = [
-    path('', include('bhtom_registration.registration_flows.approval_required.urls', namespace='registration')),
+    path('', include('bhtom_custom_registration.bhtom_registration.registration_flows.approval_required.urls', namespace='registration')),
     path('alerts/query/list/', BrokerQueryListView.as_view(template_name='bhtom_alerts/brokerquery_list.html'), name='alerts:list'),
     path('targets/<int:pk>/', TargetDetailView.as_view(template_name='bhtom_targets/target_detail.html'), name='detail'),
-    path('', include('bhtom_common.urls')),
+    path('', include('bhtom_base.bhtom_common.urls')),
 ]

@@ -7,7 +7,7 @@ from astroquery.simbad import Simbad
 
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
 from bhtom2.utils.bhtom_logger import BHTOMLogger
-from bhtom_targets.models import Target
+from bhtom_base.bhtom_targets.models import Target
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Catalog name lookup]')
 alerce: Alerce = Alerce()
