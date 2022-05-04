@@ -8,6 +8,10 @@ on:
 
 jobs:
   build:
+  
+    defaults:
+      run:
+        working-directory: ./bhtom2
 
     runs-on: ubuntu-latest
     strategy:
