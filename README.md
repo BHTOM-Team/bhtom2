@@ -42,17 +42,10 @@ To run the tests provide your local database data in the ``.bhtom.env`` file.
 
 Run the test using the following commands (in the main folder):
 
-The bhtom2 part:
-
 ```bash
 python manage.py test
 ```
-
-The forked bhtom_base (this might take a while, there are over 300 tests):
-
-```bash
-python manage.py test bhtom_base
-```
+This can take a while!
 
 # Troubleshooting
 
