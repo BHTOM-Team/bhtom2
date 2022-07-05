@@ -118,7 +118,7 @@ DATABASES = {
         'USER': secret.get("POSTGRES_DB_USER", 'bhtom'),
         'PASSWORD': secret.get("POSTGRES_PASSWORD", ""),
         'HOST': secret.get('POSTGRES_HOST', '0.0.0.0'),
-        'PORT': secret.get('POSTGRES_PORT', 8000),
+        'PORT': secret.get('POSTGRES_PORT', 35432),
         'TEST': {
             'NAME': secret.get("POSTGRES_TEST_DB_NAME", 'test_bhtom2')
         }
