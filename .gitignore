@@ -1,4 +1,5 @@
 .idea/
 
-./bhtom2/.bhtom.env
+bhtom2/.bhtom.env
+Docker/.bhtom.env
 .env
