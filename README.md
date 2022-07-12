@@ -36,6 +36,8 @@ Environment settings are defined in Docker/.bhtom.env file.
 This file is copied to bhtom2 directory in the Docker container and used the same way as on the local machine.
 (It overwrites the local .bhtom.env, so no need to change that when changing something to the architecture.)
 
+Refer to the template.env file for variable names.
+
 # Testing
 
 To run the tests provide your local database data in the ``.bhtom.env`` file.
