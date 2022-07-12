@@ -40,6 +40,9 @@ while ! python3 manage.py migrate  2>&1; do
    sleep 3
 done
 
+echo "Add admin if not yet created..."
+python3 manage.py add_admin
+
 echo "Django docker is fully configured."
 
 echo "Running server..."
