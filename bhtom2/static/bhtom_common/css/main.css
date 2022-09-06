@@ -37,6 +37,6 @@ a {
     color: #f7586f;
 }
 
-h1, h2, h3, h4, h5, h6, p, li, label {
+h1, h2, h3, h4, h5, h6, p, li, label, dt, dd, th, td {
     color: #d7d6d6;
 }
