@@ -34,7 +34,7 @@ done
 
 echo "Migrating..."
 
-# Wait for few minute and run db migraiton
+# Wait for few minute and run db migration
 while ! python3 manage.py migrate  2>&1; do
    echo "Migration is in progress..."
    sleep 3
