@@ -10,4 +10,4 @@ logger: BHTOMLogger = BHTOMLogger(__name__, '[Signals]')
 
 @receiver(pre_save, sender=Target)
 def target_pre_save(sender, instance, *args, **kwargs):
-    fill_galactic_coordinates(instance)
+    pass
