@@ -19,7 +19,7 @@ database changes.
    ```pip install -r requirements.txt```
 3. Create a local .env file
 
-   ```cp template.env bhtom/.bhtom.env```
+   ```cp template.env bhtom2/.bhtom.env```
    
    and fill the values in.
 4. Create a local DB (or an exposed Docker one, this is up to you)
