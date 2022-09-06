@@ -22,3 +22,21 @@ body {
 #login-buttons > li {
   margin: 0 2px 0 2px;
 }
+
+.btn-primary {
+    background-color: #f7586f;
+    border-color: #f7586f;
+}
+
+.btn-outline-primary {
+    color: #f7586f;
+    border-color: #f7586f;
+}
+
+a {
+    color: #f7586f;
+}
+
+h1, h2, h3, h4, h5, h6, p, li, label {
+    color: #d7d6d6;
+}

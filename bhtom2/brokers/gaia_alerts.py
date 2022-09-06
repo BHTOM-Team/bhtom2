@@ -66,11 +66,11 @@ class GaiaQueryForm(GenericQueryForm):
 
 
 class GaiaAlertsBroker(BHTOMBroker):
-    name = DataSource.Gaia.name
+    name = DataSource.GAIA.name
     form = GaiaQueryForm
 
     def __init__(self):
-        super().__init__(DataSource.Gaia)
+        super().__init__(DataSource.GAIA)
 
         try:
             self.__base_url: str = settings.GAIA_ALERTS_PATH
@@ -78,7 +78,7 @@ class GaiaAlertsBroker(BHTOMBroker):
             self.logger.error(f'No GAIA_ALERTS_PATH in settings found!')
             self.__base_url = 'http://gsaweb.ast.cam.ac.uk'
 
-        self.__GAIA_FILTER_NAME: str = FILTERS[DataSource.Gaia][0]
+        self.__GAIA_FILTER_NAME: str = FILTERS[DataSource.GAIA][0]
         self.__filter: str = filter_name(self.__GAIA_FILTER_NAME, self.data_source.name)
         self.__FACILITY_NAME: str = "Gaia"
         self.__OBSERVER_NAME: str = "Gaia"

@@ -14,7 +14,7 @@ from bhtom2.external_service.data_source_information import DataSource, TARGET_N
 from bhtom2.external_service.external_service_request import query_external_service
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
-ALERT_SOURCE: DataSource = DataSource.Gaia
+ALERT_SOURCE: DataSource = DataSource.GAIA
 GAIA_ALERTS_CACHE_PATH: str = os.path.join(settings.BASE_DIR, "bhtom2/cache/gaia_alerts.csv")
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Gaia Alerts Harvester]')
@@ -81,7 +81,7 @@ def get(term: str):
     # #Name, RaDeg, DecDeg, ...
     # so the spaces are mandatory in column names if not preprocessed before
     catalog_data: Dict[str, Any] = {
-        TARGET_NAME_KEYS[DataSource.Gaia]: term_data["#Name"],
+        TARGET_NAME_KEYS[DataSource.GAIA]: term_data["#Name"],
         "ra": Decimal(term_data[" RaDeg"]),
         "dec": Decimal(term_data[" DecDeg"]),
         "disc": term_data[" Date"],
@@ -103,7 +103,7 @@ class GaiaAlertsHarvester(AbstractHarvester):
         # catalog_data contains now all fields needed to create a target
         target = super().to_target()
 
-        gaia_name: str = self.catalog_data[TARGET_NAME_KEYS[DataSource.Gaia]]
+        gaia_name: str = self.catalog_data[TARGET_NAME_KEYS[DataSource.GAIA]]
         ra: str = self.catalog_data["ra"]
         dec: str = self.catalog_data["dec"]
         disc: str = self.catalog_data["disc"]

@@ -333,24 +333,20 @@ HARVESTERS = {
 #     {'name': 'dicovery_date', 'type': 'datetime'}
 # ]
 EXTRA_FIELDS = [
-    {'name': TARGET_NAME_KEYS[DataSource.Gaia], 'type': 'string'},
-    {'name': TARGET_NAME_KEYS[DataSource.CPCS], 'type': 'string'},
-    {'name': TARGET_NAME_KEYS[DataSource.ZTF], 'type': 'string'},
-    {'name': TARGET_NAME_KEYS[DataSource.AAVSO], 'type': 'string'},
-    {'name': TARGET_NAME_KEYS[DataSource.GAIA_DR2], 'type': 'string'},
-    {'name': TARGET_NAME_KEYS[DataSource.ZTF_DR8], 'type': 'string'},
-    {'name': TARGET_NAME_KEYS[DataSource.TNS], 'type': 'string'},
-    {'name': TARGET_NAME_KEYS[DataSource.ANTARES], 'type': 'string'},
-    {'name': 'E(V-I)', 'type': 'number'},
     {'name': 'classification', 'type': 'string'},
-    {'name': 'tweet', 'type': 'boolean'},
-    {'name': 'last_jd', 'type': 'number'},
-    {'name': 'last_mag', 'type': 'number'},
     {'name': 'priority', 'type': 'number'},
-    {'name': 'dicovery_date', 'type': 'datetime'},
+    {'name': 'discovery_date', 'type': 'datetime'},
     {'name': 'cadence', 'type': 'number'},
     {'name': 'sun_separation', 'type': 'number'},
     {'name': 'dont_update_me', 'type': 'boolean', 'hidden': True}]
+
+
+def generate_name_tuple(data_source: DataSource) -> tuple:
+    return data_source.name, f'{data_source.name} name'
+
+
+SOURCE_CHOICES = [generate_name_tuple(ds) for ds in DataSource]
+
 
 # Authentication strategy can either be LOCKED (required login for all views)
 # or READ_ONLY (read only access to views)
