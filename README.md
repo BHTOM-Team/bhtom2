@@ -8,14 +8,19 @@ Development is done best on the local environment. This way you can generate new
 database changes.
 
 1. (Recommended) Create a conda environment
-   ```conda create -n bhtom2```
-   ```conda activate bhtom2```
+   1. ```conda create -n bhtom2```
+   2. ```conda activate bhtom2```
 2. Install the requirements:
+
    ```conda install -c conda-forge --file requirements.txt```
+   
    Use pip to install additional packages (only after using conda install, refer to https://www.anaconda.com/blog/using-pip-in-a-conda-environment for caveats)
+   
    ```pip install -r requirements.txt```
 3. Create a local .env file
+
    ```cp template.env bhtom/.bhtom.env```
+   
    and fill the values in.
 4. Create a local DB (or an exposed Docker one, this is up to you)
    1. You can run the Docker/init.sql script on your local database. In case of any required changes, create a local copy of the script.
