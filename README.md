@@ -58,6 +58,10 @@ This can take a while!
 
 # Troubleshooting
 
+- Make sure to clone subrepositories as well:
+
+```git submodule update --init --recursive```
+
 - Make sure that the ``bhtom`` user has the permission to create the test database. You might need to alter user in your local DB:
 
 ``ALTER USER bhtom CREATEDB;``
