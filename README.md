@@ -25,7 +25,7 @@ database changes.
 4. Create a local DB (or an exposed Docker one, this is up to you)
    1. You can run the Docker/init.sql script on your local database. In case of any required changes, create a local copy of the script.
    2. Remember to fill the necessary values in the .bhtom.env file.
-5. Create the migrations. **Migrations are being commited to Github in order to ensure integration between all databases.** (Do watch out)
+5. (ONLY AFTER CHANGES) Create the migrations. **Migrations are being commited to Github in order to ensure integration between all databases.** (Do watch out)
    1. ```python manage.py makemigrations```
    2. ```python manage.py makemigrations bhtom2```
 6. After creating the migrations run the dev_entrypoint.sh script.
