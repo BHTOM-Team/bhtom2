@@ -41,7 +41,7 @@ def create_sample_target() -> Target:
         epoch=2000,
     )
 
-    target.save(extras={TARGET_NAME_KEYS[DataSource.Gaia]: "Gaia21edy"})
+    target.save(extras={TARGET_NAME_KEYS[DataSource.GAIA]: "Gaia21edy"})
 
     return target
 
@@ -55,7 +55,7 @@ def create_second_sample_target() -> Target:
         epoch=2000,
     )
 
-    target.save(extras={TARGET_NAME_KEYS[DataSource.Gaia]: "Gaia21een"})
+    target.save(extras={TARGET_NAME_KEYS[DataSource.GAIA]: "Gaia21een"})
 
     return target
 
