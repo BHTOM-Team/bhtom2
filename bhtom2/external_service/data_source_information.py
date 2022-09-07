@@ -28,7 +28,7 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
 }
 
 
-def get_pretty_survey_name(source_name: DataSource | str) -> str:
+def get_pretty_survey_name(source_name: DataSource) -> str:
     return PRETTY_SURVEY_NAME.get(source_name, str(source_name))
 
 
