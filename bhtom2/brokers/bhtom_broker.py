@@ -10,6 +10,8 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_alerts.alerts import GenericBroker
 from bhtom_base.bhtom_targets.models import Target
 
+import astropy.units as u
+
 LightcurveUpdateReport = namedtuple('LightcurveUpdateReport', ['new_points'])
 
 
@@ -27,6 +29,12 @@ class BHTOMBroker(GenericBroker):
         self.__last_jd: Optional[np.float64] = None
         self.__last_mag: Optional[np.float64] = None
         self.__target_name_key: str = self.__data_source.name
+
+        # How often should the catalog be checked- as an astropy quantity. Default is 1 day
+        self.__update_cadence: u.Quantity = 1*u.d
+
+        # Max separation for the cross-match to classify measurements as one object
+        self.__cross_match_separation: u.Quantity = 5*u.arcsec
 
     def filter_name(self, filter: str) -> str:
         return filter_name(filter, get_pretty_survey_name(self.__data_source.name))
