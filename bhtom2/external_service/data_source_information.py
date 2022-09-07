@@ -14,6 +14,24 @@ class DataSource(Enum):
     ZTF_DR8 = auto()
 
 
+PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
+    DataSource.GAIA: "Gaia",
+    "GAIA": "Gaia",
+    DataSource.ZTF: "ZTF",
+    DataSource.CPCS: "CPCS",
+    DataSource.AAVSO: "AAVSO",
+    DataSource.TNS: "TNS",
+    DataSource.ASASSN: "ASAS-SN",
+    DataSource.ANTARES: "ANTARES",
+    DataSource.GAIA_DR2: "Gaia DR2",
+    DataSource.ZTF_DR8: "ZTF DR8"
+}
+
+
+def get_pretty_survey_name(source_name: DataSource | str) -> str:
+    return PRETTY_SURVEY_NAME.get(source_name, str(source_name))
+
+
 TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.GAIA: "Gaia name",
     DataSource.ZTF: "ZTF name",
