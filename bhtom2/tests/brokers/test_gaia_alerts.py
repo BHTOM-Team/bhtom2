@@ -4,10 +4,10 @@ from unittest.mock import patch
 
 from django.test import TestCase
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
-from bhtom_base.bhtom_targets.models import Target
+from bhtom_base.bhtom_targets.models import Target, TargetName
 
 from bhtom2.brokers.bhtom_broker import LightcurveUpdateReport
-from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
+from bhtom2.external_service.data_source_information import DataSource
 from bhtom2.brokers.gaia_alerts import GaiaAlertsBroker
 
 sample_file_two_lines = """
@@ -41,7 +41,8 @@ def create_sample_target() -> Target:
         epoch=2000,
     )
 
-    target.save(extras={TARGET_NAME_KEYS[DataSource.GAIA]: "Gaia21edy"})
+    target.save()
+    TargetName.objects.create(target=target, source_name=DataSource.GAIA.name, name='Gaia21edy')
 
     return target
 
@@ -55,7 +56,7 @@ def create_second_sample_target() -> Target:
         epoch=2000,
     )
 
-    target.save(extras={TARGET_NAME_KEYS[DataSource.GAIA]: "Gaia21een"})
+    target.save(names={DataSource.GAIA.name: "Gaia21een"})
 
     return target
 
@@ -84,8 +85,6 @@ class GaiaLightcurveUpdateTestCase(TestCase):
 
         self.assertEqual(len(rd), 0)
         self.assertEqual(report.new_points, 0)
-        self.assertEqual(report.last_jd, None)
-        self.assertEqual(report.last_mag, None)
 
     @patch('bhtom2.brokers.gaia_alerts.query_external_service',
            return_value=sample_lightcurve_three_correct_lines)
@@ -111,5 +110,3 @@ class GaiaLightcurveUpdateTestCase(TestCase):
         self.assertAlmostEqual(rd[0].mjd, 56961.06970, 3)
 
         self.assertEqual(report.new_points, 1)
-        self.assertEqual(report.last_jd, 2456961.56970)
-        self.assertEqual(report.last_mag, 18.91)

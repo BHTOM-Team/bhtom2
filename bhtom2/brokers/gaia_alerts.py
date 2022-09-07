@@ -11,16 +11,15 @@ from dateutil.parser import parse
 from django import forms
 from django.db import transaction
 
-from bhtom_base.bhtom_alerts.alerts import GenericAlert
-from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
-from bhtom_base.bhtom_dataproducts.models import ReducedDatum
-
 from bhtom2 import settings
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
-from bhtom2.external_service.data_source_information import DataSource, FILTERS
+from bhtom2.external_service.data_source_information import DataSource, FILTERS, get_pretty_survey_name
 from bhtom2.external_service.external_service_request import query_external_service
 from bhtom2.external_service.filter_name import filter_name
+from bhtom_base.bhtom_alerts.alerts import GenericAlert
+from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
 from bhtom_base.bhtom_dataproducts.models import DatumValue
+from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 
 
 def g_gaia_error(mag: float) -> float:
@@ -79,7 +78,7 @@ class GaiaAlertsBroker(BHTOMBroker):
             self.__base_url = 'http://gsaweb.ast.cam.ac.uk'
 
         self.__GAIA_FILTER_NAME: str = FILTERS[DataSource.GAIA][0]
-        self.__filter: str = filter_name(self.__GAIA_FILTER_NAME, self.data_source.name)
+        self.__filter: str = filter_name(self.__GAIA_FILTER_NAME, get_pretty_survey_name(self.data_source.name))
         self.__FACILITY_NAME: str = "Gaia"
         self.__OBSERVER_NAME: str = "Gaia"
 
@@ -176,7 +175,6 @@ class GaiaAlertsBroker(BHTOMBroker):
 
         response: str = query_external_service(lc_url, 'Gaia alerts')
         html_data: List[str] = response.split('\n')
-        new_points: int = 0
 
         data: List[Tuple[datetime, DatumValue]] = []
 
@@ -205,19 +203,22 @@ class GaiaAlertsBroker(BHTOMBroker):
                                 filter=self.__filter,
                                 mjd=jd.mjd)))
 
-                        self.update_last_jd_and_mag(jd.value, mag)
                 except Exception as e:
                     self.logger.error(f'Error while processing reduced datapoint for {target.name}: {e}')
                     continue
 
         try:
             data = list(set(data))
-            reduced_datums = [ReducedDatum(target=target, data_type='photometry',
-                                           timestamp=datum[0], mjd=datum[1].mjd, value=datum[1].value,
+            reduced_datums = [ReducedDatum(target=target,
+                                           data_type='photometry',
+                                           timestamp=datum[0],
+                                           mjd=datum[1].mjd,
+                                           value=datum[1].value,
                                            source_name=self.name,
                                            source_location=alert_url,
                                            error=datum[1].error,
-                                           filter=datum[1].filter, observer=self.__OBSERVER_NAME,
+                                           filter=datum[1].filter,
+                                           observer=self.__OBSERVER_NAME,
                                            facility=self.__FACILITY_NAME) for datum in data]
             with transaction.atomic():
                 new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))
@@ -225,6 +226,4 @@ class GaiaAlertsBroker(BHTOMBroker):
             self.logger.error(f'Error while saving reduced datapoints for {target.name}: {e}')
             return return_for_no_new_points()
 
-        return LightcurveUpdateReport(new_points=new_points,
-                                      last_jd=self.last_jd,
-                                      last_mag=self.last_mag)
+        return LightcurveUpdateReport(new_points=new_points)
