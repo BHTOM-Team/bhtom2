@@ -31,7 +31,8 @@ class BHTOMBroker(GenericBroker):
         self.__target_name_key: str = self.__data_source.name
 
         # How often should the catalog be checked- as an astropy quantity. Default is 1 day
-        self.__update_cadence: u.Quantity = 1*u.d
+        # Leave none if constant data release (e.g. should be fetched only once)
+        self.__update_cadence: Optional[u.Quantity] = 1*u.d
 
         # Max separation for the cross-match to classify measurements as one object
         self.__cross_match_max_separation: u.Quantity = 5*u.arcsec
@@ -60,7 +61,7 @@ class BHTOMBroker(GenericBroker):
         return self.__target_name_key
 
     @property
-    def update_cadence(self) -> u.Quantity:
+    def update_cadence(self) -> Optional[u.Quantity]:
         return self.__update_cadence
 
     @property

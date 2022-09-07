@@ -3,9 +3,10 @@ from typing import Optional, List, Tuple
 
 from django import forms
 from django.db import transaction
+import astropy.units as u
 
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
-from bhtom2.external_service.data_source_information import DataSource
+from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
 from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
 from bhtom_base.bhtom_dataproducts.models import DatumValue
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
@@ -31,6 +32,18 @@ class NewBroker(BHTOMBroker):
         self.__FACILITY_NAME: str = ""
         self.__OBSERVER_NAME: str = ""
 
+        self.__target_name_key: str = TARGET_NAME_KEYS.get(self.__data_source, self.__data_source.name)
+
+        # If the data should be checked from time to time (for alerts), assing the self.__update_cadence
+        # If the data should be fetched just once, leave None
+        # Remember to pass it in astropy.unit format, e.g. 6*u.h for 6 hours
+        self.__update_cadence = None
+
+        # If you are going to perform searches by coordinates, you might want to change the max_separation
+        # Remember to pass it in astropy.unit format as well
+        # Here: 5 arcseconds
+        self.__cross_match_max_separation = 5*u.arcsec
+
     def fetch_alerts(self, parameters):
         pass
 
@@ -41,8 +54,6 @@ class NewBroker(BHTOMBroker):
         pass
 
     def process_reduced_data(self, target, alert=None) -> Optional[LightcurveUpdateReport]:
-
-
         # There are two options of querying: either by name or coordinates. This depends on the survey.
         # For the coordinates, a BHTOMBroker value is introduced: self.cross_match_separation
         survey_name: Optional[str] = self.get_target_name(target)

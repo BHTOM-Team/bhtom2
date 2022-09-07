@@ -12,6 +12,7 @@ class DataSource(Enum):
     ANTARES = auto()
     GAIA_DR2 = auto()
     ZTF_DR8 = auto()
+    GAIA_DR3 = auto()
 
 
 PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
@@ -24,7 +25,8 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.ASASSN: "ASAS-SN",
     DataSource.ANTARES: "ANTARES",
     DataSource.GAIA_DR2: "Gaia DR2",
-    DataSource.ZTF_DR8: "ZTF DR8"
+    DataSource.ZTF_DR8: "ZTF DR8",
+    DataSource.GAIA_DR3: "Gaia DR3"
 }
 
 
@@ -41,7 +43,8 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.ASASSN: "ASASSN name",
     DataSource.ANTARES: "ANTARES name",
     DataSource.GAIA_DR2: "Gaia DR2 id",
-    DataSource.ZTF_DR8: "ZTF DR8 id"
+    DataSource.ZTF_DR8: "ZTF DR8 id",
+    DataSource.GAIA_DR3: "Gaia DR3 id"
 }
 
 
@@ -50,7 +53,8 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.ZTF: ["g", "i", "r"],
     DataSource.AAVSO: ["V", "I", "R"],
     DataSource.ANTARES: ["R", "g"],
-    DataSource.ZTF_DR8: ["g", "i", "r"]
+    DataSource.ZTF_DR8: ["g", "i", "r"],
+    DataSource.GAIA_DR3: ["RP", "G", "BP"]
 }
 
 
