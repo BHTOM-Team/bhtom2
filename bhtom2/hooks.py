@@ -6,6 +6,7 @@ from bhtom2.utils.coordinate_utils import fill_galactic_coordinates
 from bhtom2.utils.extinction import ogle_extinction
 from bhtom_base.bhtom_targets.models import TargetExtra
 
+
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Hooks]')
 
 

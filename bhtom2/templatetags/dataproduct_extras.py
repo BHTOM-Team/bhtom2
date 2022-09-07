@@ -1,22 +1,23 @@
+from datetime import datetime
 from urllib.parse import urlencode
 
+import plotly.graph_objs as go
 from django import template
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.paginator import Paginator
 from django.shortcuts import reverse
-from datetime import datetime
 from guardian.shortcuts import get_objects_for_user
 from plotly import offline
-import plotly.graph_objs as go
 
 from bhtom_base.bhtom_dataproducts.forms import DataProductUploadForm
-from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum
+from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, ReducedDatumUnit
 from bhtom_base.bhtom_dataproducts.processors.data_serializers import SpectrumSerializer
 from bhtom_base.bhtom_observations.models import ObservationRecord
 from bhtom_base.bhtom_targets.models import Target
 
 register = template.Library()
+
 
 @register.inclusion_tag('bhtom_dataproducts/partials/recent_photometry.html')
 def recent_photometry(target, limit=1):
@@ -24,8 +25,9 @@ def recent_photometry(target, limit=1):
     Displays a table of the most recent photometric points for a target.
     """
     photometry = ReducedDatum.objects.filter(data_type='photometry', target=target).order_by('-timestamp')[:limit]
-    return {'data': [{'timestamp': rd.timestamp, 'magnitude': rd.value.get('magnitude')} for rd in photometry
-                     if rd.value.get('magnitude')]}
+    return {'data': [{'timestamp': rd.timestamp,
+                      'magnitude': rd.value} for rd in photometry
+                     if rd.value_unit == ReducedDatumUnit.MAGNITUDE]}
 
 
 @register.inclusion_tag('bhtom_dataproducts/partials/dataproduct_list_for_target.html', takes_context=True)
@@ -134,20 +136,24 @@ def photometry_for_target(context, target, width=700, height=600, background=Non
 
     photometry_data = {}
     if settings.TARGET_PERMISSIONS_ONLY:
-        datums = ReducedDatum.objects.filter(target=target, data_type=settings.DATA_PRODUCT_TYPES['photometry'][0])
+        datums = ReducedDatum.objects.filter(target=target,
+                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0])
     else:
         datums = get_objects_for_user(context['request'].user,
                                       'bhtom_dataproducts.view_reduceddatum',
                                       klass=ReducedDatum.objects.filter(
-                                        target=target,
-                                        data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]))
+                                          target=target,
+                                          data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
+                                          value_unit=ReducedDatumUnit.MAGNITUDE))
 
     for datum in datums:
-        photometry_data.setdefault(datum.value['filter'], {})
-        photometry_data[datum.value['filter']].setdefault('time', []).append(datum.timestamp)
-        photometry_data[datum.value['filter']].setdefault('magnitude', []).append(datum.value.get('magnitude'))
-        photometry_data[datum.value['filter']].setdefault('error', []).append(datum.value.get('error'))
-        photometry_data[datum.value['filter']].setdefault('limit', []).append(datum.value.get('limit'))
+        photometry_data.setdefault(datum.filter, {})
+        photometry_data[datum.filter].setdefault('time', []).append(datum.timestamp)
+        photometry_data[datum.filter].setdefault('magnitude', []).append(datum.value)
+        photometry_data[datum.filter].setdefault('error', []).append(datum.error)
+
+        # TODO: handle limits
+        # photometry_data[datum.filter].setdefault('limit', []).append(datum.value.get('limit'))
 
     plot_data = []
     for filter_name, filter_values in photometry_data.items():
@@ -165,17 +171,17 @@ def photometry_for_target(context, target, width=700, height=600, background=Non
                 )
             )
             plot_data.append(series)
-        if filter_values['limit']:
-            series = go.Scatter(
-                x=filter_values['time'],
-                y=filter_values['limit'],
-                mode='markers',
-                opacity=0.5,
-                marker=dict(color=color_map.get(filter_name)),
-                marker_symbol=6,  # upside down triangle
-                name=filter_name + ' non-detection',
-            )
-            plot_data.append(series)
+        # if filter_values['limit']:
+        #     series = go.Scatter(
+        #         x=filter_values['time'],
+        #         y=filter_values['limit'],
+        #         mode='markers',
+        #         opacity=0.5,
+        #         marker=dict(color=color_map.get(filter_name)),
+        #         marker_symbol=6,  # upside down triangle
+        #         name=filter_name + ' non-detection',
+        #     )
+        #     plot_data.append(series)
 
     layout = go.Layout(
         yaxis=dict(autorange='reversed'),

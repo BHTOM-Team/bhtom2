@@ -220,7 +220,7 @@ LOGGING = {
     'loggers': {
         '': {
             'handlers': ['graypy', 'console'],
-            'level': 'INFO'
+            'level': 'DEBUG'
         }
     },
 }
@@ -364,6 +364,7 @@ OPEN_URLS = []
 
 HOOKS = {
     'target_post_save': 'bhtom2.hooks.target_post_save',
+    'reduced_datum_pre_save': 'bhtom_base.bhtom_dataproducts.hooks.reduced_datum_pre_save',
     'observation_change_state': 'bhtom_base.bhtom_common.hooks.observation_change_state',
     'data_product_post_upload': 'bhtom_base.bhtom_dataproducts.hooks.data_product_post_upload',
     'data_product_post_save': 'bhtom_base.bhtom_dataproducts.hooks.data_product_post_save',
