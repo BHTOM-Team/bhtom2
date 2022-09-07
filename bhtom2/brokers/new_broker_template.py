@@ -42,6 +42,9 @@ class NewBroker(BHTOMBroker):
 
     def process_reduced_data(self, target, alert=None) -> Optional[LightcurveUpdateReport]:
 
+
+        # There are two options of querying: either by name or coordinates. This depends on the survey.
+        # For the coordinates, a BHTOMBroker value is introduced: self.cross_match_separation
         survey_name: Optional[str] = self.get_target_name(target)
 
         if not survey_name:

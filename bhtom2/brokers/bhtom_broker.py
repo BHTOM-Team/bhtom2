@@ -34,7 +34,7 @@ class BHTOMBroker(GenericBroker):
         self.__update_cadence: u.Quantity = 1*u.d
 
         # Max separation for the cross-match to classify measurements as one object
-        self.__cross_match_separation: u.Quantity = 5*u.arcsec
+        self.__cross_match_max_separation: u.Quantity = 5*u.arcsec
 
     def filter_name(self, filter: str) -> str:
         return filter_name(filter, get_pretty_survey_name(self.__data_source.name))
@@ -58,6 +58,14 @@ class BHTOMBroker(GenericBroker):
     @property
     def target_name_key(self) -> str:
         return self.__target_name_key
+
+    @property
+    def update_cadence(self) -> u.Quantity:
+        return self.__update_cadence
+
+    @property
+    def cross_match_max_separation(self) -> u.Quantity:
+        return self.__cross_match_max_separation
 
     @lru_cache(maxsize=32)
     def get_target_name(self, target: Target) -> Optional[str]:
