@@ -38,6 +38,12 @@ database changes.
 docker
 docker-compose>1.25.0
 
+1. Create a local .env file
+
+   ```cp template.env bhtom2/.bhtom.env```
+   
+   and fill the values in.
+
 ## Command
 
 In the Docker directory:
