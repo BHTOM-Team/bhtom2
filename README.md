@@ -4,6 +4,8 @@
 
 # Local development (no docker)
 
+**Prerequisite**: make sure to have the neweest PostgreSQL (14) installed
+
 Development is done best on the local environment. This way you can generate new migrations in case of
 database changes.
 
