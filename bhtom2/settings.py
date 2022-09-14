@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'rest_framework',
     'django_filters',
+    'django_tables2',
     'django_gravatar',
     'bhtom_base.bhtom_targets.apps.TomTargetsConfig',
     'bhtom_base.bhtom_alerts.apps.TomAlertsConfig',

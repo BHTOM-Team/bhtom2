@@ -1,7 +1,7 @@
 {% load static bootstrap4 bhtom_common_extras %}
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,6 +9,7 @@
     <!-- Bootstrap CSS -->
     {% bootstrap_css %}
     <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
+    <link rel="stylesheet" href="//cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
     {% block additional_css %}
     {% endblock %}
     <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}"/>
@@ -16,17 +17,18 @@
     {% bootstrap_javascript jquery='True' %}
 
     <title>BHTOM | {% block title %}{% endblock %}</title>
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-      <a class="navbar-brand" href="/"><img src="{% static 'logo.png' %}" class="img-fluid"> BHTOM</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+</head>
+<body>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="/"><img src="{% static 'logo.png' %}" class="img-fluid"> BHTOM</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
-      </button>
+    </button>
 
-      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
-          {% comment "Navbar Content Template" %}
+            {% comment "Navbar Content Template" %}
           The navbar_content.html template defines the list (li) of nav-items that appear
           in the navbar-nav (ul).
 
@@ -40,27 +42,27 @@
           see the Django tutorial, "Writing your first Django app",
           Part 7, Section "Customize the admin look and feel"
           {% endcomment %}
-          {% include 'bhtom_common/navbar_content.html' %}
+            {% include 'bhtom_common/navbar_content.html' %}
 
         </ul>
         <ul class="navbar-nav ml-auto" id="login-buttons">
-        {% navbar_login %}
+            {% navbar_login %}
         </ul>
-      </div>
-    </nav>
+    </div>
+</nav>
 
-    <main role="main" class="container">
-      {% bootstrap_messages %}
-      <div class="content">
+<main role="main" class="container">
+    {% bootstrap_messages %}
+    <div class="content">
         {% block content %}
         {% endblock %}
-      </div>
+    </div>
 
-    </main>
+</main>
 
-  {% block javascript %}
-  {% endblock %}
-  {% block extra_javascript %}
-  {% endblock %}
-  </body>
+{% block javascript %}
+{% endblock %}
+{% block extra_javascript %}
+{% endblock %}
+</body>
 </html>
