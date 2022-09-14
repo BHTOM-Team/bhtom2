@@ -42,8 +42,7 @@ class GaiaQueryForm(GenericQueryForm):
 
 
 class GaiaBroker(BHTOMBroker):
-    name = DataSource.GAIA_DR3
-
+    name = DataSource.GAIA_DR3.name
     form = GaiaQueryForm
 
     def __init__(self):
@@ -53,7 +52,7 @@ class GaiaBroker(BHTOMBroker):
         self.__FACILITY_NAME: str = "Gaia"
         self.__OBSERVER_NAME: str = "Gaia"
 
-        self.__target_name_key: str = TARGET_NAME_KEYS[self.__data_source]
+        self.__target_name_key: str = TARGET_NAME_KEYS[self.data_source]
 
         self.__update_cadence = None
         self.__cross_match_max_separation = 0.5 * u.arcsec
