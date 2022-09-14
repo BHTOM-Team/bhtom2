@@ -24,6 +24,14 @@ database changes.
    ```cp template.env bhtom2/.bhtom.env```
    
    and fill the values in.
+   Remember to input the values in ```"```.
+   
+   For local development, you will probably want to use localhost as the postgres and graylog host (although you can use a Dockerized/remote one if you wish!)
+   
+   ```
+   POSTGRES_HOST="localhost"
+   GRAYLOG_HOST="localhost"
+   ```
 4. Create a local DB (or an exposed Docker one, this is up to you)
    1. You can run the Docker/init.sql script on your local database. In case of any required changes, create a local copy of the script.
    2. Remember to fill the necessary values in the .bhtom.env file.
