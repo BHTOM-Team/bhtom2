@@ -17,7 +17,7 @@ from bhtom_base.bhtom_targets.models import TargetName
 
 
 def gaia_time_to_bjd(tcb_time: float) -> float:
-    return tcb_time + 2455197.5
+    return tcb_time + 55197
 
 
 def mag_error(flux_over_error: float) -> float:
@@ -63,7 +63,7 @@ class GaiaBroker(BHTOMBroker):
 
         self.logger.debug(f'Fetching DR3 lightcurve for target with DR3 source {source_id}')
 
-        datalink = Gaia.load_data(ids=[source_id],
+        datalink = Gaia.load_data(ids=[str(source_id)],
                                   data_release=data_release,
                                   retrieval_type='EPOCH_PHOTOMETRY',
                                   data_structure=data_structure,
@@ -127,7 +127,7 @@ class GaiaBroker(BHTOMBroker):
                                            source_name=self.name,
                                            source_location='Gaia TAP+',
                                            error=datum['mag_err'],
-                                           filter=self.filter_name(datum['filter']),
+                                           filter=self.filter_name(datum['band']),
                                            observer=self.__OBSERVER_NAME,
                                            facility=self.__FACILITY_NAME)
                               for _, datum in lightcurve.iterrows()]  # Inline loop
