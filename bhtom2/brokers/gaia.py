@@ -61,6 +61,8 @@ class GaiaBroker(BHTOMBroker):
         data_structure = 'INDIVIDUAL'  # Options are: 'INDIVIDUAL', 'COMBINED', 'RAW'
         data_release = 'Gaia DR3'  # Options are: 'Gaia DR3' (default), 'Gaia DR2'
 
+        self.logger.debug(f'Fetching DR3 lightcurve for target with DR3 source {source_id}')
+
         datalink = Gaia.load_data(ids=[source_id],
                                   data_release=data_release,
                                   retrieval_type='EPOCH_PHOTOMETRY',
@@ -87,6 +89,8 @@ class GaiaBroker(BHTOMBroker):
     def process_reduced_data(self, target, alert=None) -> Optional[LightcurveUpdateReport]:
         dr3_id: Optional[str] = self.get_target_name(target)
 
+        self.logger.debug(f'Searching for DR3 lightcurve for DR3 id {dr3_id} (target {target.name})...')
+
         if not dr3_id:
 
             coord = SkyCoord(ra=target.ra * u.degree,
@@ -104,8 +108,11 @@ class GaiaBroker(BHTOMBroker):
                 self.logger.error(f'Error when querying Gaia DR3 for {target.name}: {e}')
                 return return_for_no_new_points()
 
-        self.logger.debug(f'Downloading DR3 lightcurve for DR3 id {dr3_id} (target {target.name})...')
         lightcurve: pd.DataFrame = self.download_dr3_lightcurve(dr3_id)
+
+        if len(lightcurve) == 0:
+            self.logger.info(f'No lightcurves downloaded for Gaia DR3 for target {target.name}')
+            return return_for_no_new_points()
 
         lightcurve['time_bjd'] = gaia_time_to_bjd(lightcurve['time'])
         lightcurve['mag_err'] = mag_error(lightcurve['flux_over_error'])
