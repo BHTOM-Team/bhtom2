@@ -100,7 +100,8 @@ class GaiaBroker(BHTOMBroker):
             try:
                 result = Gaia.query_object_async(coordinate=coord,
                                                  width=self.cross_match_max_separation,
-                                                 height=self.cross_match_max_separation).to_pandas()["solution_id"]
+                                                 height=self.cross_match_max_separation).to_pandas().sort_values(
+                    by=['dist'])['source_id']
                 if len(result) > 0:
                     dr3_id = result[0]
                     TargetName.objects.create(target=target, source_name=DataSource.GAIA_DR3.name, name=dr3_id)
