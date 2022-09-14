@@ -38,7 +38,7 @@ database changes.
 5. (ONLY AFTER CHANGES) Create the migrations. **Migrations are being commited to Github in order to ensure integration between all databases.** (Do watch out)
    1. ```python manage.py makemigrations```
    2. ```python manage.py makemigrations bhtom2```
-6. After creating the migrations run the dev_entrypoint.sh script.
+6. After creating the migrations run the entrypoint.sh script.
 
 
 # Building Docker
