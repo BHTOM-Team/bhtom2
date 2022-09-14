@@ -4,7 +4,7 @@
 
 ! **Important** Make sure to clone subrepositories as well:
 
-```git submodule update --init --recursive```
+```git submodule foreach --recursive git reset --hard```
 
 ! **Important** Make sure to have at least Python 3.8 or newer
 
