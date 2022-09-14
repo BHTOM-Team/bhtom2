@@ -2,6 +2,10 @@
 
 # BHTom 2
 
+! **Important** Make sure to clone subrepositories as well:
+
+```git submodule update --init --recursive```
+
 # Local development (no docker)
 
 **Prerequisite**: make sure to have the neweest PostgreSQL (14) installed
@@ -13,24 +17,37 @@ database changes.
    1. ```conda create -n bhtom2```
    2. ```conda activate bhtom2```
 2. Install the requirements:
-
-   ```conda install -c conda-forge --file requirements.txt```
    
-   Use pip to install additional packages (only after using conda install, refer to https://www.anaconda.com/blog/using-pip-in-a-conda-environment for caveats)
+   Use pip to install packages (only after using conda install, refer to https://www.anaconda.com/blog/using-pip-in-a-conda-environment for caveats)
    
    ```pip install -r requirements.txt```
+   
+   Why not conda? Unfortunately, some of the packages aren't in conda-forge :(
 3. Create a local .env file
 
    ```cp template.env bhtom2/.bhtom.env```
    
    and fill the values in.
+   Remember to input the values in ```"```.
+   
+   For local development, you will probably want to use localhost as the postgres and graylog host (although you can use a Dockerized/remote one if you wish!)
+   
+   ```
+   POSTGRES_HOST="localhost"
+   GRAYLOG_HOST="localhost"
+   ```
 4. Create a local DB (or an exposed Docker one, this is up to you)
-   1. You can run the Docker/init.sql script on your local database. In case of any required changes, create a local copy of the script.
-   2. Remember to fill the necessary values in the .bhtom.env file.
+   1. Set the .bhtom.env as source of environment variables.
+      ```source bhtom2/.bhtom.env```
+   2. You can run the Docker/init_no_pswrd.sql script on your local database. In case of any required changes, create a local copy of the script.
+      Keep in mind you have to pass the ```$POSTGRES_PASSWORD``` variable as an argument to set the postgres variable ```pswrd```, e.g.:
+      ```psql --set=pswrd="$POSTGRES_PASSWORD" -U postgres```
+
+   3. Remember to fill the necessary values in the .bhtom.env file.
 5. (ONLY AFTER CHANGES) Create the migrations. **Migrations are being commited to Github in order to ensure integration between all databases.** (Do watch out)
    1. ```python manage.py makemigrations```
    2. ```python manage.py makemigrations bhtom2```
-6. After creating the migrations run the dev_entrypoint.sh script.
+6. After creating the migrations run the entrypoint.sh script.
 
 
 # Building Docker
