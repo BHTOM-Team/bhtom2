@@ -13,12 +13,12 @@ database changes.
    1. ```conda create -n bhtom2```
    2. ```conda activate bhtom2```
 2. Install the requirements:
-
-   ```conda install -c conda-forge --file requirements.txt```
    
-   Use pip to install additional packages (only after using conda install, refer to https://www.anaconda.com/blog/using-pip-in-a-conda-environment for caveats)
+   Use pip to install packages (only after using conda install, refer to https://www.anaconda.com/blog/using-pip-in-a-conda-environment for caveats)
    
    ```pip install -r requirements.txt```
+   
+   Why not conda? Unfortunately, some of the packages aren't in conda-forge :(
 3. Create a local .env file
 
    ```cp template.env bhtom2/.bhtom.env```
