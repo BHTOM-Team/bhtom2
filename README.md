@@ -16,7 +16,7 @@ Development is done best on the local environment. This way you can generate new
 database changes.
 
 1. (Recommended) Create a conda environment
-   1. ```conda create -n bhtom2```
+   1. ```conda create -n bhtom2 python=3.9```
    2. ```conda activate bhtom2```
 2. Install the requirements:
    
