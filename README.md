@@ -43,7 +43,7 @@ database changes.
       ```source bhtom2/.bhtom.env```
    2. You can run the Docker/init_no_pswrd.sql script on your local database. In case of any required changes, create a local copy of the script.
       Keep in mind you have to pass the ```$POSTGRES_PASSWORD``` variable as an argument to set the postgres variable ```pswrd```, e.g.:
-      ```psql --set=pswrd="$POSTGRES_PASSWORD" -U postgres```
+      ```psql --set=pswrd="$POSTGRES_PASSWORD" -U postgres``` and execute with e.g. ```\i Docker/init_no_pswd.sql```
 
    3. Remember to fill the necessary values in the .bhtom.env file.
 5. (ONLY AFTER CHANGES) Create the migrations. **Migrations are being commited to Github in order to ensure integration between all databases.** (Do watch out)
