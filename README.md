@@ -37,8 +37,13 @@ database changes.
    GRAYLOG_HOST="localhost"
    ```
 4. Create a local DB (or an exposed Docker one, this is up to you)
-   1. You can run the Docker/init.sql script on your local database. In case of any required changes, create a local copy of the script.
-   2. Remember to fill the necessary values in the .bhtom.env file.
+   1. Set the .bhtom.env as source of environment variables.
+      ```source bhtom2/.bhtom.env```
+   2. You can run the Docker/init_no_pswrd.sql script on your local database. In case of any required changes, create a local copy of the script.
+      Keep in mind you have to pass the ```$POSTGRES_PASSWORD``` variable as an argument to set the postgres variable ```pswrd```, e.g.:
+      ```psql --set=pswrd="$POSTGRES_PASSWORD" -U postgres```
+
+   3. Remember to fill the necessary values in the .bhtom.env file.
 5. (ONLY AFTER CHANGES) Create the migrations. **Migrations are being commited to Github in order to ensure integration between all databases.** (Do watch out)
    1. ```python manage.py makemigrations```
    2. ```python manage.py makemigrations bhtom2```
