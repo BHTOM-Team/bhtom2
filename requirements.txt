@@ -31,7 +31,6 @@ astroquery>=0.4.4
 numpy>=1.22.3
 requests>=2.27.1
 marshmallow>=3.15.0
-beautifulsoup4>=4.11.1
 python-dateutil>=2.8.1
 pillow==9.0.1
 plotly>=5.7.0
