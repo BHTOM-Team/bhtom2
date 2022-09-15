@@ -19,7 +19,6 @@ from dotenv import dotenv_values
 
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
 
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -112,7 +111,6 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 WSGI_APPLICATION = 'bhtom2.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
@@ -130,18 +128,9 @@ DATABASES = {
     },
 }
 
-# Test Database
-if 'test' in sys.argv:
-    DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3' # Django uses an in-memory database if sqlite3
-    DATABASES['default']['PASSWORD'] = secret.get("POSTGRES_TEST_PASSWORD", "")
-    DATABASES['default']['HOST'] = secret.get("POSTGRES_TEST_HOST", "localhost")
-    DATABASES['default']['PORT'] = secret.get("POSTGRES_TEST_PORT", 5432)
-
-
 MIGRATION_MODULES = {
     'bhtom2': 'bhtom2.migrations'
 }
-
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
@@ -193,7 +182,6 @@ USE_TZ = True
 
 DATETIME_FORMAT = 'Y-m-d H:m:s'
 DATE_FORMAT = 'Y-m-d'
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
@@ -301,7 +289,7 @@ TOM_ALERT_CLASSES = [
     'bhtom2.brokers.aavso.AAVSOBroker',
     'bhtom2.brokers.ztf.ZTFBroker',
     'bhtom2.brokers.gaia.GaiaBroker'
-    #'bhtom2.brokers.antares.ANTARESBroker',
+    # 'bhtom2.brokers.antares.ANTARESBroker',
 ]
 
 BROKERS = {
@@ -349,7 +337,6 @@ def generate_name_tuple(data_source: DataSource) -> tuple:
 
 SOURCE_CHOICES = [generate_name_tuple(ds) for ds in DataSource]
 
-
 # Authentication strategy can either be LOCKED (required login for all views)
 # or READ_ONLY (read only access to views)
 AUTH_STRATEGY = 'READ_ONLY'
@@ -391,7 +378,7 @@ REST_FRAMEWORK = {
 }
 
 try:
-    from local_settings import * # noqa
+    from local_settings import *  # noqa
 except ImportError:
     pass
 
