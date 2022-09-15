@@ -12,6 +12,7 @@ django-gravatar2>=1.4
 django-guardian>=2.3
 djangorestframework>=3.12
 django-pgviews==0.5.7
+django-tables2==2.4.1
 factory_boy==3.2.1
 fits2image==0.4.4
 gunicorn==20.1.0
