@@ -32,6 +32,8 @@ database changes.
    and fill the values in.
    Remember to input the values in ```"```.
    
+   For now, the values of ```SENTRY_SDK_DSN, CPCS_DATA_ACCESS_HASHTAG, CPCS_BASE_URL``` can remain empty.
+   
    For local development, you will probably want to use localhost as the postgres and graylog host (although you can use a Dockerized/remote one if you wish!)
    
    ```
