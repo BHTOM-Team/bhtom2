@@ -330,6 +330,13 @@ EXTRA_FIELDS = [
     {'name': 'sun_separation', 'type': 'number'},
     {'name': 'dont_update_me', 'type': 'boolean', 'hidden': True}]
 
+CREATE_TARGET_HIDDEN_EXTRA_FIELDS = [
+    'sun_separation', 'dont_update_me', 'discovery_date'
+]
+
+CREATE_TARGET_HIDDEN_FIELDS = [
+    'pm_ra', 'pm_dec', 'galactic_lat', 'galactic_lng', 'distance', 'distance_err'#, 'groups'
+]
 
 def generate_name_tuple(data_source: DataSource) -> tuple:
     return data_source.name, f'{data_source.name} name'
