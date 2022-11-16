@@ -6,6 +6,10 @@
 
 ```git submodule foreach --recursive git reset --hard```
 
+and then update all subrepositories:
+
+```git submodule update --init --recursive --remote```
+
 ! **Important** Make sure to have at least Python 3.8 or newer
 
 # Local development (no docker)
@@ -18,6 +22,7 @@ database changes.
 1. (Recommended) Create a conda environment
    1. ```conda create -n bhtom2 python=3.9```
    2. ```conda activate bhtom2```
+   3. ```conda install pip``` - so that the local env pip is used, not the global one.
 2. Install the requirements:
    
    Use pip to install packages (only after using conda install, refer to https://www.anaconda.com/blog/using-pip-in-a-conda-environment for caveats)
@@ -32,6 +37,8 @@ database changes.
    and fill the values in.
    Remember to input the values in ```"```.
    
+   For now, the values of ```SENTRY_SDK_DSN, CPCS_DATA_ACCESS_HASHTAG, CPCS_BASE_URL``` can remain empty.
+   
    For local development, you will probably want to use localhost as the postgres and graylog host (although you can use a Dockerized/remote one if you wish!)
    
    ```
@@ -39,11 +46,17 @@ database changes.
    GRAYLOG_HOST="localhost"
    ```
 4. Create a local DB (or an exposed Docker one, this is up to you)
+
+   Please note that Postgres installation differs from on system, method of installation etc. to another. **This is not bhtom2-specific**, therefore I cannot automatize it fully. Please referto external tutorials and resources, luckily for Postgres there are plenty of them. The important things are to **install Postgres>=14.0**, **create the bhtom2 database and bhtom user** (so, to execute the commands in the init_no_pswd.sql script). Note that the 'pswrd' is not hard-coded, it's the password that you have set up in the .bhtom.env. So if you are executing the lines directly in the console, make sure to pass the appropriate password.
+   
+   For example, for Mac OS and homebrew you can refer to https://daily-dev-tips.com/posts/installing-postgresql-on-a-mac-with-homebrew/.
+
    1. Set the .bhtom.env as source of environment variables.
       ```source bhtom2/.bhtom.env```
    2. You can run the Docker/init_no_pswrd.sql script on your local database. In case of any required changes, create a local copy of the script.
-      Keep in mind you have to pass the ```$POSTGRES_PASSWORD``` variable as an argument to set the postgres variable ```pswrd```, e.g.:
-      ```psql --set=pswrd="$POSTGRES_PASSWORD" -U postgres``` and execute with e.g. ```\i Docker/init_no_pswd.sql```
+      Keep in mind you have to pass the ```$POSTGRES_PASSWORD``` variable as an argument to set the postgres variable ```pswrd```, e.g. (this will works on Linux, but i'm not sure about MacOS):
+      ```psql --set=pswrd="$POSTGRES_PASSWORD" -U postgres``` and execute with e.g. ```\i Docker/init_no_pswrd.sql```
+      Another method would be to just log in to the ```psql``` console and copying the script lines. But then you have to substitute ```pswrd``` with the password from .bhtom.env
 
    3. Remember to fill the necessary values in the .bhtom.env file.
 5. (ONLY AFTER CHANGES) Create the migrations. **Migrations are being commited to Github in order to ensure integration between all databases.** (Do watch out)
