@@ -8,7 +8,7 @@
 
 and then update all subrepositories:
 
-```git submodule update --init --recursive```
+```git submodule update --init --recursive --remote```
 
 ! **Important** Make sure to have at least Python 3.8 or newer
 
