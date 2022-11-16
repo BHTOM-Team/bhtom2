@@ -22,6 +22,7 @@ database changes.
 1. (Recommended) Create a conda environment
    1. ```conda create -n bhtom2 python=3.9```
    2. ```conda activate bhtom2```
+   3. ```conda install pip``` - so that the local env pip is used, not the global one.
 2. Install the requirements:
    
    Use pip to install packages (only after using conda install, refer to https://www.anaconda.com/blog/using-pip-in-a-conda-environment for caveats)
