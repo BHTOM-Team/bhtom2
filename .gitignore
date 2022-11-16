@@ -2,4 +2,6 @@
 
 bhtom2/.bhtom.env
 Docker/.bhtom.env
-.envg
+.env
+_static
+__pycache__
