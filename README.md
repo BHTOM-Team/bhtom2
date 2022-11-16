@@ -43,6 +43,8 @@ database changes.
 4. Create a local DB (or an exposed Docker one, this is up to you)
 
    Please note that Postgres installation differs from on system, method of installation etc. to another. **This is not bhtom2-specific**, therefore I cannot automatize it fully. Please referto external tutorials and resources, luckily for Postgres there are plenty of them. The important things are to **install Postgres>=14.0**, **create the bhtom2 database and bhtom user** (so, to execute the commands in the init_no_pswd.sql script). Note that the 'pswrd' is not hard-coded, it's the password that you have set up in the .bhtom.env. So if you are executing the lines directly in the console, make sure to pass the appropriate password.
+   
+   For example, for Mac OS and homebrew you can refer to https://daily-dev-tips.com/posts/installing-postgresql-on-a-mac-with-homebrew/.
 
    1. Set the .bhtom.env as source of environment variables.
       ```source bhtom2/.bhtom.env```
