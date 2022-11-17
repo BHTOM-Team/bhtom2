@@ -41,9 +41,14 @@ SITE_ID = int(secret.get("SITE_ID", 1))
 CPCS_BASE_URL = secret.get('CPCS_BASE_URL', None)
 CPCS_DATA_ACCESS_HASHTAG = secret.get('CPCS_DATA_ACCESS_HASHTAG', None)
 
+WSDB_USER = secret.get('WSDB_USER','')
+WSDB_PASSWORD = secret.get('WSDB_PASSWORD','')
+WSDB_HOST = secret.get('WSDB_HOST','')
+WSDB_PORT = secret.get('WSDB_PORT','')
+
 ADMIN_USERNAME = secret.get('ADMIN_USERNAME')
 ADMIN_PASSWORD = secret.get('ADMIN_PASSWORD')
-ADMIN_EMAIL = secret.get('ADMIN_EMAIL')
+ADMIN_EMAIL = secret.get('ADMIN_EMAIL','')
 
 # Application definition
 
