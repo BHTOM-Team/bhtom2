@@ -15,6 +15,7 @@ class DataSource(Enum):
     GAIA_DR3 = auto()
     SDSS_DR14 = auto()
     NEOWISE = auto()
+    SDSS_DR14 = auto()
 
 
 PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
