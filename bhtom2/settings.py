@@ -293,7 +293,8 @@ TOM_ALERT_CLASSES = [
     'bhtom2.brokers.gaia_alerts.GaiaAlertsBroker',
     'bhtom2.brokers.aavso.AAVSOBroker',
     'bhtom2.brokers.ztf.ZTFBroker',
-    'bhtom2.brokers.gaia.GaiaBroker'
+    'bhtom2.brokers.gaia.GaiaBroker',
+    'bhtom2.brokers.sdss.SDSSBroker'
     # 'bhtom2.brokers.antares.ANTARESBroker',
 ]
 

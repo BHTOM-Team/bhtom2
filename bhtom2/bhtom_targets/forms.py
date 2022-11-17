@@ -58,9 +58,9 @@ class TargetForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        for field in self.fields.keys():
-            if (field in settings.CREATE_TARGET_HIDDEN_FIELDS): 
-                self.fields[field].widget = forms.HiddenInput()
+        # for field in self.fields.keys():
+        #     if (field in settings.CREATE_TARGET_HIDDEN_FIELDS): 
+        #         self.fields[field].widget = forms.HiddenInput()
 
         self.extra_fields = {}
         for extra_field in settings.EXTRA_FIELDS:
