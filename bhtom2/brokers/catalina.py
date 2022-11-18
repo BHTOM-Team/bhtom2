@@ -12,7 +12,7 @@ from astropy.time import Time, TimezoneInfo
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
 from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
-from bhtom_base.bhtom_dataproducts.models import DatumValue
+from bhtom_base.bhtom_dataproducts.models import DatumValue, ReducedDatumUnit
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 
 
@@ -94,7 +94,9 @@ class CRTSBroker(BHTOMBroker):
                                            error=datum.Magerr,
                                            filter='CRTS',
                                            observer=self.__OBSERVER_NAME,
-                                           facility=self.__FACILITY_NAME)
+                                           facility=self.__FACILITY_NAME,
+                                           value_unit = ReducedDatumUnit.MAGNITUDE)
+                                           
                 reduced_datums.extend([reduced_datum])
 
             with transaction.atomic():
