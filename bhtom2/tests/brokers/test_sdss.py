@@ -11,7 +11,6 @@ from bhtom2.brokers.bhtom_broker import LightcurveUpdateReport
 from bhtom2.external_service.data_source_information import DataSource
 from bhtom2.brokers.gaia_alerts import GaiaAlertsBroker
 
-
 sample_response = [(52288,
   20.417389,
   20.348757,
@@ -52,7 +51,7 @@ def create_second_sample_target() -> Target:
 
 
 class SDSSLightcurveUpdateTestCase(TestCase):
-
+    
     @patch('bhtom2.brokers.sdss.WSDBConnection.run_query',
            return_value=sample_response)
     def test_dont_update_lightcurve_when_no_gaia_name(self, _):
