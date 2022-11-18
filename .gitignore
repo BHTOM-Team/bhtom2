@@ -6,3 +6,4 @@ Docker/.bhtom.env
 _static
 */__pycache__
 */cache
+*.pyc
