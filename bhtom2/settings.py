@@ -41,9 +41,14 @@ SITE_ID = int(secret.get("SITE_ID", 1))
 CPCS_BASE_URL = secret.get('CPCS_BASE_URL', None)
 CPCS_DATA_ACCESS_HASHTAG = secret.get('CPCS_DATA_ACCESS_HASHTAG', None)
 
+WSDB_USER = secret.get('WSDB_USER','')
+WSDB_PASSWORD = secret.get('WSDB_PASSWORD','')
+WSDB_HOST = secret.get('WSDB_HOST','')
+WSDB_PORT = secret.get('WSDB_PORT','')
+
 ADMIN_USERNAME = secret.get('ADMIN_USERNAME')
 ADMIN_PASSWORD = secret.get('ADMIN_PASSWORD')
-ADMIN_EMAIL = secret.get('ADMIN_EMAIL')
+ADMIN_EMAIL = secret.get('ADMIN_EMAIL','')
 
 # Application definition
 
@@ -288,7 +293,8 @@ TOM_ALERT_CLASSES = [
     'bhtom2.brokers.gaia_alerts.GaiaAlertsBroker',
     'bhtom2.brokers.aavso.AAVSOBroker',
     'bhtom2.brokers.ztf.ZTFBroker',
-    'bhtom2.brokers.gaia.GaiaBroker'
+    'bhtom2.brokers.gaia.GaiaBroker',
+    'bhtom2.brokers.sdss.SDSSBroker'
     # 'bhtom2.brokers.antares.ANTARESBroker',
 ]
 
@@ -330,6 +336,13 @@ EXTRA_FIELDS = [
     {'name': 'sun_separation', 'type': 'number'},
     {'name': 'dont_update_me', 'type': 'boolean', 'hidden': True}]
 
+CREATE_TARGET_HIDDEN_EXTRA_FIELDS = [
+    'sun_separation', 'dont_update_me', 'discovery_date'
+]
+
+CREATE_TARGET_HIDDEN_FIELDS = [
+    'pm_ra', 'pm_dec', 'galactic_lat', 'galactic_lng', 'distance', 'distance_err'#, 'groups'
+]
 
 def generate_name_tuple(data_source: DataSource) -> tuple:
     return data_source.name, f'{data_source.name} name'
