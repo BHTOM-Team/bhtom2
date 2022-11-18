@@ -119,3 +119,11 @@ This can take a while!
 - Make sure to allow for dev_entrypoint.sh execution.
 
 ``chmod +x dev_entrypoint.sh`` in UNIX-based systems (Linux, Mac OS)
+
+- When testing, you might encounter a problem:
+
+```Got an error recreating the test database: must be owner of database test_bhtom2```
+
+if you are working on a local database, perhaps you can just set bhtom as a superuser...
+
+```ALTER USER bhtom WITH SUPERUSER;```
