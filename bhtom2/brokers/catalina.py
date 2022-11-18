@@ -36,7 +36,7 @@ class CRTSBroker(BHTOMBroker):
         self.__FACILITY_NAME: str = "CRTS"
         self.__OBSERVER_NAME: str = "CRTS"
 
-        self.__target_name_key: str = TARGET_NAME_KEYS.get(self.__data_source, self.__data_source.name)
+        self.__target_name_key: str = TARGET_NAME_KEYS.get(self.data_source, self.data_source.name)
 
         # If the data should be checked from time to time (for alerts), assing the self.__update_cadence
         # If the data should be fetched just once, leave None
