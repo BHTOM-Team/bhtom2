@@ -295,8 +295,8 @@ TOM_ALERT_CLASSES = [
     'bhtom2.brokers.ztf.ZTFBroker',
     'bhtom2.brokers.gaia.GaiaBroker',
     'bhtom2.brokers.sdss.SDSSBroker',
-    'bhtom2.brokers.sdss.NEOWISEBroker',
-    'bhtom2.brokers.sdss.CRTSBroker',
+    'bhtom2.brokers.neowise.NEOWISEBroker',
+    'bhtom2.brokers.catalina.CRTSBroker',
     
     # 'bhtom2.brokers.antares.ANTARESBroker',
 ]
