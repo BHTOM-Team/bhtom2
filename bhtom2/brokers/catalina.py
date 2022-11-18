@@ -12,7 +12,7 @@ from astropy.time import Time, TimezoneInfo
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
 from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
-from bhtom_base.bhtom_dataproducts.models import DatumValue
+from bhtom_base.bhtom_dataproducts.models import DatumValue, ReducedDatumUnit
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 
 
@@ -36,7 +36,7 @@ class CRTSBroker(BHTOMBroker):
         self.__FACILITY_NAME: str = "CRTS"
         self.__OBSERVER_NAME: str = "CRTS"
 
-        self.__target_name_key: str = TARGET_NAME_KEYS.get(self.__data_source, self.__data_source.name)
+        self.__target_name_key: str = TARGET_NAME_KEYS.get(self.data_source, self.data_source.name)
 
         # If the data should be checked from time to time (for alerts), assing the self.__update_cadence
         # If the data should be fetched just once, leave None
@@ -70,9 +70,13 @@ class CRTSBroker(BHTOMBroker):
         query = "http://nunuku.caltech.edu/cgi-bin/getcssconedb_release_img.cgi?RA="+ra_str+"&Dec="+dec_str+"&Rad=0.003&DB=photcat&OUT=web&SHORT=short”"
         res = requests.get(query)._content
         res_str = res.decode()
-        res_tab = res_str.split("null|\n",1)[1]
-        df = pd.read_html(StringIO(res_str), match='Photometry of Objs')
-        df = df[0]
+        try:
+            res_tab = res_str.split("null|\n",1)[1]
+            df = pd.read_html(StringIO(res_tab), match='Photometry of Objs')
+            df = df[0]
+        except IndexError:
+            # Empty response
+            return return_for_no_new_points()
 
         try:
             # Change the fields accordingly to the data format
@@ -90,7 +94,9 @@ class CRTSBroker(BHTOMBroker):
                                            error=datum.Magerr,
                                            filter='CRTS',
                                            observer=self.__OBSERVER_NAME,
-                                           facility=self.__FACILITY_NAME)
+                                           facility=self.__FACILITY_NAME,
+                                           value_unit = ReducedDatumUnit.MAGNITUDE)
+                                           
                 reduced_datums.extend([reduced_datum])
 
             with transaction.atomic():
