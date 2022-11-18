@@ -151,7 +151,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             return super().form_invalid(form)
 
         for source_name, name in target_names:
-            to_add = TargetName.objects.create(target=self.object, source_name=source_name)
+            to_add, _ = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
             to_add.name = name
             to_add.save()
 
@@ -215,10 +215,9 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
 
         target_names = get_nonempty_names_from_queryset(names.data)
         duplicate_names = check_duplicate_source_names(target_names)
-        existing_names = check_for_existing_alias(target_names)
 
         # Check if the form, extras and names are all valid:
-        if extra.is_valid() and names.is_valid() and not duplicate_names and not existing_names:
+        if extra.is_valid() and not duplicate_names:
             extra.instance = self.object
             extra.save()
         else:
@@ -234,7 +233,7 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
 
         # Update target names for given source
         for source_name, name in target_names:
-            to_update, created = TargetName.objects.get_or_create(target=self.object, source_name=source_name)
+            to_update, created = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
             to_update.name = name
             to_update.save(update_fields=['name'])
             messages.add_message(

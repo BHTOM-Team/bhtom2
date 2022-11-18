@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
-from bhtom2.bhtom_targets.views import TargetCreateView
+from bhtom2.bhtom_targets.views import TargetCreateView, TargetUpdateView
 
 from bhtom_base.bhtom_targets.views import TargetDetailView
 
@@ -25,5 +25,6 @@ urlpatterns = [
     path('alerts/query/list/', BrokerQueryListView.as_view(template_name='bhtom_alerts/brokerquery_list.html'), name='alerts:list'),
     path('targets/<int:pk>/', TargetDetailView.as_view(template_name='bhtom_targets/target_detail.html'), name='detail'),
     path('targets/create/', TargetCreateView.as_view(template_name='bhtom_targets/target_form.html'), name='create'),
+    path('targets/<int:pk>/update/', TargetUpdateView.as_view(template_name='bhtom_targets/target_form.html'), name='update'),
     path('', include('bhtom_base.bhtom_common.urls')),
 ]
