@@ -72,9 +72,9 @@ class CRTSBroker(BHTOMBroker):
         query = "http://nunuku.caltech.edu/cgi-bin/getcssconedb_release_img.cgi?RA="+ra_str+"&Dec="+dec_str+"&Rad="+RadiusCRTS+"&DB=photcat&OUT=web&SHORT=short”"
         # res = requests.get(query)._content
         # res_str = res.decode()
-        res_str: str = query_external_service(query, 'CRTS')
 
         try:
+            res_str: str = query_external_service(query, 'CRTS')
 #            res_tab = res_str.split("null|\n",1)[1]
             df = pd.read_html(StringIO(res_str), match='Photometry of Objs')
             df = df[0]
