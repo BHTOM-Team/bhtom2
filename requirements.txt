@@ -38,3 +38,4 @@ plotly>=5.7.0
 recommonmark>=0.7
 specutils==1.5.0
 sphinx>=4.0
+lxml==4.9.1

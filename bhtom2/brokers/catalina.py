@@ -3,6 +3,7 @@ from typing import Optional, List, Tuple
 import pandas as pd
 from io import StringIO
 import requests
+from bhtom2.external_service.external_service_request import query_external_service
 import numpy as np
 from django import forms
 from django.db import transaction
@@ -64,15 +65,18 @@ class CRTSBroker(BHTOMBroker):
         # We are going to probably obtain some response from an API call or using a python package
         #response: str = ''
 
+        RadiusCRTS = str(0.1) #in arcmin
         ra_str = str(target.ra)
         dec_str = str(target.dec)
         # search radius = 0.003 deg, ~10 arcsec, for testing 
-        query = "http://nunuku.caltech.edu/cgi-bin/getcssconedb_release_img.cgi?RA="+ra_str+"&Dec="+dec_str+"&Rad=0.003&DB=photcat&OUT=web&SHORT=short”"
-        res = requests.get(query)._content
-        res_str = res.decode()
+        query = "http://nunuku.caltech.edu/cgi-bin/getcssconedb_release_img.cgi?RA="+ra_str+"&Dec="+dec_str+"&Rad="+RadiusCRTS+"&DB=photcat&OUT=web&SHORT=short”"
+        # res = requests.get(query)._content
+        # res_str = res.decode()
+        res_str: str = query_external_service(query, 'CRTS')
+
         try:
-            res_tab = res_str.split("null|\n",1)[1]
-            df = pd.read_html(StringIO(res_tab), match='Photometry of Objs')
+#            res_tab = res_str.split("null|\n",1)[1]
+            df = pd.read_html(StringIO(res_str), match='Photometry of Objs')
             df = df[0]
         except IndexError:
             # Empty response
