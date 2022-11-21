@@ -428,8 +428,8 @@ class NEOWISELightcurveUpdateTestCase(TestCase):
 
         rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
 
-        self.assertEqual(len(rd), 172)
-        self.assertEqual(report.new_points, 172)
+        self.assertEqual(len(rd), 562)
+        self.assertEqual(report.new_points, 562)
 
     
     @patch('bhtom2.brokers.neowise.query_external_service',
