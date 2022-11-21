@@ -76,10 +76,17 @@ class CRTSBroker(BHTOMBroker):
         try:
             res_str: str = query_external_service(query, 'CRTS')
 #            res_tab = res_str.split("null|\n",1)[1]
+        except IndexError:
+             # Empty response or error in connection
+            self.logger.warning(f'Warning: CRTS server down or error in connecting - no response for {target.name}')
+            return return_for_no_new_points()
+
+        try:
             df = pd.read_html(StringIO(res_str), match='Photometry of Objs')
             df = df[0]
-        except IndexError:
-            # Empty response
+        except Exception:
+            # Response not empty, but there is no data - no Coverage
+            self.logger.warning(f'Warning: CRTS returned no observations (no coverage) for {target.name}')
             return return_for_no_new_points()
 
         try:

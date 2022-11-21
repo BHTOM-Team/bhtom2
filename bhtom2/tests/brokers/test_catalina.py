@@ -285,6 +285,106 @@ sample_response = """<!DOCTYPE html
 </table><br><p>
 <p><br><p></HTML>"""
 
+sample_response_no_coverage="""
+<!DOCTYPE html
+	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+<head>
+<title>Positional Cone Search</title>
+<META http-equiv="CACHE-CONTROL" CONTENT="NO-CACHE"><script type="text/javascript">document.write('<style type="text/css">.tabber{display:none;}</style>');</script>
+<link rel="stylesheet" type="text/css" href="/DataRelease/main-v3.css" />
+<link rel="stylesheet" type="text/css" href="/DataRelease/flot/layout.css" />
+<link rel="stylesheet" type="text/css" href="/DataRelease/scripts/tabber.css" />
+<script src="/DataRelease/flot/jquery.js" type="text/JavaScript"></script>
+<script src="/DataRelease/flot/jquery.flot.js" type="text/JavaScript"></script>
+<script src="/DataRelease/flot/jquery.flot.selection.js" type="text/JavaScript"></script>
+<script src="/DataRelease/flot/jquery.flot.errorbars.js" type="text/JavaScript"></script>
+<script src="/DataRelease/scripts/tabber.js" type="text/JavaScript"></script>
+<script src="/DataRelease/scripts/pixastic.core.js" type="text/JavaScript"></script>
+<script src="/DataRelease/scripts/everything.js" type="text/JavaScript"></script>
+<script src="/DataRelease/scripts/brightness.js" type="text/JavaScript"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+</head>
+<body link="#E1E10" alink="#ffff00" vlink="#00ffff" bgcolor="#00004f" text="#000000" charset="utf-7">
+<center>
+    <!-- hr noshade size=1 width="95%" -->
+        <table border=0 bgcolor="#c0c0c0" cellpadding=2 cellspacing=2>
+        <tr>
+            <td bgcolor="#000099">
+                <table border=0 width="100%" cellpadding=6 cellspacing=0>
+                    <tr align="center" bgcolor="#000099">
+                        <td bgcolor="#000099">
+                        <font color="#ffffff">
+                        Querying region
+                        </font>
+                        </td>
+                    </tr>
+		    </table>
+		    <table border=1 width="100%" bgcolor="#c0c0c0" cellpadding=6 cellspacing=0>
+		    <tr align="center" bgcolor="#000099">
+		    <td bgcolor="#000099">
+		    <font color="yellow">RA
+		    </font>
+		    </td>
+		    <td bgcolor="#000099">
+		    <font color="yellow">Dec
+		    </font>
+		    </td>
+                    <td bgcolor="#000099">
+                    <font color="yellow">Radius
+                    </font>
+                    </td>
+		    </tr>
+		    <tr align="center" bgcolor="#000099">
+		    <td bgcolor="#000099">
+		    <font color="yellow">283.61614
+		    </font>
+		    </td>
+		    <td bgcolor="#000099">
+		    <font color="yellow">0.81912
+		    </font>
+		    </td>
+                    <td bgcolor="#000099">
+                    <font color="yellow">0.002
+                    </font>
+                    </td>
+		    </tr>
+		    <tr align="center" bgcolor="#000099">
+		    <td bgcolor="#000099">
+		    <font color="yellow">18:54:27.87
+		    </font>
+		    </td>
+		    <td bgcolor="#000099">
+		    <font color="yellow">00:49:08.8
+		    </font>
+		    </td>
+                    <td bgcolor="#000099">
+                    <font color="yellow">0.1'
+                    </font>
+                    </td>
+		    </tr>
+		    </table>
+		    <table border=0 width="100%" cellpadding=6 cellspacing=0>
+		    <tr align="center" bgcolor="#000099">
+		    <td bgcolor="#000099">
+		    <font color="orange">
+		    Please wait!
+		    </font>
+		    </td>
+		    </tr>
+                </table>
+            </td>
+        </tr>
+            
+        </table>
+</center>
+
+</html>
+<hr><H3>Photcat DB query</H3>
+<hr><h2>Query Results</h2><table bgcolor="#c0c0c0" border><tr><Caption>Master Catalog Frame at Coords:</Caption></tr><tr><th>Frame<th>RA<th>Dec<th>Telescope<th>Size<th>RA Min<th>RA Max<th>Dec Min<th>Dec Max</tr></table><br><p><font size=5 color=red> This area is not covered by CSS data.</font><br><p>
+"""
+
 def create_sample_target() -> Target:
     target: Target = Target(
         name="Gaia21edy",
@@ -318,7 +418,7 @@ class CRTSLightcurveUpdateTestCase(TestCase):
     
     @patch('bhtom2.brokers.catalina.query_external_service',
            return_value=sample_response)
-    def test_dont_update_lightcurve_when_no_gaia_name(self, _):
+    def test_update_crts_with_coverage(self, _):
 
         crts_broker: CRTSBroker = CRTSBroker()
 
@@ -340,3 +440,26 @@ class CRTSLightcurveUpdateTestCase(TestCase):
         self.assertEqual(report.new_points, 172)
 
     
+    @patch('bhtom2.brokers.catalina.query_external_service',
+           return_value=sample_response_no_coverage)
+    def test_update_crts_no_coverage(self, _):
+
+        crts_broker: CRTSBroker = CRTSBroker()
+
+        target: Target = Target(
+            name="Gaia21een",
+            ra=Decimal(113.25287),
+            dec=Decimal(-31.98319),
+            type='SIDEREAL',
+            epoch=2000,
+        )
+
+        target.save()
+
+        report: LightcurveUpdateReport = crts_broker.process_reduced_data(target)
+
+        rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
+
+        self.assertEqual(len(rd), 0)
+        self.assertEqual(report.new_points, 0)
+
