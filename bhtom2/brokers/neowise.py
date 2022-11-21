@@ -3,6 +3,7 @@ from typing import Optional, List, Tuple
 import pandas as pd
 from io import StringIO
 import requests
+from bhtom2.external_service.external_service_request import query_external_service
 import numpy as np
 from django import forms
 from django.db import transaction
@@ -67,10 +68,30 @@ class NEOWISEBroker(BHTOMBroker):
         ra_str = str(target.ra)
         dec_str = str(target.dec)
         query = "https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-query?catalog=neowiser_p1bs_psd&spatial=cone&radius=5&radunits=arcsec&objstr="+ra_str+"+"+dec_str+"&outfmt=1&selcols=ra,dec,mjd,w1mpro,w1sigmpro,w2mpro,w2sigmpro"
-        res = requests.get(query)._content
-        res_str = res.decode()
-        res_tab = res_str.split("null|\n",1)[1]
-        df = pd.read_csv(StringIO(res_tab), header=None, names=['ra', 'dec', 'clon', 'clat', 'mjd', 'w1mpro', 'w1sigmpro', 'w2mpro', 'w2sigmpro', 'dist', 'angle'], delim_whitespace=True)
+        
+        
+        try:
+            res_str: str = query_external_service(query, 'NEOWISE')
+        except IndexError:
+            self.logger.warning(f'Warning: NEOWISE server down or error in connecting - no response for {target.name}')
+            return return_for_no_new_points()
+
+        try:
+            #df = pd.read_csv(StringIO(res_str), match='Photometry of Objs')
+            res_tab = res_str.split("null|\n",1)[1]
+            df = pd.read_csv(StringIO(res_tab), header=None, names=['ra', 'dec', 'clon', 'clat', 'mjd', 'w1mpro', 'w1sigmpro', 'w2mpro', 'w2sigmpro', 'dist', 'angle'], delim_whitespace=True)
+            #df = df[0]
+        except Exception:
+            # Response not empty, but there is no data - no Coverage
+            self.logger.warning(f'Warning: NEOWISE returned no observations (no coverage) for {target.name}')
+            return return_for_no_new_points()
+
+        
+        
+        #res = requests.get(query)._content
+        #res_str = res.decode()
+        #res_tab = res_str.split("null|\n",1)[1]
+        #df = pd.read_csv(StringIO(res_tab), header=None, names=['ra', 'dec', 'clon', 'clat', 'mjd', 'w1mpro', 'w1sigmpro', 'w2mpro', 'w2sigmpro', 'dist', 'angle'], delim_whitespace=True)
    
         try:
             # Change the fields accordingly to the data format
