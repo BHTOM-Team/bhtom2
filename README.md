@@ -127,3 +127,7 @@ This can take a while!
 if you are working on a local database, perhaps you can just set bhtom as a superuser...
 
 ```ALTER USER bhtom WITH SUPERUSER;```
+
+- Some users experienced postgresql unable to find some libraries (dylib.so) when launching via entrypoint.sh. One fix we found was to make sure ```psycopg2``` and ```psycopg2-binary``` are uninstalled via pip, and then ```psycopg2-binary``` installed via conda:
+
+```conda install -c conda-forge psycopg2-binary```
