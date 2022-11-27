@@ -109,6 +109,7 @@ class LINEARBroker(BHTOMBroker):
             with transaction.atomic():
                 new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))
                 lightcurveupdatereport = LightcurveUpdateReport(new_points=new_points)
+                self.logger.info(f"LINEAR Broker returned {new_points} points for {target.name}")
         except Exception as e:
             self.logger.error(f'Error while saving reduced datapoints for {target.name}: {e}')
         
