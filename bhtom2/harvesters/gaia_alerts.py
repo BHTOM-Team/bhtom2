@@ -117,7 +117,7 @@ class GaiaAlertsHarvester(AbstractHarvester):
 
             return t0
         except ObjectDoesNotExist:
-            logger.error(f'Target {gaia_name} not found in the database.')
+#            logger.error(f'Target {gaia_name} not found in the database.')
             pass
 
         try:
@@ -128,9 +128,14 @@ class GaiaAlertsHarvester(AbstractHarvester):
             target.dec = dec
             target.epoch = 2000
             target.jdlastobs = 0.
-            target.priority = 0.
-            target.classification = classif
-            target.discovery_date = disc
+#            target.priority = 0.
+            target.targetextra_set['priority'] = 10.
+
+#            target.classification = classif
+            target.targetextra_set['classification'] = classif
+
+#            target.discovery_date = disc
+            target.targetextra_set['discovery_date'] = disc
             target.cadence = 1.
 
             # TODO: extra fields?
