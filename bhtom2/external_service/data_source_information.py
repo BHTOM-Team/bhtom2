@@ -16,6 +16,7 @@ class DataSource(Enum):
     SDSS_DR14 = auto()
     NEOWISE = auto()
     CRTS = auto()
+    LINEAR = auto()
 
 
 PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
@@ -32,7 +33,8 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.GAIA_DR3: "Gaia DR3",
     DataSource.SDSS_DR14: "SDSS-DR14",
     DataSource.NEOWISE: "NEOWISE",
-    DataSource.CRTS: "CRTS"
+    DataSource.CRTS: "CRTS",
+    DataSource.LINEAR: "LINEAR"
 }
 
 
@@ -53,7 +55,8 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.GAIA_DR3: "Gaia DR3 id",
     DataSource.SDSS_DR14: "SDSS-DR14 id",
     DataSource.NEOWISE: "NEOWISE name",
-    DataSource.CRTS: "CRTS name"
+    DataSource.CRTS: "CRTS name",
+    DataSource.LINEAR: "LINEAR name"
 }
 
 
@@ -66,7 +69,8 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.GAIA_DR3: ["RP", "G", "BP"],
     DataSource.SDSS_DR14: ["g", "r", "i", "z"],
     DataSource.NEOWISE: ["W1", "W2"],
-    DataSource.CRTS: ["CRTS"]
+    DataSource.CRTS: ["CL"],
+    DataSource.LINEAR: ["CL"]
 }
 
 
