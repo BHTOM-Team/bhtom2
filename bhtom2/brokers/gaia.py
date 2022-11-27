@@ -3,14 +3,17 @@ from typing import Optional
 import astropy.units as u
 import numpy as np
 import pandas as pd
-from astropy.coordinates import SkyCoord, ICRS
+from astropy.coordinates import ICRS, SkyCoord
 from astropy.time import Time
 from astroquery.gaia import Gaia
 from django import forms
 from django.db import transaction
+from astropy.time import Time, TimezoneInfo
 
-from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
-from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
+from bhtom2.brokers.bhtom_broker import (BHTOMBroker, LightcurveUpdateReport,
+                                         return_for_no_new_points)
+from bhtom2.external_service.data_source_information import (TARGET_NAME_KEYS,
+                                                             DataSource)
 from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 from bhtom_base.bhtom_targets.models import TargetName
@@ -121,7 +124,7 @@ class GaiaBroker(BHTOMBroker):
         try:
             reduced_datums = [ReducedDatum(target=target,
                                            data_type='photometry',
-                                           timestamp=Time(datum['time_bjd'], format='mjd').to_datetime(),
+                                           timestamp=Time(datum['time_bjd'], format='mjd').to_datetime(timezone=TimezoneInfo()),
                                            mjd=datum['time_bjd'],
                                            value=datum['mag'],
                                            source_name=self.name,
