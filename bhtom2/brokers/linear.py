@@ -98,7 +98,7 @@ class LINEARBroker(BHTOMBroker):
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
                                             error=datum[2],
-                                            filter='LINEAR(W)',
+                                            filter='LINEAR(CL)',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
 

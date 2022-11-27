@@ -103,7 +103,7 @@ class CRTSBroker(BHTOMBroker):
                                            source_name=self.name,
                                            source_location='Caltech',  # e.g. alerts url
                                            error=datum.Magerr,
-                                           filter='CRTS',
+                                           filter='CRTS(CL)',
                                            observer=self.__OBSERVER_NAME,
                                            facility=self.__FACILITY_NAME,
                                            value_unit = ReducedDatumUnit.MAGNITUDE)
