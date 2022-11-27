@@ -13,6 +13,10 @@ from bhtom2.external_service.data_source_information import DataSource, FILTERS,
 from bhtom2.external_service.external_service_request import query_external_service
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum, DatumValue
 from bhtom_base.bhtom_targets.models import Target, TargetExtra
+from bhtom2.external_service.data_source_information import TARGET_NAME_KEYS
+
+import pandas as pd
+from io import StringIO
 
 
 # For DR8
@@ -55,7 +59,9 @@ class ZTFBroker(BHTOMBroker):
 
     def process_reduced_data(self, target: Target, alert=None) -> Optional[LightcurveUpdateReport]:
 
-        ztf_name: Optional[str] = self.get_target_name(target)
+#       target.targetextra_set[TARGET_NAME_KEYS[DataSource.ZTF]] = ztf_name
+
+        ztf_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.ZTF])
         base_url: str = self.__base_url
 
         self.logger.debug(f'Updating ZTF Data Releases for {target.name} with ZTF oid {ztf_name}')
@@ -67,10 +73,10 @@ class ZTFBroker(BHTOMBroker):
         print_with_sign = lambda i: ("+" if i > 0 else "") + str(i)
 
         query_parameters: Dict[str, Any] = {
-            "POS": f'CIRCLE{print_with_sign(target.ra)}{print_with_sign(target.dec)}{print_with_sign(self.__MATCHING_RADIUS)}',
+            "POS": f"CIRCLE {target.ra} {target.dec} {self.__MATCHING_RADIUS}",
             "BAD_CATFLAGS_MASK": str(32768),
             "FORMAT": "csv",
-            "COLLECTION": "ztf_dr8",
+#            "COLLECTION": "ztf_dr8", #removed by LW to make it work - are we now reading the newest DR? - but the output has changed!!
         }
 
         # "https://irsa.ipac.caltech.edu/cgi-bin/ZTF/nph_light_curves?POS=CIRCLE+255.9302+11.8654+0.0028&BANDNAME=r&NOBS_MIN=3&TIME=58194.0+58483.0&BAD_CATFLAGS_MASK=32768&FORMAT=csv"
@@ -80,6 +86,9 @@ class ZTFBroker(BHTOMBroker):
                                                               params="&".join("%s=%s" % (k, v) for k, v in
                                                                               query_parameters.items()))
         # No such object on ZTF
+            res_tab = response.split("null|\n",1)[0]
+            df = pd.read_csv(StringIO(res_tab), header=None, names=['oid','expid','hjd','mjd','mag','magerr','catflags','filtercode','ra','dec','chi','sharp','filefracday','field','ccdid','qid','limitmag','magzp','magzprms','clrcoeff','clrcounc','exptime','airmass','programid'], delim_whitespace=False)
+            df=df[1:] #removes header
         except ObjectNotFoundError as e:
             raise NoResultException(f'No ZTF data found for {target.name} with ZTF name {ztf_name}')
         except APIError as e:
@@ -88,96 +97,36 @@ class ZTFBroker(BHTOMBroker):
             self.logger.error(f'Error while updating ZTF DR8 for {target.name} with ZTF name {ztf_name}: {e}')
             return return_for_no_new_points()
 
-        # detections:
-        # 'mjd', 'candid', 'fid', 'pid', 'diffmaglim', 'isdiffpos', 'nid', 'distnr', 'magpsf', 'magpsf_corr',
-        # 'magpsf_corr_ext', 'magap', 'magap_corr', 'sigmapsf', 'sigmapsf_corr', 'sigmapsf_corr_ext', 'sigmagap',
-        # 'sigmagap_corr', 'ra', 'dec', 'rb', 'rbversion', 'drb', 'magapbig', 'sigmagapbig', 'rfid', 'has_stamp',
-        # 'corrected', 'dubious', 'candid_alert', 'step_id_corr', 'phase', 'parent_candid'
-
-        # non_detections:
-        # mjd, fid, diffmaglim
-
         # TODO: add non-detections
-
-        detections = response['detections']
-        nondetections = response['non_detections']
 
         new_points: int = 0
 
-        data: List[Tuple[datetime, DatumValue]] = []
-
-        if len(detections) > 0:
-            self.save_ztf_dr8_name_if_missing(target, detections[0]['pid'])
-        else:
-            return return_for_no_new_points()
-
-        for entry in detections:
-            try:
-                mjd: Time = Time(entry['mjd'], format='mjd', scale='utc')
-                mag: float = float(entry['magpsf_corr'])
-
-                if (mag is not None) and (not math.isnan(mag)):
-                    self.logger.debug(f'None magnitude for target {target.name}')
-
-                    magerr: float = float(entry['sigmapsf_corr'])
-                    filter: str = ZTF_DR8_FILTERS[entry['fid']]
-
-                    if filter not in FILTERS[self.data_source]:
-                        self.logger.warning(f'Invalid ZTF DR8 filter for {target.name}: {filter}')
-
-
-                    data.append((mjd.to_datetime(timezone=TimezoneInfo()),
-                                 DatumValue(value=mag,
-                                            error=magerr,
-                                            mjd=mjd.mjd,
-                                            filter=self.filter_name(filter),
-                                            data_type='photometry')))
-            except Exception as e:
-                self.logger.error(f'Error while processing reduced datapoint for {target.name} with '
-                                  f'ZTF DR8 oid {ztf_name}: {e}')
-                continue
-
-        for entry in nondetections:
-            try:
-                mjd: Time = Time(entry['mjd'], format='mjd', scale='utc')
-                mag: float = float(entry['diffmaglim'])
-
-                if (mag is not None) and (not math.isnan(mag)):
-                    self.logger.debug(f'None limit magnitude for target {target.name}')
-
-                    filter: str = ZTF_DR8_FILTERS[entry['fid']]
-
-                    if filter not in FILTERS[self.data_source]:
-                        self.logger.warning(f'Invalid ZTF DR8 filter for {target.name}: {filter}')
-
-                    data.append((mjd.to_datetime(timezone=TimezoneInfo()),
-                                 DatumValue(value=mag,
-                                            mjd=mjd.mjd,
-                                            filter=self.filter_name(filter),
-                                            data_type='photometry_nondetection')))
-            except Exception as e:
-                self.logger.error(f'Error while processing non-detection reduced datapoint for {target.name} with '
-                                  f'ZTF DR8 oid {ztf_name}: {e}')
-                continue
-
         try:
-            data = list(set(data))
-            reduced_datums = [ReducedDatum(target=target,
-                                           data_type=datum[1].data_type,
-                                           timestamp=datum[0],
-                                           mjd=datum[1].mjd,
-                                           value=datum[1].value,
-                                           source_name=self.name,
-                                           source_location=self.__base_url,
-                                           error=datum[1].error,
-                                           filter=datum[1].filter,
-                                           observer=self.__OBSERVER_NAME,
-                                           facility=self.__FACILITY_NAME) for datum in data]
-            with transaction.atomic():
-                new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))
-        except Exception as e:
-            self.logger.error(f'Error while saving reduced datapoints for {target.name} with '
-                              f'ZTF DR8 oid {ztf_name}: {e}')
-            return return_for_no_new_points()
+                # Change the fields accordingly to the data format
+                # Data could be a dict or pandas table as well
+                reduced_datums = []
+                for _, datum in df.iterrows():
+#                    print(datum.mjd, datum.filtercode)
+                    timestamp = Time(datum.mjd, format="mjd").to_datetime(timezone=TimezoneInfo())
+                    reduced_datum = ReducedDatum(target=target,
+                                            data_type='photometry',
+                                            timestamp=timestamp,
+                                            mjd=datum.mjd,
+                                            value=datum.mag,
+                                            source_name=self.name,
+                                            source_location='IPAC/Caltech',  # e.g. alerts url
+                                            error=datum.magerr,
+                                            filter=f'ZTF({datum.filtercode})',
+                                            observer=self.__OBSERVER_NAME,
+                                            facility=self.__FACILITY_NAME)
+                    reduced_datums.extend([reduced_datum])
 
+                with transaction.atomic():
+                    new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))
+                    self.logger.info(f"ZTF Broker returned {new_points} points for {target.name}")
+
+        except Exception as e:
+                self.logger.error(f'Error while saving reduced datapoints for {target.name}: {e}')
+                return return_for_no_new_points()
+                
         return LightcurveUpdateReport(new_points=new_points)
