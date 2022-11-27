@@ -17,6 +17,7 @@ class DataSource(Enum):
     NEOWISE = auto()
     CRTS = auto()
     LINEAR = auto()
+    FIRST = auto()
 
 
 PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
@@ -34,7 +35,8 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.SDSS_DR14: "SDSS-DR14",
     DataSource.NEOWISE: "NEOWISE",
     DataSource.CRTS: "CRTS",
-    DataSource.LINEAR: "LINEAR"
+    DataSource.LINEAR: "LINEAR",
+    DataSource.FIRST: "FIRST"
 }
 
 
@@ -56,7 +58,8 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.SDSS_DR14: "SDSS-DR14 id",
     DataSource.NEOWISE: "NEOWISE name",
     DataSource.CRTS: "CRTS name",
-    DataSource.LINEAR: "LINEAR name"
+    DataSource.LINEAR: "LINEAR name",
+    DataSource.FIRST: "FIRST name"
 }
 
 
@@ -70,7 +73,8 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.SDSS_DR14: ["g", "r", "i", "z"],
     DataSource.NEOWISE: ["W1", "W2"],
     DataSource.CRTS: ["CL"],
-    DataSource.LINEAR: ["CL"]
+    DataSource.LINEAR: ["CL"],
+    DataSource.FIRST: ["Flux 1.4GHz"]
 }
 
 
