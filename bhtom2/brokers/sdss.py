@@ -62,11 +62,11 @@ class SDSSBroker(BHTOMBroker):
 
         ra, dec = target.ra, target.dec
 
-        radius = self.__cross_match_max_separation
+        radius = self.__cross_match_max_separation.value
 
         sqlsdss=("Select mjd, psfmag_g, psfmag_r, psfmag_i, psfmag_z, psfmagerr_g, psfmagerr_r, psfmagerr_i, psfmagerr_z from sdssdr14.photoobjall "+
             "WHERE psfmag_g>0 AND psfmag_r>0 AND psfmag_i>0 AND psfmag_z>0 "+
-            "AND q3c_radial_query(ra, dec, %f, %f, f{radius}/3600.);")%(ra, dec)
+            "AND q3c_radial_query(ra, dec, %f, %f, %f/3600.);")%(ra, dec,radius)
         sdssres=[]
         try:
             sdssres=WSDBConnection().run_query(sqlsdss)
