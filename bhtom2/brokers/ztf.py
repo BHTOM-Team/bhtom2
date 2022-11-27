@@ -61,14 +61,19 @@ class ZTFBroker(BHTOMBroker):
 
 #       target.targetextra_set[TARGET_NAME_KEYS[DataSource.ZTF]] = ztf_name
 
-        ztf_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.ZTF])
         base_url: str = self.__base_url
+        
+        ztf_name = "None"
+        try:
+            ztf_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.ZTF])
+            self.logger.debug(f'Updating ZTF Data Releases for {target.name} with ZTF oid {ztf_name}')
+        except:
+            self.logger.debug(f"No ZTF name in TargetExtra for {target.name} but trying without the name")
 
-        self.logger.debug(f'Updating ZTF Data Releases for {target.name} with ZTF oid {ztf_name}')
 
-        if ztf_name is None or ztf_name == '':
-            self.logger.debug(f'No ZTF DR8 id for {target.name}')
-            return return_for_no_new_points()
+        # if ztf_name is None or ztf_name == '':
+        #     self.logger.debug(f'No ZTF DR8 id for {target.name}')
+        #     return return_for_no_new_points()
 
         print_with_sign = lambda i: ("+" if i > 0 else "") + str(i)
 
