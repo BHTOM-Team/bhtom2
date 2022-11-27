@@ -44,7 +44,7 @@ class SDSSBroker(BHTOMBroker):
         # If you are going to perform searches by coordinates, you might want to change the max_separation
         # Remember to pass it in astropy.unit format as well
         # Here: 5 arcseconds
-        self.__cross_match_max_separation = 5*u.arcsec
+        self.__cross_match_max_separation = 0.5*u.arcsec
 
     def fetch_alerts(self, parameters):
         pass
@@ -62,18 +62,16 @@ class SDSSBroker(BHTOMBroker):
 
         ra, dec = target.ra, target.dec
 
+        radius = self.__cross_match_max_separation
+
         sqlsdss=("Select mjd, psfmag_g, psfmag_r, psfmag_i, psfmag_z, psfmagerr_g, psfmagerr_r, psfmagerr_i, psfmagerr_z from sdssdr14.photoobjall "+
             "WHERE psfmag_g>0 AND psfmag_r>0 AND psfmag_i>0 AND psfmag_z>0 "+
-            "AND q3c_radial_query(ra, dec, %f, %f, 0.5/3600.);")%(ra, dec)
+            "AND q3c_radial_query(ra, dec, %f, %f, f{radius}/3600.);")%(ra, dec)
         sdssres=[]
         try:
             sdssres=WSDBConnection().run_query(sqlsdss)
         except Exception as e:
             self.logger.error(f'Error with WSDB connection for SDSS for {target.name}: {e}')
-
-
-        # We are going to probably obtain some response from an API call or using a python package
-        response: str = ''
 
         # Process the data here to obtain a numpy array, list, or whatever feels comfortable to process
         data: List[Tuple] = sdssres

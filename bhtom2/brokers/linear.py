@@ -63,7 +63,9 @@ class LINEARBroker(BHTOMBroker):
 
         ra, dec = target.ra, target.dec
 
-        sqllinear="select s.mjd,s.mag,s.magerr FROM lineardb.sources as s, lineardb.objects as o where q3c_radial_query(o.ra, o.decl, f{ra}, f{dec}, f{self.__cross_match_max_separation}/3600.) and o.objectid=s.objectid;"
+        radius = self.__cross_match_max_separation
+
+        sqllinear="select s.mjd,s.mag,s.magerr FROM lineardb.sources as s, lineardb.objects as o where q3c_radial_query(o.ra, o.decl, f{ra}, f{dec}, f{radius}/3600.) and o.objectid=s.objectid;"
         linearres=[]
         try:
             linearres=WSDBConnection().run_query(sqllinear)
