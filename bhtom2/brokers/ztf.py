@@ -1,7 +1,7 @@
-import math
-from datetime import datetime
-from typing import Optional, Any, Dict, List, Tuple
+from io import StringIO
+from typing import Optional, Any, Dict
 
+import pandas as pd
 from alerce.exceptions import APIError, ObjectNotFoundError
 from astropy.time import Time, TimezoneInfo
 from django.db import transaction
@@ -9,14 +9,11 @@ from django.db import transaction
 from bhtom2 import settings
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
 from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
-from bhtom2.external_service.data_source_information import DataSource, FILTERS, ZTF_DR8_FILTERS
-from bhtom2.external_service.external_service_request import query_external_service
-from bhtom_base.bhtom_dataproducts.models import ReducedDatum, DatumValue
-from bhtom_base.bhtom_targets.models import Target, TargetExtra
+from bhtom2.external_service.data_source_information import DataSource
 from bhtom2.external_service.data_source_information import TARGET_NAME_KEYS
-
-import pandas as pd
-from io import StringIO
+from bhtom2.external_service.external_service_request import query_external_service
+from bhtom_base.bhtom_dataproducts.models import ReducedDatum
+from bhtom_base.bhtom_targets.models import Target, TargetExtra
 
 
 # For DR8
@@ -59,10 +56,10 @@ class ZTFBroker(BHTOMBroker):
 
     def process_reduced_data(self, target: Target, alert=None) -> Optional[LightcurveUpdateReport]:
 
-#       target.targetextra_set[TARGET_NAME_KEYS[DataSource.ZTF]] = ztf_name
+        #       target.targetextra_set[TARGET_NAME_KEYS[DataSource.ZTF]] = ztf_name
 
         base_url: str = self.__base_url
-        
+
         ztf_name = "None"
         try:
             ztf_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.ZTF])
@@ -70,30 +67,22 @@ class ZTFBroker(BHTOMBroker):
         except:
             self.logger.debug(f"No ZTF name in TargetExtra for {target.name} but trying without the name")
 
-
-        # if ztf_name is None or ztf_name == '':
-        #     self.logger.debug(f'No ZTF DR8 id for {target.name}')
-        #     return return_for_no_new_points()
-
         print_with_sign = lambda i: ("+" if i > 0 else "") + str(i)
 
         query_parameters: Dict[str, Any] = {
             "POS": f"CIRCLE {target.ra} {target.dec} {self.__MATCHING_RADIUS}",
             "BAD_CATFLAGS_MASK": str(32768),
             "FORMAT": "csv",
-#            "COLLECTION": "ztf_dr8", #removed by LW to make it work - are we now reading the newest DR? - but the output has changed!!
+            #            "COLLECTION": "ztf_dr8", #removed by LW to make it work - are we now reading the newest DR? - but the output has changed!!
         }
 
         # "https://irsa.ipac.caltech.edu/cgi-bin/ZTF/nph_light_curves?POS=CIRCLE+255.9302+11.8654+0.0028&BANDNAME=r&NOBS_MIN=3&TIME=58194.0+58483.0&BAD_CATFLAGS_MASK=32768&FORMAT=csv"
 
         try:
-            response: Dict[str, Any] = query_external_service(base_url, service_name=DataSource.ZTF.name,
+            response: str = query_external_service(base_url, service_name=DataSource.ZTF.name,
                                                               params="&".join("%s=%s" % (k, v) for k, v in
                                                                               query_parameters.items()))
-        # No such object on ZTF
-            res_tab = response.split("null|\n",1)[0]
-            df = pd.read_csv(StringIO(res_tab), header=None, names=['oid','expid','hjd','mjd','mag','magerr','catflags','filtercode','ra','dec','chi','sharp','filefracday','field','ccdid','qid','limitmag','magzp','magzprms','clrcoeff','clrcounc','exptime','airmass','programid'], delim_whitespace=False)
-            df=df[1:] #removes header
+            df = pd.read_csv(StringIO(response))
         except ObjectNotFoundError as e:
             raise NoResultException(f'No ZTF data found for {target.name} with ZTF name {ztf_name}')
         except APIError as e:
@@ -107,31 +96,30 @@ class ZTFBroker(BHTOMBroker):
         new_points: int = 0
 
         try:
-                # Change the fields accordingly to the data format
-                # Data could be a dict or pandas table as well
-                reduced_datums = []
-                for _, datum in df.iterrows():
-#                    print(datum.mjd, datum.filtercode)
-                    timestamp = Time(datum.mjd, format="mjd").to_datetime(timezone=TimezoneInfo())
-                    reduced_datum = ReducedDatum(target=target,
-                                            data_type='photometry',
-                                            timestamp=timestamp,
-                                            mjd=datum.mjd,
-                                            value=datum.mag,
-                                            source_name=self.name,
-                                            source_location='IPAC/Caltech',  # e.g. alerts url
-                                            error=datum.magerr,
-                                            filter=f'ZTF({datum.filtercode})',
-                                            observer=self.__OBSERVER_NAME,
-                                            facility=self.__FACILITY_NAME)
-                    reduced_datums.extend([reduced_datum])
+            # Change the fields accordingly to the data format
+            # Data could be a dict or pandas table as well
+            reduced_datums = []
+            for _, datum in df.iterrows():
+                timestamp = Time(datum.mjd, format="mjd").to_datetime(timezone=TimezoneInfo())
+                reduced_datum = ReducedDatum(target=target,
+                                             data_type='photometry',
+                                             timestamp=timestamp,
+                                             mjd=datum.mjd,
+                                             value=datum.mag,
+                                             source_name=self.name,
+                                             source_location='IPAC/Caltech',  # e.g. alerts url
+                                             error=datum.magerr,
+                                             filter=f'ZTF({datum.filtercode})',
+                                             observer=self.__OBSERVER_NAME,
+                                             facility=self.__FACILITY_NAME)
+                reduced_datums.append(reduced_datum)
 
-                with transaction.atomic():
-                    new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))
-                    self.logger.info(f"ZTF Broker returned {new_points} points for {target.name}")
+            with transaction.atomic():
+                new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))
+                self.logger.info(f"ZTF Broker returned {new_points} points for {target.name}")
 
         except Exception as e:
-                self.logger.error(f'Error while saving reduced datapoints for {target.name}: {e}')
-                return return_for_no_new_points()
-                
+            self.logger.error(f'Error while saving reduced datapoints for {target.name}: {e}')
+            return return_for_no_new_points()
+
         return LightcurveUpdateReport(new_points=new_points)
