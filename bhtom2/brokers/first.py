@@ -10,7 +10,7 @@ from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, ret
 from bhtom2.external_service.connectWSDB import WSDBConnection
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
 from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
-from bhtom_base.bhtom_dataproducts.models import DatumValue
+from bhtom_base.bhtom_dataproducts.models import DatumValue, ReducedDatumUnit
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 
 '''Broker reading FIRST radio data from WSDB'''
@@ -98,15 +98,13 @@ class FIRSTBroker(BHTOMBroker):
                                             timestamp=timestamp,
                                             mjd=mjd,
                                             value=datum[1], #flux
+                                            value_unit=ReducedDatumUnit.MILLIJANSKY,
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
                                             error=datum[2],
                                             filter='FIRST(Flux 1.4GHz)',
-                                            value_unit='mJy',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
-
-                
 
                 reduced_datums.extend([reduced_datum])
 

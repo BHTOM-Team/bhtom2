@@ -102,8 +102,6 @@ class LINEARBroker(BHTOMBroker):
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
 
-                
-
                 reduced_datums.extend([reduced_datum])
 
             with transaction.atomic():
