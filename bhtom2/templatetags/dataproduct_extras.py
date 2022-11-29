@@ -198,8 +198,15 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
     magnitude_range = magnitude_min-magnitude_max
     radio_range = radio_max-radio_min
 
-    magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
-    radio_dtick_digit = (round(np.log10(radio_range)) - 1)
+    try:
+        magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
+    except:
+        magnitude_dtick_digit = 1
+    
+    try:
+        radio_dtick_digit = (round(np.log10(radio_range)) - 1)
+    except:
+        radio_dtick_digit = 1
 
     plot_data = []
     for filter_name, filter_values in photometry_data.items():
