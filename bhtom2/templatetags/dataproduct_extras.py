@@ -200,8 +200,10 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
 
     try:
         magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
+        magnitude_range = 10
     except:
         magnitude_dtick_digit = 1
+        radio_range = 10
     
     try:
         radio_dtick_digit = (round(np.log10(radio_range)) - 1)
