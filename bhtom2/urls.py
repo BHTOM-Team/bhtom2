@@ -18,7 +18,7 @@ from bhtom2.bhtom_targets.views import TargetCreateView, TargetUpdateView
 
 from bhtom_base.bhtom_targets.views import TargetDetailView
 
-from bhtom2.views import BrokerQueryListView
+from bhtom2.views import BrokerQueryListView, TargetDownloadPhotometryDataView, TargetDownloadRadioDataView
 
 urlpatterns = [
     path('', include('bhtom_custom_registration.bhtom_registration.registration_flows.approval_required.urls', namespace='registration')),
@@ -26,5 +26,7 @@ urlpatterns = [
     path('targets/<int:pk>/', TargetDetailView.as_view(template_name='bhtom_targets/target_detail.html'), name='detail'),
     path('targets/create/', TargetCreateView.as_view(template_name='bhtom_targets/target_form.html'), name='create'),
     path('targets/<int:pk>/update/', TargetUpdateView.as_view(template_name='bhtom_targets/target_form.html'), name='update'),
+    path('targets/<int:pk>/download-photometry', TargetDownloadPhotometryDataView.as_view(), name='download_photometry_data'),
+    path('targets/<int:pk>/download-radio', TargetDownloadRadioDataView.as_view(), name='download_radio_data'),
     path('', include('bhtom_base.bhtom_common.urls')),
 ]
