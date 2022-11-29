@@ -1,6 +1,8 @@
+import logging
 from datetime import datetime
 from urllib.parse import urlencode
 
+import numpy as np
 import plotly.graph_objs as go
 from django import template
 from django.conf import settings
@@ -105,7 +107,7 @@ def upload_dataproduct(context, obj):
 
 
 @register.inclusion_tag('bhtom_dataproducts/partials/photometry_for_target.html', takes_context=True)
-def photometry_for_target(context, target, width=700, height=600, background=None, label_color=None, grid=True):
+def photometry_for_target(context, target, width=1000, height=600, background=None, label_color=None, grid=True):
     """
     Renders a photometric plot for a target.
 
@@ -135,9 +137,16 @@ def photometry_for_target(context, target, width=700, height=600, background=Non
     }
 
     photometry_data = {}
+    radio_data = {}
+
     if settings.TARGET_PERMISSIONS_ONLY:
         datums = ReducedDatum.objects.filter(target=target,
-                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0])
+                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
+                                             value_unit=ReducedDatumUnit.MAGNITUDE)
+
+        radio_datums = ReducedDatum.objects.filter(target=target,
+                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
+                                             value_unit=ReducedDatumUnit.MILLIJANSKY)
     else:
         datums = get_objects_for_user(context['request'].user,
                                       'bhtom_dataproducts.view_reduceddatum',
@@ -146,14 +155,51 @@ def photometry_for_target(context, target, width=700, height=600, background=Non
                                           data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
                                           value_unit=ReducedDatumUnit.MAGNITUDE))
 
+        radio_datums = get_objects_for_user(context['request'].user,
+                                      'bhtom_dataproducts.view_reduceddatum',
+                                      klass=ReducedDatum.objects.filter(
+                                        target=target,
+                                        data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
+                                        value_unit=ReducedDatumUnit.MILLIJANSKY))
+
+    # set the datum max and min the silly way, we already iterate through all the datums anyway
+    magnitude_min = -100
+    magnitude_max = 100
+
+    radio_min = 1e7
+    radio_max = -1e7
+
     for datum in datums:
         photometry_data.setdefault(datum.filter, {})
-        photometry_data[datum.filter].setdefault('time', []).append(datum.timestamp)
-        photometry_data[datum.filter].setdefault('magnitude', []).append(datum.value)
-        photometry_data[datum.filter].setdefault('error', []).append(datum.error)
+
+        if datum.value:
+            photometry_data[datum.filter].setdefault('time', []).append(datum.timestamp)
+            photometry_data[datum.filter].setdefault('magnitude', []).append(datum.value)
+            photometry_data[datum.filter].setdefault('error', []).append(datum.error)
+
+            magnitude_min = datum.value if datum.value > magnitude_min else magnitude_min
+            magnitude_max = datum.value if datum.value < magnitude_max else magnitude_max
+
+    for radio_datum in radio_datums:
+        radio_data.setdefault(radio_datum.filter, {})
+
+        if radio_datum.value:
+            radio_data[radio_datum.filter].setdefault('time', []).append(radio_datum.timestamp)
+            radio_data[radio_datum.filter].setdefault('magnitude', []).append(radio_datum.value)
+            radio_data[radio_datum.filter].setdefault('error', []).append(radio_datum.error)
+
+            radio_min = radio_datum.value if radio_datum.value < radio_min else radio_min
+            radio_max = radio_datum.value if radio_datum.value > radio_max else radio_max
 
         # TODO: handle limits
         # photometry_data[datum.filter].setdefault('limit', []).append(datum.value.get('limit'))
+
+    # Calculate min/max values for ranges and ticks
+    magnitude_range = magnitude_min-magnitude_max
+    radio_range = radio_max-radio_min
+
+    magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
+    radio_dtick_digit = (round(np.log10(radio_range)) - 1)
 
     plot_data = []
     for filter_name, filter_values in photometry_data.items():
@@ -168,23 +214,38 @@ def photometry_for_target(context, target, width=700, height=600, background=Non
                     type='data',
                     array=filter_values['error'],
                     visible=True
-                )
+                ),
             )
             plot_data.append(series)
-        # if filter_values['limit']:
-        #     series = go.Scatter(
-        #         x=filter_values['time'],
-        #         y=filter_values['limit'],
-        #         mode='markers',
-        #         opacity=0.5,
-        #         marker=dict(color=color_map.get(filter_name)),
-        #         marker_symbol=6,  # upside down triangle
-        #         name=filter_name + ' non-detection',
-        #     )
-        #     plot_data.append(series)
+
+    for filter_name, filter_values in radio_data.items():
+        if filter_values['magnitude']:
+            series = go.Scatter(
+                x=filter_values['time'],
+                y=filter_values['magnitude'],
+                mode='markers',
+                marker=dict(color=color_map.get(filter_name), symbol='diamond', line_color='black', line_width=2),
+                name=filter_name,
+                error_y=dict(
+                    type='data',
+                    array=filter_values['error'],
+                    visible=True
+                ),
+                yaxis="y2"
+            )
+            plot_data.append(series)
+        elif filter_values.get('limit'):
+            series = go.Scatter(
+                x=filter_values['time'],
+                y=filter_values['limit'],
+                mode='markers',
+                opacity=0.5,
+                marker=dict(color=color_map.get(filter_name), symbol=6),  # upside down triangle
+                name=filter_name + ' non-detection',
+            )
+            plot_data.append(series)
 
     layout = go.Layout(
-        yaxis=dict(autorange='reversed'),
         height=height,
         width=width,
         paper_bgcolor=background,
@@ -193,8 +254,46 @@ def photometry_for_target(context, target, width=700, height=600, background=Non
     )
     layout.legend.font.color = label_color
     fig = go.Figure(data=plot_data, layout=layout)
-    fig.update_yaxes(showgrid=grid, color=label_color, showline=True, linecolor=label_color, mirror=True)
-    fig.update_xaxes(showgrid=grid, color=label_color, showline=True, linecolor=label_color, mirror=True)
+    fig.update_layout(
+        margin=dict(t= 40, r= 20, b= 40, l= 80),
+        yaxis=dict(
+            autorange=False,
+            range=[round(magnitude_min+max(0.15*magnitude_range, 10**magnitude_dtick_digit),
+                         magnitude_dtick_digit),
+                   round(magnitude_max-max(0.15*magnitude_range, 10**magnitude_dtick_digit),
+                         magnitude_dtick_digit)],
+            title="magnitude",
+            titlefont=dict(
+                color="#1f77b4"
+            ),
+            tickfont=dict(
+                color="#1f77b4"
+            ),
+        ),
+        yaxis2=dict(
+            autorange=False,
+            range=[round(radio_min - max(0.15 * radio_range, 10**radio_dtick_digit),
+                         radio_dtick_digit),
+                   round(radio_max + max(0.15 * radio_range, 10**radio_dtick_digit),
+                         radio_dtick_digit)],
+            title="mJy",
+            titlefont=dict(
+                color="black"
+            ),
+            tickfont=dict(
+                color="black"
+            ),
+            overlaying="y",
+            side="right",
+            showgrid=False,
+        ),
+        legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="right",
+            x=1.35
+        )
+    )
     return {
         'target': target,
         'plot': offline.plot(fig, output_type='div', show_link=False)
