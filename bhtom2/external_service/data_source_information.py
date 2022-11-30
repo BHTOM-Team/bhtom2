@@ -4,20 +4,21 @@ from typing import Dict, List
 
 class DataSource(Enum):
     GAIA = auto()
+    GAIA_DR3 = auto()
+    GAIA_DR2 = auto()
     ZTF = auto()
     CPCS = auto()
     AAVSO = auto()
     TNS = auto()
     ASASSN = auto()
     ANTARES = auto()
-    GAIA_DR2 = auto()
     ZTF_DR8 = auto()
-    GAIA_DR3 = auto()
     SDSS_DR14 = auto()
     NEOWISE = auto()
     CRTS = auto()
     LINEAR = auto()
     FIRST = auto()
+    PS1 = auto()
 
 
 PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
@@ -36,7 +37,8 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.NEOWISE: "NEOWISE",
     DataSource.CRTS: "CRTS",
     DataSource.LINEAR: "LINEAR",
-    DataSource.FIRST: "FIRST"
+    DataSource.FIRST: "FIRST",
+    DataSource.PS1: "PS1"
 }
 
 
@@ -59,7 +61,8 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.NEOWISE: "NEOWISE name",
     DataSource.CRTS: "CRTS name",
     DataSource.LINEAR: "LINEAR name",
-    DataSource.FIRST: "FIRST name"
+    DataSource.FIRST: "FIRST name",
+    DataSource.PS1: "PS1 name"
 }
 
 
@@ -74,7 +77,8 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.NEOWISE: ["W1", "W2"],
     DataSource.CRTS: ["CL"],
     DataSource.LINEAR: ["CL"],
-    DataSource.FIRST: ["Flux 1.4GHz"]
+    DataSource.FIRST: ["Flux 1.4GHz"],
+    DataSource.PS1: ["g", "r", "i", "z"],
 }
 
 
