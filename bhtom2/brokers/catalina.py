@@ -26,7 +26,7 @@ class CRTSBrokerQueryForm(GenericQueryForm):
 
 
 class CRTSBroker(BHTOMBroker):
-    name = DataSource.CRTS
+    name = "CRTS"
 
     form = CRTSBrokerQueryForm
 
