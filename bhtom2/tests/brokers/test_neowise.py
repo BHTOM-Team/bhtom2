@@ -428,13 +428,9 @@ class NEOWISELightcurveUpdateTestCase(TestCase):
 
         rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
 
-<<<<<<< HEAD
-        self.assertEqual(len(rd), 562)
-=======
         print("TESTRD",rd)
 
         self.assertEqual(len(rd), 561)
->>>>>>> 0f6f8fd (Update neowise - fixed NaN)
         self.assertEqual(report.new_points, 562)
 
     
@@ -459,9 +455,4 @@ class NEOWISELightcurveUpdateTestCase(TestCase):
         rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
 
         self.assertEqual(len(rd), 0)
-<<<<<<< HEAD
         self.assertEqual(report.new_points, 0)
-
-=======
-        self.assertEqual(report.new_points, 0)
->>>>>>> 0f6f8fd (Update neowise - fixed NaN)
