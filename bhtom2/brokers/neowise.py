@@ -26,7 +26,7 @@ class NEOWISEBrokerQueryForm(GenericQueryForm):
 
 
 class NEOWISEBroker(BHTOMBroker):
-    name = DataSource.NEOWISE
+    name = "NEOWISE"
 
     form = NEOWISEBrokerQueryForm
 
@@ -99,7 +99,8 @@ class NEOWISEBroker(BHTOMBroker):
             reduced_datums = []
             for _, datum in df.iterrows():
                 timestamp = Time(datum.mjd, format="mjd").to_datetime(timezone=TimezoneInfo())
-                reduced_datum_w1 = ReducedDatum(target=target,
+                if (not np.isnan(datum.w1mpro) and not np.isnan(datum.w1mpro)):
+                    reduced_datum_w1 = ReducedDatum(target=target,
                                            data_type='photometry',
                                            timestamp=timestamp,
                                            mjd=datum.mjd,
@@ -110,7 +111,8 @@ class NEOWISEBroker(BHTOMBroker):
                                            filter='WISE(W1)',
                                            observer=self.__OBSERVER_NAME,
                                            facility=self.__FACILITY_NAME)
-                reduced_datum_w2 = ReducedDatum(target=target,
+                if (not np.isnan(datum.w2mpro) and not np.isnan(datum.w2mpro)):
+                    reduced_datum_w2 = ReducedDatum(target=target,
                                            data_type='photometry',
                                            timestamp=timestamp,
                                            mjd=datum.mjd,
