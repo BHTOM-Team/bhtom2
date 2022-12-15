@@ -67,7 +67,7 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
 
 
 FILTERS: Dict[DataSource, List[str]] = {
-    DataSource.GAIA: ["g"],
+    DataSource.GAIA: ["G"],
     DataSource.ZTF: ["g", "i", "r"],
     DataSource.AAVSO: ["V", "I", "R"],
     DataSource.ANTARES: ["R", "g"],
