@@ -50,6 +50,10 @@ ADMIN_USERNAME = secret.get('ADMIN_USERNAME')
 ADMIN_PASSWORD = secret.get('ADMIN_PASSWORD')
 ADMIN_EMAIL = secret.get('ADMIN_EMAIL','')
 
+PROPOSALS_API_KEYS={
+'LCO':secret.get('LCO_API_KEY','')
+}
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -232,33 +236,6 @@ CACHES = {
 # TOM Specific configuration
 TARGET_TYPE = 'SIDEREAL'
 
-FACILITIES = {
-    'LCO': {
-        'portal_url': 'https://observe.lco.global',
-        'api_key': '',
-    },
-    'GEM': {
-        'portal_url': {
-            'GS': 'https://139.229.34.15:8443',
-            'GN': 'https://128.171.88.221:8443',
-        },
-        'api_key': {
-            'GS': '',
-            'GN': '',
-        },
-        'user_email': '',
-        'programs': {
-            'GS-YYYYS-T-NNN': {
-                'MM': 'Std: Some descriptive text',
-                'NN': 'Rap: Some descriptive text'
-            },
-            'GN-YYYYS-T-NNN': {
-                'QQ': 'Std: Some descriptive text',
-                'PP': 'Rap: Some descriptive text',
-            },
-        },
-    },
-}
 
 # Define the valid data product types for your TOM. Be careful when removing items, as previously valid types will no
 # longer be valid, and may cause issues unless the offending records are modified.
@@ -275,12 +252,6 @@ DATA_PROCESSORS = {
     'spectroscopy': 'bhtom_base.bhtom_dataproducts.processors.spectroscopy_processor.SpectroscopyProcessor',
 }
 
-TOM_FACILITY_CLASSES = [
-    'bhtom_base.bhtom_observations.facilities.lco.LCOFacility',
-    'bhtom_base.bhtom_observations.facilities.gemini.GEMFacility',
-    'bhtom_base.bhtom_observations.facilities.soar.SOARFacility',
-    'bhtom_base.bhtom_observations.facilities.lt.LTFacility'
-]
 
 TOM_ALERT_CLASSES = [
     'bhtom_base.bhtom_alerts.brokers.alerce.ALeRCEBroker',
@@ -403,3 +374,15 @@ except ImportError:
 GAIA_ALERTS_PATH: str = 'http://gsaweb.ast.cam.ac.uk'
 AAVSO_API_PATH: str = 'https://www.aavso.org/vsx/index.php'
 ZTF_DR_PATH: str = 'https://irsa.ipac.caltech.edu/cgi-bin/ZTF/nph_light_curves'
+
+# Observatories possible to request data
+FACILITIES = {
+    'LCO': {
+        'portal_url': 'https://observe.lco.global',
+        'api_key': PROPOSALS_API_KEYS['LCO'],
+    },
+}
+
+TOM_FACILITY_CLASSES = [
+     'bhtom_base.bhtom_observations.facilities.lco.LCOFacility',
+]
