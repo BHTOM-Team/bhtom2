@@ -64,9 +64,13 @@ class SDSSBroker(BHTOMBroker):
 
         radius = self.__cross_match_max_separation.value
 
-        sqlsdss=("Select mjd, psfmag_g, psfmag_r, psfmag_i, psfmag_z, psfmagerr_g, psfmagerr_r, psfmagerr_i, psfmagerr_z from sdssdr14.photoobjall "+
-            "WHERE psfmag_g>0 AND psfmag_r>0 AND psfmag_i>0 AND psfmag_z>0 "+
-            "AND q3c_radial_query(ra, dec, %f, %f, %f/3600.);")%(ra, dec,radius)
+        sqlsdss=("SELECT f.mjd_g, s.psfmag_g, s.psfmag_r, s.psfmag_i, s.psfmag_z, "+
+           "s.psfmagerr_g, s.psfmagerr_r, s.psfmagerr_i, s.psfmagerr_z,  "+
+           "f.mjd_r, f.mjd_i, f.mjd_z, f.mjd_u, s.psfmag_u, s.psfmagerr_u "+
+           "FROM sdssdr14.photoobjall as s, sdssdr14.field as f "+
+            "WHERE s.psfmag_u>0 AND s.psfmag_g>0 AND s.psfmag_r>0 AND s.psfmag_i>0 AND s.psfmag_z>0 "+
+            "AND s.field=f.field AND s.run=f.run AND s.rerun=f.rerun AND s.camcol=f.camcol "+
+            "AND q3c_radial_query(s.ra, s.dec, %f, %f, %f/3600.);")%(ra, dec,radius)
         sdssres=[]
         try:
             sdssres=WSDBConnection().run_query(sqlsdss)
@@ -82,18 +86,24 @@ class SDSSBroker(BHTOMBroker):
         lightcurveupdatereport = return_for_no_new_points()
 
         #0     1 .       2 .      3          4        5            6             7             8
-        #mjd, psfmag_g, psfmag_r, psfmag_i, psfmag_z, psfmagerr_g, psfmagerr_r, psfmagerr_i, psfmagerr_z
+        #mjd_g, psfmag_g, psfmag_r, psfmag_i, psfmag_z, psfmagerr_g, psfmagerr_r, psfmagerr_i, psfmagerr_z
+        # 9         10       11       12      13          14
+        #"f.mjd_r, f.mjd_i, f.mjd_z, f.mjd_u, s.psfmag_u, s.psfmagerr_u "+
 
         try:
             # Change the fields accordingly to the data format
             # Data could be a dict or pandas table as well
             reduced_datums = []
             for datum in data:
-                timestamp = Time(datum[0], format="mjd").to_datetime(timezone=TimezoneInfo())
+                timestamp_g = Time(datum[0], format="mjd").to_datetime(timezone=TimezoneInfo())
+                timestamp_r = Time(datum[9], format="mjd").to_datetime(timezone=TimezoneInfo())
+                timestamp_i = Time(datum[10], format="mjd").to_datetime(timezone=TimezoneInfo())
+                timestamp_z = Time(datum[11], format="mjd").to_datetime(timezone=TimezoneInfo())
+                timestamp_u = Time(datum[12], format="mjd").to_datetime(timezone=TimezoneInfo())
                 
                 reduced_datum_g = ReducedDatum(target=target,
                                             data_type='photometry',
-                                            timestamp=timestamp,
+                                            timestamp=timestamp_g,
                                             mjd=datum[0],
                                             value=datum[1], #filter g
                                             source_name=self.name,
@@ -105,8 +115,8 @@ class SDSSBroker(BHTOMBroker):
 
                 reduced_datum_r = ReducedDatum(target=target,
                                             data_type='photometry',
-                                            timestamp=timestamp,
-                                            mjd=datum[0],
+                                            timestamp=timestamp_r,
+                                            mjd=datum[9],
                                             value=datum[2], #filter r
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
@@ -117,8 +127,8 @@ class SDSSBroker(BHTOMBroker):
                 
                 reduced_datum_i = ReducedDatum(target=target,
                                             data_type='photometry',
-                                            timestamp=timestamp,
-                                            mjd=datum[0],
+                                            timestamp=timestamp_i,
+                                            mjd=datum[10],
                                             value=datum[3], #filter i
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
@@ -129,8 +139,8 @@ class SDSSBroker(BHTOMBroker):
 
                 reduced_datum_z = ReducedDatum(target=target,
                                             data_type='photometry',
-                                            timestamp=timestamp,
-                                            mjd=datum[0],
+                                            timestamp=timestamp_z,
+                                            mjd=datum[11],
                                             value=datum[4], #filter z
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
@@ -139,7 +149,19 @@ class SDSSBroker(BHTOMBroker):
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
 
-                reduced_datums.extend([reduced_datum_g,reduced_datum_r,reduced_datum_i,reduced_datum_z])
+                reduced_datum_u = ReducedDatum(target=target,
+                                            data_type='photometry',
+                                            timestamp=timestamp_u,
+                                            mjd=datum[12],
+                                            value=datum[13], #filter u
+                                            source_name=self.name,
+                                            source_location='WSDB',  # e.g. alerts url
+                                            error=datum[14],
+                                            filter='SDSS_DR14(u)',
+                                            observer=self.__OBSERVER_NAME,
+                                            facility=self.__FACILITY_NAME)
+
+                reduced_datums.extend([reduced_datum_u, reduced_datum_g,reduced_datum_r,reduced_datum_i,reduced_datum_z])
 
             with transaction.atomic():
                 new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))

@@ -73,7 +73,7 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.ANTARES: ["R", "g"],
     DataSource.ZTF_DR8: ["g", "i", "r"],
     DataSource.GAIA_DR3: ["RP", "G", "BP"],
-    DataSource.SDSS_DR14: ["g", "r", "i", "z"],
+    DataSource.SDSS_DR14: ["u","g", "r", "i", "z"],
     DataSource.NEOWISE: ["W1", "W2"],
     DataSource.CRTS: ["CL"],
     DataSource.LINEAR: ["CL"],

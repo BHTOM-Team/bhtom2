@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from django.test import TestCase
 from bhtom2.brokers.sdss import SDSSBroker
+from bhtom2.external_service.connectWSDB import WSDBConnection
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 from bhtom_base.bhtom_targets.models import Target, TargetName
 
@@ -11,15 +12,9 @@ from bhtom2.brokers.bhtom_broker import LightcurveUpdateReport
 from bhtom2.external_service.data_source_information import DataSource
 from bhtom2.brokers.gaia_alerts import GaiaAlertsBroker
 
-sample_response = [(52288,
-  20.417389,
-  20.348757,
-  20.188702,
-  20.113611,
-  0.025659233,
-  0.03796997,
-  0.04096018,
-  0.116355374)]
+sample_response = [(52258.30247521,
+ 20.957407, 20.80408, 20.706472, 20.855112, 0.044929855,  0.05652531,  0.05668118,  0.24416567,
+  52258.29915815, 52258.29998742, 52258.30164595,52258.30081668,21.230421,0.12558867)]
 
 def create_sample_target() -> Target:
     target: Target = Target(
@@ -72,7 +67,7 @@ class SDSSLightcurveUpdateTestCase(TestCase):
 
         rd: List[ReducedDatum] = list(ReducedDatum.objects.all())
 
-        self.assertEqual(len(rd), 4)
-        self.assertEqual(report.new_points, 4)
+        self.assertEqual(len(rd), 5)
+        self.assertEqual(report.new_points, 5)
 
-    
+
