@@ -99,7 +99,7 @@ class NEOWISEBroker(BHTOMBroker):
             reduced_datums = []
             for _, datum in df.iterrows():
                 timestamp = Time(datum.mjd, format="mjd").to_datetime(timezone=TimezoneInfo())
-                if (not np.isnan(datum.w1mpro) and not np.isnan(datum.w1mpro)):
+                if (not np.isnan(datum.w1mpro) and not np.isnan(datum.w1sigmpro)):
                     reduced_datum_w1 = ReducedDatum(target=target,
                                            data_type='photometry',
                                            timestamp=timestamp,
@@ -111,7 +111,7 @@ class NEOWISEBroker(BHTOMBroker):
                                            filter='WISE(W1)',
                                            observer=self.__OBSERVER_NAME,
                                            facility=self.__FACILITY_NAME)
-                if (not np.isnan(datum.w2mpro) and not np.isnan(datum.w2mpro)):
+                if (not np.isnan(datum.w2mpro) and not np.isnan(datum.w2sigmpro)):
                     reduced_datum_w2 = ReducedDatum(target=target,
                                            data_type='photometry',
                                            timestamp=timestamp,
