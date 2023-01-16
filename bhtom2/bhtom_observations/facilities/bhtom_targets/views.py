@@ -1,38 +1,20 @@
 import logging
-from datetime import datetime
-from io import StringIO
-from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
-from django.core.management import call_command
 from django.db import transaction
-from django.db.models import Q
-from django.forms import HiddenInput
-from django.http import HttpResponseRedirect, QueryDict, StreamingHttpResponse
 from django.shortcuts import redirect
-from django.urls import reverse_lazy, reverse
-from django.utils.html import format_html
-from django.utils.safestring import mark_safe
-from django.utils.text import slugify
-from django.views.generic import RedirectView, TemplateView, View
-from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.views.generic.list import ListView
-from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm
+from django.views.generic.edit import CreateView, UpdateView
+from bhtom2.bhtom_observations.facilities.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm
 from bhtom2.external_service.data_source_information import get_pretty_survey_name
 from bhtom_base.bhtom_common.hooks import run_hook
 from bhtom_base.bhtom_common.mixins import Raise403PermissionRequiredMixin
 from bhtom_base.bhtom_targets.forms import TargetExtraFormset, TargetNamesFormset
 from bhtom_base.bhtom_targets.models import Target, TargetName
 from bhtom_base.bhtom_targets.utils import check_duplicate_source_names, check_for_existing_alias, get_nonempty_names_from_queryset
-from django_filters.views import FilterView
-from guardian.mixins import PermissionListMixin
-from guardian.shortcuts import get_objects_for_user, get_groups_with_perms, assign_perm
-from django_tables2 import Table
-from django_tables2.views import SingleTableMixin
+from guardian.shortcuts import get_objects_for_user, get_groups_with_perms
 
 logger = logging.getLogger(__name__)
 

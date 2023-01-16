@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
-from bhtom2.bhtom_targets.views import TargetCreateView, TargetUpdateView
+from bhtom2.bhtom_observations.facilities.bhtom_targets.views import TargetCreateView, TargetUpdateView
 
 from bhtom_base.bhtom_targets.views import TargetDetailView
 

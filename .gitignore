@@ -169,5 +169,5 @@ __pycache__/
 */__pycache__/
 */cache
 *.pyc
-bhtom2/bhtom_targets/__pycache__/views.cpython-39.pyc
+bhtom2/bhtom_observations/facilities/bhtom_targets/__pycache__/views.cpython-39.pyc
 bhtom2/external_service/__pycache__/data_source_information.cpython-39.pyc

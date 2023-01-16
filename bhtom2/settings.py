@@ -384,5 +384,6 @@ FACILITIES = {
 }
 
 TOM_FACILITY_CLASSES = [
-     'bhtom_base.bhtom_observations.facilities.lco.LCOFacility',
+    'bhtom_base.bhtom_observations.facilities.lco.LCOFacility',
+    'bhtom2.bhtom_observations.facilities.ostrowik.Ostrowik'
 ]
