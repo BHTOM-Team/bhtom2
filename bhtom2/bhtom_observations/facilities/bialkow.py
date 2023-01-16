@@ -31,8 +31,8 @@ class Bialkow(BaseManualObservationFacility):
     SITES = {
         'Bialkow': {
             'sitecode': 'bialkow',
-            'latitude': 51.47435543316016,
-            'longitude': 16.658407910831198,
+            'latitude': 16.658407910831198,
+            'longitude': 51.47435543316016,
             'elevation': 150
         }
     }
