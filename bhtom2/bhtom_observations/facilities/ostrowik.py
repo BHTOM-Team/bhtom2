@@ -31,8 +31,8 @@ class Ostrowik(BaseManualObservationFacility):
     SITES = {
         'Ostrowik': {
             'sitecode': 'ostrowik',
-            'latitude': 21.42,
-            'longitude': 52.0897,
+            'latitude': 52.0897,
+            'longitude': 21.42,
             'elevation': 200
         }
     }
@@ -65,3 +65,32 @@ class Ostrowik(BaseManualObservationFacility):
 
     def all_data_products(self, observation_record):
         return []
+
+    def get_facility_weather_urls(self):
+        facility_weather_urls = {
+            'code': 'Ostrowik',
+            'sites': [
+                {
+                    'code': site['sitecode'],
+                    'weather_url': 'http://alps.astro.uni.wroc.pl/alps_ost/'
+                }
+                for site in self.SITES.values()]
+            }
+        return facility_weather_urls
+
+    def get_facility_status(self):
+        return {
+            'code': 'Ostrowik',
+            'sites': [
+                {
+                    'code': site['sitecode'],
+                    'telescopes': [
+                        {
+                            'code': 'ostrowik',
+                            'status': 'AVAILABLE'
+                        },
+                    ],
+                    'weather_url': "http://alps.astro.uni.wroc.pl/alps_ost/"
+                }
+                for site in self.SITES.values()]
+            }
