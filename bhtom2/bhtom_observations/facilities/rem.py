@@ -8,7 +8,7 @@ FAILED_OBSERVING_STATES = ['WINDOW_EXPIRED', 'CANCELED', 'FAILURE_LIMIT_REACHED'
 TERMINAL_OBSERVING_STATES = SUCCESSFUL_OBSERVING_STATES + FAILED_OBSERVING_STATES
 
 
-class REMPhotometryObservationForm(BaseManualObservationForm):
+class REMPhotometricSequenceForm(BaseManualObservationForm):
     name = forms.CharField()
     start = forms.CharField(widget=forms.TextInput(attrs={'type': 'date'}))
     end = forms.CharField(required=False, widget=forms.TextInput(attrs={'type': 'date'}))
@@ -30,14 +30,14 @@ class REM(BaseManualObservationFacility):
     name = 'REM'
     SITES = {
         'REM': {
-            'sitecode': 'ostrowik',
+            'sitecode': 'REM',
             'latitude': 70.73,
             'longitude': -29.26,
             'elevation': 2400
         }
     }
     observation_forms = {
-        'PHOTOMETRIC_SEQUENCE': REMPhotometryObservationForm,
+        'PHOTOMETRIC_SEQUENCE': REMPhotometricSequenceForm,
     }
 
     def get_form(self, observation_type):
