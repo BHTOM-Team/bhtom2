@@ -31,8 +31,8 @@ class Moletai(BaseManualObservationFacility):
     SITES = {
         'Moletai': {
             'sitecode': 'moletai',
-            'latitude': 334.436944,
-            'longitude': 55.315833,
+            'latitude': 55.315833,
+            'longitude': 334.436944,
             'elevation': 200
         }
     }
