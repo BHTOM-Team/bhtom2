@@ -26,13 +26,13 @@ class OstrowikPhotometryObservationForm(BaseManualObservationForm):
             Div('observation_params')
         )
 
-class Ostrowik(BaseManualObservationFacility):
-    name = 'Ostrowik'
+class Moletai(BaseManualObservationFacility):
+    name = 'Moletai'
     SITES = {
-        'Ostrowik': {
-            'sitecode': 'ostrowik',
-            'latitude': 21.42,
-            'longitude': 52.0897,
+        'Moletai': {
+            'sitecode': 'moletai',
+            'latitude': 334.436944,
+            'longitude': 55.315833,
             'elevation': 200
         }
     }
