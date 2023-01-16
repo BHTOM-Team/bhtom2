@@ -8,7 +8,7 @@ FAILED_OBSERVING_STATES = ['WINDOW_EXPIRED', 'CANCELED', 'FAILURE_LIMIT_REACHED'
 TERMINAL_OBSERVING_STATES = SUCCESSFUL_OBSERVING_STATES + FAILED_OBSERVING_STATES
 
 
-class OstrowikPhotometryObservationForm(BaseManualObservationForm):
+class MoletaiPhotometryObservationForm(BaseManualObservationForm):
     name = forms.CharField()
     start = forms.CharField(widget=forms.TextInput(attrs={'type': 'date'}))
     end = forms.CharField(required=False, widget=forms.TextInput(attrs={'type': 'date'}))
@@ -37,7 +37,7 @@ class Moletai(BaseManualObservationFacility):
         }
     }
     observation_forms = {
-        'PHOTOMETRIC_SEQUENCE': OstrowikPhotometryObservationForm,
+        'PHOTOMETRIC_SEQUENCE': MoletaiPhotometryObservationForm,
     }
 
     def get_form(self, observation_type):
