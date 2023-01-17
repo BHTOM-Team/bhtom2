@@ -88,6 +88,7 @@ class Bialkow(BaseManualObservationFacility):
             }
         return facility_weather_urls
 
+
     def get_facility_status(self):
         return {
             'code': 'Bialkow',
