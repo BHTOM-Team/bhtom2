@@ -388,5 +388,6 @@ TOM_FACILITY_CLASSES = [
     'bhtom2.bhtom_observations.facilities.ostrowik.Ostrowik',
     'bhtom2.bhtom_observations.facilities.rem.REM',
     'bhtom2.bhtom_observations.facilities.moletai.Moletai',
-    'bhtom2.bhtom_observations.facilities.bialkow.Bialkow'
+    'bhtom2.bhtom_observations.facilities.bialkow.Bialkow',
+    'bhtom2.bhtom_observations.facilities.piwnice.Piwnice'
 ]
