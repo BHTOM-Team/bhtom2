@@ -41,8 +41,8 @@ class Suhora(BaseManualObservationFacility):
     SITES = {
         'Suhora': {
             'sitecode': 'suhora',
-            'latitude': 53.091111,
-            'longitude': 18.558056,
+            'latitude': 49.569167,
+            'longitude': 20.0675,
             'elevation': 1000
         }
     }
