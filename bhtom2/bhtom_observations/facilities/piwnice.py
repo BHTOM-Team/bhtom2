@@ -43,7 +43,7 @@ class Piwnice(BaseManualObservationFacility):
             'sitecode': 'piwnice',
             'latitude': 53.091111,
             'longitude': 18.558056,
-            'elevation': 150
+            'elevation': 100
         }
     }
     observation_forms = {
