@@ -48,7 +48,7 @@ class REM(BaseManualObservationFacility):
         'REM': {
             'sitecode': 'REM',
             'latitude': -29.26,
-            'longitude': 70.73,
+            'longitude': -70.73,
             'elevation': 2400
         }
     }
