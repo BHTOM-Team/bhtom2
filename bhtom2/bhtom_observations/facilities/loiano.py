@@ -20,7 +20,7 @@ class LoianoPhotometryObservationForm(BaseManualObservationForm):
     cadence_frequency = forms.IntegerField(required=True, help_text='in hours')
     exposure_time = forms.FloatField(required=True, help_text='in seconds')
 
-    valid_filters = [['U', 'U'],['B', 'B'],['V', 'V'], ['R', 'R'], ['I', 'I'],['Ha_narrow', 'HA_NARROW'],['Ha_wide', 'HA_WIDE'], ['Clear', 'CLEAR']]
+    valid_filters = [['V', 'V'], ['R', 'R'], ['I', 'I']]
     filters = forms.ChoiceField(required=True, label='Filters', choices=valid_filters)   
    
     def layout(self):
