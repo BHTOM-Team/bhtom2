@@ -270,7 +270,8 @@ TOM_ALERT_CLASSES = [
     'bhtom2.brokers.catalina.CRTSBroker',
     'bhtom2.brokers.linear.LINEARBroker',
     'bhtom2.brokers.first.FIRSTBroker',
-    'bhtom2.brokers.ps1.PS1Broker'
+    'bhtom2.brokers.ps1.PS1Broker',
+    'bhtom2.brokers.allwise.ALLWISEBroker'
     # 'bhtom2.brokers.antares.ANTARESBroker',
 ]
 
