@@ -83,7 +83,7 @@ class TargetDownloadRadioDataView(TargetDownloadDataView):
 class TargetTable(Table):
     #adding a new column, which does not exist in the model, can not be sorted by
 #    image = tables.Column(empty_values=(),orderable=False)
-    comment = tables.Column(empty_values=(),orderable=True)
+    comment = tables.Column(empty_values=(),orderable=False)
 
     #TODO add a new field: classification, with enum, sortable, filterable
     # so people could just select microlensing candidates or SNe
