@@ -22,7 +22,6 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
     """
     View for creating a Target. Requires authentication.
     """
-
     model = Target
     fields = '__all__'
 

@@ -302,6 +302,206 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
         'plot': offline.plot(fig, output_type='div', show_link=False)
     }
 
+### static and simpler version of the plot for massive list table
+@register.inclusion_tag('bhtom_dataproducts/partials/photometry_for_target_icon.html', takes_context=True)
+def photometry_for_target_icon(context, target, width=800, height=400, background=None, label_color=None, grid=True):
+    """
+    Renders a photometric plot for a target.
+
+    This templatetag requires all ``ReducedDatum`` objects with a data_type of ``photometry`` to be structured with the
+    following keys in the JSON representation: magnitude, error, filter
+
+    :param width: Width of generated plot
+    :type width: int
+
+    :param height: Height of generated plot
+    :type width: int
+
+    :param background: Color of the background of generated plot. Can be rgba or hex string.
+    :type background: str
+
+    :param label_color: Color of labels/tick labels. Can be rgba or hex string.
+    :type label_color: str
+
+    :param grid: Whether to show grid lines.
+    :type grid: bool
+    """
+
+    color_map = {
+        'r': 'red',
+        'g': 'green',
+        'i': 'black'
+    }
+
+    photometry_data = {}
+    radio_data = {}
+
+    if settings.TARGET_PERMISSIONS_ONLY:
+        datums = ReducedDatum.objects.filter(target=target,
+                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
+                                             value_unit=ReducedDatumUnit.MAGNITUDE)
+
+        radio_datums = ReducedDatum.objects.filter(target=target,
+                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
+                                             value_unit=ReducedDatumUnit.MILLIJANSKY)
+    else:
+        datums = get_objects_for_user(context['request'].user,
+                                      'bhtom_dataproducts.view_reduceddatum',
+                                      klass=ReducedDatum.objects.filter(
+                                          target=target,
+                                          data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
+                                          value_unit=ReducedDatumUnit.MAGNITUDE))
+
+        radio_datums = get_objects_for_user(context['request'].user,
+                                      'bhtom_dataproducts.view_reduceddatum',
+                                      klass=ReducedDatum.objects.filter(
+                                        target=target,
+                                        data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
+                                        value_unit=ReducedDatumUnit.MILLIJANSKY))
+
+    # set the datum max and min the silly way, we already iterate through all the datums anyway
+    magnitude_min = -100
+    magnitude_max = 100
+
+    radio_min = 1e7
+    radio_max = -1e7
+
+    for datum in datums:
+        photometry_data.setdefault(datum.filter, {})
+
+        if datum.value:
+            photometry_data[datum.filter].setdefault('time', []).append(datum.timestamp)
+            photometry_data[datum.filter].setdefault('magnitude', []).append(datum.value)
+            photometry_data[datum.filter].setdefault('error', []).append(datum.error)
+
+            magnitude_min = (datum.value+datum.error) if (datum.value+datum.error) > magnitude_min else magnitude_min
+            magnitude_max = (datum.value-datum.error) if (datum.value-datum.error) < magnitude_max else magnitude_max
+
+    for radio_datum in radio_datums:
+        radio_data.setdefault(radio_datum.filter, {})
+
+        if radio_datum.value:
+            radio_data[radio_datum.filter].setdefault('time', []).append(radio_datum.timestamp)
+            radio_data[radio_datum.filter].setdefault('magnitude', []).append(radio_datum.value)
+            radio_data[radio_datum.filter].setdefault('error', []).append(radio_datum.error)
+
+            radio_min = (radio_datum.value-radio_datum.error) if (radio_datum.value-radio_datum.error) < radio_min else radio_min
+            radio_max = (radio_datum.value+radio_datum.error) if (radio_datum.value+radio_datum.error) > radio_max else radio_max
+
+        # TODO: handle limits
+        # photometry_data[datum.filter].setdefault('limit', []).append(datum.value.get('limit'))
+
+    # Calculate min/max values for ranges and ticks
+    magnitude_range = magnitude_min-magnitude_max
+    radio_range = radio_max-radio_min
+
+    try:
+        magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
+        magnitude_range = 10
+    except:
+        magnitude_dtick_digit = 1
+        radio_range = 10
+    
+    try:
+        radio_dtick_digit = (round(np.log10(radio_range)) - 1)
+    except:
+        radio_dtick_digit = 1
+
+    plot_data = []
+    for filter_name, filter_values in photometry_data.items():
+        if filter_values['magnitude']:
+            series = go.Scatter(
+                x=filter_values['time'],
+                y=filter_values['magnitude'],
+                mode='markers',
+                marker=dict(color=color_map.get(filter_name)),
+                name=filter_name,
+                error_y=dict(
+                    type='data',
+                    array=filter_values['error'],
+                    visible=True
+                ),
+            )
+            plot_data.append(series)
+
+    for filter_name, filter_values in radio_data.items():
+        if filter_values['magnitude']:
+            series = go.Scatter(
+                x=filter_values['time'],
+                y=filter_values['magnitude'],
+                mode='markers',
+                marker=dict(color=color_map.get(filter_name), symbol='diamond', line_color='black', line_width=2),
+                name=filter_name,
+                error_y=dict(
+                    type='data',
+                    array=filter_values['error'],
+                    visible=True
+                ),
+                yaxis="y2"
+            )
+            plot_data.append(series)
+        elif filter_values.get('limit'):
+            series = go.Scatter(
+                x=filter_values['time'],
+                y=filter_values['limit'],
+                mode='markers',
+                opacity=0.5,
+                marker=dict(color=color_map.get(filter_name), symbol=6),  # upside down triangle
+                name=filter_name + ' non-detection',
+            )
+            plot_data.append(series)
+
+    layout = go.Layout(
+        height=height,
+        width=width,
+        paper_bgcolor=background,
+        plot_bgcolor=background
+
+    )
+    layout.legend.font.color = label_color
+    #no legend shown in icon view
+    layout.update(showlegend=False)
+    fig = go.Figure(data=plot_data, layout=layout)
+    fig.update_layout(
+        title=target.name,
+        margin=dict(t= 40, r= 20, b= 40, l= 80),
+        yaxis=dict(
+            autorange=False,
+            range=[np.ceil(magnitude_min), np.floor(magnitude_max)],
+            title="magnitude",
+            titlefont=dict(
+                color="#1f77b4"
+            ),
+            tickfont=dict(
+                color="#1f77b4"
+            ),
+        ),
+        yaxis2=dict(
+            autorange=False,
+            range=[np.floor(radio_min), np.ceil(radio_max)],
+            title="mJy",
+            titlefont=dict(
+                color="black"
+            ),
+            tickfont=dict(
+                color="black"
+            ),
+            overlaying="y",
+            side="right",
+            showgrid=False,
+        ),
+        legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="right",
+            x=1.35
+        )
+    )
+    return {
+        'target': target,
+        'plot': offline.plot(fig, output_type='div', show_link=True, config=dict({'staticPlot':True}))
+    }
+
 
 @register.inclusion_tag('bhtom_dataproducts/partials/spectroscopy_for_target.html', takes_context=True)
 def spectroscopy_for_target(context, target, dataproduct=None):

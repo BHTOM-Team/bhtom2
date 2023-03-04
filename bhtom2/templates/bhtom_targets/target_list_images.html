@@ -1,0 +1,51 @@
+{% extends 'bhtom_common/base.html' %}
+{% load comments bootstrap4 bhtom_common_extras targets_extras observation_extras dataproduct_extras static cache %}
+{% block title %}Targets images{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10">
+
+<table class="table table-hover">
+    <tbody>
+        {% for target in object_list %}
+        <tr>
+                <td>
+                {{target.name}} {{target.ra}} {{target.dec}}
+                {% photometry_for_target_icon target %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>            
+
+<!-- filters  -->
+</div>
+{{ filter.fields }}
+<div class="col-md-2">
+    <form action="" method="get" class="form">
+        {% bootstrap_form filter.form %}
+        {% buttons %}
+            <button type="submit" class="btn btn-primary">
+                Filter
+            </button>
+            <a href="{% url 'targets:list' %}" class="btn btn-secondary" title="Reset">Reset</a>
+            <button type="submit" formaction="{% url 'targets:export' %}" id="invisible-export-button"
+                    style="display:none"></button>
+        {% endbuttons %}
+    </form>
+</div>
+</div>
+{% endblock %}
+{% block javascript %}
+<script src="https://code.jquery.com/jquery-3.6.1.min.js"
+    integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="//cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+<script>
+
+$(document).ready(function () {
+    $('.table').DataTable();
+    $('#DataTables_Table_0_filter').hide();
+});
+</script>
+{% endblock %}
