@@ -177,8 +177,8 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
             photometry_data[datum.filter].setdefault('magnitude', []).append(datum.value)
             photometry_data[datum.filter].setdefault('error', []).append(datum.error)
 
-            magnitude_min = datum.value if datum.value > magnitude_min else magnitude_min
-            magnitude_max = datum.value if datum.value < magnitude_max else magnitude_max
+            magnitude_min = (datum.value+datum.error) if (datum.value+datum.error) > magnitude_min else magnitude_min
+            magnitude_max = (datum.value-datum.error) if (datum.value-datum.error) < magnitude_max else magnitude_max
 
     for radio_datum in radio_datums:
         radio_data.setdefault(radio_datum.filter, {})
@@ -188,8 +188,8 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
             radio_data[radio_datum.filter].setdefault('magnitude', []).append(radio_datum.value)
             radio_data[radio_datum.filter].setdefault('error', []).append(radio_datum.error)
 
-            radio_min = radio_datum.value if radio_datum.value < radio_min else radio_min
-            radio_max = radio_datum.value if radio_datum.value > radio_max else radio_max
+            radio_min = (radio_datum.value-radio_datum.error) if (radio_datum.value-radio_datum.error) < radio_min else radio_min
+            radio_max = (radio_datum.value+radio_datum.error) if (radio_datum.value+radio_datum.error) > radio_max else radio_max
 
         # TODO: handle limits
         # photometry_data[datum.filter].setdefault('limit', []).append(datum.value.get('limit'))
@@ -267,10 +267,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
         margin=dict(t= 40, r= 20, b= 40, l= 80),
         yaxis=dict(
             autorange=False,
-            range=[round(magnitude_min+max(0.15*magnitude_range, 10**magnitude_dtick_digit),
-                         magnitude_dtick_digit),
-                   round(magnitude_max-max(0.15*magnitude_range, 10**magnitude_dtick_digit),
-                         magnitude_dtick_digit)],
+            range=[np.ceil(magnitude_min), np.floor(magnitude_max)],
             title="magnitude",
             titlefont=dict(
                 color="#1f77b4"
@@ -281,10 +278,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
         ),
         yaxis2=dict(
             autorange=False,
-            range=[round(radio_min - max(0.15 * radio_range, 10**radio_dtick_digit),
-                         radio_dtick_digit),
-                   round(radio_max + max(0.15 * radio_range, 10**radio_dtick_digit),
-                         radio_dtick_digit)],
+            range=[np.floor(radio_min), np.ceil(radio_max)],
             title="mJy",
             titlefont=dict(
                 color="black"
