@@ -95,9 +95,10 @@ def get_last(target: Target):
     if (n_g>0): mean_g=mean_g/n_g
     if (n_V>0): mean_V=mean_V/n_V
 
-    return_mag = last_mag ##if everything fails, we just return last mag
+    return_mag = last_mag ##if everything fails, we just return last mag and the name of the filter
     approxsign="x"
-    #assuming r is close to G
+
+    #assuming r is close enough to G
     if (any(x in last_filter for x in G_filters)
     or 
     any(x in last_filter for x in r_filters)): 
