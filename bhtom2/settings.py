@@ -309,12 +309,15 @@ EXTRA_FIELDS = [
     {'name': 'classification', 'type': 'string'},
     {'name': 'priority', 'type': 'number'},
     {'name': 'discovery_date', 'type': 'datetime'},
+    {'name': 'mjd_diff', 'type': 'number'},
+    {'name': 'mag_last','type': 'number'},
     {'name': 'cadence', 'type': 'number'},
     {'name': 'sun_separation', 'type': 'number'},
     {'name': 'dont_update_me', 'type': 'boolean', 'hidden': True}]
 
 CREATE_TARGET_HIDDEN_EXTRA_FIELDS = [
-    'sun_separation', 'dont_update_me', 'discovery_date'
+    'sun_separation', 'dont_update_me', 'discovery_date',
+    'mjd_diff', 'mag_last'
 ]
 
 CREATE_TARGET_HIDDEN_FIELDS = [

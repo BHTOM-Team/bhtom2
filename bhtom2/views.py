@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
+from astropy.time import Time
 from django.views.generic import View
+from bhtom2.dataproducts import last_jd
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom2.utils.reduced_data_utils import save_photometry_data_for_target_to_csv_file, save_radio_data_for_target_to_csv_file
 from django_filters.views import FilterView
@@ -84,6 +87,9 @@ class TargetTable(Table):
     #adding a new column, which does not exist in the model, can not be sorted by
 #    image = tables.Column(empty_values=(),orderable=False)
     comment = tables.Column(empty_values=(),orderable=False)
+    Gmag = tables.Column(empty_values=(),orderable=False)
+    dt = tables.Column(empty_values=(),orderable=False)
+
 
     #TODO add a new field: classification, with enum, sortable, filterable
     # so people could just select microlensing candidates or SNe
@@ -91,7 +97,7 @@ class TargetTable(Table):
     class Meta:
         model = Target
         template_name = "django_tables2/bootstrap-responsive.html"
-        fields = ("id","name", "ra", "dec", "comment")
+        fields = ("id","name", "ra", "dec", "dt", "Gmag", "comment")
 
     def render_ra(self, record):
         return format_html('%.6f'%record.ra)
@@ -112,6 +118,26 @@ class TargetTable(Table):
 
     def render_comment(self, record):
         return format_html('{}', record.extra_fields.get('classification'))
+
+    def render_dt(self, record):
+        mag_last, mjd_last, filter_last, approxsign = last_jd.get_last(record)
+        mjd_now = Time(datetime.utcnow()).mjd
+
+        if (mjd_last >0):
+            return format_html('%.3f'%(mjd_now-mjd_last))
+        else:
+            return format_html('--')
+
+    def render_Gmag(self, record):
+        mag_last, mjd_last, filter_last,approxsign = last_jd.get_last(record)
+
+        if (mjd_last >0 ):
+            if (approxsign!="x"):
+                return format_html('%.1f%s'%(mag_last, approxsign))
+            else:
+                return format_html('%.1f (%s)'%(mag_last,filter_last))
+        else:
+            return format_html('--')
 
 #overwriting the view from bhtom_base
 class TargetListView(SingleTableMixin, PermissionListMixin, FilterView):
