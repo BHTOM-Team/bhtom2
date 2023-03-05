@@ -305,19 +305,23 @@ HARVESTERS = {
 #     {'name': 'eligible', 'type': 'boolean'},
 #     {'name': 'dicovery_date', 'type': 'datetime'}
 # ]
+#'hidden':True # hides the extra field from target detail
+
 EXTRA_FIELDS = [
     {'name': 'classification', 'type': 'string'},
-    {'name': 'priority', 'type': 'number'},
     {'name': 'discovery_date', 'type': 'datetime'},
-    {'name': 'mjd_diff', 'type': 'number'},
+    {'name': 'mjd_last', 'type': 'number'},
     {'name': 'mag_last','type': 'number'},
+    {'name': 'importance', 'type': 'number'},
     {'name': 'cadence', 'type': 'number'},
+    {'name': 'priority', 'type': 'number'},
     {'name': 'sun_separation', 'type': 'number'},
+    {'name': 'creation_date', 'type': 'datetime'},
     {'name': 'dont_update_me', 'type': 'boolean', 'hidden': True}]
 
 CREATE_TARGET_HIDDEN_EXTRA_FIELDS = [
-    'sun_separation', 'dont_update_me', 'discovery_date',
-    'mjd_diff', 'mag_last'
+    'sun_separation', 'dont_update_me', 
+    'mjd_last', 'mag_last', 'priority'
 ]
 
 CREATE_TARGET_HIDDEN_FIELDS = [

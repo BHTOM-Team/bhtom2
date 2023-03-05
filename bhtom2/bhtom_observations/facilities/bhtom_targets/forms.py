@@ -5,6 +5,7 @@ from django.forms import ValidationError, inlineformset_factory
 from django.conf import settings
 from django.contrib.auth.models import Group
 from guardian.shortcuts import assign_perm, get_groups_with_perms, remove_perm
+from datetime import datetime, timezone
 
 from bhtom_base.bhtom_targets.models import (
     Target, TargetExtra, TargetName, SIDEREAL_FIELDS, NON_SIDEREAL_FIELDS, REQUIRED_SIDEREAL_FIELDS,
@@ -73,7 +74,6 @@ class TargetForm(forms.ModelForm):
                 te = TargetExtra.objects.filter(target=kwargs['instance'], key=field_name)
                 if te.exists():
                     self.extra_fields[field_name].initial = te.first().typed_value(extra_field['type'])
-
             self.fields.update(self.extra_fields)
 
         self.name_fields = {}
@@ -88,6 +88,16 @@ class TargetForm(forms.ModelForm):
                             key=field['name'],
                             defaults={'value': self.cleaned_data[field['name']]}
                     )
+
+            # #writing the creation date:
+            if (not self.cleaned_data.get('creation_date')):
+                now = datetime.now(timezone.utc).isoformat()
+#                print("Saving now as the creation date for target ",now,instance.name)
+                TargetExtra.objects.update_or_create(target=instance,
+                key='creation_date',
+                defaults={'value': now})
+    
+
             # Save groups for this target
             for group in self.cleaned_data['groups']:
                 assign_perm('bhtom_targets.view_target', group, instance)

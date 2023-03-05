@@ -4,6 +4,7 @@ from typing import Optional
 from sentry_sdk import capture_exception
 from bhtom_base.bhtom_base import settings
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, ReducedDatumUnit
+from numpy import around 
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -103,24 +104,24 @@ def get_last(target: Target):
     or 
     any(x in last_filter for x in r_filters)): 
         return_mag = last_mag
-        approxsign=""
+        approxsign="Gaia/r"
     else:
         #shifting the last mag by colour to match G
         #from V to G/r using V-r
         if (mean_r!=0 and mean_V!=0 and any(x in last_filter for x in V_filters)):
             return_mag = last_mag-(mean_V-mean_r)
-            approxsign="~"
+            approxsign="~G"
         #from g to G/r using g-r
         if (mean_g!=0 and mean_r!=0 and any(x in last_filter for x in g_filters)):
             return_mag = last_mag-(mean_g-mean_r)
-            approxsign="~"
+            approxsign="~G"
         #from i to G/r using i-r
         if (mean_i!=0 and mean_r!=0 and any(x in last_filter for x in i_filters)):
             return_mag = last_mag-(mean_i-mean_r)
-            approxsign="~"
+            approxsign="~G"
         #from g to G/r using g-i
         if (mean_g!=0 and mean_i!=0 and any(x in last_filter for x in g_filters)):
             return_mag = last_mag-(mean_g-mean_i)/2.
-            approxsign="~"
+            approxsign="~G"
 
-    return return_mag, last_mjd, last_filter, approxsign
+    return around(return_mag,1), last_mjd, approxsign
