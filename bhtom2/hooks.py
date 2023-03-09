@@ -2,17 +2,18 @@ from typing import Dict, Optional
 
 from bhtom2.external_service.catalog_name_lookup import query_all_services
 from bhtom2.utils.bhtom_logger import BHTOMLogger
-from bhtom2.utils.coordinate_utils import fill_galactic_coordinates
+from bhtom2.utils.coordinate_utils import fill_galactic_coordinates, update_sun_distance
 from bhtom2.utils.extinction import ogle_extinction
 from bhtom_base.bhtom_targets.models import TargetExtra
 
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Hooks]')
 
-
+# actions done just after saving the target (in creation or update)
 def target_post_save(target, created, **kwargs):
     if created:
         fill_galactic_coordinates(target)
+        update_sun_distance(target)
         names: Dict[str, str] = query_all_services(target)
         for k, v in names.items():
             te, _ = TargetExtra.objects.update_or_create(target=target,
