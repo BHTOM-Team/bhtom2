@@ -34,26 +34,36 @@ def fill_galactic_coordinates(target: Target) -> Target:
                                      unit='deg')
                                      
     # rounding galactic coords to 6 decimal points
-    target.galactic_lat = around(coordinates.galactic.b.degree, 6)
-    target.galactic_lng = around(coordinates.galactic.l.degree,6)
+    glat = around(coordinates.galactic.b.degree, 6)
+    glng = around(coordinates.galactic.l.degree,6)
+    target.galactic_lat = glat
+    target.galactic_lng = glng
+
+    # Target.objects.update_or_create(target=target, key='galactic_lat', 
+    # defaults={'value':glat})
 
     logger.debug(f'Filling in galactic coordinates for target {target.name}...')
 
     return target
 
-def update_sun_distance(target: Target):
+def update_sun_distance(target: Target, time_to_compute=None):
     """
     Computes the Sun-target distance in degrees for NOW 
     and fills the Extra field for this target.
     No decimal points, rounding to degrees.
+    Optional parameter is of Time format
     """
     #SUN's position now:
-    sun_pos = get_sun(Time(datetime.utcnow()))
+    if (time_to_compute == None):
+        tt=Time(datetime.utcnow())
+    else:
+        tt=time_to_compute
 
+    sun_pos = get_sun(tt)
     obj_pos = SkyCoord(target.ra, target.dec, unit=u.deg)
     Sun_sep = around(sun_pos.separation(obj_pos).deg,0)
     TargetExtra.objects.update_or_create(target=target,
-    key='sun_separation',
-    defaults={'value': Sun_sep})
+        key='sun_separation',
+        defaults={'value': Sun_sep})
 
     return target
