@@ -1,18 +1,21 @@
 import os
 import os.path
-from decimal import Decimal
+from decimal import Decimal, getcontext
+from numpy import around, sqrt
 from typing import Optional, Dict, Any
 
 import pandas as pd
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from bhtom_base.bhtom_catalogs.harvester import AbstractHarvester
-from bhtom_base.bhtom_targets.models import Target
+from bhtom_base.bhtom_targets.models import Target, TargetExtra
 
 from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
 from bhtom2.external_service.external_service_request import query_external_service
 from bhtom2.utils.bhtom_logger import BHTOMLogger
+
+from astropy.coordinates import Angle, SkyCoord
 
 ALERT_SOURCE: DataSource = DataSource.GAIA
 GAIA_ALERTS_CACHE_PATH: str = os.path.join(settings.BASE_DIR, "bhtom2/cache/gaia_alerts.csv")
@@ -71,6 +74,44 @@ def search_term_in_gaia_data(term: str) -> pd.DataFrame:
     else:
         raise NoResultException(f'No result for {term_data} in Gaia Alerts!')
 
+#performs a cone search on Gaia CSV file - TODO: is there an API for Gaia Alerts to do that?
+#returns the name of the target if present
+def cone_search(coordinates:SkyCoord, radius:Angle):
+    from io import StringIO
+    import astropy.units as u
+
+    # # Check if the cache file exists
+    # if os.path.exists(GAIA_ALERTS_CACHE_PATH):
+    #     gaia_data: pd.DataFrame = pd.read_csv(str(GAIA_ALERTS_CACHE_PATH))
+
+    #     try:
+    #         term_data: pd.DataFrame = gaia_data.loc[gaia_data['#Name'].str.lower() == term.lower()]
+    #     except KeyError:
+    #         os.remove(GAIA_ALERTS_CACHE_PATH)
+    #         raise InvalidExternalServiceResponseException(f'Gaia Alerts didn\'t return a valid csv file!')
+
+    #     if len(term_data.index) > 0:
+    #         target_data: pd.DataFrame = term_data.iloc[0]
+    #         return target_data
+
+    # Term is not found or the CSV file doesn't exist, so CSV needs to be updated
+    new_gaia_data = pd.read_csv(StringIO(fetch_alerts_csv()))
+
+    #simple cone search, computing the difference in coordinates column
+    new_gaia_data["diff"] = ((sqrt((new_gaia_data[" RaDeg"]-coordinates.ra)**2)+((new_gaia_data[" DecDeg"]-coordinates.dec)**2))<radius*u.deg)
+#    new_gaia_data.sort_values(by=['diff'], inplace=True)
+
+    try:
+        term_data: pd.DataFrame = new_gaia_data.loc[new_gaia_data['diff'] == True]
+    except KeyError:
+        os.remove(GAIA_ALERTS_CACHE_PATH)
+        raise InvalidExternalServiceResponseException(f'Gaia Alerts didn\'t return a valid csv file!')
+
+    if len(term_data.index) > 0:
+        target_data: pd.DataFrame = term_data.iloc[0]
+        return target_data
+    else:
+        logger.info('Cone Search returned no results in Gaia Alerts!')
 
 # Queries alerts.csv and searches for the name
 # then also loads the light curve
@@ -80,10 +121,12 @@ def get(term: str):
     # Gaia Alerts data have the columns in format:
     # #Name, RaDeg, DecDeg, ...
     # so the spaces are mandatory in column names if not preprocessed before
+    getcontext().prec = 12
+
     catalog_data: Dict[str, Any] = {
         TARGET_NAME_KEYS[DataSource.GAIA]: term_data["#Name"],
-        "ra": Decimal(term_data[" RaDeg"]),
-        "dec": Decimal(term_data[" DecDeg"]),
+        "ra": (term_data[" RaDeg"]), #dropping Decimal (LW), returning string
+        "dec": (term_data[" DecDeg"]), #dropping Decimal (LW), returning string
         "disc": term_data[" Date"],
         "classif": term_data[" Class"]
     }
@@ -127,18 +170,38 @@ class GaiaAlertsHarvester(AbstractHarvester):
             target.ra = ra
             target.dec = dec
             target.epoch = 2000
-            target.jdlastobs = 0.
-#            target.priority = 0.
-            target.targetextra_set['priority'] = 10.
+
+            te, _ = TargetExtra.objects.update_or_create(target=target,
+                key='importance',
+                defaults={'value': 10})
+#            te.save()
+            target.targetextra_set['importance'] = 9.99
 
 #            target.classification = classif
-            target.targetextra_set['classification'] = classif
+#            target.targetextra_set['classification'] = classif
+            te, _ = TargetExtra.objects.update_or_create(target=target,
+                key='classification',
+                defaults={'value': classif})
+#            te.save()
 
 #            target.discovery_date = disc
-            target.targetextra_set['discovery_date'] = disc
-            target.cadence = 1.
+#            target.targetextra_set['discovery_date'] = disc
+            te, _ = TargetExtra.objects.update_or_create(target=target,
+                key='discovery_date',
+                defaults={'value': disc})
+#            te.save()
 
-            # TODO: extra fields?
+            te, _ = TargetExtra.objects.update_or_create(target=target,
+                key='cadence',
+                defaults={'value': 1})
+#            te.save()
+
+            te, _ = TargetExtra.objects.update_or_create(target=target,
+                key=TARGET_NAME_KEYS[DataSource.GAIA],
+                defaults={'value': 'dupa'})
+ #           te.save()
+
+            #TNSId is also in the csv! use it
 
             logger.info(f'Successfully created target {gaia_name}')
 

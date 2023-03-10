@@ -9,13 +9,16 @@ from django.conf import settings
 from bhtom_base.bhtom_targets.models import Target
 
 from bhtom2.harvesters.gaia_alerts import fetch_alerts_csv, search_term_in_gaia_data, get, \
-    GaiaAlertsHarvester
+    GaiaAlertsHarvester, cone_search
+
 
 from pyfakefs.fake_filesystem_unittest import Patcher
 
 from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
 
 from pandas import DataFrame
+
+from astropy.coordinates import Angle, SkyCoord
 
 sample_file_two_lines = """
 #Name, Date, RaDeg, DecDeg, AlertMag, HistoricMag, HistoricStdDev, Class, Published, Comment, TNSid
@@ -164,3 +167,18 @@ class TestGaiaAlertsHarvester(TestCase):
             self.assertEqual(target.type, 'SIDEREAL')
             self.assertEqual(target.epoch, 2000)
 
+    @patch('bhtom2.harvesters.gaia_alerts.query_external_service', return_value=sample_file_three_lines)
+    def test_cone_search(self, mocked_query):
+        with Patcher() as patcher:
+            patcher.fs.create_dir(os.path.join(settings.BASE_DIR, 'cache'))
+            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'))
+            with open(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'), 'w') as w:
+                w.write(sample_file_two_lines)
+            coords = SkyCoord(111.55315,-39.30836,unit="deg")
+            radius: Angle = Angle(1, unit="arcsec")
+            term_data: DataFrame = cone_search(coords, radius)
+            print(term_data)
+            self.assertEqual(term_data['#Name'], "Gaia21eeo")
+            # self.assertEqual(term_data[' Date'], '2021-09-07 02:07:38')
+            # self.assertEqual(term_data[' RaDeg'], 111.55315)
+            # self.assertFalse(mocked_query.called)
