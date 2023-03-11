@@ -20,6 +20,8 @@ from bhtom_base.bhtom_alerts.alerts import GenericAlert
 from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
 from bhtom_base.bhtom_dataproducts.models import DatumValue
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
+from bhtom2.external_service.data_source_information import TARGET_NAME_KEYS
+from bhtom_base.bhtom_targets.models import TargetExtra
 
 
 def g_gaia_error(mag: float) -> float:
@@ -154,7 +156,11 @@ class GaiaAlertsBroker(BHTOMBroker):
 
     def process_reduced_data(self, target, alert=None) -> Optional[LightcurveUpdateReport]:
 
+        #TODO: figure out how to fill Aliases with Gaia name
         gaia_name: Optional[str] = self.get_target_name(target)
+        #checking target extra if Gaia name there:
+        if (not gaia_name):
+            gaia_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.GAIA]).value
 
         if not gaia_name:
             self.logger.debug(f'No Gaia name for {target.name}')

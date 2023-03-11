@@ -6,6 +6,7 @@ from astropy.coordinates import Angle, SkyCoord
 from astroquery.simbad import Simbad
 
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
+from bhtom2.harvesters.gaia_alerts import cone_search
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_targets.models import Target
 
@@ -130,8 +131,8 @@ TNS_OBJECT_URL_SLUG: str = "object"
 def query_all_services(target: Target) -> Dict[str, str]:
     alerce_result: Dict[str, str] = query_antares_for_names(target)
     simbad_result: Dict[str, str] = query_simbad_for_names(target)
-
-    return {**alerce_result, **simbad_result}
+    gaia_alerts_result: Dict[str, str] = query_gaia_alerts_for_name(target)
+    return {**alerce_result, **simbad_result, **gaia_alerts_result}
 
 
 def query_antares_for_names(target: Target) -> Dict[str, str]:
@@ -183,6 +184,25 @@ def query_simbad_for_names(target: Target) -> Dict[str, str]:
         logger.error(f'Error while querying Simbad for target {target.name}: {e}')
         return {}
 
+#searches Gaia Alerts for names of this target
+def query_gaia_alerts_for_name(target: Target) -> Dict[str,str]:
+    coordinates: SkyCoord = SkyCoord(ra=target.ra, dec=target.dec, unit="deg")
+    radius: Angle = Angle(1, unit="arcsec")
+    try:
+
+        target: Optional[Any] = None
+
+        #returns pd.DataFrame
+        result = cone_search(coordinates, radius)
+        name = result["#Name"]
+        logger.info(f'Found Gaia Alerts name...')
+        return {
+                TARGET_NAME_KEYS[DataSource.GAIA]: name,
+            }
+
+    except Exception as e:
+        logger.error(f'Exception when querying Gaia Alerts for target {target.name}: {e}')
+        return {}
 
 def tns_id_to_url_slug(tns_id: str) -> str:
     import re

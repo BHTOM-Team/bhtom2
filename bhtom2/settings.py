@@ -321,7 +321,8 @@ EXTRA_FIELDS = [
 
 CREATE_TARGET_HIDDEN_EXTRA_FIELDS = [
     'sun_separation', 'dont_update_me', 
-    'mjd_last', 'mag_last', 'priority'
+    'mjd_last', 'mag_last', 'priority',
+    'pm_ra', 'pm_dec', 'galactic_lat', 'galactic_lng', 'distance', 'distance_err'
 ]
 
 CREATE_TARGET_HIDDEN_FIELDS = [

@@ -7,7 +7,7 @@ from django.contrib.auth.models import Group
 from django.db import transaction
 from django.shortcuts import redirect
 from django.views.generic.edit import CreateView, UpdateView
-from bhtom2.bhtom_observations.facilities.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm
+from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm
 from bhtom2.external_service.data_source_information import get_pretty_survey_name
 from bhtom_base.bhtom_common.hooks import run_hook
 from bhtom_base.bhtom_common.mixins import Raise403PermissionRequiredMixin
