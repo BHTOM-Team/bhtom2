@@ -121,7 +121,7 @@ def get(term: str):
     # Gaia Alerts data have the columns in format:
     # #Name, RaDeg, DecDeg, ...
     # so the spaces are mandatory in column names if not preprocessed before
-    getcontext().prec = 12
+#    getcontext().prec = 12
 
     catalog_data: Dict[str, Any] = {
         TARGET_NAME_KEYS[DataSource.GAIA]: term_data["#Name"],
@@ -130,8 +130,6 @@ def get(term: str):
         "disc": term_data[" Date"],
         "classif": term_data[" Class"]
     }
-
-    # TODO: add other things?
 
     return catalog_data
 
@@ -171,34 +169,39 @@ class GaiaAlertsHarvester(AbstractHarvester):
             target.dec = dec
             target.epoch = 2000
 
-            te, _ = TargetExtra.objects.update_or_create(target=target,
-                key='importance',
-                defaults={'value': 10})
-#            te.save()
-            target.targetextra_set['importance'] = 9.99
+#             te, _ = TargetExtra.objects.update_or_create(target=target,
+#                 key='importance',
+#                 defaults={'value': 10})
+# #            te.save() #LW: this will never work, as the target is not written into db yet.
+#                         # so we either pass these params elsewhere or change the model
+#                         # for target to include those fields and not in extras.
+#             target.targetextra_set['importance'] = 9.99
 
-#            target.classification = classif
-#            target.targetextra_set['classification'] = classif
-            te, _ = TargetExtra.objects.update_or_create(target=target,
-                key='classification',
-                defaults={'value': classif})
-#            te.save()
+# #            target.classification = classif
+# #            target.targetextra_set['classification'] = classif
+#             te, _ = TargetExtra.objects.update_or_create(target=target,
+#                 key='classification',
+#                 defaults={'value': classif})
+# #            te.save()
 
-#            target.discovery_date = disc
-#            target.targetextra_set['discovery_date'] = disc
-            te, _ = TargetExtra.objects.update_or_create(target=target,
-                key='discovery_date',
-                defaults={'value': disc})
-#            te.save()
+# #            target.discovery_date = disc
+# #            target.targetextra_set['discovery_date'] = disc
+#             te, _ = TargetExtra.objects.update_or_create(target=target,
+#                 key='discovery_date',
+#                 defaults={'value': disc})
+# #            te.save()
 
-            te, _ = TargetExtra.objects.update_or_create(target=target,
-                key='cadence',
-                defaults={'value': 1})
-#            te.save()
+#             te, _ = TargetExtra.objects.update_or_create(target=target,
+#                 key='cadence',
+#                 defaults={'value': 1})
+# #            te.save()
 
-            te, _ = TargetExtra.objects.update_or_create(target=target,
-                key=TARGET_NAME_KEYS[DataSource.GAIA],
-                defaults={'value': 'dupa'})
+
+            # the name passing is done in hooks in the coords search
+            # but that one is again a search in csv, so we do it twice!
+            # te, _ = TargetExtra.objects.update_or_create(target=target,
+            #     key=TARGET_NAME_KEYS[DataSource.GAIA],
+            #     defaults={'value': gaia_name})
  #           te.save()
 
             #TNSId is also in the csv! use it
@@ -209,3 +212,19 @@ class GaiaAlertsHarvester(AbstractHarvester):
             logger.error(f'Exception while creating object {gaia_name}: {e}')
 
         return target
+
+    def to_extras(self) -> Dict[str,str]:
+
+        gaia_name: str = self.catalog_data[TARGET_NAME_KEYS[DataSource.GAIA]]
+        ra: str = self.catalog_data["ra"]
+        dec: str = self.catalog_data["dec"]
+        disc: str = self.catalog_data["disc"]
+        classif: str = self.catalog_data["classif"]
+
+        extras : Dict[str] = {}
+        extras["classification"] = classif
+        extras["importance"] = str(9.99)
+        extras["discovery_date"] = disc
+        extras["cadence"] = str(1.0)
+
+        return extras

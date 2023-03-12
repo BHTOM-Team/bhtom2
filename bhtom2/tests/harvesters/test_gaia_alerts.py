@@ -182,3 +182,28 @@ class TestGaiaAlertsHarvester(TestCase):
             # self.assertEqual(term_data[' Date'], '2021-09-07 02:07:38')
             # self.assertEqual(term_data[' RaDeg'], 111.55315)
             # self.assertFalse(mocked_query.called)
+
+    @patch('bhtom2.harvesters.gaia_alerts.query_external_service', return_value=sample_file_three_lines)
+    def test_extras(self, mocked_query):
+        with Patcher() as patcher:
+            patcher.fs.create_dir(os.path.join(settings.BASE_DIR, 'cache'))
+            patcher.fs.create_file(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'))
+            with open(os.path.join(settings.BASE_DIR, 'bhtom2/cache/gaia_alerts.csv'), 'w') as w:
+                w.write(sample_file_two_lines)
+            harvester = GaiaAlertsHarvester()
+            harvester.query("Gaia21edy")
+            target: Target = harvester.to_target()
+            ex = harvester.to_extras()
+
+            expected_target: Target = Target(name="Gaia21edy",
+                                             ra=Decimal(295.16969),
+                                             dec=Decimal(14.58495),
+                                             type='SIDEREAL',
+                                             epoch=2000, )
+
+            self.assertEqual(ex["importance"], "9.99")
+            self.assertEqual(ex["cadence"], "1.0")
+            self.assertEqual(ex["classification"],"unknown")
+            self.assertEqual(ex["discovery_date"],"2021-09-06 16:50:31")
+
+#            print(hasattr(harvester, 'to_extras'))
