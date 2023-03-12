@@ -82,8 +82,6 @@ INSTALLED_APPS = [
     'bhtom_custom_registration.bhtom_registration.apps.TomRegistrationConfig',
     'rest_framework.authtoken',
     'bhtom2.apps.BHTOM2Config',
-#    'bhtom2.bhtom_catalogs.apps.TomCatalogsConfig',
-
 ]
 
 MIDDLEWARE = [

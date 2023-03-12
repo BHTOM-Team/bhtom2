@@ -67,3 +67,32 @@ def update_sun_distance(target: Target, time_to_compute=None):
         defaults={'value': Sun_sep})
 
     return target
+
+# computes priority based on dt 
+# if observed within the cadence, then returns just the pure target priority
+# if not, then priority increases
+def computePriority(dt, imp, cadence):
+    ret = 0
+    # if (dt<cadence): ret = 1 #ok
+    # else:
+    #     if (cadence!=0 and dt/cadence>1 and dt/cadence<2): ret = 2
+    #     if (cadence!=0 and dt/cadence>2): ret = 3
+
+    # alternative - linear scale
+    if (cadence != 0):
+        ret = dt / cadence
+    return around(ret * imp,1)
+
+# computes dt (mjd_last - mjd_now) and then priority 
+# if observed within the cadence, then returns just the pure target priority
+# if not, then priority increases
+def computeDtAndPriority(mjd_last, imp, cadence,time_to_compute:Time=None):
+    ret = 0
+    if (time_to_compute == None):
+        tt=Time(datetime.utcnow())
+    else:
+        tt=time_to_compute
+
+    dt = tt.mjd- mjd_last
+
+    return computePriority(dt, imp, cadence)

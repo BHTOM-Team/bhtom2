@@ -23,6 +23,7 @@ from bhtom_base.bhtom_targets.models import Target, TargetExtra, TargetList, Tar
 from astropy import units as u
 from astropy.coordinates import get_sun, SkyCoord
 from numpy import around
+from bhtom2.utils.coordinate_utils import computePriority
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[BHTOM2 views]')
 
@@ -144,20 +145,6 @@ class TargetDownloadRadioDataView(TargetDownloadDataView):
 #     def render_importance(self, record):
 #         return record.extra_fields.get('importance')
 
-# computes priority based on dt and expected cadence
-# if observed within the cadence, then returns just the pure target priority
-# if not, then priority increases
-def computePriority(dt, imp, cadence):
-    ret = 0
-    # if (dt<cadence): ret = 1 #ok
-    # else:
-    #     if (cadence!=0 and dt/cadence>1 and dt/cadence<2): ret = 2
-    #     if (cadence!=0 and dt/cadence>2): ret = 3
-
-    # alternative - linear scale
-    if (cadence != 0):
-        ret = dt / cadence
-    return ret * imp
 
 #overwriting the view from bhtom_base
 class TargetListView(SingleTableMixin, PermissionListMixin, FilterView):

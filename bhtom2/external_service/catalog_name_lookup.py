@@ -194,8 +194,9 @@ def query_gaia_alerts_for_name(target: Target) -> Dict[str,str]:
 
         #returns pd.DataFrame
         result = cone_search(coordinates, radius)
+        print(result)
         name=''
-        if (result!=None):
+        if (result is not None):
             name = result["#Name"]
             logger.info(f'Found Gaia Alerts name...{name}')
             return {

@@ -9,7 +9,7 @@ def query_external_service(url: str,
                            value_to_get: str = 'text',
                            **kwargs) -> str:
 
-    response: requests.Response = requests.get(url, **kwargs)
+    response: requests.Response = requests.get(url, timeout=10, **kwargs)
     response.raise_for_status()
 
     status: int = response.status_code

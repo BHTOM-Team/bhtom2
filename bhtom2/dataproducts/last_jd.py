@@ -124,4 +124,4 @@ def get_last(target: Target):
             return_mag = last_mag-(mean_g-mean_i)/2.
             approxsign="~G"
 
-    return around(return_mag,1), last_mjd, approxsign
+    return around(return_mag,1), around(last_mjd,8), approxsign

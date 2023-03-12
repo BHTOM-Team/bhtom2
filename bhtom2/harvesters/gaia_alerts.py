@@ -98,7 +98,7 @@ def cone_search(coordinates:SkyCoord, radius:Angle):
     new_gaia_data = pd.read_csv(StringIO(fetch_alerts_csv()))
 
     #simple cone search, computing the difference in coordinates column
-    new_gaia_data["diff"] = ((sqrt((new_gaia_data[" RaDeg"]-coordinates.ra)**2)+((new_gaia_data[" DecDeg"]-coordinates.dec)**2))<radius*u.deg)
+    new_gaia_data["diff"] = ((sqrt((new_gaia_data[" RaDeg"]-coordinates.ra)**2)+((new_gaia_data[" DecDeg"]-coordinates.dec)**2))<radius.degree)
 #    new_gaia_data.sort_values(by=['diff'], inplace=True)
 
     try:
@@ -112,6 +112,7 @@ def cone_search(coordinates:SkyCoord, radius:Angle):
         return target_data
     else:
         logger.info('Cone Search returned no results in Gaia Alerts!')
+        return {}
 
 # Queries alerts.csv and searches for the name
 # then also loads the light curve

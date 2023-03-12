@@ -1,7 +1,7 @@
 from django import forms
 from astropy.coordinates import Angle
 from astropy import units as u
-from django.forms import ValidationError, inlineformset_factory
+from django.forms import ValidationError, inlineformset_factory, HiddenInput
 from django.conf import settings
 from django.contrib.auth.models import Group
 from guardian.shortcuts import assign_perm, get_groups_with_perms, remove_perm
@@ -63,6 +63,8 @@ class TargetForm(forms.ModelForm):
         #     if (field in settings.CREATE_TARGET_HIDDEN_FIELDS): 
         #         self.fields[field].widget = forms.HiddenInput()
 
+        self.fields['epoch'].initial = 2000.0
+        
         self.extra_fields = {}
         for extra_field in settings.EXTRA_FIELDS:
             # Add extra fields to the form
@@ -70,10 +72,18 @@ class TargetForm(forms.ModelForm):
             if (field_name in settings.CREATE_TARGET_HIDDEN_EXTRA_FIELDS): continue
             self.extra_fields[field_name] = extra_field_to_form_field(extra_field['type'])
             # Populate them with initial values if this is an update
+            # or with default values if the first create
+            if (field_name=='importance'): self.extra_fields[field_name].initial = 9.99
+            if (field_name=='cadence'): self.extra_fields[field_name].initial = 1.0
+            if (field_name=='creation_date'): self.extra_fields[field_name].initial = datetime.now(timezone.utc).isoformat()
+            if (field_name=='dont_update_me'): self.extra_fields[field_name].initial = False
+
+            #the values are going to be overwritten if the update
             if kwargs['instance']:
                 te = TargetExtra.objects.filter(target=kwargs['instance'], key=field_name)
                 if te.exists():
                     self.extra_fields[field_name].initial = te.first().typed_value(extra_field['type'])
+
             self.fields.update(self.extra_fields)
 
         self.name_fields = {}
@@ -89,14 +99,15 @@ class TargetForm(forms.ModelForm):
                             defaults={'value': self.cleaned_data[field['name']]}
                     )
 
-            # #writing the creation date:
-            if (not self.cleaned_data.get('creation_date')):
-                now = datetime.now(timezone.utc).isoformat()
-#                print("Saving now as the creation date for target ",now,instance.name)
-                TargetExtra.objects.update_or_create(target=instance,
-                key='creation_date',
-                defaults={'value': now})
-    
+#             # #writing the creation date:
+#             if (not self.cleaned_data.get('creation_date')):
+#                 now = datetime.now(timezone.utc).isoformat()
+# #                print("Saving now as the creation date for target ",now,instance.name)
+#                 TargetExtra.objects.update_or_create(target=instance,
+#                 key='creation_date',
+#                 defaults={'value': now})
+
+            #In hooks the light curves should be downloaded and priority computed                
 
             # Save groups for this target
             for group in self.cleaned_data['groups']:
@@ -133,12 +144,19 @@ class SiderealTargetCreateForm(TargetForm):
         for field in REQUIRED_SIDEREAL_FIELDS:
             self.fields[field].required = True
 
-        # self.fields['importance'].required = True
-        # self.fields['importance'].help_text = 'Priority as an integer 0-10 (10 is the highest)'
-        # self.fields['importance'].label = 'Priority*'
-        # self.fields['cadence'].required = True
-        # self.fields['cadence'].help_text = 'Cadence as 0-100 days'
-        # self.fields['cadence'].label = 'Cadence*'
+        self.extra_fields['classification'].required = True
+        self.extra_fields['classification'].help_text = 'Classification of the object (e.g. variable star, microlensing event)'
+        self.extra_fields['classification'].label = 'Classification*'
+        self.extra_fields['classification'].widget.attrs['rows'] = 1
+
+        self.extra_fields['discovery_date'].required = False
+        self.extra_fields['discovery_date'].help_text = 'Date of the discovery, YYYY-MM-DDTHH-MM-SS, or leave blank'
+        self.extra_fields['importance'].required = True
+        self.extra_fields['importance'].help_text = 'Target importance as an integer 0-10 (10 is the highest)'
+        self.extra_fields['importance'].label = 'Importance*'
+        self.extra_fields['cadence'].required = True
+        self.extra_fields['cadence'].help_text = 'Requested cadence (0-100 days)'
+        self.extra_fields['cadence'].label = 'Cadence*'
 
         # # self.fields['gaia_alert_name'].widget = TextInput(attrs={'maxlength': 100})
         # # self.fields['calib_server_name'].widget = TextInput(attrs={'maxlength': 100})
@@ -156,9 +174,10 @@ class SiderealTargetCreateForm(TargetForm):
         # self.fields['dont_update_me'].widget = HiddenInput()
 
     class Meta(TargetForm.Meta):
-        fields = ('name', 'type', 'ra', 'dec', 'epoch', 'parallax',
-                  'pm_ra', 'pm_dec', 'galactic_lng', 'galactic_lat',
-                  'distance', 'distance_err')
+        # fields = ('name', 'type', 'ra', 'dec', 'epoch', 'parallax',
+        #           'pm_ra', 'pm_dec', 'galactic_lng', 'galactic_lat',
+        #           'distance', 'distance_err')
+        fields = ('name', 'type', 'ra', 'dec', 'epoch')
     # class Meta(TargetForm.Meta):
     #     fields = SIDEREAL_FIELDS
 
