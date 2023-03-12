@@ -194,12 +194,14 @@ def query_gaia_alerts_for_name(target: Target) -> Dict[str,str]:
 
         #returns pd.DataFrame
         result = cone_search(coordinates, radius)
-        name = result["#Name"]
-        logger.info(f'Found Gaia Alerts name...')
-        return {
-                TARGET_NAME_KEYS[DataSource.GAIA]: name,
-            }
-
+        name=''
+        if (result!=None):
+            name = result["#Name"]
+            logger.info(f'Found Gaia Alerts name...{name}')
+            return {
+                    TARGET_NAME_KEYS[DataSource.GAIA]: name,
+                }
+        return {} #if nothing found, returns empty dictionary
     except Exception as e:
         logger.error(f'Exception when querying Gaia Alerts for target {target.name}: {e}')
         return {}
