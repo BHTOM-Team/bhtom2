@@ -133,6 +133,7 @@ def query_all_services(target: Target) -> Dict[str, str]:
     simbad_result: Dict[str, str] = query_simbad_for_names(target)
     gaia_alerts_result: Dict[str, str] = query_gaia_alerts_for_name(target)
     return {**alerce_result, **simbad_result, **gaia_alerts_result}
+#    return {**alerce_result, **simbad_result}
 
 
 def query_antares_for_names(target: Target) -> Dict[str, str]:
@@ -178,6 +179,9 @@ def query_simbad_for_names(target: Target) -> Dict[str, str]:
                 elif 'Gaia DR2' in row:
                     logger.info(f'Found Gaia DR2 name...')
                     result_dict[TARGET_NAME_KEYS[DataSource.GAIA_DR2]] = re.sub(r'^Gaia( )*DR2( )*', '', row)
+                elif 'Gaia DR3' in row:
+                    logger.info(f'Found Gaia DR3 name...')
+                    result_dict[TARGET_NAME_KEYS[DataSource.GAIA_DR3]] = re.sub(r'^Gaia( )*DR3( )*', '', row)
 
         return result_dict
     except Exception as e:
@@ -190,13 +194,13 @@ def query_gaia_alerts_for_name(target: Target) -> Dict[str,str]:
     radius: Angle = Angle(1, unit="arcsec")
     try:
 
-        target: Optional[Any] = None
+#        target: Optional[Any] = None
 
         #returns pd.DataFrame
         result = cone_search(coordinates, radius)
-        print(result)
         name=''
-        if (result is not None):
+#        if (result is not None):
+        if ( result.empty==False ):
             name = result["#Name"]
             logger.info(f'Found Gaia Alerts name...{name}')
             return {

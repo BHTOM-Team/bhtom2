@@ -160,7 +160,10 @@ class GaiaAlertsBroker(BHTOMBroker):
         gaia_name: Optional[str] = self.get_target_name(target)
         #checking target extra if Gaia name there:
         if (not gaia_name):
-            gaia_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.GAIA]).value
+            try:
+                gaia_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.GAIA]).value
+            except:
+                pass
 
         if not gaia_name:
             self.logger.debug(f'No Gaia name for {target.name}')

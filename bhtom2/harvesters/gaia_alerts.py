@@ -80,19 +80,21 @@ def cone_search(coordinates:SkyCoord, radius:Angle):
     from io import StringIO
     import astropy.units as u
 
-    # # Check if the cache file exists
-    # if os.path.exists(GAIA_ALERTS_CACHE_PATH):
-    #     gaia_data: pd.DataFrame = pd.read_csv(str(GAIA_ALERTS_CACHE_PATH))
+    # Check if the cache file exists
+    if os.path.exists(GAIA_ALERTS_CACHE_PATH):
+        logger.debug("Using cashed Gaia Alerts csv file in cone_search for Gaia Alert name")
+        gaia_data: pd.DataFrame = pd.read_csv(str(GAIA_ALERTS_CACHE_PATH))
+        gaia_data["diff"] = ((sqrt((gaia_data[" RaDeg"]-coordinates.ra)**2)+((gaia_data[" DecDeg"]-coordinates.dec)**2))<radius.degree)
 
-    #     try:
-    #         term_data: pd.DataFrame = gaia_data.loc[gaia_data['#Name'].str.lower() == term.lower()]
-    #     except KeyError:
-    #         os.remove(GAIA_ALERTS_CACHE_PATH)
-    #         raise InvalidExternalServiceResponseException(f'Gaia Alerts didn\'t return a valid csv file!')
+        try:
+            term_data: pd.DataFrame = gaia_data.loc[gaia_data['diff'] == True]
+        except KeyError:
+            os.remove(GAIA_ALERTS_CACHE_PATH)
+            raise InvalidExternalServiceResponseException(f'Gaia Alerts didn\'t return a valid csv file!')
 
-    #     if len(term_data.index) > 0:
-    #         target_data: pd.DataFrame = term_data.iloc[0]
-    #         return target_data
+        if len(term_data.index) > 0:
+            target_data: pd.DataFrame = term_data.iloc[0]
+            return target_data
 
     # Term is not found or the CSV file doesn't exist, so CSV needs to be updated
     new_gaia_data = pd.read_csv(StringIO(fetch_alerts_csv()))
@@ -112,7 +114,7 @@ def cone_search(coordinates:SkyCoord, radius:Angle):
         return target_data
     else:
         logger.info('Cone Search returned no results in Gaia Alerts!')
-        return {}
+        return pd.DataFrame() #empty data frame returned
 
 # Queries alerts.csv and searches for the name
 # then also loads the light curve
