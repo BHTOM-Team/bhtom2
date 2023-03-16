@@ -18,6 +18,8 @@ from bhtom_base.bhtom_dataproducts.processors.data_serializers import SpectrumSe
 from bhtom_base.bhtom_observations.models import ObservationRecord
 from bhtom_base.bhtom_targets.models import Target
 
+from numpy import around 
+
 register = template.Library()
 
 
@@ -174,8 +176,8 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
 
         if datum.value:
             photometry_data[datum.filter].setdefault('time', []).append(datum.timestamp)
-            photometry_data[datum.filter].setdefault('magnitude', []).append(datum.value)
-            photometry_data[datum.filter].setdefault('error', []).append(datum.error)
+            photometry_data[datum.filter].setdefault('magnitude', []).append(around(datum.value,3))
+            photometry_data[datum.filter].setdefault('error', []).append(around(datum.error,3))
 
             magnitude_min = (datum.value+datum.error) if (datum.value+datum.error) > magnitude_min else magnitude_min
             magnitude_max = (datum.value-datum.error) if (datum.value-datum.error) < magnitude_max else magnitude_max
@@ -185,8 +187,8 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
 
         if radio_datum.value:
             radio_data[radio_datum.filter].setdefault('time', []).append(radio_datum.timestamp)
-            radio_data[radio_datum.filter].setdefault('magnitude', []).append(radio_datum.value)
-            radio_data[radio_datum.filter].setdefault('error', []).append(radio_datum.error)
+            radio_data[radio_datum.filter].setdefault('magnitude', []).append(around(radio_datum.value,3))
+            radio_data[radio_datum.filter].setdefault('error', []).append(around(radio_datum.error,3))
 
             radio_min = (radio_datum.value-radio_datum.error) if (radio_datum.value-radio_datum.error) < radio_min else radio_min
             radio_max = (radio_datum.value+radio_datum.error) if (radio_datum.value+radio_datum.error) > radio_max else radio_max
