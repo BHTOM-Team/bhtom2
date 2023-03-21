@@ -25,7 +25,7 @@ class CatalogQueryView(FormView):
         try:
             #harvester might return a dictionary of extras
             self.target, self.ex = form.get_target()
-            print("extras from harvester: ",self.ex)  
+#            print("extras from harvester: ",self.ex)  
 
         except MissingDataException:
             form.add_error('term', ValidationError('Object not found'))

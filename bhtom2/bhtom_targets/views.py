@@ -18,6 +18,7 @@ from guardian.shortcuts import get_objects_for_user, get_groups_with_perms
 from django.forms import inlineformset_factory
 from astropy.coordinates import Angle
 from astropy import units as u
+from django.forms import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -118,17 +119,16 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         extra = TargetExtraFormset(self.request.POST)
         names = TargetNamesFormset(self.request.POST)
 
-        ff=self.request.POST
-        stored = Target.objects.all()
-        ra = coords_to_degrees(ff.get('ra'), 'ra')
-        dec = coords_to_degrees(ff.get('dec'), 'dec')
         target_names = get_nonempty_names_from_queryset(names.data)
         duplicate_names = check_duplicate_source_names(target_names)
         existing_names = check_for_existing_alias(target_names)
        
         ## check by RA,DEC if the target exists
-        coords_names = check_for_existing_coords(ra, dec, 3./3600., stored)
-        print("DUPlicates found at these coordinates: ",coords_names)
+        # ff=self.request.POST
+        # stored = Target.objects.all()
+        # ra = coords_to_degrees(ff.get('ra'), 'ra')
+        # dec = coords_to_degrees(ff.get('dec'), 'dec')
+        # coords_names = check_for_existing_coords(ra, dec, 3./3600., stored)
 
         # Check if the form, extras and names are all valid:
         if extra.is_valid() and names.is_valid() and (not duplicate_names) and (not existing_names) and (len(coords_names)==0):
@@ -142,9 +142,9 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             form.add_error(None, extra.non_form_errors())
             form.add_error(None, names.errors)
             form.add_error(None, names.non_form_errors())
-            if (len(coords_names)!=0):
-                ccnames = ' '.join(coords_names)
-                form.add_error(None, 'Source(s) found already at these coordinates: '+ccnames)
+            # if (len(coords_names)!=0):
+            #     ccnames = ' '.join(coords_names)
+            #     raise ValidationError(f'Source found already at these coordinates: {ccnames}')
 
             return super().form_invalid(form)
 
@@ -153,13 +153,13 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             to_add.name = name
             to_add.save()
 
+        form.add_error(None,'Creating target, please wait...')
+        # messages.add_message(self.request,
+        #         messages.INFO,
+        #         f'Creating target, please wait...')
+
         logger.info('Target post save hook: %s created: %s', self.object, True)
-        try:
-            run_hook('target_post_save', target=self.object, created=True)
-        except:
-                messages.add_message(self.request,
-                messages.WARNING,
-                f'Target {source_name,} already exists under different name/alias!')
+        run_hook('target_post_save', target=self.object, created=True)
 
         return redirect(self.get_success_url())
 

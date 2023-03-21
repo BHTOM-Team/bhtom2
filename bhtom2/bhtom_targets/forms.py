@@ -7,6 +7,11 @@ from django.contrib.auth.models import Group
 from guardian.shortcuts import assign_perm, get_groups_with_perms, remove_perm
 from datetime import datetime, timezone
 
+from bhtom_base.bhtom_targets.utils import check_for_existing_coords, coords_to_degrees
+from astropy.coordinates import Angle
+from astropy import units as u
+from django.forms import ValidationError
+
 from bhtom_base.bhtom_targets.models import (
     Target, TargetExtra, TargetName, SIDEREAL_FIELDS, NON_SIDEREAL_FIELDS, REQUIRED_SIDEREAL_FIELDS,
     REQUIRED_NON_SIDEREAL_FIELDS, REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME
@@ -172,6 +177,24 @@ class SiderealTargetCreateForm(TargetForm):
         # self.fields['dicovery_date'].widget = HiddenInput()
         # self.fields['Sun_separation'].widget = HiddenInput()
         # self.fields['dont_update_me'].widget = HiddenInput()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        stored = Target.objects.all()
+        try:
+            ra = coords_to_degrees(cleaned_data.get('ra'), 'ra')
+            dec = coords_to_degrees(cleaned_data.get('dec'), 'dec')
+        except:
+            raise ValidationError(f'Invalid format of the coordinates')
+
+        if (ra<0 or ra>360 or dec<-90 or dec>90):
+            raise ValidationError(f'Coordinates beyond range error')
+
+        coords_names = check_for_existing_coords(ra, dec, 3./3600., stored)
+        if (len(coords_names)!=0):
+            ccnames = ' '.join(coords_names)
+            raise ValidationError(f'Source found already at these coordinates: {ccnames}')
+
 
     class Meta(TargetForm.Meta):
         # fields = ('name', 'type', 'ra', 'dec', 'epoch', 'parallax',
