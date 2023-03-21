@@ -13,8 +13,11 @@ from bhtom_base.bhtom_common.hooks import run_hook
 from bhtom_base.bhtom_common.mixins import Raise403PermissionRequiredMixin
 from bhtom_base.bhtom_targets.forms import TargetExtraFormset, TargetNamesFormset
 from bhtom_base.bhtom_targets.models import Target, TargetName
-from bhtom_base.bhtom_targets.utils import check_duplicate_source_names, check_for_existing_alias, get_nonempty_names_from_queryset
+from bhtom_base.bhtom_targets.utils import check_duplicate_source_names, check_for_existing_alias, check_for_existing_coords, get_nonempty_names_from_queryset, coords_to_degrees
 from guardian.shortcuts import get_objects_for_user, get_groups_with_perms
+from django.forms import inlineformset_factory
+from astropy.coordinates import Angle
+from astropy import units as u
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +106,9 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         """
-        Runs after form validation. Creates the ``Target``, and creates any ``TargetName`` or ``TargetExtra`` objects,
+        Runs after form validation. Checks for existence of the target, also under different alias name
+        
+        Creates the ``Target``, and creates any ``TargetName`` or ``TargetExtra`` objects,
         then runs the ``target_post_save`` hook and redirects to the success URL.
 
         :param form: Form data for target creation
@@ -113,12 +118,20 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         extra = TargetExtraFormset(self.request.POST)
         names = TargetNamesFormset(self.request.POST)
 
+        ff=self.request.POST
+        stored = Target.objects.all()
+        ra = coords_to_degrees(ff.get('ra'), 'ra')
+        dec = coords_to_degrees(ff.get('dec'), 'dec')
         target_names = get_nonempty_names_from_queryset(names.data)
         duplicate_names = check_duplicate_source_names(target_names)
         existing_names = check_for_existing_alias(target_names)
+       
+        ## check by RA,DEC if the target exists
+        coords_names = check_for_existing_coords(ra, dec, 3./3600., stored)
+        print("DUPlicates found at these coordinates: ",coords_names)
 
         # Check if the form, extras and names are all valid:
-        if extra.is_valid() and names.is_valid() and (not duplicate_names) and (not existing_names):
+        if extra.is_valid() and names.is_valid() and (not duplicate_names) and (not existing_names) and (len(coords_names)==0):
             super().form_valid(form)
             extra.instance = self.object
             extra.save()
@@ -129,6 +142,10 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             form.add_error(None, extra.non_form_errors())
             form.add_error(None, names.errors)
             form.add_error(None, names.non_form_errors())
+            if (len(coords_names)!=0):
+                ccnames = ' '.join(coords_names)
+                form.add_error(None, 'Source(s) found already at these coordinates: '+ccnames)
+
             return super().form_invalid(form)
 
         for source_name, name in target_names:
@@ -137,7 +154,13 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             to_add.save()
 
         logger.info('Target post save hook: %s created: %s', self.object, True)
-        run_hook('target_post_save', target=self.object, created=True)
+        try:
+            run_hook('target_post_save', target=self.object, created=True)
+        except:
+                messages.add_message(self.request,
+                messages.WARNING,
+                f'Target {source_name,} already exists under different name/alias!')
+
         return redirect(self.get_success_url())
 
     def get_form(self, *args, **kwargs):

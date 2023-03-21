@@ -4,6 +4,12 @@ import antares_client.search as antares
 from alerce.core import Alerce
 from astropy.coordinates import Angle, SkyCoord
 from astroquery.simbad import Simbad
+import astropy.units as u
+from astropy.coordinates import ICRS, SkyCoord
+from astropy.time import Time
+from astroquery.gaia import Gaia
+from bhtom2.brokers.gaia import GaiaBroker
+
 
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
 from bhtom2.harvesters.gaia_alerts import cone_search
@@ -128,43 +134,48 @@ TNS_OBJECT_URL_SLUG: str = "object"
 #         raise TNSReplyError(f'No TNS internal names in response.')
 
 
-def query_all_services(target: Target) -> Dict[str, str]:
-    alerce_result: Dict[str, str] = query_antares_for_names(target)
-    simbad_result: Dict[str, str] = query_simbad_for_names(target)
-    gaia_alerts_result: Dict[str, str] = query_gaia_alerts_for_name(target)
-    return {**alerce_result, **simbad_result, **gaia_alerts_result}
+def query_all_services(target: Target) -> Dict[DataSource, str]:
+    alerce_result: Dict[DataSource, str] = query_antares_for_names(target)
+    simbad_result: Dict[DataSource, str] = query_simbad_for_names(target)
+    gaia_alerts_result: Dict[DataSource, str] = query_gaia_alerts_for_name(target)
+    gaiadr3_result: Dict[DataSource, str] = query_gaia_dr3_for_name(target)
+    return {**alerce_result, **simbad_result, **gaia_alerts_result, **gaiadr3_result}
 #    return {**alerce_result, **simbad_result}
 
 
-def query_antares_for_names(target: Target) -> Dict[str, str]:
+def query_antares_for_names(target: Target) -> Dict[DataSource, str]:
     try:
         coordinates: SkyCoord = SkyCoord(ra=target.ra, dec=target.dec, unit="deg")
         radius: Angle = Angle(1, unit="arcsec")
 
         target: Optional[Any] = None
+        result_dict: Dict[str] = {}
 
         for locus in antares.cone_search(coordinates, radius):
             target = locus
             break
 
         if target:
-            return {
-                TARGET_NAME_KEYS[DataSource.ANTARES]: target.locus_id,
-                TARGET_NAME_KEYS[DataSource.ZTF]: target.properties.get('ztf_object_id', '')
-            }
+            result_dict[DataSource.ANTARES] = target.locus_id
+            result_dict[DataSource.ZTF]= target.properties.get('ztf_object_id', '')
+            return result_dict
+            # return {
+            #     TARGET_NAME_KEYS[DataSource.ANTARES]: target.locus_id,
+            #     TARGET_NAME_KEYS[DataSource.ZTF]: target.properties.get('ztf_object_id', '')
+            # }
 
         return {}
     except Exception as e:
         logger.error(f'Exception when querying antares for target {target.name}: {e}')
         return {}
 
-
+#TODO: use coords instaed of name; Add SDSS name
 def query_simbad_for_names(target: Target) -> Dict[str, str]:
     from astropy.table import Table
     import re
 
     try:
-        logger.info(f'Querying Simbad for target {target.name}...')
+        logger.info(f'Querying Simbad using target`s name {target.name}...')
 
         result_table: Optional[Table] = Simbad.query_objectids(object_name=target.name)
         result_dict: Dict[str] = {}
@@ -175,21 +186,41 @@ def query_simbad_for_names(target: Target) -> Dict[str, str]:
             for row in result_table['ID']:
                 if 'AAVSO' in row:
                     logger.info(f'Found AAVSO name...')
-                    result_dict[TARGET_NAME_KEYS[DataSource.AAVSO]] = re.sub(r'^AAVSO( )*', '', row)
+                    result_dict[DataSource.AAVSO] = re.sub(r'^AAVSO( )*', '', row)
                 elif 'Gaia DR2' in row:
                     logger.info(f'Found Gaia DR2 name...')
-                    result_dict[TARGET_NAME_KEYS[DataSource.GAIA_DR2]] = re.sub(r'^Gaia( )*DR2( )*', '', row)
-                elif 'Gaia DR3' in row:
-                    logger.info(f'Found Gaia DR3 name...')
-                    result_dict[TARGET_NAME_KEYS[DataSource.GAIA_DR3]] = re.sub(r'^Gaia( )*DR3( )*', '', row)
+                    result_dict[DataSource.GAIA_DR2] = re.sub(r'^Gaia( )*DR2( )*', '', row)
+                # elif 'Gaia DR3' in row:
+                #     logger.info(f'Found Gaia DR3 name...')
+                #     result_dict[DataSource.GAIA_DR3] = re.sub(r'^Gaia( )*DR3( )*', '', row)
 
         return result_dict
     except Exception as e:
         logger.error(f'Error while querying Simbad for target {target.name}: {e}')
         return {}
 
+#searches Gaia DR3 for name using coordinates TODO: should we move this to GaiaBroker? Same for other searches?
+def query_gaia_dr3_for_name(target: Target) -> Dict[DataSource, str]:
+    coord = SkyCoord(ra=target.ra * u.degree,
+                        dec=target.dec * u.degree,
+                        frame=ICRS)
+
+    try:
+        rad: Angle = Angle(1, unit="arcsec")
+        result = Gaia.query_object_async(coordinate=coord,
+                                            radius=rad
+                                            ).to_pandas().sort_values(
+            by=['dist'])['source_id']
+        if len(result) > 0:
+            dr3_id = result[0]
+            logger.debug(f"Gaia DR3 id found for {target.name}: {dr3_id}")
+            return {DataSource.GAIA_DR3:dr3_id,}
+    except Exception as e:
+        logger.error(f'Error when querying Gaia DR3 for {target.name}: {e}')
+        return {}
+
 #searches Gaia Alerts for names of this target
-def query_gaia_alerts_for_name(target: Target) -> Dict[str,str]:
+def query_gaia_alerts_for_name(target: Target) -> Dict[DataSource,str]:
     coordinates: SkyCoord = SkyCoord(ra=target.ra, dec=target.dec, unit="deg")
     radius: Angle = Angle(1, unit="arcsec")
     try:
@@ -204,7 +235,7 @@ def query_gaia_alerts_for_name(target: Target) -> Dict[str,str]:
             name = result["#Name"]
             logger.info(f'Found Gaia Alerts name...{name}')
             return {
-                    TARGET_NAME_KEYS[DataSource.GAIA]: name,
+                    DataSource.GAIA: name,
                 }
         return {} #if nothing found, returns empty dictionary
     except Exception as e:

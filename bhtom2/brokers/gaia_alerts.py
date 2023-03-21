@@ -154,6 +154,7 @@ class GaiaAlertsBroker(BHTOMBroker):
             score=1.0
         )
 
+    #Gaia Alerts broker has to get a name, does not rely on coordinates
     def process_reduced_data(self, target, alert=None) -> Optional[LightcurveUpdateReport]:
 
         #TODO: figure out how to fill Aliases with Gaia name
@@ -182,39 +183,43 @@ class GaiaAlertsBroker(BHTOMBroker):
         else:
             return
 
-        response: str = query_external_service(lc_url, 'Gaia alerts')
-        html_data: List[str] = response.split('\n')
+        try:
+            response: str = query_external_service(lc_url, 'Gaia alerts')
+            html_data: List[str] = response.split('\n')
 
-        data: List[Tuple[datetime, DatumValue]] = []
+            data: List[Tuple[datetime, DatumValue]] = []
 
-        # The data contains alert name at the top: we wish to skip the first 3 lines
-        for entry in html_data[2:]:
-            phot_data = entry.split(',')
+            # The data contains alert name at the top: we wish to skip the first 3 lines
+            for entry in html_data[2:]:
+                phot_data = entry.split(',')
 
-            if len(phot_data) == 3:
-                # Photometry data is of format:
-                # (date, JD, photometry mag)
+                if len(phot_data) == 3:
+                    # Photometry data is of format:
+                    # (date, JD, photometry mag)
 
-                data_jd: str = phot_data[1]
-                data_mag: str = phot_data[2]
+                    data_jd: str = phot_data[1]
+                    data_mag: str = phot_data[2]
 
-                try:
-                    if 'untrusted' not in data_mag and 'null' not in data_mag and 'NaN' not in data_mag:
-                        mag: float = float(data_mag)
+                    try:
+                        if 'untrusted' not in data_mag and 'null' not in data_mag and 'NaN' not in data_mag:
+                            mag: float = float(data_mag)
 
-                        jd = Time(float(data_jd), format='jd', scale='utc')
+                            jd = Time(float(data_jd), format='jd', scale='utc')
 
-                        data.append((
-                            jd.to_datetime(timezone=TimezoneInfo()),
-                            DatumValue(
-                                value=mag,
-                                error=g_gaia_error(mag),
-                                filter=self.__filter,
-                                mjd=jd.mjd)))
+                            data.append((
+                                jd.to_datetime(timezone=TimezoneInfo()),
+                                DatumValue(
+                                    value=mag,
+                                    error=g_gaia_error(mag),
+                                    filter=self.__filter,
+                                    mjd=jd.mjd)))
 
-                except Exception as e:
-                    self.logger.error(f'Error while processing reduced datapoint for {target.name}: {e}')
-                    continue
+                    except Exception as e:
+                        self.logger.error(f'Error while processing reduced datapoint for {target.name}: {e}')
+                        continue
+        except Exception as e:
+            self.logger.error(f'Error while reading the Gaia Alerts service for {target.name}: {e}')
+            return return_for_no_new_points()
 
         try:
             data = list(set(data))

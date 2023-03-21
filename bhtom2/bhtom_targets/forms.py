@@ -235,3 +235,4 @@ TargetExtraFormset = inlineformset_factory(Target, TargetExtra, fields=('key', '
 TargetNamesFormset = inlineformset_factory(Target, TargetName, fields=('source_name', 'name',), validate_min=False,
                                            can_delete=False, extra=1, max_num=100,
                                            widgets={'name': forms.TextInput()},)
+

@@ -16,7 +16,7 @@ from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
 from bhtom_base.bhtom_dataproducts.models import DatumValue, ReducedDatumUnit
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 
-
+from bhtom_base.bhtom_targets.models import Target, TargetExtra
 
 class CRTSBrokerQueryForm(GenericQueryForm):
     target_name = forms.CharField(required=False)
@@ -73,21 +73,42 @@ class CRTSBroker(BHTOMBroker):
         # res = requests.get(query)._content
         # res_str = res.decode()
 
+        hasName = ""
         try:
+            hasName = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.CRTS]).value
+        except:
+            hasName = ""
+        
+        #extracts the data only if there is no CRTS name
+        if (hasName!=""):
+            self.logger.debug(f'CRTS data already downloaded. Skipping. {target.name}')
+            return return_for_no_new_points()
+
+        #downloading data only if not done before
+        try:        
             res_str: str = query_external_service(query, 'CRTS')
 #            res_tab = res_str.split("null|\n",1)[1]
         except IndexError:
-             # Empty response or error in connection
+                # Empty response or error in connection
             self.logger.warning(f'Warning: CRTS server down or error in connecting - no response for {target.name}')
             return return_for_no_new_points()
 
         try:
             df = pd.read_html(StringIO(res_str), match='Photometry of Objs')
             df = df[0]
+            #setting CRTS name when data found
+            inventName: Optional[str] = "CRTS+J"+ra_str+"_"+dec_str
+            TargetExtra.objects.update_or_create(target=target,
+                                            key=TARGET_NAME_KEYS[DataSource.CRTS],
+                                            defaults={
+                                                'value': inventName
+                                            })
+            self.logger.info(f"CRTS data found for {target.name}. Downloaded and stored as {inventName}")
+            
         except Exception:
-            # Response not empty, but there is no data - no Coverage
-            self.logger.warning(f'Warning: CRTS returned no observations (no coverage) for {target.name}')
-            return return_for_no_new_points()
+           # Response not empty, but there is no data - no Coverage
+           self.logger.warning(f'Warning: CRTS returned no observations (no coverage) for {target.name}')
+           return return_for_no_new_points()
 
         try:
             # Change the fields accordingly to the data format
@@ -119,3 +140,7 @@ class CRTSBroker(BHTOMBroker):
             return return_for_no_new_points()
             
         return LightcurveUpdateReport(new_points=new_points)
+
+#returns a Latex String with citation needed when using data from this broker
+def getCitation():
+    return "CITATION TO CRTS and acknowledgment."

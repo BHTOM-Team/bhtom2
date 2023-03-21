@@ -5,13 +5,16 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom2.utils.coordinate_utils import fill_galactic_coordinates, update_sun_distance
 from bhtom2.utils.extinction import ogle_extinction
 from bhtom_base.bhtom_targets.models import TargetExtra, Target
-from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
+from bhtom2.external_service.data_source_information import (TARGET_NAME_KEYS,
+                                                             DataSource)
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.core.management import call_command
 from io import StringIO
 from bhtom2.dataproducts import last_jd
 from bhtom2.utils.coordinate_utils import computeDtAndPriority
+from bhtom_base.bhtom_targets.models import TargetName
+from django.contrib import messages
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Hooks]')
 
@@ -26,14 +29,19 @@ def target_post_save(target, created, **kwargs):
     if created:
         fill_galactic_coordinates(target)
         update_sun_distance(target)
-        names: Dict[str, str] = query_all_services(target)
+        names: Dict[DataSource, str] = query_all_services(target)
         for k, v in names.items():
-            te, _ = TargetExtra.objects.update_or_create(target=target,
-                                                         key=k,
-                                                         defaults={
-                                                             'value': v
-                                                         })
-            te.save()
+            try:
+                TargetName.objects.create(target=target, source_name=k.name, name=v)
+            except Exception as e:
+                logger.warning(f'{"Target {target} already exists under different name - this should be caught ealier!"}')
+                raise e
+            # te, _ = TargetExtra.objects.update_or_create(target=target,
+            #                                              key=k,
+            #                                              defaults={
+            #                                                  'value': v
+            #                                              })
+            # te.save()
         logger.info(f'Saved new names: {names} for target {target.name}')
 
 
