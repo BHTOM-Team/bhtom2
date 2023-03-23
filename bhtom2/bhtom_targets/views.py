@@ -131,7 +131,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         # coords_names = check_for_existing_coords(ra, dec, 3./3600., stored)
 
         # Check if the form, extras and names are all valid:
-        if extra.is_valid() and names.is_valid() and (not duplicate_names) and (not existing_names) and (len(coords_names)==0):
+        if extra.is_valid() and names.is_valid() and (not duplicate_names) and (not existing_names):
             super().form_valid(form)
             extra.instance = self.object
             extra.save()

@@ -194,8 +194,14 @@ class TargetListView(SingleTableMixin, PermissionListMixin, FilterView):
             defaults={'value': mjd_last})
 
             #updating sun separation
-            obj_pos = SkyCoord(target.ra, target.dec, unit=u.deg)
-            Sun_sep = around(sun_pos.separation(obj_pos).deg,0)
+            try:
+                obj_pos = SkyCoord(target.ra, target.dec, unit=u.deg)
+                Sun_sep = around(sun_pos.separation(obj_pos).deg,0)
+            except:
+                logger.error("Coordinates outside the range in {target} for Sun position calculation!")
+                obj_pos = SkyCoord(0,0,unit=u.deg)
+                Sun_sep = "error"#around(sun_pos.separation(obj_pos).deg,0)
+
             TargetExtra.objects.update_or_create(target=target,
             key='sun_separation',
             defaults={'value': Sun_sep})
