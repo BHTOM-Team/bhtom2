@@ -42,7 +42,7 @@ class NEOWISEBroker(BHTOMBroker):
         # If the data should be checked from time to time (for alerts), assing the self.__update_cadence
         # If the data should be fetched just once, leave None
         # Remember to pass it in astropy.unit format, e.g. 6*u.h for 6 hours
-        self.__update_cadence = 30*u.day
+        self.__update_cadence = 60*u.day
 
         # If you are going to perform searches by coordinates, you might want to change the max_separation
         # Remember to pass it in astropy.unit format as well
