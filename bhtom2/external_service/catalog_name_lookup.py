@@ -211,7 +211,6 @@ def query_gaia_dr3_for_name(target: Target) -> Dict[DataSource, str]:
                                             radius=rad
                                             ).to_pandas().sort_values(
             by=['dist'])['source_id']
-        print("GAIA DR3:", result)
         if (not result.empty):
             dr3_id = result[0]
             logger.debug(f"Gaia DR3 id found for {target.name}: {dr3_id}")
