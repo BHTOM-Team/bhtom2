@@ -99,6 +99,7 @@ class NEOWISEBroker(BHTOMBroker):
             reduced_datums = []
             for _, datum in df.iterrows():
                 timestamp = Time(datum.mjd, format="mjd").to_datetime(timezone=TimezoneInfo())
+                print("NEOWISE: ",datum.mjd, datum.w1mpro, datum.w1sigmpro, datum.w2mpro, datum.w2sigmpro)
                 if (not np.isnan(datum.w1mpro) and not np.isnan(datum.w1sigmpro)):
                     reduced_datum_w1 = ReducedDatum(target=target,
                                            data_type='photometry',
@@ -111,6 +112,8 @@ class NEOWISEBroker(BHTOMBroker):
                                            filter='WISE(W1)',
                                            observer=self.__OBSERVER_NAME,
                                            facility=self.__FACILITY_NAME)
+                    reduced_datums.extend([reduced_datum_w1])
+
                 if (not np.isnan(datum.w2mpro) and not np.isnan(datum.w2sigmpro)):
                     reduced_datum_w2 = ReducedDatum(target=target,
                                            data_type='photometry',
@@ -123,7 +126,8 @@ class NEOWISEBroker(BHTOMBroker):
                                            filter='WISE(W2)',
                                            observer=self.__OBSERVER_NAME,
                                            facility=self.__FACILITY_NAME)
-                reduced_datums.extend([reduced_datum_w1,reduced_datum_w2])
+                    reduced_datums.extend([reduced_datum_w2])
+                #reduced_datums.extend([reduced_datum_w1,reduced_datum_w2])
 
             with transaction.atomic():
                 new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))
