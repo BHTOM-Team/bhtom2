@@ -18,7 +18,7 @@ from django.utils.html import format_html
 from django.urls import reverse_lazy, reverse
 from guardian.mixins import PermissionListMixin
 from guardian.shortcuts import get_objects_for_user, get_groups_with_perms, assign_perm
-from bhtom_base.bhtom_targets.filters import TargetFilter
+from bhtom2.bhtom_targets.filters import TargetFilter
 from bhtom_base.bhtom_targets.models import Target, TargetExtra, TargetList, TargetName
 from astropy import units as u
 from astropy.coordinates import get_sun, SkyCoord
