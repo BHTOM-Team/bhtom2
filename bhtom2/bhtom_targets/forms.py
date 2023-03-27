@@ -178,22 +178,31 @@ class SiderealTargetCreateForm(TargetForm):
         # self.fields['Sun_separation'].widget = HiddenInput()
         # self.fields['dont_update_me'].widget = HiddenInput()
 
-    def clean(self):
-        cleaned_data = super().clean()
-        stored = Target.objects.all()
-        try:
-            ra = coords_to_degrees(cleaned_data.get('ra'), 'ra')
-            dec = coords_to_degrees(cleaned_data.get('dec'), 'dec')
-        except:
-            raise ValidationError(f'Invalid format of the coordinates')
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     stored = Target.objects.all()
+    #     try:
+    #         ra = coords_to_degrees(cleaned_data.get('ra'), 'ra')
+    #         dec = coords_to_degrees(cleaned_data.get('dec'), 'dec')
+    #     except:
+    #         raise ValidationError(f'Invalid format of the coordinates')
 
-        if (ra<0 or ra>360 or dec<-90 or dec>90):
-            raise ValidationError(f'Coordinates beyond range error')
+    #     if (ra<0 or ra>360 or dec<-90 or dec>90):
+    #         raise ValidationError(f'Coordinates beyond range error')
 
-        coords_names = check_for_existing_coords(ra, dec, 3./3600., stored)
-        if (len(coords_names)!=0):
-            ccnames = ' '.join(coords_names)
-            raise ValidationError(f'Source found already at these coordinates: {ccnames}')
+        # if this is an update, do not check if target exists at these coordinates:
+#        target = self.data['target']
+        # target = self.data.get('target',None)
+        # print(target)
+        # cd = cleaned_data.get('creation_date',None)
+        # print(cd)
+#        te = TargetExtra.objects.filter(target=target, key="creation_date")
+#        if not te.exists():
+        # if (cd is None):
+        #     coords_names = check_for_existing_coords(ra, dec, 3./3600., stored)
+        #     if (len(coords_names)!=0):
+        #         ccnames = ' '.join(coords_names)
+        #         raise ValidationError(f'Source found already at these coordinates: {ccnames}')
 
 
     class Meta(TargetForm.Meta):
