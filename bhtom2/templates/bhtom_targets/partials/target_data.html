@@ -42,18 +42,21 @@
   {% endif %}
   {% if key == 'cadence' %}
   <dt class="col-sm-6">{{ "Cadence requested (d)" }}</dt>
-   {% endif %}
-   {% if key == 'priority' %}
-   <dt class="col-sm-6">{{ "Observing priority" }}</dt>
-    {% endif %}
-    {% if key == 'sun_separation' %}
-    <dt class="col-sm-6">{{ "Sun Separation (deg)" }}</dt>
-     {% endif %}
-     {% if key == 'creation_date' %}
-     <dt class="col-sm-6">{{ "Target created" }}</dt>
-      {% endif %}
-    
-   <dd class="col-sm-6">{{ value }}</dd>
+  {% endif %}
+  {% if key == 'priority' %}
+  <dt class="col-sm-6">{{ "Observing priority" }}</dt>
+  {% endif %}
+  {% if key == 'sun_separation' %}
+  <dt class="col-sm-6">{{ "Sun Separation (deg)" }}</dt>
+  {% endif %}
+  {% if key == 'creation_date' %}
+  <dt class="col-sm-6">{{ "Target created" }}</dt>
+  {% endif %}
+  {% if key == 'dont_update_me' %}
+  <dt class="col-sm-6">{{ "Do not update"}}</dt>
+  {% endif %}
+
+     <dd class="col-sm-6">{{ value }}</dd>
 {% endfor %}
 </dl>
 {% if target.tags %}
