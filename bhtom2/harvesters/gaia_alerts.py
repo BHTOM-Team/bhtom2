@@ -7,7 +7,7 @@ from typing import Optional, Dict, Any
 import pandas as pd
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from bhtom_base.bhtom_catalogs.harvester import AbstractHarvester
+from bhtom_base.bhtom_catalogs.harvester import AbstractHarvester, MissingDataException
 from bhtom_base.bhtom_targets.models import Target, TargetExtra
 
 from bhtom2.exceptions.external_service import NoResultException, InvalidExternalServiceResponseException
@@ -72,7 +72,7 @@ def search_term_in_gaia_data(term: str) -> pd.DataFrame:
         target_data: pd.DataFrame = term_data.iloc[0]
         return target_data
     else:
-        raise NoResultException(f'No result for {term_data} in Gaia Alerts!')
+        raise MissingDataException(f'No result for {term} in Gaia Alerts!')
 
 #performs a cone search on Gaia CSV file - TODO: is there an API for Gaia Alerts to do that?
 #returns the name of the target if present
