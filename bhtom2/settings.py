@@ -317,7 +317,7 @@ EXTRA_FIELDS = [
     {'name': 'priority', 'type': 'number'},
     {'name': 'sun_separation', 'type': 'number'},
     {'name': 'creation_date', 'type': 'datetime'},
-    {'name': 'dont_update_me', 'type': 'boolean', 'hidden': True}]
+    {'name': 'dont_update_me', 'type': 'boolean'}]#, 'hidden': True}]
 
 CREATE_TARGET_HIDDEN_EXTRA_FIELDS = [
     'sun_separation', 'dont_update_me', 
