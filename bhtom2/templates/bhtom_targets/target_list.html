@@ -73,8 +73,10 @@
               <td>
                   <a href="{% url 'detail' target.id %}" title="{{ target.name }}">{{ target.names|join:", " }}</a>
               </td>
-              <td>{{ target.ra|floatformat:6 }}</td>
-              <td>{{ target.dec|floatformat:6 }}</td>
+              <!-- <td>{{ target.ra|floatformat:6 }}</td>
+              <td>{{ target.dec|floatformat:6 }}</td> -->
+              <td>{{ target.ra|deg_to_sexigesimal:"hms" }}</td>
+              <td>{{ target.dec|deg_to_sexigesimal:"dms"  }}</td>
               <td>{{ target.reduceddatum_set.count }}</td>
               <td>{{ target.last_mag|floatformat:1 }}</td>
               <td>{{ target.last_filter }}</td>
