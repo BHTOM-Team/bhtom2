@@ -11,6 +11,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import reverse
 from guardian.shortcuts import get_objects_for_user
 from plotly import offline
+from astropy.time import Time
 
 from bhtom_base.bhtom_dataproducts.forms import DataProductUploadForm
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, ReducedDatumUnit
@@ -213,6 +214,16 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
         radio_dtick_digit = 1
 
     plot_data = []
+
+##MAG:
+    mjds_to_plot = []
+    mjds_lim_to_plot = []
+    for filter_name, filter_values in photometry_data.items():
+        if filter_values['magnitude']:
+            mjds_to_plot=Time(filter_values['time'], format="datetime").mjd
+        if filter_values.get('limit'):
+            mjds_lim_to_plot=Time(filter_values['time'], format="datetime").mjd
+
     for filter_name, filter_values in photometry_data.items():
         if filter_values['magnitude']:
             series = go.Scatter(
@@ -226,8 +237,42 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                     array=filter_values['error'],
                     visible=True
                 ),
+                text=mjds_to_plot,
+#                customdata = filter_values['error'],
+            # hovertemplate='<br>'.join([
+            # "%{x}",
+            # "%{y:.2f}",
+            # "%{customdata}",
+            # ]),
+            hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
+                <br>MJD= %{text:.6f}\
+            <br>mag= %{y:.3f}&#177;%{error_y.array:3f}'
+            )     
+            plot_data.append(series)
+        elif filter_values.get('limit'):  #limit in MAG
+            series = go.Scatter(
+                x=filter_values['time'],
+                y=filter_values['limit'],
+                mode='markers',
+                opacity=0.5,
+                marker=dict(color=color_map.get(filter_name), symbol=6),  # upside down triangle
+                name=filter_name+" limit",
+                text=mjds_lim_to_plot,
+                hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
+                <br>MJD= %{text:.6f}\
+            <br>limit mag= (%{y:.3f})'
             )
             plot_data.append(series)
+
+
+##RADIO:
+    mjds_radio_to_plot = []
+    mjds_radio_lim_to_plot = []
+    for filter_name, filter_values in radio_data.items():
+        if filter_values['magnitude']:
+            mjds_radio_to_plot=Time(filter_values['time'], format="datetime").mjd
+        if filter_values.get('limit'):
+            mjds_radio_lim_to_plot=Time(filter_values['time'], format="datetime").mjd
 
     for filter_name, filter_values in radio_data.items():
         if filter_values['magnitude']:
@@ -242,6 +287,11 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                     array=filter_values['error'],
                     visible=True
                 ),
+            text=mjds_radio_to_plot,
+            hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
+                <br>MJD= %{text:.6f}\
+            <br>flux= %{y:.3f}&#177;%{error_y.array:3f}',
+
                 yaxis="y2"
             )
             plot_data.append(series)
@@ -251,8 +301,12 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 y=filter_values['limit'],
                 mode='markers',
                 opacity=0.5,
-                marker=dict(color=color_map.get(filter_name), symbol=6),  # upside down triangle
-                name=filter_name + ' non-detection',
+                marker=dict(color=color_map.get(filter_name), symbol='star-triangle-down'),  # star triangle down
+                name=filter_name+" limit",
+                text=mjds_radio_lim_to_plot,
+                hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
+                <br>MJD= %{text:.6f}\
+            <br>limit flux= (%{y:.3f})'
             )
             plot_data.append(series)
 
@@ -265,6 +319,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
     )
     layout.legend.font.color = label_color
     fig = go.Figure(data=plot_data, layout=layout)
+
     fig.update_layout(
         margin=dict(t= 40, r= 20, b= 40, l= 80),
         yaxis=dict(
