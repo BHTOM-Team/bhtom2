@@ -216,13 +216,13 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
     plot_data = []
 
 ##MAG:
-    mjds_to_plot = []
-    mjds_lim_to_plot = []
+    mjds_to_plot = {}
+    mjds_lim_to_plot = {}
     for filter_name, filter_values in photometry_data.items():
         if filter_values['magnitude']:
-            mjds_to_plot=Time(filter_values['time'], format="datetime").mjd
+            mjds_to_plot[filter_name]=Time(filter_values['time'], format="datetime").mjd
         if filter_values.get('limit'):
-            mjds_lim_to_plot=Time(filter_values['time'], format="datetime").mjd
+            mjds_lim_to_plot[filter_name]=Time(filter_values['time'], format="datetime").mjd
 
     for filter_name, filter_values in photometry_data.items():
         if filter_values['magnitude']:
@@ -237,7 +237,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                     array=filter_values['error'],
                     visible=True
                 ),
-                text=mjds_to_plot,
+                text=mjds_to_plot[filter_name],
 #                customdata = filter_values['error'],
             # hovertemplate='<br>'.join([
             # "%{x}",
@@ -257,7 +257,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 opacity=0.5,
                 marker=dict(color=color_map.get(filter_name), symbol=6),  # upside down triangle
                 name=filter_name+" limit",
-                text=mjds_lim_to_plot,
+                text=mjds_lim_to_plot[filter_name],
                 hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
                 <br>MJD= %{text:.6f}\
             <br>limit mag= (%{y:.3f})'
@@ -266,13 +266,13 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
 
 
 ##RADIO:
-    mjds_radio_to_plot = []
-    mjds_radio_lim_to_plot = []
+    mjds_radio_to_plot = {}
+    mjds_radio_lim_to_plot = {}
     for filter_name, filter_values in radio_data.items():
         if filter_values['magnitude']:
-            mjds_radio_to_plot=Time(filter_values['time'], format="datetime").mjd
+            mjds_radio_to_plot[filter_name]=Time(filter_values['time'], format="datetime").mjd
         if filter_values.get('limit'):
-            mjds_radio_lim_to_plot=Time(filter_values['time'], format="datetime").mjd
+            mjds_radio_lim_to_plot[filter_name]=Time(filter_values['time'], format="datetime").mjd
 
     for filter_name, filter_values in radio_data.items():
         if filter_values['magnitude']:
@@ -287,7 +287,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                     array=filter_values['error'],
                     visible=True
                 ),
-            text=mjds_radio_to_plot,
+            text=mjds_radio_to_plot[filter_name],
             hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
                 <br>MJD= %{text:.6f}\
             <br>flux= %{y:.3f}&#177;%{error_y.array:3f}',
@@ -303,7 +303,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 opacity=0.5,
                 marker=dict(color=color_map.get(filter_name), symbol='star-triangle-down'),  # star triangle down
                 name=filter_name+" limit",
-                text=mjds_radio_lim_to_plot,
+                text=mjds_radio_lim_to_plot[filter_name],
                 hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
                 <br>MJD= %{text:.6f}\
             <br>limit flux= (%{y:.3f})'
