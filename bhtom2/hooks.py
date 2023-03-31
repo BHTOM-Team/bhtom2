@@ -36,13 +36,13 @@ def target_post_save(target, created, **kwargs):
             except Exception as e:
                 logger.warning(f'{"Target {target} already exists under different name - this should be caught ealier!"}')
                 raise e
-            # te, _ = TargetExtra.objects.update_or_create(target=target,
+        #    te, _ = TargetExtra.objects.update_or_create(target=target,
             #                                              key=k,
             #                                              defaults={
             #                                                  'value': v
             #                                              })
             # te.save()
-        logger.info(f'Saved new names: {names} for target {target.name}')
+#        logger.info(f'Saved new names: {names} for target {target.name}')
 
 
     # Fill in extinction

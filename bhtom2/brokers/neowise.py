@@ -16,6 +16,7 @@ from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
 from bhtom_base.bhtom_dataproducts.models import DatumValue
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 
+from bhtom_base.bhtom_targets.models import  TargetExtra
 
 
 class NEOWISEBrokerQueryForm(GenericQueryForm):
@@ -81,6 +82,15 @@ class NEOWISEBroker(BHTOMBroker):
             res_tab = res_str.split("null|\n",1)[1]
             df = pd.read_csv(StringIO(res_tab), header=None, names=['ra', 'dec', 'clon', 'clat', 'mjd', 'w1mpro', 'w1sigmpro', 'w2mpro', 'w2sigmpro', 'dist', 'angle'], delim_whitespace=True)
             #df = df[0]
+            #setting NEOWISE name when data found
+            inventName: Optional[str] = "NEOWISE+J"+ra_str+"_"+dec_str
+            TargetExtra.objects.update_or_create(target=target,
+                                            key=TARGET_NAME_KEYS[DataSource.NEOWISE],
+                                            defaults={
+                                                'value': inventName
+                                            })
+            self.logger.info(f"NEOWISE data found for {target.name}. Downloaded and stored as {inventName}")
+
         except Exception:
             # Response not empty, but there is no data - no Coverage
             self.logger.warning(f'Warning: NEOWISE returned no observations (no coverage) for {target.name}')

@@ -187,9 +187,10 @@ def query_simbad_for_names(target: Target) -> Dict[str, str]:
                 if 'AAVSO' in row:
                     logger.info(f'Found AAVSO name...')
                     result_dict[DataSource.AAVSO] = re.sub(r'^AAVSO( )*', '', row)
-                elif 'Gaia DR2' in row:
-                    logger.info(f'Found Gaia DR2 name...')
-                    result_dict[DataSource.GAIA_DR2] = re.sub(r'^Gaia( )*DR2( )*', '', row)
+        ##LW: GAIA DR2 off, as we get an error if DR3 id is the same (key violation)
+                # elif 'Gaia DR2' in row:
+                #     logger.info(f'Found Gaia DR2 name...')
+                #     result_dict[DataSource.GAIA_DR2] = re.sub(r'^Gaia( )*DR2( )*', '', row)
                 # elif 'Gaia DR3' in row:
                 #     logger.info(f'Found Gaia DR3 name...')
                 #     result_dict[DataSource.GAIA_DR3] = re.sub(r'^Gaia( )*DR3( )*', '', row)

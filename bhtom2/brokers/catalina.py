@@ -16,7 +16,7 @@ from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
 from bhtom_base.bhtom_dataproducts.models import DatumValue, ReducedDatumUnit
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 
-from bhtom_base.bhtom_targets.models import Target, TargetExtra
+from bhtom_base.bhtom_targets.models import  TargetExtra
 
 class CRTSBrokerQueryForm(GenericQueryForm):
     target_name = forms.CharField(required=False)
