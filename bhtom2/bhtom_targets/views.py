@@ -20,6 +20,8 @@ from astropy.coordinates import Angle
 from astropy import units as u
 from django.forms import ValidationError
 
+from django.views.generic.detail import DetailView
+
 logger = logging.getLogger(__name__)
 
 class TargetCreateView(LoginRequiredMixin, CreateView):

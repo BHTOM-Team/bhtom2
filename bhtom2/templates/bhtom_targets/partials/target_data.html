@@ -58,22 +58,18 @@
 {% endfor %}
 </dl>
 
-<p>Other names {{ alias }}
+<p>Other names
 </p>
 <dl class="row">
-
-  {% for value in target.names %}
-  {% if forloop.first %}
-  {% else %}
-  <dt class="col-sm-6"></dt>
+{% for value in target.aliases.all %}
+  <dt class="col-sm-6">{{ value.source_name }}</dt>
   <dd class="col-sm-6">{{ value }}</dd>
-  {% endif %}
   {% endfor %}
-
 </dl>
 
+
 {% if target.tags %}
-<p>Tags</p>
+<!-- <p>Tags</p> -->
 <dl class="row">
 {% for key, value in target.tags.items %}
   <dt class="col-sm-6">{{ key }}</dt>
