@@ -2,11 +2,9 @@
 <dl class="row">
   {% for target_name in target.names %}
     {% if forloop.first %}
-      <dt class="col-sm-6">Names</dt>
-    {% else %}
-      <dt class="col-sm-6">&nbsp;</dt>
+      <dt class="col-sm-6">Name</dt>
+      <dd class="col-sm-6">{{ target_name }}</dd>
     {% endif %}
-    <dd class="col-sm-6">{{ target_name }}</dd>
   {% endfor %}
   {% for key, value in target.as_dict.items %}
   {% if value and key != 'name' %}
@@ -59,6 +57,21 @@
      <dd class="col-sm-6">{{ value }}</dd>
 {% endfor %}
 </dl>
+
+<p>Other names {{ alias }}
+</p>
+<dl class="row">
+
+  {% for value in target.names %}
+  {% if forloop.first %}
+  {% else %}
+  <dt class="col-sm-6"></dt>
+  <dd class="col-sm-6">{{ value }}</dd>
+  {% endif %}
+  {% endfor %}
+
+</dl>
+
 {% if target.tags %}
 <p>Tags</p>
 <dl class="row">
