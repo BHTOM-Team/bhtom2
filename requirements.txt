@@ -40,3 +40,4 @@ recommonmark>=0.7
 specutils==1.5.0
 sphinx>=4.0
 lxml==4.9.1
+crispy-bootstrap4>=2022.1
