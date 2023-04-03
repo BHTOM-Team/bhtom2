@@ -10,10 +10,12 @@ from django.db import transaction
 
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
 from bhtom2.external_service.data_source_information import DataSource, AAVSO_ACCEPTED_FLAGS, FILTERS
+from bhtom2.external_service.data_source_information import TARGET_NAME_KEYS
 from bhtom2.external_service.external_service_request import query_external_service
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum, DatumValue
-from bhtom_base.bhtom_targets.models import Target
+from bhtom_base.bhtom_targets.models import Target, TargetExtra
+import astropy.units as u
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[AAVSO data fetch]')
 
@@ -29,6 +31,17 @@ class AAVSOBroker(BHTOMBroker):
     def __init__(self):
         super().__init__(DataSource.AAVSO)
 
+        # If the survey is e.g. a space survey, fill the facility and observer names in and treat is as a constant
+        self.__FACILITY_NAME: str = "AAVSO"
+        self.__OBSERVER_NAME: str = "AASVO"
+
+        self.__target_name_key: str = TARGET_NAME_KEYS.get(self.data_source, self.data_source.name)
+
+        # If the data should be checked from time to time (for alerts), assing the self.__update_cadence
+        # If the data should be fetched just once, leave None
+        # Remember to pass it in astropy.unit format, e.g. 6*u.h for 6 hours
+        self.__update_cadence = 10*u.day
+
         try:
             self.__base_url: str = settings.AAVSO_API_PATH
         except Exception as e:
@@ -43,7 +56,11 @@ class AAVSOBroker(BHTOMBroker):
             .loc[df.band.isin(FILTERS[self.data_source])]
 
     def process_reduced_data(self, target: Target, alert=None) -> Optional[LightcurveUpdateReport]:
-        aavso_name: Optional[str] = self.get_target_name(target)
+#LW: this checks for alias name among names, but we get key violation if the same name is used
+#that's why I'm moving the aavso name to extras
+#        aavso_name: Optional[str] = self.get_target_name(target)
+
+        aavso_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.AAVSO])
 
         if not aavso_name:
             self.logger.debug(f'No AAVSO name for {target.name}')
@@ -57,13 +74,17 @@ class AAVSOBroker(BHTOMBroker):
             "delimiter": "~"
         }
 
-        response = query_external_service(self.__base_url, params=params)
-
-        buffer: StringIO = StringIO(str(response))
-        result_df: pd.DataFrame = self.filter_data(pd.read_csv(buffer,
+        try:
+            self.logger.debug(f'Try to read AAVSO for {aavso_name}')
+            response = query_external_service(self.__base_url, params=params)
+            buffer: StringIO = StringIO(str(response))
+            result_df: pd.DataFrame = self.filter_data(pd.read_csv(buffer,
                                                                sep="~",
                                                                index_col=False,
-                                                               error_bad_lines=False))
+                                                               on_bad_lines=False))
+        except:
+            self.logger.debug(f'AAVSO name reading failed, probably no aavso data for {aavso_name}')
+            return return_for_no_new_points()
 
         new_points: int = 0
         data: List[Tuple[datetime, DatumValue]] = []
@@ -108,6 +129,7 @@ class AAVSOBroker(BHTOMBroker):
                                            facility=datum[1].facility) for datum in data]
             with transaction.atomic():
                 new_points = len(ReducedDatum.objects.bulk_create(reduced_datums))
+                self.logger.info(f"AAVSO Broker returned {new_points} points for {target.name}")
 
         except Exception as e:
             self.logger.error(f'Error while saving reduced datapoints for {target.name} '
