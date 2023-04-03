@@ -140,8 +140,6 @@ def query_all_services(target: Target) -> Dict[DataSource, str]:
     gaia_alerts_result: Dict[DataSource, str] = query_gaia_alerts_for_name(target)
     gaiadr3_result: Dict[DataSource, str] = query_gaia_dr3_for_name(target)
     return {**alerce_result, **simbad_result, **gaia_alerts_result, **gaiadr3_result}
-#    return {**alerce_result, **simbad_result}
-
 
 def query_antares_for_names(target: Target) -> Dict[DataSource, str]:
     try:
