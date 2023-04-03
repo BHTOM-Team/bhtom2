@@ -3,7 +3,7 @@ from typing import Dict, List
 
 
 class DataSource(Enum):
-    GAIA = auto()
+    GAIA_ALERTS = auto()
     GAIA_DR3 = auto()
     GAIA_DR2 = auto()
     ZTF = auto()
@@ -23,8 +23,8 @@ class DataSource(Enum):
 
 
 PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
-    DataSource.GAIA: "Gaia",
-    "GAIA": "Gaia",
+    DataSource.GAIA_ALERTS: "Gaia Alerts",
+#    "GAIA": "Gaia",
     DataSource.ZTF: "ZTF",
     DataSource.CPCS: "CPCS",
     DataSource.AAVSO: "AAVSO",
@@ -49,7 +49,7 @@ def get_pretty_survey_name(source_name: DataSource) -> str:
 
 
 TARGET_NAME_KEYS: Dict[DataSource, str] = {
-    DataSource.GAIA: "Gaia name",
+    DataSource.GAIA_ALERTS: "Gaia Alerts name",
     DataSource.ZTF: "ZTF name",
     DataSource.CPCS: "CPCS name",
     DataSource.AAVSO: "AAVSO name",
@@ -70,7 +70,7 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
 
 
 FILTERS: Dict[DataSource, List[str]] = {
-    DataSource.GAIA: ["G"],
+    DataSource.GAIA_ALERTS: ["G"],
     DataSource.ZTF: ["g", "i", "r"],
     DataSource.AAVSO: ["V", "I", "R"],
     DataSource.ANTARES: ["R", "g"],

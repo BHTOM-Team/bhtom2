@@ -32,9 +32,9 @@ def g_gaia_error(mag: float) -> float:
 
     error = 0.0
 
-    if mag < 13.5:
+    if mag <= 13.5:
         error: float = a1 * 13.5 + b1
-    elif 13.5 < mag < 17:
+    elif 13.5 < mag <= 17:
         error: float = a1 * mag + b1
     elif mag > 17:
         error: float = a2 * mag + b2
@@ -67,11 +67,11 @@ class GaiaQueryForm(GenericQueryForm):
 
 
 class GaiaAlertsBroker(BHTOMBroker):
-    name = DataSource.GAIA.name
+    name = DataSource.GAIA_ALERTS.name
     form = GaiaQueryForm
 
     def __init__(self):
-        super().__init__(DataSource.GAIA)
+        super().__init__(DataSource.GAIA_ALERTS)
 
         try:
             self.__base_url: str = settings.GAIA_ALERTS_PATH
@@ -79,10 +79,10 @@ class GaiaAlertsBroker(BHTOMBroker):
             self.logger.error(f'No GAIA_ALERTS_PATH in settings found!')
             self.__base_url = 'http://gsaweb.ast.cam.ac.uk'
 
-        self.__GAIA_FILTER_NAME: str = FILTERS[DataSource.GAIA][0]
+        self.__GAIA_FILTER_NAME: str = FILTERS[DataSource.GAIA_ALERTS][0]
         self.__filter: str = filter_name(self.__GAIA_FILTER_NAME, get_pretty_survey_name(self.data_source.name))
-        self.__FACILITY_NAME: str = "Gaia"
-        self.__OBSERVER_NAME: str = "Gaia"
+        self.__FACILITY_NAME: str = "Gaia Alerts"
+        self.__OBSERVER_NAME: str = "Gaia Alerts"
 
     def fetch_alerts(self, parameters):
         """Must return an iterator"""
@@ -157,17 +157,16 @@ class GaiaAlertsBroker(BHTOMBroker):
     #Gaia Alerts broker has to get a name, does not rely on coordinates
     def process_reduced_data(self, target, alert=None) -> Optional[LightcurveUpdateReport]:
 
-        #TODO: figure out how to fill Aliases with Gaia name
         gaia_name: Optional[str] = self.get_target_name(target)
         #checking target extra if Gaia name there:
         if (not gaia_name):
             try:
-                gaia_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.GAIA]).value
+                gaia_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.GAIA_ALERTS]).value
             except:
                 pass
 
         if not gaia_name:
-            self.logger.debug(f'No Gaia name for {target.name}')
+            self.logger.debug(f'No Gaia Alerts name for {target.name}')
             return return_for_no_new_points()
 
         self.logger.debug(f'Updating Gaia Alerts lightcurve for {gaia_name}, target: {target.name}')

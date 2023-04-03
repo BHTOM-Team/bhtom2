@@ -62,8 +62,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'django.contrib.sites',
+    'django.contrib.staticfiles',
     'django_extensions',
     'guardian',
     'bhtom_base.bhtom_common.apps.TomCommonConfig',
@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     'bhtom_custom_registration.bhtom_registration.apps.TomRegistrationConfig',
     'rest_framework.authtoken',
     'bhtom2.apps.BHTOM2Config',
+    'crispy_bootstrap4',
 ]
 
 MIDDLEWARE = [

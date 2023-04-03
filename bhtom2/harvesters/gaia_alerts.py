@@ -17,7 +17,7 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 
 from astropy.coordinates import Angle, SkyCoord
 
-ALERT_SOURCE: DataSource = DataSource.GAIA
+ALERT_SOURCE: DataSource = DataSource.GAIA_ALERTS
 GAIA_ALERTS_CACHE_PATH: str = os.path.join(settings.BASE_DIR, "bhtom2/cache/gaia_alerts.csv")
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Gaia Alerts Harvester]')
@@ -127,7 +127,7 @@ def get(term: str):
 #    getcontext().prec = 12
 
     catalog_data: Dict[str, Any] = {
-        TARGET_NAME_KEYS[DataSource.GAIA]: term_data["#Name"],
+        TARGET_NAME_KEYS[DataSource.GAIA_ALERTS]: term_data["#Name"],
         "ra": (term_data[" RaDeg"]), #dropping Decimal (LW), returning string
         "dec": (term_data[" DecDeg"]), #dropping Decimal (LW), returning string
         "disc": term_data[" Date"],
@@ -147,7 +147,7 @@ class GaiaAlertsHarvester(AbstractHarvester):
         # catalog_data contains now all fields needed to create a target
         target = super().to_target()
 
-        gaia_name: str = self.catalog_data[TARGET_NAME_KEYS[DataSource.GAIA]]
+        gaia_name: str = self.catalog_data[TARGET_NAME_KEYS[DataSource.GAIA_ALERTS]]
         ra: str = self.catalog_data["ra"]
         dec: str = self.catalog_data["dec"]
         disc: str = self.catalog_data["disc"]
@@ -218,7 +218,7 @@ class GaiaAlertsHarvester(AbstractHarvester):
 
     def to_extras(self) -> Dict[str,str]:
 
-        gaia_name: str = self.catalog_data[TARGET_NAME_KEYS[DataSource.GAIA]]
+        gaia_name: str = self.catalog_data[TARGET_NAME_KEYS[DataSource.GAIA_ALERTS]]
         ra: str = self.catalog_data["ra"]
         dec: str = self.catalog_data["dec"]
         disc: str = self.catalog_data["disc"]

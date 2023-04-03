@@ -42,7 +42,7 @@ def create_sample_target() -> Target:
     )
 
     target.save()
-    TargetName.objects.create(target=target, source_name=DataSource.GAIA.name, name='Gaia21edy')
+    TargetName.objects.create(target=target, source_name=DataSource.GAIA_ALERTS.name, name='Gaia21edy')
 
     return target
 
@@ -56,7 +56,7 @@ def create_second_sample_target() -> Target:
         epoch=2000,
     )
 
-    target.save(names={DataSource.GAIA.name: "Gaia21een"})
+    target.save(names={DataSource.GAIA_ALERTS.name: "Gaia21een"})
 
     return target
 

@@ -239,7 +239,7 @@ def query_gaia_alerts_for_name(target: Target) -> Dict[DataSource,str]:
             name = result["#Name"]
             logger.info(f'Found Gaia Alerts name...{name}')
             return {
-                    DataSource.GAIA: name,
+                    DataSource.GAIA_ALERTS: name,
                 }
         return {} #if nothing found, returns empty dictionary
     except Exception as e:
