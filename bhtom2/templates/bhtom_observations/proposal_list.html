@@ -1,0 +1,28 @@
+{% extends 'bhtom_common/base.html' %}
+{% load bootstrap4 observation_extras %}
+{% block title %}Facility Status{% endblock %}
+{% block content %}
+<h3>Proposals</h3>
+<div>
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Active from</th>
+      <th>Active from</th>
+    </tr>
+  </thead>
+    {% for proposal in object_list %}
+        <tr>
+            <td>{{ proposal.name }}</td>
+            <td>{{ proposal.active_from }}</td>
+            <td>{{ proposal.active_to }}</td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td>No proposals yet.</td>
+        </tr>
+    {% endfor %}
+</table>
+</div>
+{% endblock %}

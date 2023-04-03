@@ -31,5 +31,6 @@ urlpatterns = [
     path('targets/<int:pk>/download-photometry', TargetDownloadPhotometryDataView.as_view(), name='download_photometry_data'),
     path('targets/<int:pk>/download-radio', TargetDownloadRadioDataView.as_view(), name='download_radio_data'),
     path('catalogs/', include('bhtom2.bhtom_catalogs.urls')),
+    path('proposals/', include('bhtom2.bhtom_observations.urls', namespace='proposals')),
     path('', include('bhtom_base.bhtom_common.urls')),
 ]
