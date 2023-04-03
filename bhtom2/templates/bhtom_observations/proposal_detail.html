@@ -1,0 +1,13 @@
+{% extends 'bhtom_common/base.html' %}
+{% load comments bootstrap4 bhtom_common_extras targets_extras observation_extras dataproduct_extras static cache %}
+{% block title %}Proposal {{ object.name }}{% endblock %}
+{% block additional_css %}
+    <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}">
+{% endblock %}
+{% block content %}
+<div>
+    <h1>{{ object.name }}</h1>
+    <h4>Active from {{ object.active_from }} to {{ object.active_to }}</h4>
+</div>
+{% endblock content %}
