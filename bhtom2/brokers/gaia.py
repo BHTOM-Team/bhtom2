@@ -92,25 +92,27 @@ class GaiaBroker(BHTOMBroker):
     def process_reduced_data(self, target, alert=None) -> Optional[LightcurveUpdateReport]:
         dr3_id: Optional[str] = self.get_target_name(target)
 
-        self.logger.debug(f'Searching for DR3 lightcurve for DR3 id {dr3_id} (target {target.name})...')
+#        self.logger.debug(f'Searching for DR3 lightcurve for DR3 id {dr3_id} (target {target.name})...')
 
         if not dr3_id:
+            self.logger.debug(f"No Gaia DR3 id hence not trying to get the lightcurve")
+            return return_for_no_new_points()
 
-            coord = SkyCoord(ra=target.ra * u.degree,
-                             dec=target.dec * u.degree,
-                             frame=ICRS)
+            # coord = SkyCoord(ra=target.ra * u.degree,
+            #                  dec=target.dec * u.degree,
+            #                  frame=ICRS)
 
-            try:
-                result = Gaia.query_object_async(coordinate=coord,
-                                                 width=self.cross_match_max_separation,
-                                                 height=self.cross_match_max_separation).to_pandas().sort_values(
-                    by=['dist'])['source_id']
-                if len(result) > 0:
-                    dr3_id = result[0]
-                    TargetName.objects.create(target=target, source_name=DataSource.GAIA_DR3.name, name=dr3_id)
-            except Exception as e:
-                self.logger.error(f'Error when querying Gaia DR3 for {target.name}: {e}')
-                return return_for_no_new_points()
+            # try:
+            #     result = Gaia.query_object_async(coordinate=coord,
+            #                                      width=self.cross_match_max_separation,
+            #                                      height=self.cross_match_max_separation).to_pandas().sort_values(
+            #         by=['dist'])['source_id']
+            #     if len(result) > 0:
+            #         dr3_id = result[0]
+            #         TargetName.objects.create(target=target, source_name=DataSource.GAIA_DR3.name, name=dr3_id)
+            # except Exception as e:
+            #     self.logger.error(f'Error when querying Gaia DR3 for {target.name}: {e}')
+            #     return return_for_no_new_points()
 
         lightcurve: pd.DataFrame = self.download_dr3_lightcurve(dr3_id)
 

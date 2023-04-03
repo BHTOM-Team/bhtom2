@@ -20,6 +20,8 @@ from bhtom_base.bhtom_alerts.alerts import GenericAlert
 from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
 from bhtom_base.bhtom_dataproducts.models import DatumValue
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
+from bhtom2.external_service.data_source_information import TARGET_NAME_KEYS
+from bhtom_base.bhtom_targets.models import TargetExtra
 
 
 def g_gaia_error(mag: float) -> float:
@@ -30,9 +32,9 @@ def g_gaia_error(mag: float) -> float:
 
     error = 0.0
 
-    if mag < 13.5:
+    if mag <= 13.5:
         error: float = a1 * 13.5 + b1
-    elif 13.5 < mag < 17:
+    elif 13.5 < mag <= 17:
         error: float = a1 * mag + b1
     elif mag > 17:
         error: float = a2 * mag + b2
@@ -65,11 +67,11 @@ class GaiaQueryForm(GenericQueryForm):
 
 
 class GaiaAlertsBroker(BHTOMBroker):
-    name = DataSource.GAIA.name
+    name = DataSource.GAIA_ALERTS.name
     form = GaiaQueryForm
 
     def __init__(self):
-        super().__init__(DataSource.GAIA)
+        super().__init__(DataSource.GAIA_ALERTS)
 
         try:
             self.__base_url: str = settings.GAIA_ALERTS_PATH
@@ -77,10 +79,10 @@ class GaiaAlertsBroker(BHTOMBroker):
             self.logger.error(f'No GAIA_ALERTS_PATH in settings found!')
             self.__base_url = 'http://gsaweb.ast.cam.ac.uk'
 
-        self.__GAIA_FILTER_NAME: str = FILTERS[DataSource.GAIA][0]
+        self.__GAIA_FILTER_NAME: str = FILTERS[DataSource.GAIA_ALERTS][0]
         self.__filter: str = filter_name(self.__GAIA_FILTER_NAME, get_pretty_survey_name(self.data_source.name))
-        self.__FACILITY_NAME: str = "Gaia"
-        self.__OBSERVER_NAME: str = "Gaia"
+        self.__FACILITY_NAME: str = "Gaia Alerts"
+        self.__OBSERVER_NAME: str = "Gaia Alerts"
 
     def fetch_alerts(self, parameters):
         """Must return an iterator"""
@@ -152,12 +154,19 @@ class GaiaAlertsBroker(BHTOMBroker):
             score=1.0
         )
 
+    #Gaia Alerts broker has to get a name, does not rely on coordinates
     def process_reduced_data(self, target, alert=None) -> Optional[LightcurveUpdateReport]:
 
         gaia_name: Optional[str] = self.get_target_name(target)
+        #checking target extra if Gaia name there:
+        if (not gaia_name):
+            try:
+                gaia_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.GAIA_ALERTS]).value
+            except:
+                pass
 
         if not gaia_name:
-            self.logger.debug(f'No Gaia name for {target.name}')
+            self.logger.debug(f'No Gaia Alerts name for {target.name}')
             return return_for_no_new_points()
 
         self.logger.debug(f'Updating Gaia Alerts lightcurve for {gaia_name}, target: {target.name}')
@@ -173,39 +182,43 @@ class GaiaAlertsBroker(BHTOMBroker):
         else:
             return
 
-        response: str = query_external_service(lc_url, 'Gaia alerts')
-        html_data: List[str] = response.split('\n')
+        try:
+            response: str = query_external_service(lc_url, 'Gaia alerts')
+            html_data: List[str] = response.split('\n')
 
-        data: List[Tuple[datetime, DatumValue]] = []
+            data: List[Tuple[datetime, DatumValue]] = []
 
-        # The data contains alert name at the top: we wish to skip the first 3 lines
-        for entry in html_data[2:]:
-            phot_data = entry.split(',')
+            # The data contains alert name at the top: we wish to skip the first 3 lines
+            for entry in html_data[2:]:
+                phot_data = entry.split(',')
 
-            if len(phot_data) == 3:
-                # Photometry data is of format:
-                # (date, JD, photometry mag)
+                if len(phot_data) == 3:
+                    # Photometry data is of format:
+                    # (date, JD, photometry mag)
 
-                data_jd: str = phot_data[1]
-                data_mag: str = phot_data[2]
+                    data_jd: str = phot_data[1]
+                    data_mag: str = phot_data[2]
 
-                try:
-                    if 'untrusted' not in data_mag and 'null' not in data_mag and 'NaN' not in data_mag:
-                        mag: float = float(data_mag)
+                    try:
+                        if 'untrusted' not in data_mag and 'null' not in data_mag and 'NaN' not in data_mag:
+                            mag: float = float(data_mag)
 
-                        jd = Time(float(data_jd), format='jd', scale='utc')
+                            jd = Time(float(data_jd), format='jd', scale='utc')
 
-                        data.append((
-                            jd.to_datetime(timezone=TimezoneInfo()),
-                            DatumValue(
-                                value=mag,
-                                error=g_gaia_error(mag),
-                                filter=self.__filter,
-                                mjd=jd.mjd)))
+                            data.append((
+                                jd.to_datetime(timezone=TimezoneInfo()),
+                                DatumValue(
+                                    value=mag,
+                                    error=g_gaia_error(mag),
+                                    filter=self.__filter,
+                                    mjd=jd.mjd)))
 
-                except Exception as e:
-                    self.logger.error(f'Error while processing reduced datapoint for {target.name}: {e}')
-                    continue
+                    except Exception as e:
+                        self.logger.error(f'Error while processing reduced datapoint for {target.name}: {e}')
+                        continue
+        except Exception as e:
+            self.logger.error(f'Error while reading the Gaia Alerts service for {target.name}: {e}')
+            return return_for_no_new_points()
 
         try:
             data = list(set(data))

@@ -25,7 +25,7 @@ class WSDBConnection():
             user=settings.WSDB_USER,
             port=settings.WSDB_PORT,
             password=settings.WSDB_PASSWORD)
-            self.__cursor = self.__connection()
+            self.__cursor = self.__connection.cursor()
         except Exception as e:
             self.__logger.error(f'Error while connecting to WSDB: {e}')
             raise InvalidExternalServiceStatusException('Can\'t connect to WSDB')

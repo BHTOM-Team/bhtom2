@@ -1,7 +1,9 @@
 from crispy_forms.layout import Div
 from django import forms
+from crispy_forms.layout import Column, Div, HTML, Layout, Row, MultiWidgetField, Fieldset
 
 from bhtom_base.bhtom_observations.facility import BaseManualObservationFacility, BaseManualObservationForm
+from bhtom_base.bhtom_observations.widgets import FilterField
 
 SUCCESSFUL_OBSERVING_STATES = ['COMPLETED']
 FAILED_OBSERVING_STATES = ['WINDOW_EXPIRED', 'CANCELED', 'FAILURE_LIMIT_REACHED', 'NOT_ATTEMPTED']
@@ -9,12 +11,18 @@ TERMINAL_OBSERVING_STATES = SUCCESSFUL_OBSERVING_STATES + FAILED_OBSERVING_STATE
 
 
 class BialkowPhotometryObservationForm(BaseManualObservationForm):
+    
     name = forms.CharField()
     start = forms.CharField(widget=forms.TextInput(attrs={'type': 'date'}))
     end = forms.CharField(required=False, widget=forms.TextInput(attrs={'type': 'date'}))
     observation_id = forms.CharField(required=False)
     observation_params = forms.CharField(required=False, widget=forms.Textarea(attrs={'type': 'json'}))
+    cadence_frequency = forms.IntegerField(required=True, help_text='in hours')
+    exposure_time = forms.FloatField(required=True, help_text='in seconds')
 
+    valid_filters = [['U', 'U'],['B', 'B'],['V', 'V'], ['R', 'R'], ['I', 'I'],['Ha_narrow', 'HA_NARROW'],['Ha_wide', 'HA_WIDE'], ['Clear', 'CLEAR']]
+    filters = forms.ChoiceField(required=True, label='Filters', choices=valid_filters)   
+   
     def layout(self):
         return Div(
             Div('name', 'observation_id'),
@@ -23,16 +31,18 @@ class BialkowPhotometryObservationForm(BaseManualObservationForm):
                 Div('end', css_class='col'),
                 css_class='form-row'
             ),
+            Div('filters'),
             Div('observation_params')
         )
+
 
 class Bialkow(BaseManualObservationFacility):
     name = 'Bialkow'
     SITES = {
         'Bialkow': {
             'sitecode': 'bialkow',
-            'latitude': 16.658407910831198,
-            'longitude': 51.47435543316016,
+            'latitude': 51.47435543316016,
+            'longitude': 16.658407910831198,
             'elevation': 150
         }
     }
@@ -65,3 +75,33 @@ class Bialkow(BaseManualObservationFacility):
 
     def all_data_products(self, observation_record):
         return []
+
+    def get_facility_weather_urls(self):
+        facility_weather_urls = {
+            'code': 'Bialkow',
+            'sites': [
+                {
+                    'code': site['sitecode'],
+                    'weather_url': 'http://alps.astro.uni.wroc.pl/alps_bia/'
+                }
+                for site in self.SITES.values()]
+            }
+        return facility_weather_urls
+
+
+    def get_facility_status(self):
+        return {
+            'code': 'Bialkow',
+            'sites': [
+                {
+                    'code': site['sitecode'],
+                    'telescopes': [
+                        {
+                            'code': 'bialkow',
+                            'status': 'AVAILABLE'
+                        },
+                    ],
+                    'weather_url': "http://alps.astro.uni.wroc.pl/alps_bia/"
+                }
+                for site in self.SITES.values()]
+            }

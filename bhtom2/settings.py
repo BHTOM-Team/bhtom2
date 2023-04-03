@@ -62,8 +62,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'django.contrib.sites',
+    'django.contrib.staticfiles',
     'django_extensions',
     'guardian',
     'bhtom_base.bhtom_common.apps.TomCommonConfig',
@@ -81,7 +81,8 @@ INSTALLED_APPS = [
     'bhtom_base.bhtom_dataproducts.apps.TomDataproductsConfig',
     'bhtom_custom_registration.bhtom_registration.apps.TomRegistrationConfig',
     'rest_framework.authtoken',
-    'bhtom2.apps.BHTOM2Config'
+    'bhtom2.apps.BHTOM2Config',
+    'crispy_bootstrap4',
 ]
 
 MIDDLEWARE = [
@@ -270,7 +271,8 @@ TOM_ALERT_CLASSES = [
     'bhtom2.brokers.catalina.CRTSBroker',
     'bhtom2.brokers.linear.LINEARBroker',
     'bhtom2.brokers.first.FIRSTBroker',
-    'bhtom2.brokers.ps1.PS1Broker'
+    'bhtom2.brokers.ps1.PS1Broker',
+    'bhtom2.brokers.allwise.ALLWISEBroker'
     # 'bhtom2.brokers.antares.ANTARESBroker',
 ]
 
@@ -304,16 +306,24 @@ HARVESTERS = {
 #     {'name': 'eligible', 'type': 'boolean'},
 #     {'name': 'dicovery_date', 'type': 'datetime'}
 # ]
+#'hidden':True # hides the extra field from target detail
+
 EXTRA_FIELDS = [
     {'name': 'classification', 'type': 'string'},
-    {'name': 'priority', 'type': 'number'},
     {'name': 'discovery_date', 'type': 'datetime'},
+    {'name': 'mjd_last', 'type': 'number'},
+    {'name': 'mag_last','type': 'number'},
+    {'name': 'importance', 'type': 'number'},
     {'name': 'cadence', 'type': 'number'},
+    {'name': 'priority', 'type': 'number'},
     {'name': 'sun_separation', 'type': 'number'},
-    {'name': 'dont_update_me', 'type': 'boolean', 'hidden': True}]
+    {'name': 'creation_date', 'type': 'datetime'},
+    {'name': 'dont_update_me', 'type': 'boolean'}]#, 'hidden': True}]
 
 CREATE_TARGET_HIDDEN_EXTRA_FIELDS = [
-    'sun_separation', 'dont_update_me', 'discovery_date'
+    'sun_separation', 'dont_update_me', 
+    'mjd_last', 'mag_last', 'priority',
+    'pm_ra', 'pm_dec', 'galactic_lat', 'galactic_lng', 'distance', 'distance_err'
 ]
 
 CREATE_TARGET_HIDDEN_FIELDS = [
@@ -388,5 +398,8 @@ TOM_FACILITY_CLASSES = [
     'bhtom2.bhtom_observations.facilities.ostrowik.Ostrowik',
     'bhtom2.bhtom_observations.facilities.rem.REM',
     'bhtom2.bhtom_observations.facilities.moletai.Moletai',
-    'bhtom2.bhtom_observations.facilities.bialkow.Bialkow'
+    'bhtom2.bhtom_observations.facilities.bialkow.Bialkow',
+    'bhtom2.bhtom_observations.facilities.piwnice.Piwnice',
+    'bhtom2.bhtom_observations.facilities.suhora.Suhora',
+    'bhtom2.bhtom_observations.facilities.loiano.Loiano',
 ]

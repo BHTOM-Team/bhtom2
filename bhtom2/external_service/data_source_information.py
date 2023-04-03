@@ -3,7 +3,7 @@ from typing import Dict, List
 
 
 class DataSource(Enum):
-    GAIA = auto()
+    GAIA_ALERTS = auto()
     GAIA_DR3 = auto()
     GAIA_DR2 = auto()
     ZTF = auto()
@@ -15,6 +15,7 @@ class DataSource(Enum):
     ZTF_DR8 = auto()
     SDSS_DR14 = auto()
     NEOWISE = auto()
+    ALLWISE = auto()
     CRTS = auto()
     LINEAR = auto()
     FIRST = auto()
@@ -22,8 +23,8 @@ class DataSource(Enum):
 
 
 PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
-    DataSource.GAIA: "Gaia",
-    "GAIA": "Gaia",
+    DataSource.GAIA_ALERTS: "Gaia Alerts",
+#    "GAIA": "Gaia",
     DataSource.ZTF: "ZTF",
     DataSource.CPCS: "CPCS",
     DataSource.AAVSO: "AAVSO",
@@ -35,6 +36,7 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.GAIA_DR3: "Gaia DR3",
     DataSource.SDSS_DR14: "SDSS-DR14",
     DataSource.NEOWISE: "NEOWISE",
+    DataSource.ALLWISE: "ALLWISE",
     DataSource.CRTS: "CRTS",
     DataSource.LINEAR: "LINEAR",
     DataSource.FIRST: "FIRST",
@@ -47,7 +49,7 @@ def get_pretty_survey_name(source_name: DataSource) -> str:
 
 
 TARGET_NAME_KEYS: Dict[DataSource, str] = {
-    DataSource.GAIA: "Gaia name",
+    DataSource.GAIA_ALERTS: "Gaia Alerts name",
     DataSource.ZTF: "ZTF name",
     DataSource.CPCS: "CPCS name",
     DataSource.AAVSO: "AAVSO name",
@@ -59,6 +61,7 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.GAIA_DR3: "Gaia DR3 id",
     DataSource.SDSS_DR14: "SDSS-DR14 id",
     DataSource.NEOWISE: "NEOWISE name",
+    DataSource.ALLWISE: "ALLWISE name",
     DataSource.CRTS: "CRTS name",
     DataSource.LINEAR: "LINEAR name",
     DataSource.FIRST: "FIRST name",
@@ -67,7 +70,7 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
 
 
 FILTERS: Dict[DataSource, List[str]] = {
-    DataSource.GAIA: ["G"],
+    DataSource.GAIA_ALERTS: ["G"],
     DataSource.ZTF: ["g", "i", "r"],
     DataSource.AAVSO: ["V", "I", "R"],
     DataSource.ANTARES: ["R", "g"],
@@ -75,6 +78,7 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.GAIA_DR3: ["RP", "G", "BP"],
     DataSource.SDSS_DR14: ["u","g", "r", "i", "z"],
     DataSource.NEOWISE: ["W1", "W2"],
+    DataSource.ALLWISE: ["W1", "W2"],
     DataSource.CRTS: ["CL"],
     DataSource.LINEAR: ["CL"],
     DataSource.FIRST: ["Flux 1.4GHz"],

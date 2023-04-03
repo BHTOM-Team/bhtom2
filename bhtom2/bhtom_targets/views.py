@@ -7,14 +7,20 @@ from django.contrib.auth.models import Group
 from django.db import transaction
 from django.shortcuts import redirect
 from django.views.generic.edit import CreateView, UpdateView
-from bhtom2.bhtom_observations.facilities.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm
+from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm
 from bhtom2.external_service.data_source_information import get_pretty_survey_name
 from bhtom_base.bhtom_common.hooks import run_hook
 from bhtom_base.bhtom_common.mixins import Raise403PermissionRequiredMixin
 from bhtom_base.bhtom_targets.forms import TargetExtraFormset, TargetNamesFormset
 from bhtom_base.bhtom_targets.models import Target, TargetName
-from bhtom_base.bhtom_targets.utils import check_duplicate_source_names, check_for_existing_alias, get_nonempty_names_from_queryset
+from bhtom_base.bhtom_targets.utils import check_duplicate_source_names, check_for_existing_alias, check_for_existing_coords, get_nonempty_names_from_queryset, coords_to_degrees
 from guardian.shortcuts import get_objects_for_user, get_groups_with_perms
+from django.forms import inlineformset_factory
+from astropy.coordinates import Angle
+from astropy import units as u
+from django.forms import ValidationError
+
+from django.views.generic.detail import DetailView
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +28,6 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
     """
     View for creating a Target. Requires authentication.
     """
-
     model = Target
     fields = '__all__'
 
@@ -104,7 +109,9 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         """
-        Runs after form validation. Creates the ``Target``, and creates any ``TargetName`` or ``TargetExtra`` objects,
+        Runs after form validation. Checks for existence of the target, also under different alias name
+        
+        Creates the ``Target``, and creates any ``TargetName`` or ``TargetExtra`` objects,
         then runs the ``target_post_save`` hook and redirects to the success URL.
 
         :param form: Form data for target creation
@@ -118,6 +125,28 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         duplicate_names = check_duplicate_source_names(target_names)
         existing_names = check_for_existing_alias(target_names)
 
+        cleaned_data = form.cleaned_data
+        stored = Target.objects.all()
+        try:
+            ra = coords_to_degrees(cleaned_data['ra'], 'ra')
+            dec = coords_to_degrees(cleaned_data['dec'], 'dec')
+        except:
+            form.add_error(None, "Invalid format of the coordinates")
+            return super().form_invalid(form)
+#            raise ValidationError(f'Invalid format of the coordinates')
+
+        if (ra<0 or ra>360 or dec<-90 or dec>90):
+            form.add_error(None, "Coordinates beyond range")
+            return super().form_invalid(form)
+#            raise ValidationError(f'Coordinates beyond range error')
+
+        coords_names = check_for_existing_coords(ra, dec, 3./3600., stored)
+        if (len(coords_names)!=0):
+            ccnames = ' '.join(coords_names)
+            form.add_error(None, "Source found already at these coordinates")
+            return super().form_invalid(form)
+#            raise ValidationError(f'Source found already at these coordinates: {ccnames}')
+
         # Check if the form, extras and names are all valid:
         if extra.is_valid() and names.is_valid() and (not duplicate_names) and (not existing_names):
             super().form_valid(form)
@@ -130,6 +159,10 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             form.add_error(None, extra.non_form_errors())
             form.add_error(None, names.errors)
             form.add_error(None, names.non_form_errors())
+            # if (len(coords_names)!=0):
+            #     ccnames = ' '.join(coords_names)
+            #     raise ValidationError(f'Source found already at these coordinates: {ccnames}')
+
             return super().form_invalid(form)
 
         for source_name, name in target_names:
@@ -137,8 +170,16 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             to_add.name = name
             to_add.save()
 
+#        form.add_error(None,'Creating target, please wait...')
+        # messages.add_message(self.request,
+        #         messages.INFO,
+        #         f'Creating target, please wait...')
+
+        #TODO: there should be a message here on success and a warning to wait: Gathering archival data for target
+        #TODO: the hook here should be run in the background 
         logger.info('Target post save hook: %s created: %s', self.object, True)
         run_hook('target_post_save', target=self.object, created=True)
+
         return redirect(self.get_success_url())
 
     def get_form(self, *args, **kwargs):

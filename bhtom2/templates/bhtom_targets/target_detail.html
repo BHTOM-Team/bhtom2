@@ -89,11 +89,13 @@
                     <h4>Observe</h4>
                     {% observing_buttons object %}
                     <hr/>
-                    {% observationtemplate_run object %}
+                    {% observation_plan target form.facility.value %}
                     <hr/>
-                    <h4>Plan</h4>
+                    <!-- {% observationtemplate_run object %}
+                    <hr/> -->
+                    <!-- <h4>Plan</h4> -->
                     {% if object.type == 'SIDEREAL' %}
-                        {% target_plan %}
+                        <!-- {% target_plan %} -->
                         {% moon_distance object %}
                     {% elif target.type == 'NON_SIDEREAL' %}
                         <p>Airmass plotting for non-sidereal targets is not currently supported. If you would like to
