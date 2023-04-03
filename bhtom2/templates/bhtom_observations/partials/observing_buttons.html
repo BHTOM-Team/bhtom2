@@ -1,0 +1,4 @@
+{% for facility, is_active in facilities %}
+<a href="{% url 'bhtom_base.bhtom_observations:create' facility=facility %}?target_id={{ target.id }}"
+   class="btn btn-outline-primary {% if not is_active %}disabled{% endif %}">{{ facility }}</a>
+{% endfor %}

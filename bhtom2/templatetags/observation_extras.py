@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from urllib.parse import urlencode
 
 from django import forms, template
@@ -9,12 +9,11 @@ from plotly import offline
 import plotly.graph_objs as go
 
 from bhtom_base.bhtom_observations.forms import AddExistingObservationForm, UpdateObservationId
-from bhtom_base.bhtom_observations.models import ObservationRecord
+from bhtom_base.bhtom_observations.models import ObservationRecord, Proposal
 from bhtom_base.bhtom_observations.facility import get_service_class, get_service_classes
 from bhtom_base.bhtom_observations.observation_template import ApplyObservationTemplateForm
 from bhtom_base.bhtom_observations.utils import get_sidereal_visibility
 from bhtom_base.bhtom_targets.models import Target
-
 
 register = template.Library()
 
@@ -38,12 +37,24 @@ def display_obs_type(value):
 
 
 @register.inclusion_tag('bhtom_observations/partials/observing_buttons.html')
-def observing_buttons(target):
+def observing_buttons(target, user):
     """
     Displays the observation buttons for all facilities available in the TOM.
     """
+    today = date.today()
     facilities = get_service_classes()
-    return {'target': target, 'facilities': facilities}
+    user_proposals = Proposal.objects.filter(users__in=[user.id])
+
+    if user.is_superuser:
+        return {'target': target, 'facilities': zip(facilities, [True] * len(facilities))}
+
+    # Filter facilities by user
+    active = [(str(f).lower() == 'lco' or len(user_proposals.filter(facilities__in=[str(f)],
+                                                                    active_to__gte=today,
+                                                                    active_from__lte=today)) > 0) for f in
+              facilities.keys()]
+
+    return {'target': target, 'facilities': zip(facilities, active)}
 
 
 @register.inclusion_tag('bhtom_observations/partials/existing_observation_form.html')
