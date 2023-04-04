@@ -16,6 +16,8 @@ from bhtom2.utils.coordinate_utils import computeDtAndPriority
 from bhtom_base.bhtom_targets.models import TargetName
 from django.contrib import messages
 
+from bhtom2.utils.openai_utils import get_constel
+
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Hooks]')
 
 # @receiver(pre_save, sender=Target)
@@ -102,6 +104,13 @@ def target_post_save(target, created, **kwargs):
         te, _ = TargetExtra.objects.update_or_create(target=target,
         key='priority',
         defaults={'value': priority})
+
+        constellation = get_constel(target.ra, target.dec)
+        te, _ = TargetExtra.objects.update_or_create(target=target,
+        key='constellation',
+        defaults={'value': constellation})
+
+        print("HOOKS: constell: ",constellation)
         te.save()
 
 

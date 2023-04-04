@@ -23,6 +23,9 @@
 </dl>
 <dl class="row">
 {% for key, value in extras.items %}
+{% if key == 'constellation' %}
+ <dt class="col-sm-6">{{ "Constellation" }}</dt>
+  {% endif %}
 {% if key == 'classification' %}
  <dt class="col-sm-6">{{ "Class" }}</dt>
   {% endif %}

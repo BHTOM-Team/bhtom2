@@ -54,6 +54,8 @@ PROPOSALS_API_KEYS={
 'LCO':secret.get('LCO_API_KEY','')
 }
 
+OPENAI_API_KEY = secret.get('OPENAI_API_KEY')
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -318,12 +320,14 @@ EXTRA_FIELDS = [
     {'name': 'priority', 'type': 'number'},
     {'name': 'sun_separation', 'type': 'number'},
     {'name': 'creation_date', 'type': 'datetime'},
+    {'name': 'constellation', 'type': 'string'},
     {'name': 'dont_update_me', 'type': 'boolean'}]#, 'hidden': True}]
 
 CREATE_TARGET_HIDDEN_EXTRA_FIELDS = [
     'sun_separation', 'dont_update_me', 
     'mjd_last', 'mag_last', 'priority',
-    'pm_ra', 'pm_dec', 'galactic_lat', 'galactic_lng', 'distance', 'distance_err'
+    'pm_ra', 'pm_dec', 'galactic_lat', 'galactic_lng', 'distance', 'distance_err',
+    'constellation'
 ]
 
 CREATE_TARGET_HIDDEN_FIELDS = [
