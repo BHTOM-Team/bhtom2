@@ -58,22 +58,48 @@
 {% endfor %}
 </dl>
 
-<p>Other names
+<p>Other names:
 </p>
-<dl class="row">
-{% for value in target.aliases.all %}
-  <dt class="col-sm-6">{{ value.source_name }}</dt>
-  <dd class="col-sm-6">{{ value }}</dd>
-  {% endfor %}
-</dl>
+<!-- <dl class="row"> -->
+  <!-- the link to the source could be also stored in DATASOURCE -->
+  {% for value in target.aliases.all %}
+    <dt class="col-sm-6">{{ value.source_name }}</dt>
+    {% if value.source_name == "GAIA_ALERTS" %}
+    <dd class="col-sm-6">
+      <a href='https://gsaweb.ast.cam.ac.uk/alerts/alert/{{ value }}' target="_blank"> 
+        {{ value }}
+      </a>
+    </dd>
+    {% elif value.source_name == "ZTF" %}
+    <dd class="col-sm-6">
+      <a href='https://alerce.online/object/{{ value }}' target="_blank"> 
+        {{ value }}
+      </a>
+    </dd>
+    {% elif value.source_name == "ANTARES" %}
+    <dd class="col-sm-6">
+      <a href='https://antares.noirlab.edu/loci/{{ value }}' target="_blank"> 
+        {{ value }}
+      </a>
+    </dd>
+    {% elif value.source_name == "GAIA_DR3" %}
+    <dd class="col-sm-6">
+      <a href='https://gaia.ari.uni-heidelberg.de/singlesource.html#id={{ value }}' target="_blank">        {{ value }}
+      </a>
+    </dd>
+    {% else %}
+    <dd class="col-sm-6">{{ value }}</dd>
+    {% endif %}
+{% endfor %}
+<!-- </dl> -->
 
 
 {% if target.tags %}
 <!-- <p>Tags</p> -->
-<dl class="row">
+<!-- <dl class="row"> -->
 {% for key, value in target.tags.items %}
   <dt class="col-sm-6">{{ key }}</dt>
   <dd class="col-sm-6">{{ value }}</dd>
 {% endfor %}
-</dl>
+<!-- </dl> -->
 {% endif %}
