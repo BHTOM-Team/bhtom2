@@ -125,6 +125,21 @@
                     {% spectroscopy_for_target target %}
                 </div>
 
+                {% if perms.tom_targets.view_target %}
+                <div class="tab-pane" id="publication">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <a href="{% url 'targets:generate_target_description_latex' pk=target.id %}" role="button" title="Generate LaTeX" class="btn btn-info">Generate LaTeX target description</a>
+                        <!-- <button formaction='{% url "generate_target_description_latex" target.id %}' class="btn btn-info" role="button">Generate LaTeX target description                            
+                        </button> -->
+                        <!-- <button onclick="download_photometry_stats_latex()" class="btn btn-info" role="button">Download photometry stats latex table</button>
+                        <button onclick="download_photometry_stats()" class="btn btn-info" role="button">Download photometry stats</button> -->
+                      </div>
+                    </div>
+                </div>
+                {% endif %}
+
+
                 {% comments_enabled as comments_are_enabled %}
                 <hr/>
                 <h5>Comments</h5>
@@ -135,6 +150,8 @@
                         {% render_comment_form for object %}
                     {% endif %}
                 {% endif %}
+
+
             </div>
         </div>
     </div>
@@ -149,5 +166,10 @@
     function download_radio() {
       window.open('{% url "download_radio_data" target.id %}')
     }
+
+    // function generate_target_description_latex() {
+    //   window.open('{% url "generate_target_description_latex" target.id %}')
+    // }
+
 </script>
 {% endblock %}

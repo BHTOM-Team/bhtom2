@@ -6,6 +6,7 @@ from astropy.coordinates import get_sun, SkyCoord
 from astropy.time import Time
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic import View
+from bhtom2.utils.openai_utils import latex_text_target
 from django_filters.views import FilterView
 from django_tables2.views import SingleTableMixin
 from guardian.mixins import PermissionListMixin
@@ -203,3 +204,4 @@ class TargetListImagesView(SingleTableMixin, PermissionListMixin, FilterView):
                                 else TargetList.objects.none())
         context['query_string'] = self.request.META['QUERY_STRING']
         return context
+

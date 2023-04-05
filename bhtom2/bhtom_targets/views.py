@@ -7,18 +7,21 @@ from django.contrib.auth.models import Group
 from django.db import transaction
 from django.shortcuts import redirect
 from django.views.generic.edit import CreateView, UpdateView
-from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm
+from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm, TargetLatexDescriptionForm
 from bhtom2.external_service.data_source_information import get_pretty_survey_name
+from bhtom2.utils.openai_utils import latex_text_target
 from bhtom_base.bhtom_common.hooks import run_hook
 from bhtom_base.bhtom_common.mixins import Raise403PermissionRequiredMixin
 from bhtom_base.bhtom_targets.forms import TargetExtraFormset, TargetNamesFormset
 from bhtom_base.bhtom_targets.models import Target, TargetName
+from bhtom_base.bhtom_targets.templatetags.targets_extras import deg_to_sexigesimal
 from bhtom_base.bhtom_targets.utils import check_duplicate_source_names, check_for_existing_alias, check_for_existing_coords, get_nonempty_names_from_queryset, coords_to_degrees
 from guardian.shortcuts import get_objects_for_user, get_groups_with_perms
 from django.forms import inlineformset_factory
 from astropy.coordinates import Angle
 from astropy import units as u
 from django.forms import ValidationError
+from django.http import HttpResponseRedirect
 
 from django.views.generic.detail import DetailView
 
@@ -327,3 +330,79 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
             form.fields['groups'].queryset = self.request.user.groups.all()
         return form
 
+
+#form for generating latex description of the target (under Publication)
+#very similar form to update
+class TargetGenerateTargetDescriptionLatexView(UpdateView):
+    model = Target
+    fields = '__all__'
+
+    def get_context_data(self, **kwargs):
+        """
+        Adds formset for ``TargetName`` and ``TargetExtra`` to the context.
+
+        :returns: context object
+        :rtype: dict
+        """
+        extra_field_names = [extra['name'] for extra in settings.EXTRA_FIELDS]
+        context = super().get_context_data(**kwargs)
+        context['names_form'] = TargetNamesFormset(instance=self.object)
+        context['extra_form'] = TargetExtraFormset(
+            instance=self.object,
+            queryset=self.object.targetextra_set.exclude(key__in=extra_field_names)
+        )
+        return context
+
+    def get_form_class(self):
+        """
+        Return the form class to use in this view.
+        """
+        return TargetLatexDescriptionForm
+
+    def get_initial(self):
+        """
+        Returns the initial data to use for forms on this view. For the ``TargetUpdateView``, adds the groups that the
+        target is a member of.
+
+        :returns:
+        :rtype: dict
+        """
+        initial = super().get_initial()
+        initial['groups'] = get_groups_with_perms(self.get_object())
+        target: Target = self.object
+        latex= latex_text_target(target)
+        initial['latex'] = latex
+
+        # form = super().get_form()
+        # cleaned_data = form.cleaned_data
+        # initial['ra'] = deg_to_sexigesimal(cleaned_data['ra'], 'hms')
+        # initial['dec'] = deg_to_sexigesimal(cleaned_data['dec'], 'dms')
+
+        return initial
+
+    def get_form(self, *args, **kwargs):
+        """
+        Gets an instance of the ``TargetCreateForm`` and populates it with the groups available to the current user.
+
+        :returns: instance of creation form
+        :rtype: subclass of TargetCreateForm
+        """
+        form = super().get_form(*args, **kwargs)
+        if self.request.user.is_superuser:
+            form.fields['groups'].queryset = Group.objects.all()
+        else:
+            form.fields['groups'].queryset = self.request.user.groups.all()
+        return form
+
+    def form_valid(self, form):
+
+        target: Target = self.object
+        lat= latex_text_target(target)
+        print(lat)
+        context = super().get_context_data()
+
+        context['latex'] = lat
+
+#        super().form_valid(form)
+
+        return HttpResponseRedirect(self.request.path_info)

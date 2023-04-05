@@ -268,3 +268,61 @@ TargetNamesFormset = inlineformset_factory(Target, TargetName, fields=('source_n
                                            can_delete=False, extra=1, max_num=100,
                                            widgets={'name': forms.TextInput()},)
 
+class TargetLatexDescriptionForm(TargetForm):
+    ra = CoordinateField(required=True, label='Right Ascension', c_type='ra',
+                         help_text='Right Ascension, in decimal degrees or sexagesimal hours. See '
+                                   'https://docs.astropy.org/en/stable/api/astropy.coordinates.Angle.html for '
+                                   'supported sexagesimal inputs.')
+    dec = CoordinateField(required=True, label='Declination', c_type='dec',
+                          help_text='Declination, in decimal or sexagesimal degrees. See '
+                                    ' https://docs.astropy.org/en/stable/api/astropy.coordinates.Angle.html for '
+                                    'supported sexagesimal inputs.')
+    latex = forms.CharField(label = 'latex', required = False, 
+                            widget=forms.Textarea(attrs={'rows':6, 'cols':80}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+        # for field in REQUIRED_SIDEREAL_FIELDS:
+        #     self.fields[field].required = True
+
+#        self.fields['galactic_lat'].widget = forms.TextInput()
+        self.fields['parallax'].label = 'Gaia DR3 parallax'
+
+        self.extra_fields['classification'].required = False
+        self.extra_fields['classification'].help_text = 'Classification of the object (e.g. variable star, microlensing event)'
+        self.extra_fields['classification'].label = 'Classification'
+        self.extra_fields['classification'].widget.attrs['rows'] = 1
+
+        self.extra_fields['discovery_date'].required = False
+        self.extra_fields['discovery_date'].help_text = 'Date of the discovery, YYYY-MM-DDTHH-MM-SS, or leave blank'
+
+        # # self.fields['gaia_alert_name'].widget = TextInput(attrs={'maxlength': 100})
+        # # self.fields['calib_server_name'].widget = TextInput(attrs={'maxlength': 100})
+        # # self.fields['ztf_alert_name'].widget = TextInput(attrs={'maxlength': 100})
+        # # self.fields['aavso_name'].widget = TextInput(attrs={'maxlength': 100})
+        # # self.fields['gaiadr2_id'].widget = TextInput(attrs={'maxlength': 100})
+        # # self.fields['TNS_ID'].widget = TextInput(attrs={'maxlength': 100})
+        # self.fields['classification'].widget = TextInput(attrs={'maxlength': 250})
+
+        #hidding irrelevant fields
+        self.fields['importance'].widget = HiddenInput()
+        self.fields['cadence'].widget = HiddenInput()
+
+        # self.fields['jdlastobs'].widget = HiddenInput()
+        # self.fields['maglast'].widget = HiddenInput()
+        # self.fields['dicovery_date'].widget = HiddenInput()
+        # self.fields['Sun_separation'].widget = HiddenInput()
+        # self.fields['dont_update_me'].widget = HiddenInput()
+
+    class Meta:
+        # fields = ('name', 'type', 'ra', 'dec', 'epoch', 'parallax',
+        #           'pm_ra', 'pm_dec', 'galactic_lng', 'galactic_lat',
+        #           'distance', 'distance_err')
+        model = Target
+        fields = ('latex','name', 'ra', 'dec', 'galactic_lng', 'galactic_lat',
+                  'epoch', 'parallax',
+                  'pm_ra', 'pm_dec',
+        )
+#        fields = ('name', 'type', 'ra', 'dec', 'epoch')

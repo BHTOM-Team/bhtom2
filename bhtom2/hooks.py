@@ -16,7 +16,7 @@ from bhtom2.utils.coordinate_utils import computeDtAndPriority
 from bhtom_base.bhtom_targets.models import TargetName
 from django.contrib import messages
 
-from bhtom2.utils.openai_utils import get_constel
+from bhtom2.utils.openai_utils import get_constel, latex_text_target
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Hooks]')
 
@@ -110,10 +110,11 @@ def target_post_save(target, created, **kwargs):
         key='constellation',
         defaults={'value': constellation})
 
-        print("HOOKS: constell: ",constellation)
         te.save()
 
 
         #if we want to display filter-last, we should add this to extra fields.
         #now it is only dynamically computed in table list views.py
         target.save()
+
+        print(latex_text_target(target))
