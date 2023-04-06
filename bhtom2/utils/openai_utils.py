@@ -1,3 +1,4 @@
+from bhtom_base.bhtom_targets.templatetags.targets_extras import deg_to_sexigesimal
 import openai
 from django.conf import settings
 
@@ -31,7 +32,7 @@ def get_constel(ra,dec):
     # extracting useful part of response
     response = completion.choices[0].text
   
-    return response
+    return response[2:]
 
 #any type of prompt
 def get_response(prompt):
@@ -52,13 +53,20 @@ def get_response(prompt):
     # extracting useful part of response
     response = completion.choices[0].text
 
-    return response
+#removes first 2x /n which are present in all responses
+    return response[2:]
 
 #outputs a latex text with target information
-#TODO this should be moved to the form, as the fields can be edited
 def latex_text_target(target:Target):
-    ra = target.ra
-    dec= target.dec
+    prompt = latex_text_target_prompt(target)
+    return get_response(prompt)
+
+#outputs a latex text with target information
+#returns only the prompt (which is built using AI too)
+#prompt should be cast to get_response
+def latex_text_target_prompt(target:Target):
+    ra = deg_to_sexigesimal(target.ra,'hms')
+    dec= deg_to_sexigesimal(target.dec,'dms')
     gall=target.galactic_lng
     galb=target.galactic_lat
     constel = get_constel(ra,dec)
@@ -88,15 +96,15 @@ def latex_text_target(target:Target):
     hjd=get_response(prompt_hjd)
 #    print("HJD=",hjd)
 
+    epoch = target.epoch
     prompt1=f"Rephrase and keep LaTeX: \\quad {name}"
     if (tns): prompt1+="({tns} according to the IAU transient name server)"
     prompt1+=f" {name} was discovered by \
             \\textit{{Gaia}} Science Alerts on {date} (HJD’ = HJD - 2450000.0 = {hjd}) \
             and was posted on the GSA website \\footnote{{\\href{{http://gsaweb.ast.cam.ac.uk/alerts/alert/{name}/}}{{http://gsaweb.ast.cam.ac.uk/alerts/alert/{name}/}}}}."
     if (aliases): prompt1+=f" Other surveys' names include: {aliases}. "
-    prompt1+=f"The event was located at equatorial coordinates RA = {ra}, DEC = {dec} and galactic coordinates l = {gall}, b = {galb} \
+    prompt1+=f"The event was located at equatorial coordinates RA, Dec(J{epoch})= {ra}, {dec} and galactic coordinates l,b = {gall}, {galb} \
         in constellation {constel}. \
             The finding chart with the event's location on the sky is presented in Figure \\ref{{fig:fchart}}."
 
-    res = get_response(prompt1)
-    return res[2:] #removing first two \n characters
+    return prompt1

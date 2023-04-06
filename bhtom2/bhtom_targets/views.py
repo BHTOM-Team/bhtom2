@@ -5,11 +5,11 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.db import transaction
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.views.generic.edit import CreateView, UpdateView
 from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm, TargetLatexDescriptionForm
 from bhtom2.external_service.data_source_information import get_pretty_survey_name
-from bhtom2.utils.openai_utils import latex_text_target
+from bhtom2.utils.openai_utils import latex_text_target, latex_text_target_prompt, get_response
 from bhtom_base.bhtom_common.hooks import run_hook
 from bhtom_base.bhtom_common.mixins import Raise403PermissionRequiredMixin
 from bhtom_base.bhtom_targets.forms import TargetExtraFormset, TargetNamesFormset
@@ -337,22 +337,6 @@ class TargetGenerateTargetDescriptionLatexView(UpdateView):
     model = Target
     fields = '__all__'
 
-    def get_context_data(self, **kwargs):
-        """
-        Adds formset for ``TargetName`` and ``TargetExtra`` to the context.
-
-        :returns: context object
-        :rtype: dict
-        """
-        extra_field_names = [extra['name'] for extra in settings.EXTRA_FIELDS]
-        context = super().get_context_data(**kwargs)
-        context['names_form'] = TargetNamesFormset(instance=self.object)
-        context['extra_form'] = TargetExtraFormset(
-            instance=self.object,
-            queryset=self.object.targetextra_set.exclude(key__in=extra_field_names)
-        )
-        return context
-
     def get_form_class(self):
         """
         Return the form class to use in this view.
@@ -369,14 +353,11 @@ class TargetGenerateTargetDescriptionLatexView(UpdateView):
         """
         initial = super().get_initial()
         initial['groups'] = get_groups_with_perms(self.get_object())
-        target: Target = self.object
-        latex= latex_text_target(target)
-        initial['latex'] = latex
 
-        # form = super().get_form()
-        # cleaned_data = form.cleaned_data
-        # initial['ra'] = deg_to_sexigesimal(cleaned_data['ra'], 'hms')
-        # initial['dec'] = deg_to_sexigesimal(cleaned_data['dec'], 'dms')
+        target: Target = self.object
+        prompt = latex_text_target_prompt(target)
+        initial['latex'] = get_response(prompt)
+        initial['prompt'] = prompt
 
         return initial
 
@@ -394,15 +375,59 @@ class TargetGenerateTargetDescriptionLatexView(UpdateView):
             form.fields['groups'].queryset = self.request.user.groups.all()
         return form
 
-    def form_valid(self, form):
+#     def post(self, request, *args, **kwargs):
+#         if request.method == "POST":
+#             form = TargetLatexDescriptionForm(request.POST)
+#             print("POST PROMPT: ",request.POST['prompt'])
 
-        target: Target = self.object
-        lat= latex_text_target(target)
-        print(lat)
-        context = super().get_context_data()
+#             if form.is_valid():
+#                 print("POST: ",form.fields['prompt'])
+# #                form.save()
 
-        context['latex'] = lat
+#                 prompt = form.changed_data[0]
+#                 latex = get_response(prompt)
 
-#        super().form_valid(form)
+#                 initial = {prompt:form.cleaned_data[prompt]}
+#                 form = TargetLatexDescriptionForm(initial)
+#                 context = {'form': form, 'latex': latex}
+#                 return render(request,'bhtom_targets/target_generate_latex_form.html',context)
+#         else:
+#             form = TargetLatexDescriptionForm()
 
-        return HttpResponseRedirect(self.request.path_info)
+#             context = {'form': form, 'latex': ''}
+#             return render(request,'bhtom_targets/target_generate_latex_form.html',context)
+
+
+#    def form_valid(self, form):
+
+        # target: Target = self.object
+        # lat= latex_text_target(target)
+        # print(lat)
+        # context = super().get_context_data()
+
+        # context['latex'] = lat
+
+#         if form.is_valid():
+# #            print("CLEANED: ",form.cleaned_data['prompt'])
+#             # form.fields['prompt'] = "DUUUPA"
+
+#             # prompt = form.changed_data[0]
+#             # latex = get_response(prompt)
+
+#             # initial = {prompt:form.cleaned_data[prompt]}
+#             # newform = form(initial)
+#             # context = {'form': newform, 'latex': latex}
+#             # form.cleaned_data['Email'] = GetEmailString()
+# #            form.fields["prompt"].initial = form.cleaned_data['prompt']
+#             form.initial['prompt'] = form.cleaned_data['prompt']
+#             form.initial['latex'] = (form.cleaned_data['prompt'])
+#             form.initial['latex'] = 'cos'
+#             form.save()
+#             print(form)
+# #            return self.form_invalid(form)
+# #            super().form_valid(form)
+
+#         #returns to the same page, unless back hit
+#         return HttpResponseRedirect(self.request.path_info)
+#        return render(request,'about/contact.html',{'form':form})
+

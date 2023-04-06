@@ -7,7 +7,7 @@
         <form method="post" class="form">
 {% csrf_token %}
 {% bootstrap_form form %}
-<div id="alias-form-container">
+<!-- <div id="alias-form-container">
         <h3>Aliases</h3>
         {#    {% bootstrap_formset names_form %}#}
         {{ names_form.management_form }}
@@ -20,16 +20,13 @@
                     {% bootstrap_field form.name %}
                 </div>
             </div>
-        {% endfor %}
+        {% endfor %} -->
     
 {% buttons %}
-<!-- no form action, so it stays at the same page after click -->
-        <!-- <button type="submit" id="save-btn" 
-                class="btn btn-primary">Generate
-        </button> -->
-        <button type="submit" id="save-btn" formaction="{% url 'targets:generate_target_description_latex' pk=object.id %}"
+            <!-- the page has no submit, only back -->
+        <!-- <button type="submit" id="save-btn" formaction="{% url 'targets:generate_target_description_latex' pk=object.id %}"
                 class="btn btn-primary">Regenerate LaTeX
-        </button>
+        </button> -->
  
         <a href="{% url 'targets:detail' pk=object.id %}" class="btn btn-primary" title="Back">Back</a>
 {% endbuttons %}

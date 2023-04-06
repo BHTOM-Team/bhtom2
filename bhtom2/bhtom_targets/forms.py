@@ -4,6 +4,7 @@ from astropy import units as u
 from django.forms import ValidationError, inlineformset_factory, HiddenInput
 from django.conf import settings
 from django.contrib.auth.models import Group
+from bhtom2.utils import openai_utils
 from guardian.shortcuts import assign_perm, get_groups_with_perms, remove_perm
 from datetime import datetime, timezone
 
@@ -67,8 +68,6 @@ class TargetForm(forms.ModelForm):
         # for field in self.fields.keys():
         #     if (field in settings.CREATE_TARGET_HIDDEN_FIELDS): 
         #         self.fields[field].widget = forms.HiddenInput()
-
-        self.fields['epoch'].initial = 2000.0
         
         self.extra_fields = {}
         for extra_field in settings.EXTRA_FIELDS:
@@ -148,6 +147,8 @@ class SiderealTargetCreateForm(TargetForm):
         super().__init__(*args, **kwargs)
         for field in REQUIRED_SIDEREAL_FIELDS:
             self.fields[field].required = True
+
+        self.fields['epoch'].initial = 2000.0
 
         self.extra_fields['classification'].required = True
         self.extra_fields['classification'].help_text = 'Classification of the object (e.g. variable star, microlensing event)'
@@ -277,26 +278,33 @@ class TargetLatexDescriptionForm(TargetForm):
                           help_text='Declination, in decimal or sexagesimal degrees. See '
                                     ' https://docs.astropy.org/en/stable/api/astropy.coordinates.Angle.html for '
                                     'supported sexagesimal inputs.')
-    latex = forms.CharField(label = 'latex', required = False, 
-                            widget=forms.Textarea(attrs={'rows':6, 'cols':80}))
+    latex = forms.CharField(
+        label = 'ChatGPT-generated LaTeX text:', 
+        required = False,
+        widget=forms.Textarea(attrs={
+            'rows': 6, 
+            'cols': 80,
+            'style': 'background-color: #ffeb3b; color: #000000;'        }),
+        help_text="Copy/paste to your paper"
+    )
+
+    prompt = forms.CharField(
+        label = 'Prompt used', required = False,                     
+        widget=forms.Textarea(attrs={'rows':6, 'cols':80}),
+#        help_text="Modify below in order to generate a new response from AI"
+        )
+    
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # self.extra_fields['classification'].required = False
+        # self.extra_fields['classification'].help_text = 'Classification of the object (e.g. variable star, microlensing event)'
+        # self.extra_fields['classification'].label = 'Classification'
+        # self.extra_fields['classification'].widget.attrs['rows'] = 1
 
-        # for field in REQUIRED_SIDEREAL_FIELDS:
-        #     self.fields[field].required = True
-
-#        self.fields['galactic_lat'].widget = forms.TextInput()
-        self.fields['parallax'].label = 'Gaia DR3 parallax'
-
-        self.extra_fields['classification'].required = False
-        self.extra_fields['classification'].help_text = 'Classification of the object (e.g. variable star, microlensing event)'
-        self.extra_fields['classification'].label = 'Classification'
-        self.extra_fields['classification'].widget.attrs['rows'] = 1
-
-        self.extra_fields['discovery_date'].required = False
-        self.extra_fields['discovery_date'].help_text = 'Date of the discovery, YYYY-MM-DDTHH-MM-SS, or leave blank'
+        # self.extra_fields['discovery_date'].required = False
+        # self.extra_fields['discovery_date'].help_text = 'Date of the discovery, YYYY-MM-DDTHH-MM-SS, or leave blank'
 
         # # self.fields['gaia_alert_name'].widget = TextInput(attrs={'maxlength': 100})
         # # self.fields['calib_server_name'].widget = TextInput(attrs={'maxlength': 100})
@@ -307,8 +315,15 @@ class TargetLatexDescriptionForm(TargetForm):
         # self.fields['classification'].widget = TextInput(attrs={'maxlength': 250})
 
         #hidding irrelevant fields
+        self.fields['ra'].widget = HiddenInput()
+        self.fields['dec'].widget = HiddenInput()
         self.fields['importance'].widget = HiddenInput()
         self.fields['cadence'].widget = HiddenInput()
+        self.fields['groups'].widget = HiddenInput()
+
+        self.extra_fields['classification'].widget = HiddenInput()
+        self.extra_fields['discovery_date'].widget = HiddenInput()
+        self.extra_fields['creation_date'].widget = HiddenInput()
 
         # self.fields['jdlastobs'].widget = HiddenInput()
         # self.fields['maglast'].widget = HiddenInput()
@@ -317,12 +332,18 @@ class TargetLatexDescriptionForm(TargetForm):
         # self.fields['dont_update_me'].widget = HiddenInput()
 
     class Meta:
-        # fields = ('name', 'type', 'ra', 'dec', 'epoch', 'parallax',
-        #           'pm_ra', 'pm_dec', 'galactic_lng', 'galactic_lat',
-        #           'distance', 'distance_err')
         model = Target
-        fields = ('latex','name', 'ra', 'dec', 'galactic_lng', 'galactic_lat',
-                  'epoch', 'parallax',
-                  'pm_ra', 'pm_dec',
-        )
+        fields = ('latex','prompt')
+
+        # fields = ('latex','prompt','name', 'ra', 'dec', 'galactic_lng', 'galactic_lat',
+        #           'epoch', 'parallax',
+        #           'pm_ra', 'pm_dec',
+        # )
 #        fields = ('name', 'type', 'ra', 'dec', 'epoch')
+
+
+    def clean(self):
+        cleaned_data = super().clean()
+        prompt = cleaned_data.get('prompt')
+        if not prompt:
+            raise forms.ValidationError('The prompt can not be empty')
