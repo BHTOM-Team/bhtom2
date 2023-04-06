@@ -279,7 +279,7 @@ class TargetLatexDescriptionForm(TargetForm):
                                     ' https://docs.astropy.org/en/stable/api/astropy.coordinates.Angle.html for '
                                     'supported sexagesimal inputs.')
     latex = forms.CharField(
-        label = 'ChatGPT-generated LaTeX text:', 
+        label = 'ChatGPT-generated LaTeX target description:', 
         required = False,
         widget=forms.Textarea(attrs={
             'rows': 6, 
@@ -293,7 +293,22 @@ class TargetLatexDescriptionForm(TargetForm):
         widget=forms.Textarea(attrs={'rows':6, 'cols':80}),
 #        help_text="Modify below in order to generate a new response from AI"
         )
-    
+
+    title = forms.CharField(
+        label = 'ChatGPT-generated title:', 
+        required = False,
+        widget=forms.Textarea(attrs={
+            'rows': 2, 
+            'cols': 80,
+            'style': 'background-color: #ffeb3b; color: #000000;'        }),
+        help_text="Copy/paste to your paper"
+    )
+
+    prompt_title = forms.CharField(
+        label = 'Prompt used for the title', required = False,                     
+        widget=forms.Textarea(attrs={'rows':2, 'cols':80}),
+#        help_text="Modify below in order to generate a new response from AI"
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -333,7 +348,7 @@ class TargetLatexDescriptionForm(TargetForm):
 
     class Meta:
         model = Target
-        fields = ('latex','prompt')
+        fields = ('title','prompt_title','latex','prompt')
 
         # fields = ('latex','prompt','name', 'ra', 'dec', 'galactic_lng', 'galactic_lat',
         #           'epoch', 'parallax',
@@ -342,8 +357,8 @@ class TargetLatexDescriptionForm(TargetForm):
 #        fields = ('name', 'type', 'ra', 'dec', 'epoch')
 
 
-    def clean(self):
-        cleaned_data = super().clean()
-        prompt = cleaned_data.get('prompt')
-        if not prompt:
-            raise forms.ValidationError('The prompt can not be empty')
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     prompt = cleaned_data.get('prompt')
+    #     if not prompt:
+    #         raise forms.ValidationError('The prompt can not be empty')

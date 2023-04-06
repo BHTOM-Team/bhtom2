@@ -9,7 +9,7 @@ from django.shortcuts import redirect, render
 from django.views.generic.edit import CreateView, UpdateView
 from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm, TargetLatexDescriptionForm
 from bhtom2.external_service.data_source_information import get_pretty_survey_name
-from bhtom2.utils.openai_utils import latex_text_target, latex_text_target_prompt, get_response
+from bhtom2.utils.openai_utils import latex_target_title_prompt, latex_text_target, latex_text_target_prompt, get_response
 from bhtom_base.bhtom_common.hooks import run_hook
 from bhtom_base.bhtom_common.mixins import Raise403PermissionRequiredMixin
 from bhtom_base.bhtom_targets.forms import TargetExtraFormset, TargetNamesFormset
@@ -358,6 +358,11 @@ class TargetGenerateTargetDescriptionLatexView(UpdateView):
         prompt = latex_text_target_prompt(target)
         initial['latex'] = get_response(prompt)
         initial['prompt'] = prompt
+
+        #title:
+        prompt_title = latex_target_title_prompt(target)
+        initial['title'] = get_response(prompt_title)
+        initial['prompt_title'] = prompt_title
 
         return initial
 

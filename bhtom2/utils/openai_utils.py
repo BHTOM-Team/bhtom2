@@ -5,34 +5,45 @@ from django.conf import settings
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_targets.models import TargetExtra, Target
 
+import astropy.units as u
+from astropy.coordinates import SkyCoord, get_constellation
+
 logger: BHTOMLogger = BHTOMLogger(__name__, '[OpenAI]')
 
 API_KEY = settings.OPENAI_API_KEY
 
 #finds the constellation name given the coordinates
 #returns one name in Latin
-def get_constel(ra,dec):
+# def get_constel(ra,dec):
 
-    openai.api_key = API_KEY
+#     openai.api_key = API_KEY
     
-    model_engine = "text-davinci-003"
+#     model_engine = "text-davinci-003"
 
-    prompt = f"find the constellation for coordinates {ra}, {dec} and answer in one word with the latin name."
+#     prompt = f"find the constellation for coordinates {ra}, {dec} and answer in one word with the latin name."
 
-        # Generate a response
-    completion = openai.Completion.create(
-        engine=model_engine,
-        prompt=prompt,
-        max_tokens=1024,
-        n=1,
-        stop=None,
-        temperature=0.5,
-    )
+#         # Generate a response
+#     completion = openai.Completion.create(
+#         engine=model_engine,
+#         prompt=prompt,
+#         max_tokens=1024,
+#         n=1,
+#         stop=None,
+#         temperature=0.5,
+#     )
 
-    # extracting useful part of response
-    response = completion.choices[0].text
+#     # extracting useful part of response
+#     response = completion.choices[0].text
   
-    return response[2:]
+#     return response[2:]
+
+#returns a full constellation name, input ra dec is in degrees
+def get_constel(ra:float, dec:float):
+    coords = SkyCoord(ra, dec, unit=(u.deg, u.deg), frame='icrs')
+    # Create a Simbad object and query it for the object at the given coordinates
+    constellation=get_constellation(coords, short_name=False)
+
+    return constellation
 
 #any type of prompt
 def get_response(prompt):
@@ -69,7 +80,7 @@ def latex_text_target_prompt(target:Target):
     dec= deg_to_sexigesimal(target.dec,'dms')
     gall=target.galactic_lng
     galb=target.galactic_lat
-    constel = get_constel(ra,dec)
+    constel = get_constel(target.ra,target.dec)
 #    print("CONSTEL: ",constel)
     name = target.name
     tns=""
@@ -108,3 +119,17 @@ def latex_text_target_prompt(target:Target):
             The finding chart with the event's location on the sky is presented in Figure \\ref{{fig:fchart}}."
 
     return prompt1
+
+#generates a catchy title for the paper
+#assuming it is a black hole candidate
+def latex_target_title_prompt(target:Target):
+    name = target.name
+
+    constel = get_constel(target.ra,target.dec)
+
+    prompt2 = f"Suggest a catchy title about "\
+    f" a black hole candidate"\
+    f" found with microlensing"\
+    f" named {name}, found in constellation {constel}."
+
+    return prompt2
