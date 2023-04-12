@@ -1,3 +1,4 @@
+from datetime import datetime
 from bhtom_base.bhtom_targets.templatetags.targets_extras import deg_to_sexigesimal
 import openai
 from django.conf import settings
@@ -7,6 +8,7 @@ from bhtom_base.bhtom_targets.models import TargetExtra, Target
 
 import astropy.units as u
 from astropy.coordinates import SkyCoord, get_constellation
+from astropy.time import Time
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[OpenAI]')
 
@@ -98,20 +100,26 @@ def latex_text_target_prompt(target:Target):
     #discovery date from extras
     #who found it first?
 #    discdate=target.discovery_date
-    discdate=TargetExtra.objects.get(target=target, key='discovery_date')
+    discdate=datetime(TargetExtra.objects.get(target=target, key='discovery_date').value)
 
     prompt_date=f"Rewrite datetime {discdate} UT in Month, day, year format, without time"
     date=get_response(prompt_date)
 #    print("DATE: ",date)
-    prompt_hjd=f"Compute full Heliocentric Julian Date (HJD) for date {discdate} and subtract 2450000.0 from the result. Output only subtracted value."
-    hjd=get_response(prompt_hjd)
+#    prompt_hjd=f"Compute full Heliocentric Julian Date (HJD) for date {discdate} and subtract 2450000.0 from the result. Output only subtracted value."
+#    hjd=get_response(prompt_hjd)
+    #datetime_object = datetime.strptime(discdate, '%Y-%m-%d %H:%M:%S')
+
+    t_utc = Time(discdate, format='datetime', scale='utc')
+    # Convert to MJD
+    mjd = t_utc.mjd
+
 #    print("HJD=",hjd)
 
     epoch = target.epoch
     prompt1=f"Rephrase and keep LaTeX: \\quad {name}"
     if (tns): prompt1+="({tns} according to the IAU transient name server)"
     prompt1+=f" {name} was discovered by \
-            \\textit{{Gaia}} Science Alerts on {date} (HJD’ = HJD - 2450000.0 = {hjd}) \
+            \\textit{{Gaia}} Science Alerts on {date} (MJD = {mjd}) \
             and was posted on the GSA website \\footnote{{\\href{{http://gsaweb.ast.cam.ac.uk/alerts/alert/{name}/}}{{http://gsaweb.ast.cam.ac.uk/alerts/alert/{name}/}}}}."
     if (aliases): prompt1+=f" Other surveys' names include: {aliases}. "
     prompt1+=f"The event was located at equatorial coordinates RA, Dec(J{epoch})= {ra}, {dec} and galactic coordinates l,b = {gall}, {galb} \
