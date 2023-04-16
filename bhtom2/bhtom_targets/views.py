@@ -146,7 +146,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         coords_names = check_for_existing_coords(ra, dec, 3./3600., stored)
         if (len(coords_names)!=0):
             ccnames = ' '.join(coords_names)
-            form.add_error(None, "Source found already at these coordinates")
+            form.add_error(None, f"Source found already at these coordinates: {ccnames}")
             return super().form_invalid(form)
 #            raise ValidationError(f'Source found already at these coordinates: {ccnames}')
 
