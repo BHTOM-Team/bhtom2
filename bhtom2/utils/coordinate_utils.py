@@ -8,6 +8,7 @@ from numpy import around
 from astropy.coordinates import get_sun, SkyCoord
 from datetime import datetime
 from astropy.time import Time
+from astroquery.gaia import Gaia
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Coordinate Utils]')
 
@@ -96,3 +97,33 @@ def computeDtAndPriority(mjd_last, imp, cadence,time_to_compute:Time=None):
     dt = tt.mjd- mjd_last
 
     return computePriority(dt, imp, cadence)
+
+def query_Gaia_DR3_distance(id):
+    """
+    Get distances to stars based on Gaia DR3:
+    Bailer-Jones et al. 2021
+    https://ui.adsabs.harvard.edu/abs/2021AJ....161..147B/abstract
+
+    Parameters :
+        Gaia id : str
+
+    Returns :
+        table: *astropy.Table*
+            Table with results
+    """
+    query = (
+        f"""
+        SELECT
+        source_id,r_med_geo,r_lo_geo,r_hi_geo,
+        r_med_photogeo,r_lo_photogeo,r_hi_photogeo,flag
+        FROM external.gaiaedr3_distance
+        WHERE source_id in ({id})
+        """)
+    result = None
+    try:
+        job = Gaia.launch_job(query)
+        result = job.get_results()
+    except Exception:
+        logger.warning(f'launching astroquery.gaia.Gaia job failed for Gaia DR3 distance, source {id}...')
+
+    return result
