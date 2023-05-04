@@ -31,7 +31,9 @@ def recent_photometry(target, limit=1):
     """
     photometry = ReducedDatum.objects.filter(data_type='photometry', target=target).order_by('-timestamp')[:limit]
     return {'data': [{'timestamp': rd.timestamp,
-                      'magnitude': rd.value} for rd in photometry
+                      'magnitude': rd.value,
+                      'filter': rd.filter,
+                      'facility': rd.facility} for rd in photometry
                      if rd.value_unit == ReducedDatumUnit.MAGNITUDE]}
 
 

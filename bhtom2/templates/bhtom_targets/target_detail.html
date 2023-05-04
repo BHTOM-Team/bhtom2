@@ -34,12 +34,10 @@
                 {% endif %}
                 {% target_unknown_statuses object %}
                 {% target_buttons object %}
-                {% target_data object %}
-                {% recent_photometry object limit=3 %}
+                {% target_data object %}/
                 {% if object.type == 'SIDEREAL' %}
                     {% aladin object %}
                 {% endif %}
-
             </div>
         </div>
         <div class="col-md-8">
@@ -84,6 +82,8 @@
                             <button onclick="download_radio()" class="btn btn-primary" role="button">Download radio data</button>
                         </div>
                       </div>
+                      {% recent_photometry object limit=5 %}
+
                 </div>
                 <div class="tab-pane" id="observe">
                     <h4>Observe</h4>
