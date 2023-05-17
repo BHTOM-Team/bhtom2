@@ -20,6 +20,7 @@ class DataSource(Enum):
     LINEAR = auto()
     FIRST = auto()
     PS1 = auto()
+    DECAPS = auto()
 
 
 PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
@@ -40,7 +41,8 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.CRTS: "CRTS",
     DataSource.LINEAR: "LINEAR",
     DataSource.FIRST: "FIRST",
-    DataSource.PS1: "PS1"
+    DataSource.PS1: "PS1",
+    DataSource.DECAPS: "DECAPS"
 }
 
 
@@ -65,7 +67,8 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.CRTS: "CRTS name",
     DataSource.LINEAR: "LINEAR name",
     DataSource.FIRST: "FIRST name",
-    DataSource.PS1: "PS1 name"
+    DataSource.PS1: "PS1 name",
+#    DataSource.DECAPS: "DECAPS name"
 }
 
 
@@ -83,6 +86,7 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.LINEAR: ["CL"],
     DataSource.FIRST: ["Flux 1.4GHz"],
     DataSource.PS1: ["g", "r", "i", "z"],
+    DataSource.DECAPS: ["g", "r", "i", "z"],
 }
 
 
