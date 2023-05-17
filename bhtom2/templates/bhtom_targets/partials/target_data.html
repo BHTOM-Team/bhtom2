@@ -6,8 +6,12 @@
       <dd class="col-sm-6">{{ target_name }}</dd>
     {% endif %}
   {% endfor %}
+
+  <!-- <dt class="col-sm-6">{{  target.as_dict }}</dt>
+   -->
+  
   {% for key, value in target.as_dict.items %}
-  {% if value and key != 'name' %}
+  {% if value and key != 'name' and key != 'type' %}
   <dt class="col-sm-6">{% verbose_name target key %}</dt>
   <dd class="col-sm-6">{{ value }}</dd>
   {% endif %}
@@ -53,9 +57,9 @@
   {% if key == 'creation_date' %}
   <dt class="col-sm-6">{{ "Target created" }}</dt>
   {% endif %}
-  {% if key == 'dont_update_me' %}
+  <!-- {% if key == 'dont_update_me' %}
   <dt class="col-sm-6">{{ "Do not update"}}</dt>
-  {% endif %}
+  {% endif %} -->
 
      <dd class="col-sm-6">{{ value }}</dd>
 {% endfor %}
