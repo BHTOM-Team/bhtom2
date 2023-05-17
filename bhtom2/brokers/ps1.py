@@ -87,12 +87,14 @@ class PS1Broker(BHTOMBroker):
             # Data could be a dict or pandas table as well
             reduced_datums = []
             for datum in data:
+                
                 timestamp_g = Time(datum[8], format="mjd").to_datetime(timezone=TimezoneInfo())
                 timestamp_r = Time(datum[9], format="mjd").to_datetime(timezone=TimezoneInfo())
                 timestamp_i = Time(datum[10], format="mjd").to_datetime(timezone=TimezoneInfo())
                 timestamp_z = Time(datum[11], format="mjd").to_datetime(timezone=TimezoneInfo())
                 
-                reduced_datum_g = ReducedDatum(target=target,
+                if (datum[4] is not None):
+                   reduced_datum_g = ReducedDatum(target=target,
                                             data_type='photometry',
                                             timestamp=timestamp_g,
                                             mjd=datum[8],
@@ -103,8 +105,10 @@ class PS1Broker(BHTOMBroker):
                                             filter='PS1(g)',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
+                   reduced_datums.append(reduced_datum_g)
 
-                reduced_datum_r = ReducedDatum(target=target,
+                if (datum[5] is not None):
+                    reduced_datum_r = ReducedDatum(target=target,
                                             data_type='photometry',
                                             timestamp=timestamp_r,
                                             mjd=datum[9],
@@ -116,7 +120,10 @@ class PS1Broker(BHTOMBroker):
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
                 
-                reduced_datum_i = ReducedDatum(target=target,
+                    reduced_datums.append(reduced_datum_r)
+
+                if (datum[6] is not None):
+                    reduced_datum_i = ReducedDatum(target=target,
                                             data_type='photometry',
                                             timestamp=timestamp_i,
                                             mjd=datum[10],
@@ -128,7 +135,10 @@ class PS1Broker(BHTOMBroker):
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
 
-                reduced_datum_z = ReducedDatum(target=target,
+                    reduced_datums.append(reduced_datum_i)
+
+                if (datum[7] is not None):
+                    reduced_datum_z = ReducedDatum(target=target,
                                             data_type='photometry',
                                             timestamp=timestamp_z,
                                             mjd=datum[11],
@@ -140,7 +150,8 @@ class PS1Broker(BHTOMBroker):
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
 
-                reduced_datums.extend([reduced_datum_g,reduced_datum_r,reduced_datum_i,reduced_datum_z])
+                    reduced_datums.append(reduced_datum_z)
+
 
             with transaction.atomic():
                 new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))
