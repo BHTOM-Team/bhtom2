@@ -93,7 +93,7 @@ class PS1Broker(BHTOMBroker):
                 timestamp_i = Time(datum[10], format="mjd").to_datetime(timezone=TimezoneInfo())
                 timestamp_z = Time(datum[11], format="mjd").to_datetime(timezone=TimezoneInfo())
                 
-                if (datum[4] is not None):
+                if (datum[0] is not None and datum[4] is not None):
                    reduced_datum_g = ReducedDatum(target=target,
                                             data_type='photometry',
                                             timestamp=timestamp_g,
@@ -107,7 +107,7 @@ class PS1Broker(BHTOMBroker):
                                             facility=self.__FACILITY_NAME)
                    reduced_datums.append(reduced_datum_g)
 
-                if (datum[5] is not None):
+                if (datum[1] is not None and datum[5] is not None):
                     reduced_datum_r = ReducedDatum(target=target,
                                             data_type='photometry',
                                             timestamp=timestamp_r,
@@ -122,7 +122,7 @@ class PS1Broker(BHTOMBroker):
                 
                     reduced_datums.append(reduced_datum_r)
 
-                if (datum[6] is not None):
+                if (datum[2] is not None and datum[6] is not None):
                     reduced_datum_i = ReducedDatum(target=target,
                                             data_type='photometry',
                                             timestamp=timestamp_i,
@@ -137,7 +137,7 @@ class PS1Broker(BHTOMBroker):
 
                     reduced_datums.append(reduced_datum_i)
 
-                if (datum[7] is not None):
+                if (datum[3] is not None and datum[7] is not None):
                     reduced_datum_z = ReducedDatum(target=target,
                                             data_type='photometry',
                                             timestamp=timestamp_z,
