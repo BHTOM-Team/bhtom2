@@ -146,13 +146,22 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         coords_names = check_for_existing_coords(ra, dec, 3./3600., stored)
         if (len(coords_names)!=0):
             ccnames = ' '.join(coords_names)
-            form.add_error(None, f"Source found already at these coordinates: {ccnames}")
+            form.add_error(None, f"Source found already at these coordinates (rad 3 arcsec): {ccnames}")
             return super().form_invalid(form)
 #            raise ValidationError(f'Source found already at these coordinates: {ccnames}')
 
         # Check if the form, extras and names are all valid:
         if extra.is_valid() and names.is_valid() and (not duplicate_names) and (not existing_names):
+#            messages.success(self.request, 'Target Create success, now grabbing all the data for it. Wait.')
+
+            messages.add_message(
+                self.request,
+                messages.INFO,
+                f"Target created. Downloading archival data. Wait..."
+            )
+            
             super().form_valid(form)
+
             extra.instance = self.object
             extra.save()
         else:
@@ -173,6 +182,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             to_add.name = name
             to_add.save()
 
+
 #        form.add_error(None,'Creating target, please wait...')
         # messages.add_message(self.request,
         #         messages.INFO,
@@ -181,7 +191,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         #TODO: there should be a message here on success and a warning to wait: Gathering archival data for target
         #TODO: the hook here should be run in the background 
         
-        messages.success(self.request, 'Target Create success, now grabbing all the data for it. Wait.')
+
 
         logger.info('Target post save hook: %s created: %s', self.object, True)
         run_hook('target_post_save', target=self.object, created=True)
