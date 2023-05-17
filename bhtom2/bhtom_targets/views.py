@@ -180,6 +180,8 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
 
         #TODO: there should be a message here on success and a warning to wait: Gathering archival data for target
         #TODO: the hook here should be run in the background 
+        messages.success(self.request, 'Target Create success, now grabbing all the data for it. Wait.')
+
         logger.info('Target post save hook: %s created: %s', self.object, True)
         run_hook('target_post_save', target=self.object, created=True)
 
