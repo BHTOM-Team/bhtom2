@@ -25,8 +25,19 @@ urlpatterns = [
     path('', include('bhtom_custom_registration.bhtom_registration.registration_flows.approval_required.urls', namespace='registration')),
     path('alerts/query/list/', BrokerQueryListView.as_view(template_name='bhtom_alerts/brokerquery_list.html'), name='alerts:list'),
     path('targets/', TargetListView.as_view(), name='targets'),
-    path('targets/<str:name>/', TargetDetailView.as_view(template_name='bhtom_targets/target_detail.html'), name='detail'),
     path('targets/create/', TargetCreateView.as_view(template_name='bhtom_targets/target_form.html'), name='create'),
+    path('targets/<int:pk>/', TargetDetailView.as_view(template_name='bhtom_targets/target_detail.html'),
+         name='detail'),
+    path('targets/<str:name>/', TargetDetailView.as_view(template_name='bhtom_targets/target_detail.html'), name='detail'),
+    path('targets/<int:pk>/update/', TargetUpdateView.as_view(template_name='bhtom_targets/target_form.html'),
+         name='update'),
+    path('targets/<int:pk>/download-photometry', TargetDownloadPhotometryDataView.as_view(),
+         name='download_photometry_data'),
+    path('targets/<int:pk>/download-radio', TargetDownloadRadioDataView.as_view(), name='download_radio_data'),
+    path('targets/<int:pk>/generate-target-description-latex/',
+         TargetGenerateTargetDescriptionLatexView.as_view(
+             template_name='bhtom_targets/target_generate_latex_form.html'),
+         name='generate_target_description_latex'),
     path('targets/<str:name>/update/', TargetUpdateView.as_view(template_name='bhtom_targets/target_form.html'), name='update'),
     path('targets/<str:name>/download-photometry', TargetDownloadPhotometryDataView.as_view(), name='download_photometry_data'),
     path('targets/<str:name>/download-radio', TargetDownloadRadioDataView.as_view(), name='download_radio_data'),
@@ -37,4 +48,5 @@ urlpatterns = [
     path('proposals/', include('bhtom2.bhtom_observations.urls', namespace='proposals')),
     path('targets/', include('bhtom2.bhtom_targets.urls', namespace='targets')),
     path('', include('bhtom_base.bhtom_common.urls')),
+
 ]
