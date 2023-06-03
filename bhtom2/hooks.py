@@ -22,11 +22,11 @@ logger: BHTOMLogger = BHTOMLogger(__name__, '[Hooks]')
 
 # actions done just after saving the target (in creation or update)
 def target_post_save(target, created, **kwargs):
-    update_sun_distance(target)
-    update_phot_class(target)
 
     if created:
         fill_galactic_coordinates(target)
+        update_sun_distance(target)
+        update_phot_class(target)
         names: Dict[DataSource, str] = query_all_services(target)
         for k, v in names.items():
             try:
