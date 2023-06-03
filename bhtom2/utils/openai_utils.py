@@ -54,18 +54,20 @@ def get_response(prompt):
     
     model_engine = "text-davinci-003"
 
+    try:
         # Generate a response
-    completion = openai.Completion.create(
-        engine=model_engine,
-        prompt=prompt,
-        max_tokens=1024,
-        n=1,
-        stop=None,
-        temperature=0.5,
-    )
-
-    # extracting useful part of response
-    response = completion.choices[0].text
+        completion = openai.Completion.create(
+            engine=model_engine,
+            prompt=prompt,
+            max_tokens=1024,
+            n=1,
+            stop=None,
+            temperature=0.7,
+        )
+        # extracting useful part of response
+        response = completion.choices[0].text
+    except:
+        response="  Error in AI..."
 
 #removes first 2x /n which are present in all responses
     return response[2:]
