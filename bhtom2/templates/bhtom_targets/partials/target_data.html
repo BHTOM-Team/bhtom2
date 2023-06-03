@@ -30,11 +30,14 @@
 {% if key == 'constellation' %}
  <dt class="col-sm-6">{{ "Constellation" }}</dt>
   {% endif %}
-{% if key == 'classification' %}
+  {% if key == 'discovery_date' %}
+  <dt class="col-sm-6">{{ "Discovered" }}</dt>
+  {% endif %}
+  {% if key == 'classification' %}
  <dt class="col-sm-6">{{ "Class" }}</dt>
   {% endif %}
-  {% if key == 'discovery_date' %}
- <dt class="col-sm-6">{{ "Discovered" }}</dt>
+  {% if key == 'phot_class' %}
+ <dt class="col-sm-6">{{ "Phot.Class" }}</dt>
   {% endif %}
   {% if key == 'mjd_last' %}
  <dt class="col-sm-6">{{ "Last MJD" }}</dt>
