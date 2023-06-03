@@ -293,7 +293,7 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
                 f'Deleted alias {to_delete.name} for {get_pretty_survey_name(to_delete.source_name)}'
             )
 
-
+        #the hook is run even if not called?
         return redirect(self.get_success_url())
 
     def get_queryset(self, *args, **kwargs):

@@ -22,10 +22,11 @@ logger: BHTOMLogger = BHTOMLogger(__name__, '[Hooks]')
 
 # actions done just after saving the target (in creation or update)
 def target_post_save(target, created, **kwargs):
+    update_sun_distance(target)
+    update_phot_class(target)
+
     if created:
         fill_galactic_coordinates(target)
-        update_sun_distance(target)
-        update_phot_class(target)
         names: Dict[DataSource, str] = query_all_services(target)
         for k, v in names.items():
             try:
@@ -33,13 +34,13 @@ def target_post_save(target, created, **kwargs):
             except Exception as e:
                 logger.warning(f'{"Target {target} already exists under different name - this should be caught ealier!"}')
                 raise e
-        #    te, _ = TargetExtra.objects.update_or_create(target=target,
+            # te, _ = TargetExtra.objects.update_or_create(target=target,
             #                                              key=k,
             #                                              defaults={
             #                                                  'value': v
             #                                              })
             # te.save()
-#        logger.info(f'Saved new names: {names} for target {target.name}')
+        #logger.info(f'Saved new names: {names} for target {target.name}')
 
         #LW: setting AAVSO name always to the name
         #it can then be changed
@@ -57,62 +58,58 @@ def target_post_save(target, created, **kwargs):
                                                 'value': aavso_name
                                             })
 
+### update and create:
 
-        # Fill in extinction
-        extinction: Optional[float] = ogle_extinction(target)
+    # Fill in extinction
+    extinction: Optional[float] = ogle_extinction(target)
 
-        if extinction:
-            te, _ = TargetExtra.objects.update_or_create(target=target,
-                                                        key='E(V-I)',
-                                                        defaults={
-                                                            'value': extinction
-                                                        })
-            te.save()
-
-            logger.info(f'Saved E(V-I) = {extinction} for target {target.name}')
-
-        ##asking for all data (check for new data force)
-        #TODO: make it run in the background?
-        call_command('updatereduceddata', target_id=target.id, stdout=StringIO())
-
-        mag_last, mjd_last, filter_last = last_jd.get_last(target)
-
-        #everytime the list is rendered, the last mag and last mjd are updated per target
+    if extinction:
         te, _ = TargetExtra.objects.update_or_create(target=target,
-        key='mag_last',
-        defaults={'value': mag_last})
+                                                    key='E(V-I)',
+                                                    defaults={
+                                                        'value': extinction
+                                                    })
         te.save()
 
-        te, _ = TargetExtra.objects.update_or_create(target=target,
-        key='mjd_last',
-        defaults={'value': mjd_last})
-        te.save()
+        logger.info(f'Saved E(V-I) = {extinction} for target {target.name}')
 
-        try:
-            imp = float(target.extra_field.get('importance'))
-            cadence = float(target.extra_field.get('cadence'))
-        except:
-            imp = 1
-            cadence = 1
+    ##asking for all data (check for new data force)
+    #TODO: make it run in the background?
+    call_command('updatereduceddata', target_id=target.id, stdout=StringIO())
 
-        priority = computeDtAndPriority(mjd_last, imp, cadence)
-        te, _ = TargetExtra.objects.update_or_create(target=target,
-        key='priority',
-        defaults={'value': priority})
+    mag_last, mjd_last, filter_last = last_jd.get_last(target)
 
-        constellation = get_constel(target.ra, target.dec)
-        te, _ = TargetExtra.objects.update_or_create(target=target,
-        key='constellation',
-        defaults={'value': constellation})
+    #everytime the list is rendered, the last mag and last mjd are updated per target
+    te, _ = TargetExtra.objects.update_or_create(target=target,
+    key='mag_last',
+    defaults={'value': mag_last})
+    te.save()
 
-        te.save()
+    te, _ = TargetExtra.objects.update_or_create(target=target,
+    key='mjd_last',
+    defaults={'value': mjd_last})
+    te.save()
+
+    try:
+        imp = float(target.extra_field.get('importance'))
+        cadence = float(target.extra_field.get('cadence'))
+    except:
+        imp = 1
+        cadence = 1
+
+    priority = computeDtAndPriority(mjd_last, imp, cadence)
+    te, _ = TargetExtra.objects.update_or_create(target=target,
+    key='priority',
+    defaults={'value': priority})
+
+    constellation = get_constel(target.ra, target.dec)
+    te, _ = TargetExtra.objects.update_or_create(target=target,
+    key='constellation',
+    defaults={'value': constellation})
+
+    te.save()
 
 
-        #if we want to display filter-last, we should add this to extra fields.
-        #now it is only dynamically computed in table list views.py
-        target.save()
-    else: #for update no grabbing the external data, only updating Sun dist and phot_class
-        print("HOOK: non-create.")
-        update_sun_distance(target)
-        update_phot_class(target)
-        target.save()
+    #if we want to display filter-last, we should add this to extra fields.
+    #now it is only dynamically computed in table list views.py
+    target.save()
