@@ -52,11 +52,13 @@ def target_post_save(target, created, **kwargs):
             pass
         if not aavso_name:
             aavso_name = target.name
-            TargetExtra.objects.update_or_create(target=target,
+            te, _ = TargetExtra.objects.update_or_create(target=target,
                                             key=TARGET_NAME_KEYS[DataSource.AAVSO],
                                             defaults={
                                                 'value': aavso_name
                                             })
+            te.save()
+
 
 ### update and create:
 
@@ -101,6 +103,7 @@ def target_post_save(target, created, **kwargs):
     te, _ = TargetExtra.objects.update_or_create(target=target,
     key='priority',
     defaults={'value': priority})
+    te.save()
 
     constellation = get_constel(target.ra, target.dec)
     te, _ = TargetExtra.objects.update_or_create(target=target,
