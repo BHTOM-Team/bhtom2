@@ -11,7 +11,7 @@ def query_external_service(url: str,
 
     status = -1
     try:
-        response: requests.Response = requests.get(url, timeout=5, **kwargs)
+        response: requests.Response = requests.get(url, timeout=30, **kwargs)
         response.raise_for_status()
 
         status: int = response.status_code

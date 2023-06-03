@@ -2,7 +2,7 @@ from typing import Dict, Optional
 
 from bhtom2.external_service.catalog_name_lookup import query_all_services
 from bhtom2.utils.bhtom_logger import BHTOMLogger
-from bhtom2.utils.coordinate_utils import fill_galactic_coordinates, update_sun_distance
+from bhtom2.utils.coordinate_utils import fill_galactic_coordinates, update_phot_class, update_sun_distance
 from bhtom2.utils.extinction import ogle_extinction
 from bhtom_base.bhtom_targets.models import TargetExtra, Target
 from bhtom2.external_service.data_source_information import (TARGET_NAME_KEYS,
@@ -31,6 +31,7 @@ def target_post_save(target, created, **kwargs):
     if created:
         fill_galactic_coordinates(target)
         update_sun_distance(target)
+        update_phot_class(target)
         names: Dict[DataSource, str] = query_all_services(target)
         for k, v in names.items():
             try:
