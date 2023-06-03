@@ -63,9 +63,10 @@ def update_sun_distance(target: Target, time_to_compute=None):
     sun_pos = get_sun(tt)
     obj_pos = SkyCoord(target.ra, target.dec, unit=u.deg)
     Sun_sep = around(sun_pos.separation(obj_pos).deg,0)
-    TargetExtra.objects.update_or_create(target=target,
+    te, _ = TargetExtra.objects.update_or_create(target=target,
         key='sun_separation',
         defaults={'value': Sun_sep})
+    te.save()
 
     return target
 
