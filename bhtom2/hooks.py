@@ -117,3 +117,8 @@ def target_post_save(target, created, **kwargs):
         #if we want to display filter-last, we should add this to extra fields.
         #now it is only dynamically computed in table list views.py
         target.save()
+
+    if not created:
+        update_sun_distance(target)
+        update_phot_class(target)
+        target.save()

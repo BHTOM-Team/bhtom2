@@ -293,6 +293,9 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
                 f'Deleted alias {to_delete.name} for {get_pretty_survey_name(to_delete.source_name)}'
             )
 
+        logger.info('Target post save hook: %s update: %s', self.object, True)
+        run_hook('target_post_save', target=self.object, created=False)
+
         return redirect(self.get_success_url())
 
     def get_queryset(self, *args, **kwargs):
