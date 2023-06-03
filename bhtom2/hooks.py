@@ -59,6 +59,13 @@ def target_post_save(target, created, **kwargs):
         defaults={'value': mjd_last})
         te.save()
 
+        try:
+            imp = float(target.extra_field.get('importance'))
+            cadence = float(target.extra_field.get('cadence'))
+        except:
+            imp = 1
+            cadence = 1
+
         priority = computeDtAndPriority(mjd_last, imp, cadence)
         te, _ = TargetExtra.objects.update_or_create(target=target,
         key='priority',
@@ -104,14 +111,6 @@ def target_post_save(target, created, **kwargs):
         te.save()
 
         logger.info(f'Saved E(V-I) = {extinction} for target {target.name}')
-
-
-    try:
-        imp = float(target.extra_field.get('importance'))
-        cadence = float(target.extra_field.get('cadence'))
-    except:
-        imp = 1
-        cadence = 1
 
 
 
