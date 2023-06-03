@@ -30,49 +30,59 @@
 
   {% if key == 'constellation' %}
   <dt class="col-sm-6">{{ "Constellation" }}</dt>
+  <dd class="col-sm-6">{{ value }}</dd>
   {% endif %}
 
   {% if key == 'discovery_date' %}
   <dt class="col-sm-6">{{ "Discovered" }}</dt>
+  <dd class="col-sm-6">{{ value }}</dd>
   {% endif %}
 
   {% if key == 'classification' %}
  <dt class="col-sm-6">{{ "Class" }}</dt>
-  {% endif %}
+ <dd class="col-sm-6">{{ value }}</dd>
+ {% endif %}
 
   {% if key == 'phot_class' %}
  <dt class="col-sm-6">{{ "Phot.Class" }}</dt>
-  {% endif %}
+ <dd class="col-sm-6">{{ value }}</dd>
+ {% endif %}
 
   {% if key == 'mjd_last' %}
  <dt class="col-sm-6">{{ "Last MJD" }}</dt>
-  {% endif %}
+ <dd class="col-sm-6">{{ value }}</dd>
+ {% endif %}
 
   {% if key == 'mag_last' %}
  <dt class="col-sm-6">{{ "Last G Mag" }}</dt>
-  {% endif %}
+ <dd class="col-sm-6">{{ value }}</dd>
+ {% endif %}
 
   {% if key == 'importance' %}
  <dt class="col-sm-6">{{ "Target importance (0-10)" }}</dt>
-  {% endif %}
+ <dd class="col-sm-6">{{ value }}</dd>
+ {% endif %}
 
   {% if key == 'cadence' %}
   <dt class="col-sm-6">{{ "Cadence requested (d)" }}</dt>
+  <dd class="col-sm-6">{{ value }}</dd>
   {% endif %}
 
   {% if key == 'priority' %}
   <dt class="col-sm-6">{{ "Observing priority" }}</dt>
+  <dd class="col-sm-6">{{ value }}</dd>
   {% endif %}
 
   {% if key == 'sun_separation' %}
   <dt class="col-sm-6">{{ "Sun Separation (deg)" }}</dt>
+  <dd class="col-sm-6">{{ value }}</dd>
   {% endif %}
 
   {% if key == 'creation_date' %}
   <dt class="col-sm-6">{{ "Target created" }}</dt>
+  <dd class="col-sm-6">{{ value }}</dd>
   {% endif %}
 
-     <dd class="col-sm-6">{{ value }}</dd>
 {% endfor %}
 </dl>
 
