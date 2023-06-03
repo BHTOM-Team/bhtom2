@@ -20,12 +20,6 @@ from bhtom2.utils.openai_utils import get_constel, latex_text_target
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Hooks]')
 
-# @receiver(pre_save, sender=Target)
-# def target_pre_save(sender, instance, **kwargs):
-#     fill_galactic_coordinates(instance)
-#     update_sun_distance(instance)
-#     print('Target pre save hook: {}', str(instance))
-
 # actions done just after saving the target (in creation or update)
 def target_post_save(target, created, **kwargs):
     if created:

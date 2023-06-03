@@ -110,6 +110,7 @@ def update_phot_class(target: Target):
 
             #print(best, '{:.1%}'.format(best_value))
             result = best+' {:.1%}'.format(best_value)
+            print("Phot.class success: ",result)
     except:
         pass
     
