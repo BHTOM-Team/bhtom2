@@ -114,9 +114,11 @@ def update_phot_class(target: Target):
     except:
         pass
     
-    TargetExtra.objects.update_or_create(target=target,
+    te, _ = TargetExtra.objects.update_or_create(target=target,
         key='phot_class',
         defaults={'value': result})
+
+    te.save()
 
     return target
     
