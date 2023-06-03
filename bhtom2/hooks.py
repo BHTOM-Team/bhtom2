@@ -42,25 +42,26 @@ def target_post_save(target, created, **kwargs):
             # te.save()
         #logger.info(f'Saved new names: {names} for target {target.name}')
 
-        #LW: setting AAVSO name always to the name
-        #it can then be changed
-        #first, checking if not exist yet:
-        aavso_name = ""
-        try:
-            aavso_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.AAVSO])
-        except:
-            pass
-        if not aavso_name:
-            aavso_name = target.name
-            te, _ = TargetExtra.objects.update_or_create(target=target,
-                                            key=TARGET_NAME_KEYS[DataSource.AAVSO],
-                                            defaults={
-                                                'value': aavso_name
-                                            })
-            te.save()
-
-
 ### update and create:
+
+    #LW: setting AAVSO name always to the name
+    #it can then be changed
+    #first, checking if not exist yet:
+    aavso_name = ""
+    try:
+        aavso_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.AAVSO])
+    except:
+        pass
+    if not aavso_name:
+        aavso_name = target.name
+        te, _ = TargetExtra.objects.update_or_create(target=target,
+                                        key=TARGET_NAME_KEYS[DataSource.AAVSO],
+                                        defaults={
+                                            'value': aavso_name
+                                        })
+        te.save()
+
+
 
     # Fill in extinction
     extinction: Optional[float] = ogle_extinction(target)
