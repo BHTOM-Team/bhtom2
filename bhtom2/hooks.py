@@ -78,42 +78,40 @@ def target_post_save(target, created, **kwargs):
         defaults={'value': constellation})
         te.save()
 
-### update and create:
-
-    #LW: setting AAVSO name always to the name
-    #it can then be changed
-    #first, checking if not exist yet:
-    aavso_name = ""
-    try:
-        aavso_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.AAVSO])
-    except:
-        pass
-    if not aavso_name:
-        aavso_name = target.name
-        te, _ = TargetExtra.objects.update_or_create(target=target,
-                                        key=TARGET_NAME_KEYS[DataSource.AAVSO],
-                                        defaults={
-                                            'value': aavso_name
-                                        })
-        te.save()
+        #LW: setting AAVSO name always to the name
+        #it can then be changed
+        #first, checking if not exist yet:
+        aavso_name = ""
+        try:
+            aavso_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.AAVSO])
+        except:
+            pass
+        if not aavso_name:
+            aavso_name = target.name
+            te, _ = TargetExtra.objects.update_or_create(target=target,
+                                            key=TARGET_NAME_KEYS[DataSource.AAVSO],
+                                            defaults={
+                                                'value': aavso_name
+                                            })
+            te.save()
 
 
 
-    # Fill in extinction
-    extinction: Optional[float] = ogle_extinction(target)
+        # Fill in extinction
+        extinction: Optional[float] = ogle_extinction(target)
 
-    if extinction:
-        te, _ = TargetExtra.objects.update_or_create(target=target,
-                                                    key='E(V-I)',
-                                                    defaults={
-                                                        'value': extinction
-                                                    })
-        te.save()
+        if extinction:
+            te, _ = TargetExtra.objects.update_or_create(target=target,
+                                                        key='E(V-I)',
+                                                        defaults={
+                                                            'value': extinction
+                                                        })
+            te.save()
 
-        logger.info(f'Saved E(V-I) = {extinction} for target {target.name}')
+            logger.info(f'Saved E(V-I) = {extinction} for target {target.name}')
 
 
 
-    #if we want to display filter-last, we should add this to extra fields.
-    #now it is only dynamically computed in table list views.py
-    target.save()
+        #if we want to display filter-last, we should add this to extra fields.
+        #now it is only dynamically computed in table list views.py
+        target.save()
