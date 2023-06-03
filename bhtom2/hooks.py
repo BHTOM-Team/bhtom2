@@ -59,6 +59,18 @@ def target_post_save(target, created, **kwargs):
         defaults={'value': mjd_last})
         te.save()
 
+        priority = computeDtAndPriority(mjd_last, imp, cadence)
+        te, _ = TargetExtra.objects.update_or_create(target=target,
+        key='priority',
+        defaults={'value': priority})
+        te.save()
+
+        constellation = get_constel(target.ra, target.dec)
+        te, _ = TargetExtra.objects.update_or_create(target=target,
+        key='constellation',
+        defaults={'value': constellation})
+        te.save()
+
 ### update and create:
 
     #LW: setting AAVSO name always to the name
@@ -101,18 +113,6 @@ def target_post_save(target, created, **kwargs):
         imp = 1
         cadence = 1
 
-    priority = computeDtAndPriority(mjd_last, imp, cadence)
-    te, _ = TargetExtra.objects.update_or_create(target=target,
-    key='priority',
-    defaults={'value': priority})
-    te.save()
-
-    constellation = get_constel(target.ra, target.dec)
-    te, _ = TargetExtra.objects.update_or_create(target=target,
-    key='constellation',
-    defaults={'value': constellation})
-
-    te.save()
 
 
     #if we want to display filter-last, we should add this to extra fields.
