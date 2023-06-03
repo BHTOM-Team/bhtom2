@@ -327,13 +327,16 @@ EXTRA_FIELDS = [
     {'name': 'sun_separation', 'type': 'number'},
     {'name': 'creation_date', 'type': 'datetime'},
     {'name': 'constellation', 'type': 'string'},
-    {'name': 'dont_update_me', 'type': 'boolean'}]#, 'hidden': True}]
+    {'name': 'dont_update_me', 'type': 'boolean'},#, 'hidden': True}]
+    {'name': 'phot_class', 'type': 'string'} #classification from photometric classifier, automated
+    ]
+
 
 CREATE_TARGET_HIDDEN_EXTRA_FIELDS = [
     'sun_separation', 'dont_update_me', 
     'mjd_last', 'mag_last', 'priority',
     'pm_ra', 'pm_dec', 'galactic_lat', 'galactic_lng', 'distance', 'distance_err',
-    'constellation'
+    'constellation', 'phot_class'
 ]
 
 CREATE_TARGET_HIDDEN_FIELDS = [
