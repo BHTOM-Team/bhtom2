@@ -294,6 +294,7 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
             )
 
         #the hook is run even if not called?
+        print("UPDATE: REDIRECTING TO "+self.get_success_url())
         return redirect(self.get_success_url())
 
     def get_queryset(self, *args, **kwargs):

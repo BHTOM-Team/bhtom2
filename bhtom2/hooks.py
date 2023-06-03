@@ -42,6 +42,23 @@ def target_post_save(target, created, **kwargs):
             # te.save()
         #logger.info(f'Saved new names: {names} for target {target.name}')
 
+        ##asking for all data (check for new data force)
+        #TODO: make it run in the background?
+        call_command('updatereduceddata', target_id=target.id, stdout=StringIO())
+
+        mag_last, mjd_last, filter_last = last_jd.get_last(target)
+
+        #everytime the list is rendered, the last mag and last mjd are updated per target
+        te, _ = TargetExtra.objects.update_or_create(target=target,
+        key='mag_last',
+        defaults={'value': mag_last})
+        te.save()
+
+        te, _ = TargetExtra.objects.update_or_create(target=target,
+        key='mjd_last',
+        defaults={'value': mjd_last})
+        te.save()
+
 ### update and create:
 
     #LW: setting AAVSO name always to the name
@@ -76,22 +93,6 @@ def target_post_save(target, created, **kwargs):
 
         logger.info(f'Saved E(V-I) = {extinction} for target {target.name}')
 
-    ##asking for all data (check for new data force)
-    #TODO: make it run in the background?
-    call_command('updatereduceddata', target_id=target.id, stdout=StringIO())
-
-    mag_last, mjd_last, filter_last = last_jd.get_last(target)
-
-    #everytime the list is rendered, the last mag and last mjd are updated per target
-    te, _ = TargetExtra.objects.update_or_create(target=target,
-    key='mag_last',
-    defaults={'value': mag_last})
-    te.save()
-
-    te, _ = TargetExtra.objects.update_or_create(target=target,
-    key='mjd_last',
-    defaults={'value': mjd_last})
-    te.save()
 
     try:
         imp = float(target.extra_field.get('importance'))
