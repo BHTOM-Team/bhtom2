@@ -112,6 +112,7 @@ def target_post_save(target, created, **kwargs):
         #now it is only dynamically computed in table list views.py
         target.save()
     else: #for update no grabbing the external data, only updating Sun dist and phot_class
+        print("HOOK: non-create.")
         update_sun_distance(target)
         update_phot_class(target)
         target.save()
