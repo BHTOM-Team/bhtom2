@@ -16,11 +16,12 @@ Including another URLconf
 from django.urls import path, include
 from bhtom2.bhtom_targets.views import TargetCreateView, TargetUpdateView, TargetGenerateTargetDescriptionLatexView
 
-from bhtom_base.bhtom_targets.views import TargetDetailView
+from bhtom_base.bhtom_targets.views import TargetDetailView, TargetImportView
 
 from bhtom2.views import BrokerQueryListView, TargetDownloadPhotometryDataView, TargetDownloadRadioDataView, TargetListImagesView, TargetListView
 
 urlpatterns = [
+    path('targets/import/', TargetImportView.as_view(), name='import'),
     path('images/', TargetListImagesView.as_view(), name='images'),
     path('', include('bhtom_custom_registration.bhtom_registration.registration_flows.approval_required.urls', namespace='registration')),
     path('alerts/query/list/', BrokerQueryListView.as_view(template_name='bhtom_alerts/brokerquery_list.html'), name='alerts:list'),
@@ -48,5 +49,4 @@ urlpatterns = [
     path('proposals/', include('bhtom2.bhtom_observations.urls', namespace='proposals')),
     path('targets/', include('bhtom2.bhtom_targets.urls', namespace='targets')),
     path('', include('bhtom_base.bhtom_common.urls')),
-
 ]
