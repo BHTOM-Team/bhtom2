@@ -21,6 +21,7 @@ from bhtom_base.bhtom_targets.views import TargetDetailView, TargetImportView, T
 from bhtom2.views import BrokerQueryListView, TargetDownloadPhotometryDataView, TargetDownloadRadioDataView, TargetListImagesView, TargetListView
 
 urlpatterns = [
+    path('targets/', include('bhtom2.bhtom_targets.urls', namespace='targets')),
     path('targets/import/', TargetImportView.as_view(), name='import'),
     # path('/targets/export/', TargetExportView.as_view(), name='export'),
     path('images/', TargetListImagesView.as_view(), name='images'),
@@ -48,6 +49,5 @@ urlpatterns = [
          name='generate_target_description_latex'),
     path('catalogs/', include('bhtom2.bhtom_catalogs.urls')),
     path('proposals/', include('bhtom2.bhtom_observations.urls', namespace='proposals')),
-    path('targets/', include('bhtom2.bhtom_targets.urls', namespace='targets')),
     path('', include('bhtom_base.bhtom_common.urls')),
 ]
