@@ -9,10 +9,14 @@ def query_external_service(url: str,
                            value_to_get: str = 'text',
                            **kwargs) -> str:
 
-    response: requests.Response = requests.get(url, timeout=10, **kwargs)
-    response.raise_for_status()
+    status = -1
+    try:
+        response: requests.Response = requests.get(url, timeout=30, **kwargs)
+        response.raise_for_status()
 
-    status: int = response.status_code
+        status: int = response.status_code
+    except Exception:
+        pass
 
     if status != 200:
         raise InvalidExternalServiceStatusException(f'{service_name} returned status code {status} '
