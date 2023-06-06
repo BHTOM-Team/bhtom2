@@ -21,6 +21,8 @@ from bhtom_base.bhtom_targets.models import Target
 
 from numpy import around 
 
+from photometry_and_spectroscopy_data_utils import get_photometry_stats
+
 register = template.Library()
 
 
@@ -36,6 +38,24 @@ def recent_photometry(target, limit=1):
                       'facility': rd.facility} for rd in photometry
                      if rd.value_unit == ReducedDatumUnit.MAGNITUDE]}
 
+
+@register.inclusion_tag('bhtom_dataproducts/partials/photometry_stats.html')
+def photometry_stats(target):
+    import pandas as pd
+
+    """
+    Displays a table of the the photometric data stats for a target.
+    """
+    stats,columns = get_photometry_stats(target)
+    sort_by='Data_points'
+    sort_by_asc=False
+    df: pd.DataFrame = pd.DataFrame(data=stats,
+                                    columns=columns).sort_values(by=sort_by, ascending=sort_by_asc)
+
+    return {'data': [{'Facility': rd.timestamp,
+                      'Filters': rd.value,
+                      'Data_points': rd.facility} for rd in df
+                     ]}
 
 @register.inclusion_tag('bhtom_dataproducts/partials/dataproduct_list_for_target.html', takes_context=True)
 def dataproduct_list_for_target(context, target):
