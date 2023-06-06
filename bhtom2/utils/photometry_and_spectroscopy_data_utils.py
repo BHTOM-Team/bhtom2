@@ -27,36 +27,6 @@ def load_datum_json(json_values):
         return {}
 
 
-def get_observation_facility(datum: ReducedDatum) -> Optional[str]:
-    try:
-        # If the reduced datum is from an observation, then
-        # the data product object is linked to an observation record
-        # which contains information about the facility
-        if datum.observation_record_facility:
-            return datum.observation_record_facility
-
-        # Then, check in reduced datum extra data
-        # Some sources might save additional data, such as
-        # the facility name, in the reduced datum extra data
-        # There should be just one extra data object, as
-        # the reduced datum extra data has reduced datum as the primary key.
-        return load_datum_json(datum.rd_extra_data).get(FACILITY_KEY,
-                                                        load_datum_json(datum.dp_extra_data).get(FACILITY_KEY, ""))
-    except:
-        return None
-
-
-def get_observer_name(datum: ReducedDatum) -> Optional[str]:
-    try:
-        # First, check in reduced datum extra data
-        # Some sources might save additional data, such as
-        # the facility name, in the reduced datum extra data
-        # There should be just one extra data object, as
-        # the reduced datum extra data has reduced datum as the primary key.
-        return load_datum_json(datum.rd_extra_data).get(OWNER_KEY,
-                                                        load_datum_json(datum.dp_extra_data).get(OWNER_KEY, ""))
-    except:
-        return None
 
 
 def decode_owner(extra_data_json_str: str) -> Optional[str]:
@@ -92,15 +62,14 @@ def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str
     columns: List[str] = ['JD', 'Magnitude', 'Error', 'Facility', 'Filter', 'Owner']
     data: List[List[Any]] = []
 
-    for datum in datums:
-        values = json.loads(datum.value)
+    for datum in datums:        
 
         data.append([Time(datum.timestamp).jd,
-                     values.get('magnitude'),
-                     values.get('error'),
-                     get_observation_facility(datum),
-                     values.get('filter'),
-                     get_observer_name(datum)])
+                     datum.get('magnitude'),
+                     datum.get('error'),
+                     datum.get('facility'),
+                     datum.get('filter'),
+                     datum.get('user')])
 
     return data, columns
 
@@ -202,42 +171,5 @@ def save_photometry_data_for_target_to_csv_file(target: Target) -> Tuple[NamedTe
     data, columns = get_photometry_data_table(target)
 
     filename: str = "target_%s_photometry.csv" % target.name
-
-    return save_data_to_temporary_file(data, columns, filename)
-
-
-def save_spectroscopy_data_for_target_to_csv_file(target: Target) -> Tuple[NamedTemporaryFile, str]:
-    from astropy.time import Time
-
-    datums: ReducedDatum = ReducedDatum.objects.filter(target=target,
-                                                               data_type=settings.DATA_PRODUCT_TYPES['spectroscopy'][0])
-
-    columns: List[str] = ['JD', 'Flux', 'Wavelength', 'Flux Units', 'Wavelength Units', 'Facility', 'Owner']
-    data: List[List[Any]] = []
-
-    for datum in datums:
-        values = json.loads(datum.value)
-        deserialized = SpectrumSerializer().deserialize(datum.value)
-
-        file_jd: Optional[float] = get_spectroscopy_observation_time_jd(datum)
-        if file_jd:
-            jd: float = file_jd
-        else:
-            jd: float = Time(datum.timestamp).jd
-
-        flux_units: str = values.get('photon_flux_units')
-        wavelength_units: str = values.get('wavelength_units')
-        observation_facility: str = get_observation_facility(datum)
-        observer_name: str = get_observer_name(datum)
-
-        data.append([jd,
-                     deserialized.flux.value,
-                     deserialized.wavelength.value,
-                     flux_units,
-                     wavelength_units,
-                     observation_facility,
-                     observer_name])
-
-    filename: str = "target_%s_spectroscopy.csv" % target.name
 
     return save_data_to_temporary_file(data, columns, filename)
