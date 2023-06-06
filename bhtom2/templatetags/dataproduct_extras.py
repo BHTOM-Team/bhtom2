@@ -47,14 +47,15 @@ def photometry_stats(target):
     Displays a table of the the photometric data stats for a target.
     """
     stats,columns = get_photometry_stats(target)
-    sort_by='Data_points'
+    sort_by='Data_points'    
     sort_by_asc=False
     df: pd.DataFrame = pd.DataFrame(data=stats,
                                     columns=columns).sort_values(by=sort_by, ascending=sort_by_asc)
 
-    return {'data': [{'Facility': rd.timestamp,
-                      'Filters': rd.value,
-                      'Data_points': rd.facility} for rd in df
+    print(df)
+    return {'data': [{'Facility': rd.facility,
+                      'Filters': rd.filters,
+                      'Data_points': rd.Data_points} for rd in df
                      ]}
 
 @register.inclusion_tag('bhtom_dataproducts/partials/dataproduct_list_for_target.html', takes_context=True)
