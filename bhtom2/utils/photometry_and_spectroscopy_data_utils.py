@@ -85,11 +85,10 @@ def get_spectroscopy_observation_time_jd(reduced_datum: ReducedDatum) -> Optiona
 def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str]]:
     from astropy.time import Time
 
-    datums: ReducedDatum = ReducedDatum.objects.filter(target=target,
-                                                               data_type__in=[
-                                                                   settings.DATA_PRODUCT_TYPES['photometry'][0]])
-#                                                                   settings.DATA_PRODUCT_TYPES['photometry_asassn'][0]])
-
+    datums = ReducedDatum.objects.filter(target=target,
+                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
+                                             )
+    
     columns: List[str] = ['JD', 'Magnitude', 'Error', 'Facility', 'Filter', 'Owner']
     data: List[List[Any]] = []
 
