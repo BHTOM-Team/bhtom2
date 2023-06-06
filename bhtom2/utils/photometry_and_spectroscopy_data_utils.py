@@ -65,11 +65,11 @@ def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str
     for datum in datums:        
 
         data.append([Time(datum.timestamp).jd,
-                     datum.get('magnitude'),
-                     datum.get('error'),
-                     datum.get('facility'),
-                     datum.get('filter'),
-                     datum.get('user')])
+                     datum.value,
+                     datum.error,
+                     datum.facility,
+                     datum.filter,
+                     datum.user])
 
     return data, columns
 
