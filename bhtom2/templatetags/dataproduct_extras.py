@@ -53,10 +53,14 @@ def photometry_stats(target):
                                     columns=columns).sort_values(by=sort_by, ascending=sort_by_asc)
 
     print(df)
-    return {'data': [{'Facility': rd.facility,
-                      'Filters': rd.filters,
-                      'Data_points': rd.Data_points} for rd in df
-                     ]}
+    data_list = []
+    for index, row in df.iterrows():
+        data_dict = {'Facility': row['Facility'],
+                    'Filters': row['Filters'],
+                    'Data_points': row['Data_points']}
+        data_list.append(data_dict)
+
+    return {'data': data_list}
 
 @register.inclusion_tag('bhtom_dataproducts/partials/dataproduct_list_for_target.html', takes_context=True)
 def dataproduct_list_for_target(context, target):
