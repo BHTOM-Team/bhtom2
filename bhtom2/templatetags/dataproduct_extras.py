@@ -21,7 +21,7 @@ from bhtom_base.bhtom_targets.models import Target
 
 from numpy import around 
 
-from photometry_and_spectroscopy_data_utils import get_photometry_stats
+from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_stats
 
 register = template.Library()
 

@@ -8,10 +8,10 @@ from astropy.time import Time
 import pandas as pd
 
 from django.conf import settings
-from tom_dataproducts.processors.data_serializers import SpectrumSerializer
-from tom_targets.models import Target
+from bhtom_base.bhtom_dataproducts.processors.data_serializers import SpectrumSerializer
+from bhtom_base.bhtom_targets.models import Target
 
-from bhtom2.models import ViewReducedDatum
+from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 from .observation_data_extra_data_utils import decode_datapoint_extra_data, ObservationDatapointExtraData, OWNER_KEY
 
 SPECTROSCOPY: str = "spectroscopy"
@@ -27,7 +27,7 @@ def load_datum_json(json_values):
         return {}
 
 
-def get_observation_facility(datum: ViewReducedDatum) -> Optional[str]:
+def get_observation_facility(datum: ReducedDatum) -> Optional[str]:
     try:
         # If the reduced datum is from an observation, then
         # the data product object is linked to an observation record
@@ -46,7 +46,7 @@ def get_observation_facility(datum: ViewReducedDatum) -> Optional[str]:
         return None
 
 
-def get_observer_name(datum: ViewReducedDatum) -> Optional[str]:
+def get_observer_name(datum: ReducedDatum) -> Optional[str]:
     try:
         # First, check in reduced datum extra data
         # Some sources might save additional data, such as
@@ -64,7 +64,7 @@ def decode_owner(extra_data_json_str: str) -> Optional[str]:
     return getattr(extra_data, 'owner', None)
 
 
-def get_spectroscopy_observation_time_jd(reduced_datum: ViewReducedDatum) -> Optional[float]:
+def get_spectroscopy_observation_time_jd(reduced_datum: ReducedDatum) -> Optional[float]:
     from dateutil import parser
     from datetime import datetime
     from astropy.time import Time
@@ -82,14 +82,13 @@ def get_spectroscopy_observation_time_jd(reduced_datum: ViewReducedDatum) -> Opt
     return None
 
 
-def get_photometry_data_table(target_id: int) -> Tuple[List[List[str]], List[str]]:
+def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str]]:
     from astropy.time import Time
 
-    target: Target = Target.objects.get(pk=target_id)
-    datums: ViewReducedDatum = ViewReducedDatum.objects.filter(target=target,
+    datums: ReducedDatum = ReducedDatum.objects.filter(target=target,
                                                                data_type__in=[
-                                                                   settings.DATA_PRODUCT_TYPES['photometry'][0],
-                                                                   settings.DATA_PRODUCT_TYPES['photometry_asassn'][0]])
+                                                                   settings.DATA_PRODUCT_TYPES['photometry'][0]])
+#                                                                   settings.DATA_PRODUCT_TYPES['photometry_asassn'][0]])
 
     columns: List[str] = ['JD', 'Magnitude', 'Error', 'Facility', 'Filter', 'Owner']
     data: List[List[Any]] = []
@@ -107,8 +106,8 @@ def get_photometry_data_table(target_id: int) -> Tuple[List[List[str]], List[str
     return data, columns
 
 
-def get_photometry_stats(target_id: int) -> Tuple[List[List[str]], List[str]]:
-    data, columns = get_photometry_data_table(target_id)
+def get_photometry_stats(target: Target) -> Tuple[List[List[str]], List[str]]:
+    data, columns = get_photometry_data_table(target)
 
     df: pd.DataFrame = pd.DataFrame(data=data,
                                     columns=columns)
@@ -181,41 +180,37 @@ def save_data_to_latex_table(data: List[List[Any]],
     return tmp, filename
 
 
-def get_photometry_stats_latex(target_id: int) -> Tuple[NamedTemporaryFile, str]:
-    target: Target = Target.objects.get(pk=target_id)
+def get_photometry_stats_latex(target: Target) -> Tuple[NamedTemporaryFile, str]:
 
-    data, columns = get_photometry_stats(target_id)
+    data, columns = get_photometry_stats(target)
 
     filename: str = "target_%s_photometry_stats.tex" % target.name
 
     return save_data_to_latex_table(data, columns, filename)
 
 
-def get_photometry_data_stats(target_id: int) -> Tuple[NamedTemporaryFile, str]:
-    target: Target = Target.objects.get(pk=target_id)
+def get_photometry_data_stats(target: Target) -> Tuple[NamedTemporaryFile, str]:
 
-    stats, columns = get_photometry_stats(target_id)
+    stats, columns = get_photometry_stats(target)
 
     filename: str = "target_%s_photometry_stats.csv" % target.name
 
     return save_data_to_temporary_file(stats, columns, filename, 'Data_points', False)
 
 
-def save_photometry_data_for_target_to_csv_file(target_id: int) -> Tuple[NamedTemporaryFile, str]:
-    target: Target = Target.objects.get(pk=target_id)
+def save_photometry_data_for_target_to_csv_file(target: Target) -> Tuple[NamedTemporaryFile, str]:
 
-    data, columns = get_photometry_data_table(target_id)
+    data, columns = get_photometry_data_table(target)
 
     filename: str = "target_%s_photometry.csv" % target.name
 
     return save_data_to_temporary_file(data, columns, filename)
 
 
-def save_spectroscopy_data_for_target_to_csv_file(target_id: int) -> Tuple[NamedTemporaryFile, str]:
+def save_spectroscopy_data_for_target_to_csv_file(target: Target) -> Tuple[NamedTemporaryFile, str]:
     from astropy.time import Time
 
-    target: Target = Target.objects.get(pk=target_id)
-    datums: ViewReducedDatum = ViewReducedDatum.objects.filter(target=target,
+    datums: ReducedDatum = ReducedDatum.objects.filter(target=target,
                                                                data_type=settings.DATA_PRODUCT_TYPES['spectroscopy'][0])
 
     columns: List[str] = ['JD', 'Flux', 'Wavelength', 'Flux Units', 'Wavelength Units', 'Facility', 'Owner']
