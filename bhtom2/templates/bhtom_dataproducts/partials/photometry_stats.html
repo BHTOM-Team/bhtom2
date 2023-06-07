@@ -4,7 +4,7 @@
     Photometry Stats
     </div>
     <table class="table">
-        <thead><tr><th>Facility</th><th>Filters</th><th>Number</th></tr>
+        <thead><tr><th>Facility</th><th>Filters</th><th>Number</th><th>Min MJD</th><th>Max JD</th></tr>
         </thead>
         <tbody>
         {% for datum in data %}
@@ -12,6 +12,8 @@
             <td>{{ datum.Facility }}</td>
             <td>{{ datum.Filters }}</td>
             <td>{{ datum.Data_points }}</td>
+            <td>{{ datum.Min_MJD }}</td>
+            <td>{{ datum.Max_MJD }}</td>
         </tr>
         {% empty %}
         <tr>

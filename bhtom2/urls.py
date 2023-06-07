@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
-from bhtom2.bhtom_targets.views import TargetCreateView, TargetUpdateView, TargetGenerateTargetDescriptionLatexView
+from bhtom2.bhtom_targets.views import TargetCreateView, TargetDownloadPhotometryStatsLatexTableView, TargetUpdateView, TargetGenerateTargetDescriptionLatexView
 
 from bhtom_base.bhtom_targets.views import TargetDetailView, TargetImportView, TargetExportView
 
@@ -41,6 +41,9 @@ urlpatterns = [
          TargetGenerateTargetDescriptionLatexView.as_view(
              template_name='bhtom_targets/target_generate_latex_form.html'),
          name='generate_target_description_latex'),
+    path('targets/<int:pk>/download-photometry-stats-latex',
+    TargetDownloadPhotometryStatsLatexTableView.as_view(),
+    name='download_photometry_stats_latex'),
     path('targets/<str:name>/update/', TargetUpdateView.as_view(template_name='bhtom_targets/target_form.html'), name='update'),
     path('targets/<str:name>/download-photometry', TargetDownloadPhotometryDataView.as_view(), name='download_photometry_data'),
     path('targets/<str:name>/download-radio', TargetDownloadRadioDataView.as_view(), name='download_radio_data'),
