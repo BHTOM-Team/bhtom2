@@ -52,7 +52,6 @@ def photometry_stats(target):
     df: pd.DataFrame = pd.DataFrame(data=stats,
                                     columns=columns).sort_values(by=sort_by, ascending=sort_by_asc)
 
-    print(df)
     data_list = []
     for index, row in df.iterrows():
         data_dict = {'Facility': row['Facility'],
