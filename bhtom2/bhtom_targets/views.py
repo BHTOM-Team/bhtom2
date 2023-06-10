@@ -10,6 +10,7 @@ from django.views.generic.edit import CreateView, UpdateView
 from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm, TargetLatexDescriptionForm
 from bhtom2.external_service.data_source_information import get_pretty_survey_name
 from bhtom2.utils.openai_utils import latex_target_title_prompt, latex_text_target, latex_text_target_prompt, get_response
+from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_stats_latex
 from bhtom_base.bhtom_common.hooks import run_hook
 from bhtom_base.bhtom_common.mixins import Raise403PermissionRequiredMixin
 from bhtom_base.bhtom_targets.forms import TargetExtraFormset, TargetNamesFormset
@@ -22,8 +23,11 @@ from astropy.coordinates import Angle
 from astropy import units as u
 from django.forms import ValidationError
 from django.http import HttpResponseRedirect
+from django.views.generic import View
 
 from django.views.generic.detail import DetailView
+from abc import ABC, abstractmethod
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
 logger = logging.getLogger(__name__)
 
@@ -395,59 +399,34 @@ class TargetGenerateTargetDescriptionLatexView(UpdateView):
             form.fields['groups'].queryset = self.request.user.groups.all()
         return form
 
-#     def post(self, request, *args, **kwargs):
-#         if request.method == "POST":
-#             form = TargetLatexDescriptionForm(request.POST)
-#             print("POST PROMPT: ",request.POST['prompt'])
 
-#             if form.is_valid():
-#                 print("POST: ",form.fields['prompt'])
-# #                form.save()
+class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
+    permission_required = 'tom_dataproducts.add_dataproduct'
 
-#                 prompt = form.changed_data[0]
-#                 latex = get_response(prompt)
+    @abstractmethod
+    def generate_data_method(self, target_id):
+        pass
 
-#                 initial = {prompt:form.cleaned_data[prompt]}
-#                 form = TargetLatexDescriptionForm(initial)
-#                 context = {'form': form, 'latex': latex}
-#                 return render(request,'bhtom_targets/target_generate_latex_form.html',context)
-#         else:
-#             form = TargetLatexDescriptionForm()
+    def get(self, request, *args, **kwargs):
+        import os
+        from django.http import FileResponse
 
-#             context = {'form': form, 'latex': ''}
-#             return render(request,'bhtom_targets/target_generate_latex_form.html',context)
+        target_id: int = kwargs.get('pk', None)
+        logger.info(f'Generating file for target with id={target_id}...')
 
+        tmp = None
+        try:
+            tmp, filename = self.generate_data_method(target_id)
+            return FileResponse(open(tmp.name, 'rb'),
+                                as_attachment=True,
+                                filename=filename)
+        except Exception as e:
+            logger.error(f'Error while generating file for target with id={target_id}: {e}')
+        finally:
+            if tmp:
+                os.remove(tmp.name)
 
-#    def form_valid(self, form):
-
-        # target: Target = self.object
-        # lat= latex_text_target(target)
-        # print(lat)
-        # context = super().get_context_data()
-
-        # context['latex'] = lat
-
-#         if form.is_valid():
-# #            print("CLEANED: ",form.cleaned_data['prompt'])
-#             # form.fields['prompt'] = "DUUUPA"
-
-#             # prompt = form.changed_data[0]
-#             # latex = get_response(prompt)
-
-#             # initial = {prompt:form.cleaned_data[prompt]}
-#             # newform = form(initial)
-#             # context = {'form': newform, 'latex': latex}
-#             # form.cleaned_data['Email'] = GetEmailString()
-# #            form.fields["prompt"].initial = form.cleaned_data['prompt']
-#             form.initial['prompt'] = form.cleaned_data['prompt']
-#             form.initial['latex'] = (form.cleaned_data['prompt'])
-#             form.initial['latex'] = 'cos'
-#             form.save()
-#             print(form)
-# #            return self.form_invalid(form)
-# #            super().form_valid(form)
-
-#         #returns to the same page, unless back hit
-#         return HttpResponseRedirect(self.request.path_info)
-#        return render(request,'about/contact.html',{'form':form})
+class TargetDownloadPhotometryStatsLatexTableView(TargetDownloadDataView):
+    def generate_data_method(self, target_id):
+        return get_photometry_stats_latex(target_id)
 

@@ -47,17 +47,18 @@ def photometry_stats(target):
     Displays a table of the the photometric data stats for a target.
     """
     stats,columns = get_photometry_stats(target)
-    sort_by='Data_points'    
-    sort_by_asc=False
+    sort_by='Facility'    
+    sort_by_asc=True
     df: pd.DataFrame = pd.DataFrame(data=stats,
                                     columns=columns).sort_values(by=sort_by, ascending=sort_by_asc)
 
-    print(df)
     data_list = []
     for index, row in df.iterrows():
         data_dict = {'Facility': row['Facility'],
                     'Filters': row['Filters'],
-                    'Data_points': row['Data_points']}
+                    'Data_points': row['Data_points'],
+                    'Min_MJD': row['Earliest_time'],
+                    'Max_MJD': row['Latest_time']}
         data_list.append(data_dict)
 
     return {'data': data_list}

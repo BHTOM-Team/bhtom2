@@ -14,6 +14,8 @@ from bhtom_base.bhtom_targets.models import Target
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 from .observation_data_extra_data_utils import decode_datapoint_extra_data, ObservationDatapointExtraData, OWNER_KEY
 
+from numpy import around
+
 SPECTROSCOPY: str = "spectroscopy"
 FACILITY_KEY = "facility"
 
@@ -59,12 +61,12 @@ def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str
                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
                                              )
     
-    columns: List[str] = ['JD', 'Magnitude', 'Error', 'Facility', 'Filter', 'Owner']
+    columns: List[str] = ['MJD', 'Magnitude', 'Error', 'Facility', 'Filter', 'Owner']
     data: List[List[Any]] = []
 
     for datum in datums:        
 
-        data.append([Time(datum.timestamp).jd,
+        data.append([Time(datum.timestamp).mjd,
                      datum.value,
                      datum.error,
                      datum.facility,
@@ -93,13 +95,16 @@ def get_photometry_stats(target: Target) -> Tuple[List[List[str]], List[str]]:
 
     facilities = df['Facility'].unique()
 
-    columns: List[str] = ['Facility', 'Filters', 'Data_points']
+    columns: List[str] = ['Facility', 'Filters', 'Data_points', 'Earliest_time','Latest_time']
     stats: List[List[Any]] = []
 
     for facility in facilities:
         datapoints = len(df[df['Facility'] == facility].index)
         filters = df[df['Facility'] == facility]['Filter'].unique()
-        stats.append([facility, ", ".join(filters), datapoints])
+        earliest_time = around(df[df['Facility'] == facility]['MJD'].min(),2)
+        latest_time = around(df[df['Facility'] == facility]['MJD'].max(),2)
+
+        stats.append([facility, ", ".join(filters), datapoints, earliest_time,latest_time])
 
     stats = sorted(stats, key=operator.itemgetter(2), reverse=True)
 
@@ -148,7 +153,8 @@ def save_data_to_latex_table(data: List[List[Any]],
     return tmp, filename
 
 
-def get_photometry_stats_latex(target: Target) -> Tuple[NamedTemporaryFile, str]:
+def get_photometry_stats_latex(target_id: int) -> Tuple[NamedTemporaryFile, str]:
+    target: Target = Target.objects.get(pk=target_id)
 
     data, columns = get_photometry_stats(target)
 
