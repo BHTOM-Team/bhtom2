@@ -9,6 +9,7 @@ from django.views.generic import View
 from bhtom2.utils.openai_utils import latex_text_target
 from django_filters.views import FilterView
 from django_tables2.views import SingleTableMixin
+from django.views.generic.detail import DetailView
 from guardian.mixins import PermissionListMixin
 from numpy import around
 
@@ -204,4 +205,24 @@ class TargetListImagesView(SingleTableMixin, PermissionListMixin, FilterView):
                                 else TargetList.objects.none())
         context['query_string'] = self.request.META['QUERY_STRING']
         return context
+
+
+class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
+    template_name = 'bhtom_targets/target_microlensing.html'
+    model = Target
+    permission_required = 'bhtom_targets.view_target'
+
+
+    def get(self, request, *args, **kwargs):
+        if request.GET.get('clevel', ''):
+            clevel = request.GET.get('clevel', '')
+            slevel = request.GET.get('slevel', '')
+        else:
+            clevel = str(0.05)
+            slevel = str(0.05)
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
+        context['clevel'] = clevel
+        context['slevel'] = slevel
+        return self.render_to_response(context)
 

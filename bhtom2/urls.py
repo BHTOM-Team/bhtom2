@@ -18,7 +18,7 @@ from bhtom2.bhtom_targets.views import TargetCreateView, TargetUpdateView, Targe
 
 from bhtom_base.bhtom_targets.views import TargetDetailView, TargetImportView, TargetExportView
 
-from bhtom2.views import BrokerQueryListView, TargetDownloadPhotometryDataView, TargetDownloadRadioDataView, TargetListImagesView, TargetListView
+from bhtom2.views import BrokerQueryListView, TargetDownloadPhotometryDataView, TargetDownloadRadioDataView, TargetListImagesView, TargetListView, TargetMicrolensingView
 
 urlpatterns = [
     path('targets/', include('bhtom2.bhtom_targets.urls', namespace='targets')),
@@ -49,5 +49,6 @@ urlpatterns = [
          name='generate_target_description_latex'),
     path('catalogs/', include('bhtom2.bhtom_catalogs.urls')),
     path('proposals/', include('bhtom2.bhtom_observations.urls', namespace='proposals')),
+    path('targets/<int:pk>/microlensing', TargetMicrolensingView.as_view(), name="microlensing_model"),
     path('', include('bhtom_base.bhtom_common.urls')),
 ]

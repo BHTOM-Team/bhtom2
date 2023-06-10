@@ -82,6 +82,9 @@
                             <button onclick="download_radio()" class="btn btn-primary" role="button">Download radio data</button>
                         </div>
                       </div>
+
+                      <button onclick="open_microlensing_model()" class="btn btn-info" role="button" style="float:right;margin: 4px;">Microlensing model</button>
+
                       {% recent_photometry object limit=5 %}
 
                 </div>
@@ -169,9 +172,13 @@
       window.open('{% url "download_radio_data" target.id %}')
     }
 
-    // function generate_target_description_latex() {
-    //   window.open('{% url "generate_target_description_latex" target.id %}')
-    // }
+    function open_microlensing_model() {
+    window.open('{% url "microlensing_model" target.id %}', 'newwindow', 'width=700,height=900');
+    }
+
+    function generate_target_description_latex() {
+      window.open('{% url "generate_target_description_latex" target.id %}')
+    }
 
 </script>
 {% endblock %}
