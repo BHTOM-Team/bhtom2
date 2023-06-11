@@ -52,7 +52,7 @@ def microlensing_for_target(context, target, slevel, clevel, sel):
 
     selected_filters = [f for f, checked in sel.items() if checked]
 
-    print("MICRO: filters passed: ",slevel, selected_filters)
+#    print("MICRO: filters passed: ",slevel, selected_filters)
     
     for datum in datums:
         if str(datum.filter) in selected_filters:
@@ -256,7 +256,7 @@ def microlensing_for_target(context, target, slevel, clevel, sel):
             info_executionTime = "Time of fitting execution: %s seconds" % '{0:.3f}'.format(
                 (time.time() - start_time))
         else:
-            print("MICROLNEINS ERROR")
+#            print("MICROLNEINS ERROR")
             return {
                 'target': target,
                 'selected_filters': selected_filters,

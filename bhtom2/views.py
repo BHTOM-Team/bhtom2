@@ -272,8 +272,8 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
         context['slevel'] = slevel
         context['selected_filters'] = selected_filters
         context['sel'] = sel
-        print(context)  
-        print("VIEW", sel)
+#        print(context)  
+#        print("VIEW", sel)
 
         return self.render_to_response(context)
 
