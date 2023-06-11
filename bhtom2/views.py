@@ -6,6 +6,7 @@ from astropy.coordinates import get_sun, SkyCoord
 from astropy.time import Time
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic import View
+from bhtom2 import settings
 from bhtom2.utils.openai_utils import latex_text_target
 from django_filters.views import FilterView
 from django_tables2.views import SingleTableMixin
@@ -23,6 +24,8 @@ from bhtom_base.bhtom_alerts.alerts import get_service_classes
 from bhtom_base.bhtom_alerts.models import BrokerQuery
 from bhtom_base.bhtom_alerts.views import BrokerQueryFilter
 from bhtom_base.bhtom_targets.models import Target, TargetExtra, TargetList
+from bhtom_base.bhtom_dataproducts.models import  ReducedDatum
+
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[BHTOM2 views]')
 
@@ -212,17 +215,100 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
     model = Target
     permission_required = 'bhtom_targets.view_target'
 
-
     def get(self, request, *args, **kwargs):
-        if request.GET.get('clevel', ''):
+        target_id: int = kwargs.get('pk', None)
+        target: Target = Target.objects.get(pk=target_id)
+
+        datums = ReducedDatum.objects.filter(target=target,
+                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
+                                             )
+
+        allobs = []
+        allobs_nowise = []
+        for datum in datums:
+            if str(datum.filter) == "WISE(W1)" or str(datum.filter) == "WISE(W2)":
+#                allobs.append(str("WISE"))
+                allobs.append(str(datum.filter))
+                continue
+            else:
+                allobs_nowise.append(str(datum.filter))
+                allobs.append(str(datum.filter))
+
+        #TODO: check if len data!=0
+
+        #extracting uniq list and sort it alphabetically
+        all_filters = sorted(set(allobs))
+        all_filters.remove('WISE(W1)')
+        all_filters.remove('WISE(W2)')
+        all_filters.append('WISE(W1)') #this trick will move WISE to the end of the list
+        all_filters.append('WISE(W2)') #this trick will move WISE to the end of the list
+
+        all_filters_nowise = sorted(set(allobs_nowise))
+
+        #for form values:
+        if request.method == 'GET':
             clevel = request.GET.get('clevel', '')
             slevel = request.GET.get('slevel', '')
+            selected_filters = request.GET.getlist('selected_filters')
         else:
+            #for default first render:??
             clevel = str(0.05)
             slevel = str(0.05)
+            selected_filters = all_filters_nowise #by default, selecting all filters but wise
+
+        if len(selected_filters) == 0:
+            selected_filters = all_filters_nowise #by default, selecting all filters but wise
+
+        sel = {}
+        for f in all_filters:
+            if f in selected_filters:
+                sel[f] = True
+            else:
+                sel[f] = False
+                
         self.object = self.get_object()
         context = self.get_context_data(object=self.object)
         context['clevel'] = clevel
         context['slevel'] = slevel
+        context['selected_filters'] = selected_filters
+        context['sel'] = sel
+        print(context)  
+        print("VIEW", sel)
+
         return self.render_to_response(context)
 
+#     def filter_form(self, request, *args, **kwargs):
+#         target_id: int = kwargs.get('pk', None)
+#         target: Target = Target.objects.get(pk=target_id)
+
+#         datums = ReducedDatum.objects.filter(target=target,
+#                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
+#                                              )
+
+#         allfilters = []
+#         for datum in datums:
+#             if str(datum.facility) == "NEOWISE" or str(datum.facility) == "ALLWISE":
+#                 continue
+#             else:
+#                 allfilters.append(str(datum.facility))
+
+#         #extracting uniq list and sort it alphabetically
+#         filters = sorted(set(allfilters))
+
+#         if request.method == 'POST':
+#             selected_filters = request.POST.getlist('filters')
+#             slevel = float(request.POST['slevel'])
+#             clevel = float(request.POST['clevel'])
+#             context = self.get_context_data(object=self.object)
+#             # Call microlensing_for_target() with selected filters and other parameters
+# #            result = microlensing_for_target(context, target, slevel, clevel, selected_filters)
+#             # Render result template with context data
+#             context['clevel'] = clevel
+#             context['slevel'] = slevel
+#             context['filters'] = filters
+#             print("POST", filters)
+#             return self.render_to_response(context)
+#         else:
+#             pass
+#             # filters = get_all_filters()
+#             # return render(request, 'filter_form.html', {'filters': filters})

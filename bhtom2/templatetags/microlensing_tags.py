@@ -27,11 +27,12 @@ from bhtom_base.bhtom_targets.models import Target
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
+
 register = template.Library()
 
 
 @register.inclusion_tag('bhtom_dataproducts/partials/microlensing_for_target.html', takes_context=True)
-def microlensing_for_target(context, target, slevel, clevel):
+def microlensing_for_target(context, target, slevel, clevel, sel):
     if settings.TARGET_PERMISSIONS_ONLY:
         datums = ReducedDatum.objects.filter(target=target,
                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
@@ -49,9 +50,12 @@ def microlensing_for_target(context, target, slevel, clevel):
     X_timestamp = []
     X_fit_timestamp = []
 
+    selected_filters = [f for f, checked in sel.items() if checked]
+
+    print("MICRO: filters passed: ",slevel, selected_filters)
+    
     for datum in datums:
-        print(datum.facility)
-        if str(datum.facility) == "Gaia Alerts":
+        if str(datum.filter) in selected_filters:
             try:
                 X.append(Time(datum.timestamp).jd)
                 X_timestamp.append(datum.timestamp)
@@ -79,7 +83,7 @@ def microlensing_for_target(context, target, slevel, clevel):
     x_timestamp = np.asarray(X_timestamp)
     if len(x) == 0:  # checking if there is Gaia data
         return {
-            'errors': "ERROR: No Gaia data",
+            'errors': "ERROR: No data",
         }
     else:
         # title
@@ -252,7 +256,12 @@ def microlensing_for_target(context, target, slevel, clevel):
             info_executionTime = "Time of fitting execution: %s seconds" % '{0:.3f}'.format(
                 (time.time() - start_time))
         else:
+            print("MICROLNEINS ERROR")
             return {
+                'target': target,
+                'selected_filters': selected_filters,
+                'sel': sel,
+                'slevel': slevel,
                 'errors': "ERROR: Cannot find fitted parameters",
             }
         # plotting fig
@@ -288,6 +297,8 @@ def microlensing_for_target(context, target, slevel, clevel):
         )
 
     return {
+        'selected_filters': selected_filters,
+        'sel': sel,
         'errors': errors,
         'target': target,
         'confidenceLevel_value': str('{0:.3f}'.format(1 - alfa)),
