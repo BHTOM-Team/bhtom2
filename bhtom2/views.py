@@ -234,8 +234,20 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
                 allobs_nowise.append(str(datum.filter))
                 allobs.append(str(datum.filter))
 
-        #TODO: check if len data!=0
+        #counting the number of entires per filter in order to remove the very short ones
+        filter_counts = {}
+        for obs in allobs_nowise:
+            if obs in filter_counts:
+                filter_counts[obs] += 1
+            else:
+                filter_counts[obs] = 1
 
+        # Create a new list that only includes filters with at least two occurrences
+        allobs_filtered = []
+        for obs in allobs_nowise:
+            if filter_counts[obs] >= 2:
+                allobs_filtered.append(obs)
+                
         #extracting uniq list and sort it alphabetically
         all_filters = sorted(set(allobs))
         all_filters.remove('WISE(W1)')
@@ -243,7 +255,7 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
         all_filters.append('WISE(W1)') #this trick will move WISE to the end of the list
         all_filters.append('WISE(W2)') #this trick will move WISE to the end of the list
 
-        all_filters_nowise = sorted(set(allobs_nowise))
+        all_filters_nowise = sorted(set(allobs_filtered)) #no wise
 
         #for form values:
         if request.method == 'GET':
