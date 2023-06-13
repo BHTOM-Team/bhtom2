@@ -16,7 +16,10 @@
       <input type="text" name="init_u0" id="init_u0" value="{{ init_u0|floatformat:6 }}">
       <label for="logu0">logu0:</label>
       <input type="checkbox" name="logu0" value="True" {% if logu0 == True %}checked{% endif %}>
-
+      <br>
+      <label for="auto_init" style="color: rgb(0, 255, 13);">auto_init:</label>
+      <input type="checkbox" name="auto_init" value="True" {% if auto_init == True %}checked{% endif %}>
+      
         <p> 
           <label>Available filters:</label>
           <br><br>

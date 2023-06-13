@@ -41,13 +41,14 @@ register = template.Library()
 
 
 @register.inclusion_tag('bhtom_dataproducts/partials/microlensing_for_target.html', takes_context=True)
-def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, logu0):
+def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, logu0, auto_init):
     error_message = ""
     if init_t0 != '':  init_t0 = float(init_t0)
     if init_te != '':  init_te = float(init_te)
     if init_u0 != '':  init_u0 = float(init_u0)
     if logu0 != '' : logu0 = bool(logu0)
-    
+    if auto_init != '': auto_init = bool(auto_init)
+
     if settings.TARGET_PERMISSIONS_ONLY:
         datums = ReducedDatum.objects.filter(target=target,
                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
@@ -129,8 +130,6 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     index = mulens_datas[largets_set].mag.argmin()
     smartt0 = mulens_datas[largets_set].time[index]
 
-    print("LARGEST SET: ",largets_set)
-
     params = dict()
     params['t_0'] = smartt0# full JD has to go here!!!
     delta_m = minmag-maxmag 
@@ -143,17 +142,15 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     my_model = mm.Model(params)
 
     #first time run:
-    if init_t0 == '':
+    if init_t0 == '' or auto_init:
         init_t0 = smartt0
-    if init_te == '':
+    if init_te == '' or auto_init:
         init_te = smartte
-    if init_u0 == '':
+    if init_u0 == '' or auto_init:
         init_u0 = params['u_0']
-    if (logu0 == ''):
+    if (logu0 == '') or auto_init:
         logu0 = False
  
-    print("MICRO INIT:",type(init_t0))
-
     ############ figure of raw data:
     fig = go.Figure(layout=dict(width=1000, height=500))
 
@@ -419,7 +416,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
         'init_te': init_te,
         'init_u0': init_u0,
         'logu0': logu0,
-        
+        'auto_init': auto_init,
         # 'criticalLevel_value': str('{0:.3f}'.format(chi2_table)),
         # 'Chi2Test': "Chi2 test: ",
         # 'Chi2Test_value': str('{0:.3f}'.format(chi2_best)),
