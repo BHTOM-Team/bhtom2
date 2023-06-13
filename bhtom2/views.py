@@ -247,13 +247,12 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
 
         #for form values:
         if request.method == 'GET':
-            clevel = request.GET.get('clevel', '')
-            slevel = request.GET.get('slevel', '')
+            init_t0 = request.GET.get('init_t0', '')
+            init_te = request.GET.get('init_te', '')
+            init_u0 = request.GET.get('init_u0', '')
+            logu0 = request.GET.get('logu0', '')
             selected_filters = request.GET.getlist('selected_filters')
         else:
-            #for default first render:??
-            clevel = str(0.05)
-            slevel = str(0.05)
             selected_filters = all_filters_nowise #by default, selecting all filters but wise
 
         if len(selected_filters) == 0:
@@ -268,47 +267,14 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
                 
         self.object = self.get_object()
         context = self.get_context_data(object=self.object)
-        context['clevel'] = clevel
-        context['slevel'] = slevel
         context['selected_filters'] = selected_filters
         context['sel'] = sel
-#        print(context)  
-#        print("VIEW", sel)
+        context.update({
+        'init_t0': init_t0,
+        'init_te': init_te,
+        'init_u0': init_u0,
+        'logu0': logu0
+        })
 
         return self.render_to_response(context)
 
-#     def filter_form(self, request, *args, **kwargs):
-#         target_id: int = kwargs.get('pk', None)
-#         target: Target = Target.objects.get(pk=target_id)
-
-#         datums = ReducedDatum.objects.filter(target=target,
-#                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
-#                                              )
-
-#         allfilters = []
-#         for datum in datums:
-#             if str(datum.facility) == "NEOWISE" or str(datum.facility) == "ALLWISE":
-#                 continue
-#             else:
-#                 allfilters.append(str(datum.facility))
-
-#         #extracting uniq list and sort it alphabetically
-#         filters = sorted(set(allfilters))
-
-#         if request.method == 'POST':
-#             selected_filters = request.POST.getlist('filters')
-#             slevel = float(request.POST['slevel'])
-#             clevel = float(request.POST['clevel'])
-#             context = self.get_context_data(object=self.object)
-#             # Call microlensing_for_target() with selected filters and other parameters
-# #            result = microlensing_for_target(context, target, slevel, clevel, selected_filters)
-#             # Render result template with context data
-#             context['clevel'] = clevel
-#             context['slevel'] = slevel
-#             context['filters'] = filters
-#             print("POST", filters)
-#             return self.render_to_response(context)
-#         else:
-#             pass
-#             # filters = get_all_filters()
-#             # return render(request, 'filter_form.html', {'filters': filters})
