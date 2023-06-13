@@ -73,6 +73,8 @@
         
             <div class="tab-content">
                 <div class="tab-pane active" id="photometry">
+                    <button onclick="open_microlensing_model()" class="btn btn-info" role="button" style="float:right;margin: 4px;">Microlensing model</button>
+
                     {% photometry_for_target target %}
                     <div class="row menu-row">
                         <div class="col-md-5">
@@ -82,8 +84,6 @@
                             <button onclick="download_radio()" class="btn btn-primary" role="button">Download radio data</button>
                         </div>
                       </div>
-
-                      <button onclick="open_microlensing_model()" class="btn btn-info" role="button" style="float:right;margin: 4px;">Microlensing model</button>
 
                       {% recent_photometry object limit=5 %}
 
@@ -173,7 +173,7 @@
     }
 
     function open_microlensing_model() {
-    window.open('{% url "microlensing_model" target.id %}', 'newwindow', 'width=700,height=900');
+    window.open('{% url "microlensing_model" target.id %}', 'newwindow', 'width=1000,height=900');
     }
 
     function generate_target_description_latex() {

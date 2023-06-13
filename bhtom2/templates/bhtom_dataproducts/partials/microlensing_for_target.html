@@ -1,32 +1,39 @@
 <div class="text" style="font-family: 'Montserrat', sans-serif">
     <h1>Microlensing model for <b style="color:#1b6d85">{{ target|safe }}</b></h1>
-      <p style="font-size: small; text-align: justify">This module aims to detect gravitational microlensing - more precisely it fits the Paczyński curve to given data and evaluates the credibility of this operation.</p>
+      <p style="font-size: small; text-align: justify">Gravitational microlensing model using MulensModel (Poleski&Yee 2018)</p>
       <hr>
   </div>
   <div class="light-curve" style="font-family: 'Montserrat', sans-serif">
-      <p style="color: #ba2121">{{ errors|safe }}</p>
-      <p>Confidence level: <span style="position: absolute; right: 2rem">{{ confidenceLevel_value|safe }}</span></p>
-      <p>Significance level: <span style="position: absolute; right: 2rem">{{ significanceLevel_value|safe }}</span></p>
-      <p>Maximum accepted error: <span style="position: absolute; right: 2rem">{{ maximumError_value|safe }}</span></p>
+      <p style="color: #ba2121">{{ error_message|safe }}</p>
 
+      <p>Fit initial values:</p>
       <form method="get">
-        <label>Available filters:</label>
-        <br>
-        {% for filter, checked in sel.items %}
+      <label for="init_t0">t0:</label>
+      <input type="text" name="init_t0" id="init_t0" value="{{ init_t0|floatformat:6 }}">
+      <label for="init_te">tE:</label>
+      <input type="text" name="init_te" id="init_te" value="{{ init_te|floatformat:6 }}">
+      <label for="init_u0">u0:</label>
+      <input type="text" name="init_u0" id="init_u0" value="{{ init_u0|floatformat:6 }}">
+      <label for="logu0">logu0:</label>
+      <input type="checkbox" name="logu0" value="True" {% if logu0 == True %}checked{% endif %}>
+
+        <p> 
+          <label>Available filters:</label>
+          <br><br>
+          {% for filter, checked in sel.items %}
           <input type="checkbox" name="selected_filters" value="{{ filter }}" {% if checked %}checked{% endif %}> {{ filter }}
           <br>
-        {% endfor %}
-        <br>
-        <label for="slevel">Enter slevel:</label>
-        <input type="text" name="slevel" id="slevel">
-        <br>
-        <label for="clevel">Enter clevel:</label>
-        <input type="text" name="clevel" id="clevel" value="{{ clevel }}">
-        <br>
-        <input type="submit" style="color: whitesmoke; background: #1b6d85; border: none; border-radius: 5px;padding: 10px" value="Reload data">
-    </form>
-
-      <hr>
+          {% endfor %}
+          <br>
+          <input type="submit" style="color: whitesmoke; background: #1b6d85; border: none; border-radius: 5px;padding: 10px" value="Reload data">
+        </form>
+        
+        <hr>
+        <div class="plot-container">
+            {{ plot_div|safe }}
+        </div>
+        
+        <p>t0: <span style="position: absolute; left: 2rem">{{ fit_t0|safe }}</span></p>
       <p>{{ criticalLevel|safe }}<span style="position: absolute; right: 2rem">{{ criticalLevel_value|safe }}</span></p>
       <p>{{ Chi2Test|safe }}<span style="position: absolute; right: 2rem">{{ Chi2Test_value|safe }}</span></p>
       <p>{{ NDF|safe }}<span style="position: absolute; right: 2rem">{{ NDF_value|safe }}</span></p>
@@ -54,5 +61,5 @@
   </div>
   <div style="font-family: 'Montserrat', sans-serif; color:#7F8177">
       <hr>
-      <p>Created by Kacper Raciborski, University of Warsaw.</p>
+      <p>Created by Kacper Raciborski/Lukasz Wyrzykowski 2022-2023, University of Warsaw.</p>
   </div>
