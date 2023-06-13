@@ -250,10 +250,15 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
                 
         #extracting uniq list and sort it alphabetically
         all_filters = sorted(set(allobs))
-        all_filters.remove('WISE(W1)')
-        all_filters.remove('WISE(W2)')
-        all_filters.append('WISE(W1)') #this trick will move WISE to the end of the list
-        all_filters.append('WISE(W2)') #this trick will move WISE to the end of the list
+        #this will move the WISE to the end of the list, if present
+        if 'WISE(W1)' in all_filters:
+            all_filters.remove('WISE(W1)')
+        if 'WISE(W2)' in all_filters:
+            all_filters.remove('WISE(W2)')
+        if 'WISE(W1)' not in all_filters:
+            all_filters.append('WISE(W1)')
+        if 'WISE(W2)' not in all_filters:
+            all_filters.append('WISE(W2)')
 
         all_filters_nowise = sorted(set(allobs_filtered)) #no wise
 
