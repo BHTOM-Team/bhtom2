@@ -242,10 +242,10 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
             else:
                 filter_counts[obs] = 1
 
-        # Create a new list that only includes filters with at least two occurrences
+        # Create a new list that only includes filters with at least three occurrences
         allobs_filtered = []
         for obs in allobs_nowise:
-            if filter_counts[obs] >= 2:
+            if filter_counts[obs] > 2:
                 allobs_filtered.append(obs)
                 
         #extracting uniq list and sort it alphabetically
