@@ -41,15 +41,15 @@ register = template.Library()
 
 
 @register.inclusion_tag('bhtom_dataproducts/partials/microlensing_for_target.html', takes_context=True)
-def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, logu0, auto_init, filter_counts):
+def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, logu0, fixblending, auto_init, filter_counts):
     error_message = ""
     if init_t0 != '':  init_t0 = float(init_t0)
     if init_te != '':  init_te = float(init_te)
     if init_u0 != '':  init_u0 = float(init_u0)
     if logu0 != '' : logu0 = bool(logu0)
+    if fixblending != '' : fixblending = bool(fixblending)
     if auto_init != '': auto_init = bool(auto_init)
 
-    print("MICO: ", filter_counts)
     if settings.TARGET_PERMISSIONS_ONLY:
         datums = ReducedDatum.objects.filter(target=target,
                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
@@ -96,11 +96,6 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     decs = deg_to_sexigesimal(target.dec,'dms')
     coords=ras+" "+decs
     print("Target for microlensing: ",name, coords)
-    #blending fixed (set to 0) when true
-    fixblending=True
-
-
-
 
     mulens_datas = OrderedDict()
 
@@ -140,7 +135,6 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
 
     smartte = 50.
     params['t_E'] = smartte
-    my_model = mm.Model(params)
 
     #first time run:
     if init_t0 == '' or auto_init:
@@ -151,6 +145,8 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
         init_u0 = params['u_0']
     if (logu0 == '') or auto_init:
         logu0 = False
+    if (fixblending == '') or auto_init:
+        fixblending = True
  
     ############ figure of raw data:
     fig = go.Figure(layout=dict(width=1000, height=500))
@@ -207,12 +203,10 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     div = opy.plot(fig, auto_open=False, output_type='div', show_link=False)
 
     ########### MODELLING
-    if num_points_all == 0:  # checking if there is any data
-        logger.error("No Data")
-        return {
-            'selected_filters': "", #forcing empty, to reload default set
-            'error_message': "ERROR: No data",
-        }
+    my_model = mm.Model(params)
+
+
+
 #     else:
 #         # title
 #         # get time of modeling
@@ -406,7 +400,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
 #                 x=1
 #             )
 #         )
-
+    print("MIC: ",fixblending)
     return {
         'selected_filters': selected_filters,
         'sel': sel,
@@ -417,6 +411,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
         'init_te': init_te,
         'init_u0': init_u0,
         'logu0': logu0,
+        'fixblending': fixblending,
         'auto_init': auto_init,
         'filter_counts': filter_counts,
         # 'criticalLevel_value': str('{0:.3f}'.format(chi2_table)),
