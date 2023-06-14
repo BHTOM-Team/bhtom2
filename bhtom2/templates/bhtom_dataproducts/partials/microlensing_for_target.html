@@ -1,3 +1,5 @@
+{% load targets_extras %}
+
 <div class="text" style="font-family: 'Montserrat', sans-serif">
     <h1>Microlensing model for <b style="color:#1b6d85">{{ target|safe }}</b></h1>
       <p style="font-size: small; text-align: justify">Gravitational microlensing model using MulensModel (Poleski&Yee 2018)</p>
@@ -23,10 +25,32 @@
         <p> 
           <label>Available filters:</label>
           <br><br>
-          {% for filter, checked in sel.items %}
-          <input type="checkbox" name="selected_filters" value="{{ filter }}" {% if checked %}checked{% endif %}> {{ filter }}
+          <!-- {% for filter, checked in sel.items %}
+          <input type="checkbox" name="selected_filters" value="{{ filter }}" {% if checked %}checked{% endif %}> {{ filter }}  
           <br>
           {% endfor %}
+          {% for filter, counts in filter_counts.items %}
+          {{ filter }} {{ counts}}  
+          <br>
+          {% endfor %} -->
+          
+          {% for filter, checked in sel.items %}
+          {% with counts=filter_counts|default:""|get_item:filter %}
+              <input type="checkbox" name="selected_filters" value="{{ filter }}" {% if checked %}checked{% endif %}> {{ filter }} {{ counts }}
+              <br>
+          {% endwith %}
+      {% endfor %}
+      
+
+          <!-- {% for filter, counts in filter_counts.items %}
+    {% if filter in sel %}
+        <input type="checkbox" name="selected_filters" value="{{ filter }}" {% if checked %}checked{% endif %}> {{ filter }}
+    {% else %}
+        <input type="checkbox" name="selected_filters" value="{{ filter }}"> {{ filter }}
+    {% endif %}
+    {{ counts }}<br>
+{% endfor %} -->
+
           <br>
           <input type="submit" style="color: whitesmoke; background: #1b6d85; border: none; border-radius: 5px;padding: 10px" value="Reload data">
         </form>

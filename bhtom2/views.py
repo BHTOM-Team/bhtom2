@@ -236,7 +236,7 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
 
         #counting the number of entires per filter in order to remove the very short ones
         filter_counts = {}
-        for obs in allobs_nowise:
+        for obs in allobs:
             if obs in filter_counts:
                 filter_counts[obs] += 1
             else:
@@ -253,14 +253,12 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
         #this will move the WISE to the end of the list, if present
         if 'WISE(W1)' in all_filters:
             all_filters.remove('WISE(W1)')
+            all_filters.append('WISE(W1)')
         if 'WISE(W2)' in all_filters:
             all_filters.remove('WISE(W2)')
-        if 'WISE(W1)' not in all_filters:
-            all_filters.append('WISE(W1)')
-        if 'WISE(W2)' not in all_filters:
             all_filters.append('WISE(W2)')
 
-        all_filters_nowise = sorted(set(allobs_filtered)) #no wise
+        all_filters_nowise = sorted(set(allobs_filtered)) #no wise and no short filters
 
         #for form values:
         if request.method == 'GET':
@@ -293,6 +291,7 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
         'init_u0': init_u0,
         'logu0': logu0,
         'auto_init': auto_init,
+        'filter_counts': filter_counts
         })
 
         return self.render_to_response(context)

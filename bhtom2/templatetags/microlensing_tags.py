@@ -41,7 +41,7 @@ register = template.Library()
 
 
 @register.inclusion_tag('bhtom_dataproducts/partials/microlensing_for_target.html', takes_context=True)
-def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, logu0, auto_init):
+def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, logu0, auto_init, filter_counts):
     error_message = ""
     if init_t0 != '':  init_t0 = float(init_t0)
     if init_te != '':  init_te = float(init_te)
@@ -49,6 +49,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     if logu0 != '' : logu0 = bool(logu0)
     if auto_init != '': auto_init = bool(auto_init)
 
+    print("MICO: ", filter_counts)
     if settings.TARGET_PERMISSIONS_ONLY:
         datums = ReducedDatum.objects.filter(target=target,
                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
@@ -417,6 +418,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
         'init_u0': init_u0,
         'logu0': logu0,
         'auto_init': auto_init,
+        'filter_counts': filter_counts,
         # 'criticalLevel_value': str('{0:.3f}'.format(chi2_table)),
         # 'Chi2Test': "Chi2 test: ",
         # 'Chi2Test_value': str('{0:.3f}'.format(chi2_best)),
@@ -461,5 +463,4 @@ def ulens(t, t0, te, u0, I0, fs=1):
     F = ampl * fs + (1 - fs)
     I = I0 - 2.5 * np.log10(F)
     return I
-
 
