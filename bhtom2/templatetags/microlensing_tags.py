@@ -225,88 +225,104 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     ndof=n_data-n_dim
     logu0_bool = True if logu0 == 'on' else False
 
-    result = op.minimize(
-        chi2_fun, x0=initial_guess, args=(parameters_to_fit, my_event, logu0_bool),
-        method='Nelder-Mead')
-    print(result.x)
-    (fit_t_0, fit_u_0, fit_t_E) = result.x
+    try:
+        result = op.minimize(
+            chi2_fun, x0=initial_guess, args=(parameters_to_fit, my_event, logu0_bool),
+            method='Nelder-Mead')
+        print(result.x)
+        (fit_t_0, fit_u_0, fit_t_E) = result.x
 
-    # Save the best-fit parameters
-    chi2 = chi2_fun(result.x, parameters_to_fit, my_event, logu0_bool)
+        # Save the best-fit parameters
+        chi2 = chi2_fun(result.x, parameters_to_fit, my_event, logu0_bool)
 
-    # Output the fit parameters
-    if (logu0_bool):
-        fit_msg = 'Best Fit: t_0 = {0:12.5f}, log(u_0) = {1:6.5f}, t_E = {2:8.3f}'.format(fit_t_0, np.power(10, fit_u_0), fit_t_E)
-    else:
-        fit_msg = 'Best Fit: t_0 = {0:12.5f}, u_0 = {1:6.5f}, t_E = {2:8.3f}'.format(fit_t_0, fit_u_0, fit_t_E)
-    
-    print(fit_msg)
-    fit_chi = 'Chi2 = {0:12.2f}  Chi2/ndof = {1:12.2f}'.format(chi2,(chi2/ndof))
-    print(fit_chi)
+        # Output the fit parameters
+        if (logu0_bool):
+            fit_msg = 'Best Fit: t_0 = {0:12.5f}, log(u_0) = {1:6.5f}, t_E = {2:8.3f}'.format(fit_t_0, np.power(10, fit_u_0), fit_t_E)
+        else:
+            fit_msg = 'Best Fit: t_0 = {0:12.5f}, u_0 = {1:6.5f}, t_E = {2:8.3f}'.format(fit_t_0, fit_u_0, fit_t_E)
+        
+        print(fit_msg)
+        fit_chi = 'Chi2 = {0:12.2f}  Chi2/ndof = {1:12.2f}'.format(chi2,(chi2/ndof))
+        print(fit_chi)
 
-    mag0_dict = {}
-    fs_dict = {}
+        mag0_dict = {}
+        fs_dict = {}
 
-    for filt in filters:
-        f_source, f_blend = my_event.get_flux_for_dataset(mulens_datas[filt])
-        mag0 = mm.utils.Utils.get_mag_from_flux(f_source + f_blend)
-        fs = f_source / (f_source + f_blend)
-        mag0_dict[filt] = np.around(mag0[0],3)
-        fs_dict[filt] = np.around(fs[0],3) #the result was an 1-element array
+        for filt in filters:
+            f_source, f_blend = my_event.get_flux_for_dataset(mulens_datas[filt])
+            mag0 = mm.utils.Utils.get_mag_from_flux(f_source + f_blend)
+            fs = f_source / (f_source + f_blend)
+            mag0_dict[filt] = np.around(mag0[0],3)
+            fs_dict[filt] = np.around(fs[0],3) #the result was an 1-element array
 
-    print("Mag0 values:")
-    print(mag0_dict)
-    print("\nFs values:")
-    print(fs_dict)
+        print("Mag0 values:")
+        print(mag0_dict)
+        print("\nFs values:")
+        print(fs_dict)
 
-    info_executionTime = "Time of fitting execution: %s seconds" % '{0:.3f}'.format((time.time() - start_time))
+        info_executionTime = "Time of fitting execution: %s seconds" % '{0:.3f}'.format((time.time() - start_time))
 
-    #FIG:
-    best = result.x
-    tstart = best[0]-1000.
-    tstop = best[0]+500.
+        #FIG:
+        best = result.x
+        tstart = best[0]-1000.
+        tstop = best[0]+500.
 
-    plt.figure(figsize=(10, 6))
-    grid = matplotlib.gridspec.GridSpec(2, 1, height_ratios=[3, 1])
-    axes = plt.subplot(grid[0])
-    my_event.plot_data(subtract_2450000=True)
-    if (fixblending=='on'): 
-        lab1 = "no-bl."
-    else:
-        lab1 = "blended"
-#    my_event.plot_model(color='black', t_start=tstart, t_stop=tstop, lw=2, subtract_2450000=True, label=lab1)#, data_ref=1)
-    my_event.plot_model(color='magenta', ls='--', t_start=tstart, t_stop=tstop, subtract_2450000=True, label=lab1)#, data_ref=0)
-    plt.grid()
-    plt.title(("%s")%(name))
-    xlim1= best[0]-500.-2450000
-    xlim2 = best[0]+500.-2450000
-    plt.xlim(xlim1, xlim2)
+        plt.figure(figsize=(10, 6))
+        grid = matplotlib.gridspec.GridSpec(2, 1, height_ratios=[3, 1])
+        axes = plt.subplot(grid[0])
+        my_event.plot_data(subtract_2450000=True)
+        if (fixblending=='on'): 
+            lab1 = "no-bl."
+        else:
+            lab1 = "blended"
+    #    my_event.plot_model(color='black', t_start=tstart, t_stop=tstop, lw=2, subtract_2450000=True, label=lab1)#, data_ref=1)
+        my_event.plot_model(color='magenta', ls='--', t_start=tstart, t_stop=tstop, subtract_2450000=True, label=lab1)#, data_ref=0)
+        plt.grid()
+        plt.title(("%s")%(name))
+        xlim1= best[0]-500.-2450000
+        xlim2 = best[0]+500.-2450000
+        plt.xlim(xlim1, xlim2)
 
-    plt.legend(loc='best')
+        plt.legend(loc='best')
 
-    axes = plt.subplot(grid[1])
-    my_event.plot_residuals(subtract_2450000=True, show_errorbars=True)
-    #difference between models:
-    # (source_flux1, blend_flux1) = my_event.get_ref_fluxes('G_Gaia')
-    # (source_flux2, blend_flux2) = my_event_parallax.get_ref_fluxes('G_Gaia')
-    # xmodel = np.linspace(xlim1+2450000, xlim2+2450000, num=200)
-    # ymodel1=my_model.get_lc(xmodel, source_flux=source_flux1, blend_flux=blend_flux1)
-    # ymodel2=my_model_parallax.get_lc(xmodel, source_flux=source_flux2, blend_flux=blend_flux2)
-    # difmodel = ymodel2-ymodel1
-    # plt.plot(xmodel-2450000, difmodel, ls='--',color='magenta')
+        axes = plt.subplot(grid[1])
+        my_event.plot_residuals(subtract_2450000=True, show_errorbars=True)
+        #difference between models:
+        # (source_flux1, blend_flux1) = my_event.get_ref_fluxes('G_Gaia')
+        # (source_flux2, blend_flux2) = my_event_parallax.get_ref_fluxes('G_Gaia')
+        # xmodel = np.linspace(xlim1+2450000, xlim2+2450000, num=200)
+        # ymodel1=my_model.get_lc(xmodel, source_flux=source_flux1, blend_flux=blend_flux1)
+        # ymodel2=my_model_parallax.get_lc(xmodel, source_flux=source_flux2, blend_flux=blend_flux2)
+        # difmodel = ymodel2-ymodel1
+        # plt.plot(xmodel-2450000, difmodel, ls='--',color='magenta')
 
-    plt.xlim(xlim1, xlim2)
-    plt.ylim(-0.23,0.23)
-    plt.grid()
+        plt.xlim(xlim1, xlim2)
+        plt.ylim(-0.23,0.23)
+        plt.grid()
 
-    import io
-    import base64
+        import io
+        import base64
 
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    image_base64 = base64.b64encode(buffer.getvalue()).decode()
-
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+        image_base64 = base64.b64encode(buffer.getvalue()).decode()
+    except:
+        return {
+                    'selected_filters': selected_filters,
+        'sel': sel,
+        'error_message': error_message,
+        'target': target,
+        'plot_div': div,
+        'init_t0': init_t0,
+        'init_te': init_te,
+        'init_u0': init_u0,
+        'logu0': logu0,
+        'fixblending': fixblending,
+        'auto_init': auto_init,
+        'filter_counts': filter_counts,
+        'error_message': "ERROR fitting microlensing model",
+        }
 
 
     return {
