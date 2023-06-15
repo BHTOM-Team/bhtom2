@@ -7,6 +7,7 @@ from astropy.time import Time
 from django import template
 import csv
 import math
+
 from bhtom_base.bhtom_targets.templatetags.targets_extras import deg_to_sexigesimal
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 import numpy as np
@@ -20,6 +21,7 @@ import json
 
 import MulensModel as mm
 import matplotlib.pyplot as plt
+import matplotlib
 import scipy.optimize as op
 from collections import OrderedDict, defaultdict
 import plotly.graph_objs as go
@@ -70,7 +72,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
         if str(datum.filter) in selected_filters:
             try:
                 filter = datum.filter
-                times[filter].append(datum.mjd)
+                times[filter].append(datum.mjd+2400000.5) #store JD here
                 mags[filter].append(datum.value)
                 errors[filter].append(datum.error)
             except Exception:
@@ -80,7 +82,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
 
     #Reading Gaia ephemeris file from statics
     try:
-        gaiaephem_path = path.join('static', 'Gaia_ephemeris.txt')
+        gaiaephem_path = path.join(settings.STATIC_ROOT, 'Gaia_ephemeris.txt')
     except Exception as e:
         logger.error("Gaia ephemeris file not found")
         return {
@@ -146,19 +148,16 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
         fixblending = '' #this is because only empty string will be read as unchecked box
 
 
-    print("MIC0: ",logu0, fixblending)
-
-
     ############ figure of raw data:
     fig = go.Figure(layout=dict(width=1000, height=500))
 
     for filter in filters:
-        fig.add_trace(go.Scatter(x=np.array(times[filter])-50000., y=mags[filter], 
+        fig.add_trace(go.Scatter(x=np.array(times[filter])-2450000., y=mags[filter], 
                           error_y=dict(type='data', array=errors[filter]), 
                           mode='markers', name=str(filter)))
 
     fig.update_layout(title="%s"%(name), 
-                      xaxis_title="MJD-50000.0", 
+                      xaxis_title="JD-2450000.0", 
                       xaxis=dict(
                         tickformat='.1f' # format the ticks to one decimal place
                         ),
@@ -181,22 +180,22 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     
     fig.add_shape(
     type="line",
-    x0=init_t0-50000.,
-    x1=init_t0-50000.,
+    x0=init_t0-2450000.,
+    x1=init_t0-2450000.,
     y0=min_y,
     y1=max_y,
     line=dict(color="red", width=2,  dash="dash",))
     fig.add_shape(
     type="line",
-    x0=init_t0-init_te-50000.,
-    x1=init_t0-init_te-50000.,
+    x0=init_t0-init_te-2450000.,
+    x1=init_t0-init_te-2450000.,
     y0=min_y,
     y1=max_y,
     line=dict(color="blue", width=2,  dash="dot",))
     fig.add_shape(
     type="line",
-    x0=init_t0+init_te-50000.,
-    x1=init_t0+init_te-50000.,
+    x0=init_t0+init_te-2450000.,
+    x1=init_t0+init_te-2450000.,
     y0=min_y,
     y1=max_y,
     line=dict(color="blue", width=2,  dash="dot",))
@@ -204,203 +203,112 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     div = opy.plot(fig, auto_open=False, output_type='div', show_link=False)
 
     ########### MODELLING
+    start_time = time.time()
+
     my_model = mm.Model(params)
 
+    #defining dictionary with zeroblending
+    zeroBlendingDict= dict()
+    zeroBlendingDict = { i : 0 for i in tuple(mulens_datas.values()) }
+    
+    if (fixblending=='on'): 
+        my_event = mm.Event(datasets=(tuple(mulens_datas.values())), model=my_model, fix_blend_flux=zeroBlendingDict) 
+    else:
+        my_event = mm.Event(datasets=(tuple(mulens_datas.values())), model=my_model)
 
 
-#     else:
-#         # title
-#         # get time of modeling
-#         start_time = time.time()
-#         # ulensing modelling
-#         t0 = x[-1]
-#         chi2_best = 100000
-#         mchi2_best = 100000
-#         NDF = 0
-#         errors = ''
-#         for i in range(10, 600, 25):
-#             for j in [0.1, 0.01]:
-#                 try:
-#                     with warnings.catch_warnings():
-#                         warnings.simplefilter("ignore")  # supressing covariance warning
-#                         popt, pcov = optimize.curve_fit(ulens, xdata=x, ydata=y, p0=np.asarray([t0, i, j, y.max()]))
-#                 except RuntimeError as error:
-#                     pass
-#                 # chi^2 test
-#                 try:
-#                     chi2 = lambda popt, x, y, err: sum(((ulens(x, *popt) - y) / err) ** 2)
-#                     tmp1 = chi2(popt, x, y, err)
-#                     tmp2 = chi2(popt, x, y, err) / (len(x) - 4)
-#                     tmp = np.asarray(pcov)
-#                     if mchi2_best > tmp2 and not np.isinf(tmp).any():
-#                         chi2_best = tmp1
-#                         mchi2_best = tmp2
-#                         popt_best = popt
-#                         pcov_best = pcov
-#                         NDF = len(x) - 4
-#                 except ZeroDivisionError as error:
-#                     return {
-#                         'errors': "ERROR: Divide by 0! The error of y is 0!",
-#                     }
-#                 except UnboundLocalError as error:
-#                     pass
-#         if NDF <= 250:
-#             round_NDF = NDF
-#         elif 250 < NDF <= 1000:
-#             round_NDF = myround(NDF)
-#         else:
-#             round_NDF = 1000
-#             errors = "ERROR: NDF out of range"
-#         chi2_table = 1 #
-        
-#         info_conclusion = ''
-#         if chi2_best <= chi2_table:
-#             info_conclusion = "There is NO reason to reject the hypothesis - this phenomenon may be microlensing at the expected confidence level: " + str(
-#                 100 - alfa * 100) + "%"
-#         else:
-#             info_conclusion = "There is a reason for rejecting the hypothesis - This phenomenon CANNOT be microlensing at the expected confidence level: " + str(
-#                 100 - alfa * 100) + "%"
+    parameters_to_fit = ["t_0", "u_0", "t_E"]
+    initial_guess = [params["t_0"], params["u_0"], params["t_E"]]
 
-#             # time of miscrolensing and max magnitude
-#         microlensing_start_time = 0
-#         microlensing_end_time = 0
-#         max_mag = 1000  # big number because of inversion
+    n_dim = len(parameters_to_fit)
+    n_data = num_points_all
+    ndof=n_data-n_dim
+    logu0_bool = True if logu0 == 'on' else False
 
-#         max_mag_time = 0
-#         beg = False
-#         fin = False
-#         deviation = 0.999  # when mag decrease 0.1%
-#         t = x[0]
-#         info_start_time = ''
-#         info_start_time_value = ''
-#         info_end_time = ''
-#         info_end_time_value = ''
-#         while (beg == False or fin == False) and t < x[0] + 10000:
-#             if ulens(t, *popt_best) <= ulens(x[0], *popt_best) * deviation and beg == False:
-#                 microlensing_start_time = t
-#                 info_start_time = "Microlensing start time: "
-#                 info_start_time_value = str(jd_to_date(microlensing_start_time)) + " |" + str(
-#                     microlensing_start_time)
-#                 beg = True
-#             elif ulens(t, *popt_best) > ulens(microlensing_start_time, *popt_best) and beg == True and fin == False:
-#                 microlensing_end_time = t
-#                 info_end_time = "Microlensing end time: "
-#                 info_end_time_value = str(jd_to_date(microlensing_end_time)) + " |" + str(microlensing_end_time)
-#                 fin = True
-#             t += 0.5
+    result = op.minimize(
+        chi2_fun, x0=initial_guess, args=(parameters_to_fit, my_event, logu0_bool),
+        method='Nelder-Mead')
+    print(result.x)
+    (fit_t_0, fit_u_0, fit_t_E) = result.x
 
-#         # fit with prediction
-#         if microlensing_end_time == 0:
-#             microlensing_end_time = x[0]
-#         time_plot = np.linspace(x[0], microlensing_end_time + 366, 1000)
-#         # showing date on x axis
-#         for i in range(len(time_plot) - 1):
-#             current_datetime = Time(float(time_plot[i]), format='jd', scale='utc').to_datetime()
-#             X_timestamp.append(current_datetime)
-#             X_fit_timestamp.append(current_datetime)
-#             if ulens(time_plot[i], *popt_best) <= max_mag and beg == True and fin == True:
-#                     max_mag = ulens(time_plot[i], *popt_best)
-#                     max_mag_time = time_plot[i]
-#         time_plot_timestamp = np.asarray(X_fit_timestamp)
+    # Save the best-fit parameters
+    chi2 = chi2_fun(result.x, parameters_to_fit, my_event, logu0_bool)
 
-#         if fin == True and beg == True:
-#             a = date(*jd_to_date(microlensing_start_time))
-#             b = date(*jd_to_date(microlensing_end_time))
-#             c = date.today()
-#             max_mag = '{0:.3f}'.format(max_mag)
-#             info_duration = "Duration of microlensing: "
-#             info_duration_value = str(days_to_ymd((b - a).days))
-#             info_remainingTime = "Remaining time of microlensing: "
-#             if (b - c).days > 0:
-#                 info_remainingTime_value = str(days_to_ymd((b - c).days))
-#             else:
-#                 info_remainingTime_value = "-"
-#             info_maximumMagnitude = "Maximum magnitude: "
-#             info_maximumMagnitude_value = "%s mag" % max_mag
-#             info_maximumMagnitudeTime = "Expected time of maximum: "
-#             info_maximumMagnitudeTime_value = str(jd_to_date(max_mag_time)) + " |" + str(max_mag_time)
-#             # print fitted parameters
-#             if abs(np.sqrt(pcov_best[0][0]) / popt_best[0]) <= errorSignificance:
-#                 info_t0 = "t0: " + str('{0:.3f}'.format(popt_best[0])) + " (" + str(
-#                     '{0:.3f}'.format(np.sqrt(pcov_best[0][0]))) + ")"
-#                 info_t0_check = "OK"
-#             else:
-#                 info_t0 = "t0: " + str('{0:.3f}'.format(popt_best[0])) + " (" + str(
-#                     '{0:.3f}'.format(np.sqrt(pcov_best[0][0]))) + ")"
-#                 info_t0_check = "BIGGER THAN " + str(errorSignificance * 100) + "%"
+    # Output the fit parameters
+    if (logu0_bool):
+        fit_msg = 'Best Fit: t_0 = {0:12.5f}, log(u_0) = {1:6.5f}, t_E = {2:8.3f}'.format(fit_t_0, np.power(10, fit_u_0), fit_t_E)
+    else:
+        fit_msg = 'Best Fit: t_0 = {0:12.5f}, u_0 = {1:6.5f}, t_E = {2:8.3f}'.format(fit_t_0, fit_u_0, fit_t_E)
+    
+    print(fit_msg)
+    fit_chi = 'Chi2 = {0:12.2f}  Chi2/ndof = {1:12.2f}'.format(chi2,(chi2/ndof))
+    print(fit_chi)
 
-#             if abs(np.sqrt(pcov_best[1][1]) / popt_best[1]) <= errorSignificance:
-#                 info_te = "te: " + str('{0:.3f}'.format(popt_best[1])) + " (" + str(
-#                     '{0:.3f}'.format(np.sqrt(pcov_best[1][1]))) + ")"
-#                 info_te_check = "OK"
-#             else:
-#                 info_te = "te: " + str('{0:.3f}'.format(popt_best[1])) + " (" + str(
-#                     '{0:.3f}'.format(np.sqrt(pcov_best[1][1]))) + ")"
-#                 info_te_check = "BIGGER THAN " + str(errorSignificance * 100) + "%"
+    mag0_dict = {}
+    fs_dict = {}
 
-#             if abs(np.sqrt(pcov_best[2][2]) / popt_best[2]) <= errorSignificance:
-#                 info_u0 = "u0: " + str('{0:.5f}'.format(abs(popt_best[2]))) + " (" + str(
-#                     '{0:.3f}'.format(np.sqrt(pcov_best[2][2]))) + ")"
-#                 info_u0_check = "OK"
-#             else:
-#                 info_u0 = "u0: " + str('{0:.5f}'.format(abs(popt_best[2]))) + " (" + str(
-#                     '{0:.3f}'.format(np.sqrt(pcov_best[2][2]))) + ")"
-#                 info_u0_check = "BIGGER THAN " + str(errorSignificance * 100) + "%"
+    for filt in filters:
+        f_source, f_blend = my_event.get_flux_for_dataset(mulens_datas[filt])
+        mag0 = mm.utils.Utils.get_mag_from_flux(f_source + f_blend)
+        fs = f_source / (f_source + f_blend)
+        mag0_dict[filt] = np.around(mag0[0],3)
+        fs_dict[filt] = np.around(fs[0],3) #the result was an 1-element array
 
-#             if abs(np.sqrt(pcov_best[3][3]) / popt_best[3]) <= errorSignificance:
-#                 info_I0 = "I0: " + str('{0:.3f}'.format(popt_best[3])) + " (" + str(
-#                     '{0:.3f}'.format(np.sqrt(pcov_best[3][3]))) + ")"
-#                 info_I0_check = "OK"
-#             else:
-#                 info_I0 = "I0: " + str('{0:.3f}'.format(popt_best[3])) + " (" + str(
-#                     '{0:.3f}'.format(np.sqrt(pcov_best[3][3]))) + ")"
-#                 info_I0_check = "BIGGER THAN " + str(errorSignificance * 100) + "%"
-#             info_fs = "fs: 1.0 (fixed)"
+    print("Mag0 values:")
+    print(mag0_dict)
+    print("\nFs values:")
+    print(fs_dict)
 
-#             # execution time
-#             info_executionTime = "Time of fitting execution: %s seconds" % '{0:.3f}'.format(
-#                 (time.time() - start_time))
-#         else:
-# #            print("MICROLNEINS ERROR")
-#             return {
-#                 'target': target,
-#                 'selected_filters': selected_filters,
-#                 'sel': sel,
-#                 'slevel': slevel,
-#                 'errors': "ERROR: Cannot find fitted parameters",
-#             }
-        
-#         # plotting fig
-#         plot_data = [go.Scatter(
-#             x=x_timestamp,
-#             y=y,
-#             mode='markers',
-#             name="Experimental data with error bar",
-#             error_y=dict(type='data',
-#                          array=err,
-#                          visible=True),
-#         ), go.Scatter(
-#             x=time_plot_timestamp,
-#             y=ulens(time_plot, *popt_best),
-#             mode='lines',
-#             line=dict(shape='spline', smoothing=1.3),
-#             name="Fit with prediction",
-#         )
-#         ]
-#         layout = go.Layout(
-#             title=dict(text=str(target)),
-#             yaxis=dict(autorange='reversed', title='Magnitude [mag]'),
-#             xaxis=dict(title='UTC time'),
-#             height=600,
-#             width=700,
-#             legend=dict(
-#                 orientation="h",
-#                 yanchor="bottom",
-#                 y=1.02,
-#                 xanchor="right",
-#                 x=1
-#             )
-#         )
+    info_executionTime = "Time of fitting execution: %s seconds" % '{0:.3f}'.format((time.time() - start_time))
+
+    #FIG:
+    best = result.x
+    tstart = best[0]-1000.
+    tstop = best[0]+500.
+
+    plt.figure(figsize=(10, 6))
+    grid = matplotlib.gridspec.GridSpec(2, 1, height_ratios=[3, 1])
+    axes = plt.subplot(grid[0])
+    my_event.plot_data(subtract_2450000=True)
+    if (fixblending=='on'): 
+        lab1 = "no-bl."
+    else:
+        lab1 = "blended"
+#    my_event.plot_model(color='black', t_start=tstart, t_stop=tstop, lw=2, subtract_2450000=True, label=lab1)#, data_ref=1)
+    my_event.plot_model(color='magenta', ls='--', t_start=tstart, t_stop=tstop, subtract_2450000=True, label=lab1)#, data_ref=0)
+    plt.grid()
+    plt.title(("%s")%(name))
+    xlim1= best[0]-500.-2450000
+    xlim2 = best[0]+500.-2450000
+    plt.xlim(xlim1, xlim2)
+
+    plt.legend(loc='best')
+
+    axes = plt.subplot(grid[1])
+    my_event.plot_residuals(subtract_2450000=True, show_errorbars=True)
+    #difference between models:
+    # (source_flux1, blend_flux1) = my_event.get_ref_fluxes('G_Gaia')
+    # (source_flux2, blend_flux2) = my_event_parallax.get_ref_fluxes('G_Gaia')
+    # xmodel = np.linspace(xlim1+2450000, xlim2+2450000, num=200)
+    # ymodel1=my_model.get_lc(xmodel, source_flux=source_flux1, blend_flux=blend_flux1)
+    # ymodel2=my_model_parallax.get_lc(xmodel, source_flux=source_flux2, blend_flux=blend_flux2)
+    # difmodel = ymodel2-ymodel1
+    # plt.plot(xmodel-2450000, difmodel, ls='--',color='magenta')
+
+    plt.xlim(xlim1, xlim2)
+    plt.ylim(-0.23,0.23)
+    plt.grid()
+
+    import io
+    import base64
+
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    image_base64 = base64.b64encode(buffer.getvalue()).decode()
+
+
+
     return {
         'selected_filters': selected_filters,
         'sel': sel,
@@ -414,6 +322,12 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
         'fixblending': fixblending,
         'auto_init': auto_init,
         'filter_counts': filter_counts,
+        'fit_msg':fit_msg,
+        'fit_chi':fit_chi,
+        'mag0_dict': mag0_dict,
+        'fs_dict': fs_dict,
+        'executionTime': info_executionTime,
+        'image':image_base64,
         # 'criticalLevel_value': str('{0:.3f}'.format(chi2_table)),
         # 'Chi2Test': "Chi2 test: ",
         # 'Chi2Test_value': str('{0:.3f}'.format(chi2_best)),
@@ -468,3 +382,35 @@ def invert_ampl(A):
 def invert_delta_mag(dm):
     ampl = 10**(0.4*dm)
     return invert_ampl(ampl)
+
+# it's chi suqared!
+def chi2_fun(theta, parameters_to_fit, event, logu0):
+    """
+    Calculate chi2 for given values of parameters
+    Keywords :
+        theta: *np.ndarray*
+            Vector of parameter values, e.g.,
+            `np.array([5380., 0.5, 20.])`.
+        parameters_to_fit: *list* of *str*
+            List of names of parameters corresponding to theta, e.g.,
+            `['t_0', 'u_0', 't_E']`.
+        event: *MulensModel.Event*
+            Event which has datasets for which chi2 will be calculated.
+        logu0: boolean
+    Returns :
+        chi2: *float*
+            Chi2 value for given model parameters.
+    """
+    # First we have to change the values of parameters in
+    # event.model.parameters to values given by theta.
+    for (parameter, value) in zip(parameters_to_fit, theta):
+        if (parameter=='t_E'): value=np.abs(value)
+        if (parameter=='rho'): value=np.abs(value)
+        if (logu0==True): 
+          if (parameter=='u_0'): value=np.power(10., -np.abs(value))               # LOG U0!
+
+        setattr(event.model.parameters, parameter, value)
+
+
+    # After that, calculating chi2 is trivial:
+    return event.get_chi2()

@@ -48,33 +48,40 @@
             {{ plot_div|safe }}
         </div>
         
-        <p>t0: <span style="position: absolute; left: 2rem">{{ fit_t0|safe }}</span></p>
-      <p>{{ criticalLevel|safe }}<span style="position: absolute; right: 2rem">{{ criticalLevel_value|safe }}</span></p>
-      <p>{{ Chi2Test|safe }}<span style="position: absolute; right: 2rem">{{ Chi2Test_value|safe }}</span></p>
-      <p>{{ NDF|safe }}<span style="position: absolute; right: 2rem">{{ NDF_value|safe }}</span></p>
-      <p>{{ Chi2NDF|safe }}<span style="position: absolute; right: 2rem">{{ Chi2NDF_value|safe }}</span></p>
-      <p style="color:#1b6d85; text-align: justify"><b>{{ conclusion|safe }}</b></p>
+        <hr>
+        <h4>Fitted parameters<span style="position: absolute; right: 2rem"></span></h4>
+        <p><span style="left: 2rem">{{ fit_msg|safe }}</span></p>
+        <p><span style="left: 2rem">{{ fit_chi|safe }}</span></p>
+
+        <table>
+            <thead>
+              <tr>
+                <th>Filter</th>
+                <th>Mag0</th>
+                <th>FS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for filter in mag0_dict.keys %}
+                <tr>
+                  <td>{{ filter }}</td>
+                  <td>{{ mag0_dict|get_item:filter }}</td>
+                  <td>{{ fs_dict|get_item:filter }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          
       <hr>
-      {{ plot|safe }}
       <hr>
-      <h4>Fitting curve properties<span style="position: absolute; right: 2rem">(years, months, days) |JD time</span></h4>
-      <p>{{ microStartTime|safe }}<span style="position: absolute; right: 2rem">{{ microStartTime_value|safe }}</span></p>
-      <p>{{ microEndTime|safe }}<span style="position: absolute; right: 2rem">{{ microEndTime_value|safe }}</span></p>
-      <p>{{ duration|safe }}<span style="position: absolute; right: 2rem">{{ duration_value|safe }}</span></p>
-      <p>{{ remainingTime|safe }}<span style="position: absolute; right: 2rem">{{ remainingTime_value|safe }}</span></p>
-      <p>{{ maximumMagnitude|safe }}<span style="position: absolute; right: 2rem">{{ maximumMagnitude_value|safe }}</span></p>
-      <p>{{ maximumMagnitudeTime|safe }}<span style="position: absolute; right: 2rem">{{ maximumMagnitudeTime_value|safe }}</span></p>
-      <hr>
-      <h4>Fitted parameters (uncertainty)<span style="position: absolute; right: 2rem">Check</span></h4>
-      <p>{{ t0|safe }}<span style="position: absolute; right: 2rem">{{ t0_check|safe }}</span></p>
-      <p>{{ te|safe }}<span style="position: absolute; right: 2rem">{{ te_check|safe }}</span></p>
-      <p>{{ u0|safe }}<span style="position: absolute; right: 2rem">{{ u0_check|safe }}</span></p>
-      <p>{{ I0|safe }}<span style="position: absolute; right: 2rem">{{ I0_check|safe }}</span></p>
-      <p>{{ fs|safe }}</p>
+      <h4>Fitted light curve<span style="position: absolute; right: 2rem"></span></h4>
+
+      <img src="data:image/png;base64,{{ image|safe }}" alt="Microlensing model">
+        
       <hr>
       <p style="font-size: small">{{ executionTime|safe }}</p>
   </div>
-  <div style="font-family: 'Montserrat', sans-serif; color:#7F8177">
+  <div style="font-family: 'Montserrat', sans-serif; color:#d9dfc1">
       <hr>
       <p>Created by Kacper Raciborski/Lukasz Wyrzykowski 2022-2023, University of Warsaw.</p>
   </div>

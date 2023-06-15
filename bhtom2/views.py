@@ -273,8 +273,6 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
             selected_filters = all_filters_nowise #by default, selecting all filters but wise
 
 
-        print("VIEW: ", logu0, fixblending)
-
         if len(selected_filters) == 0:
             selected_filters = all_filters_nowise #by default, selecting all filters but wise
 
@@ -298,6 +296,5 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
         'auto_init': auto_init,
         'filter_counts': filter_counts
         })
-        print("VIEW: ", context)
         return self.render_to_response(context)
 
