@@ -21,7 +21,7 @@ import json
 
 import MulensModel as mm
 import matplotlib.pyplot as plt
-import matplotlib
+from matplotlib import gridspec
 import scipy.optimize as op
 from collections import OrderedDict, defaultdict
 import plotly.graph_objs as go
@@ -268,7 +268,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
         tstop = best[0]+500.
 
         plt.figure(figsize=(10, 6))
-        grid = matplotlib.gridspec.GridSpec(2, 1, height_ratios=[3, 1])
+        grid = gridspec.GridSpec(2, 1, height_ratios=[3, 1])
         axes = plt.subplot(grid[0])
         my_event.plot_data(subtract_2450000=True)
         if (fixblending=='on'): 
@@ -307,6 +307,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
         plt.savefig(buffer, format='png')
         buffer.seek(0)
         image_base64 = base64.b64encode(buffer.getvalue()).decode()
+        plt.close()
     except:
         return {
                     'selected_filters': selected_filters,

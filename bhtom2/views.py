@@ -266,7 +266,7 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
             init_te = request.GET.get('init_te', '')
             init_u0 = request.GET.get('init_u0', '')
             logu0 = request.GET.get('logu0', '')
-            fixblending = request.GET.get('fixblending', '')
+            fixblending = request.GET.get('fixblending', 'on')
             auto_init = request.GET.get('auto_init', '')
             selected_filters = request.GET.getlist('selected_filters')
         else:
