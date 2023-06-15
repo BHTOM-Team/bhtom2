@@ -16,25 +16,21 @@
       <input type="text" name="init_te" id="init_te" value="{{ init_te|floatformat:6 }}">
       <label for="init_u0">u0:</label>
       <input type="text" name="init_u0" id="init_u0" value="{{ init_u0|floatformat:6 }}">
+
       <label for="logu0">logu0:</label>
-      <input type="checkbox" name="logu0" {% if logu0 == True %}checked{% endif %}>
+      <input type="checkbox" name="logu0" {% if logu0 %}checked{% endif %}>
+
       <label for="fixblending" style="color: rgb(191, 0, 0);">fixblending:</label>
-      <input type="checkbox" name="fixblending" {% if fixblending == True %}checked{% endif %}>
+      <input type="hidden" name="fixblending" value="off">
+      <input type="checkbox" id="fixblending" name="fixblending" {% if fixblending %}checked{% endif %}>
+      
       <br>
       <label for="auto_init" style="color: rgb(0, 255, 13);">auto_init:</label>
-      <input type="checkbox" name="auto_init"  {% if auto_init == True %}checked{% endif %}>
+      <input type="checkbox" name="auto_init"  {% if auto_init %}checked{% endif %}>
       
         <p> 
           <label>Available filters:</label>
           <br><br>
-          <!-- {% for filter, checked in sel.items %}
-          <input type="checkbox" name="selected_filters" value="{{ filter }}" {% if checked %}checked{% endif %}> {{ filter }}  
-          <br>
-          {% endfor %}
-          {% for filter, counts in filter_counts.items %}
-          {{ filter }} {{ counts}}  
-          <br>
-          {% endfor %} -->
           
           {% for filter, checked in sel.items %}
           {% with counts=filter_counts|default:""|get_item:filter %}
@@ -42,17 +38,7 @@
               <br>
           {% endwith %}
       {% endfor %}
-      
-
-          <!-- {% for filter, counts in filter_counts.items %}
-    {% if filter in sel %}
-        <input type="checkbox" name="selected_filters" value="{{ filter }}" {% if checked %}checked{% endif %}> {{ filter }}
-    {% else %}
-        <input type="checkbox" name="selected_filters" value="{{ filter }}"> {{ filter }}
-    {% endif %}
-    {{ counts }}<br>
-{% endfor %} -->
-
+    
           <br>
           <input type="submit" style="color: whitesmoke; background: #1b6d85; border: none; border-radius: 5px;padding: 10px" value="Reload data">
         </form>

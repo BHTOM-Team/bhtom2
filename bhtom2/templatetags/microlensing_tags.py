@@ -46,9 +46,6 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     if init_t0 != '':  init_t0 = float(init_t0)
     if init_te != '':  init_te = float(init_te)
     if init_u0 != '':  init_u0 = float(init_u0)
-    if logu0 != '' : logu0 = bool(logu0)
-    if fixblending != '' : fixblending = bool(fixblending)
-    if auto_init != '': auto_init = bool(auto_init)
 
     if settings.TARGET_PERMISSIONS_ONLY:
         datums = ReducedDatum.objects.filter(target=target,
@@ -125,29 +122,33 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     minmag = mulens_datas[largets_set].mag.max()
     index = mulens_datas[largets_set].mag.argmin()
     smartt0 = mulens_datas[largets_set].time[index]
+    delta_m = minmag-maxmag 
+    smartu0 = invert_delta_mag(delta_m)
 
+    print("LARGEST: ", largets_set, delta_m)
     params = dict()
     params['t_0'] = smartt0# full JD has to go here!!!
-    delta_m = minmag-maxmag 
-    smartu0 = (10**(0.4 * delta_m) - 1) / (10**(0.4 * delta_m) + 1)
     params['u_0'] = smartu0
-    if (logu0): params['u_0'] = np.log10(params['u_0'])
+    if (logu0 == 'on'): params['u_0'] = np.log10(params['u_0'])
 
     smartte = 50.
     params['t_E'] = smartte
 
-    #first time run:
     if init_t0 == '' or auto_init:
         init_t0 = smartt0
     if init_te == '' or auto_init:
         init_te = smartte
     if init_u0 == '' or auto_init:
-        init_u0 = params['u_0']
-    if (logu0 == '') or auto_init:
-        logu0 = False
-    if (fixblending == '') or auto_init:
-        fixblending = True
- 
+        init_u0 = smartu0
+    # if (logu0 == '') or auto_init:
+    #     logu0 = ''
+    if (fixblending == 'off') :
+        fixblending = '' #this is because only empty string will be read as unchecked box
+
+
+    print("MIC0: ",logu0, fixblending)
+
+
     ############ figure of raw data:
     fig = go.Figure(layout=dict(width=1000, height=500))
 
@@ -400,7 +401,6 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
 #                 x=1
 #             )
 #         )
-    print("MIC: ",fixblending)
     return {
         'selected_filters': selected_filters,
         'sel': sel,
@@ -459,3 +459,12 @@ def ulens(t, t0, te, u0, I0, fs=1):
     I = I0 - 2.5 * np.log10(F)
     return I
 
+def invert_ampl(A):
+    #from Sahu 1997
+    from math import sqrt
+    u=sqrt(2.)* (A*(A*A-1)**(-1/2.)-1)**(1/2.)
+    return u
+
+def invert_delta_mag(dm):
+    ampl = 10**(0.4*dm)
+    return invert_ampl(ampl)
