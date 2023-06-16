@@ -5,21 +5,15 @@ from os import path
 import astropy
 from astropy.time import Time
 from django import template
-import csv
-import math
 
 from bhtom_base.bhtom_targets.templatetags.targets_extras import deg_to_sexigesimal
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 import numpy as np
-from guardian.shortcuts import get_objects_for_user
-from scipy import optimize
-from datetime import date
-import time
-import pandas as pd
-import warnings
-import json
+import time, math
 
 import MulensModel as mm
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 import scipy.optimize as op
@@ -27,7 +21,8 @@ from collections import OrderedDict, defaultdict
 import plotly.graph_objs as go
 import plotly.offline as opy
 
-
+import logging
+logging.getLogger('matplotlib.font_manager').disabled = True
 
 from bhtom_base.bhtom_dataproducts.forms import DataProductUploadForm
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, ReducedDatumUnit
@@ -45,21 +40,19 @@ register = template.Library()
 @register.inclusion_tag('bhtom_dataproducts/partials/microlensing_for_target.html', takes_context=True)
 def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, logu0, fixblending, auto_init, filter_counts):
     error_message = ""
-    if init_t0 != '':  init_t0 = float(init_t0)
-    if init_te != '':  init_te = float(init_te)
-    if init_u0 != '':  init_u0 = float(init_u0)
-
-    if settings.TARGET_PERMISSIONS_ONLY:
-        datums = ReducedDatum.objects.filter(target=target,
+    try:
+        if init_t0 != '':  init_t0 = float(init_t0)
+        if init_te != '':  init_te = float(init_te)
+        if init_u0 != '':  init_u0 = float(init_u0)
+    except:
+        logger.error("Error in initial parameters.")
+        return {
+            'error_message': "ERROR: Error in initial parameters.",
+        }
+    
+    datums = ReducedDatum.objects.filter(target=target,
                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
                                              )
-
-    else:
-        datums = get_objects_for_user(context['request'].user,
-                                      'bhtom_viewreduceddatum',
-                                      klass=ReducedDatum.objects.filter(
-                                          target=target,
-                                          data_type__in=[settings.DATA_PRODUCT_TYPES['photometry'][0]]))
         
     selected_filters = [f for f, checked in sel.items() if checked]    
 
@@ -127,14 +120,10 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     delta_m = minmag-maxmag 
     smartu0 = invert_delta_mag(delta_m)
 
-    print("LARGEST: ", largets_set, delta_m)
-    params = dict()
-    params['t_0'] = smartt0# full JD has to go here!!!
-    params['u_0'] = smartu0
-    if (logu0 == 'on'): params['u_0'] = np.log10(params['u_0'])
+    print("LARGEST: ", largets_set, delta_m, maxmag, minmag)
+    print(mulens_datas[largets_set].mag)
 
     smartte = 50.
-    params['t_E'] = smartte
 
     if init_t0 == '' or auto_init:
         init_t0 = smartt0
@@ -142,11 +131,16 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
         init_te = smartte
     if init_u0 == '' or auto_init:
         init_u0 = smartu0
-    # if (logu0 == '') or auto_init:
-    #     logu0 = ''
     if (fixblending == 'off') :
         fixblending = '' #this is because only empty string will be read as unchecked box
 
+    params = dict()
+    params['t_0'] = init_t0# full JD has to go here!!!
+    params['u_0'] = init_u0
+    if (logu0 == 'on'): params['u_0'] = np.log10(init_u0)
+    params['t_E'] = init_te
+
+    print("PARAMS: ",params)
 
     ############ figure of raw data:
     fig = go.Figure(layout=dict(width=1000, height=500))
