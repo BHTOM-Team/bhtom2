@@ -54,7 +54,8 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
                                              )
         
-    selected_filters = [f for f, checked in sel.items() if checked]    
+    selected_filters = [f for f, checked in sel.items() if checked]
+    non_selected_filters = [f for f, checked in sel.items() if not checked]
 
     times = defaultdict(list)
     mags = defaultdict(list)
@@ -68,6 +69,21 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
                 times[filter].append(datum.mjd+2400000.5) #store JD here
                 mags[filter].append(datum.value)
                 errors[filter].append(datum.error)
+            except Exception:
+                logger("Error reading datapoint "+str(datum))
+                continue
+
+    non_times = defaultdict(list)
+    non_mags = defaultdict(list)
+    non_errors = defaultdict(list)
+
+    for datum in datums:
+        if str(datum.filter) in non_selected_filters:
+            try:
+                filter = datum.filter
+                non_times[filter].append(datum.mjd+2400000.5) #store JD here
+                non_mags[filter].append(datum.value)
+                non_errors[filter].append(datum.error)
             except Exception:
                 logger("Error reading datapoint "+str(datum))
                 continue
@@ -150,6 +166,12 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
                           error_y=dict(type='data', array=errors[filter]), 
                           mode='markers', name=str(filter)))
 
+    for filter in non_selected_filters:
+        fig.add_trace(go.Scatter(x=np.array(non_times[filter])-2450000., y=non_mags[filter], 
+                                 error_y=dict(type='data', array=non_errors[filter]), 
+                                 mode='markers', name=str(filter), 
+                                 opacity=0.1))
+
     fig.update_layout(title="%s"%(name), 
                       xaxis_title="JD-2450000.0", 
                       xaxis=dict(
@@ -169,30 +191,37 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     fig.update_yaxes(autorange="reversed")
 
     # # Set y0 and y1 to the minimum and maximum values of the y-axis range
-    min_y = min(mag for filter in mags for mag in mags[filter])
-    max_y = max(mag for filter in mags for mag in mags[filter])
-    
+    min_y_sel = min(mag for filter in mags for mag in mags[filter])
+    min_y_non = min(mag for filter in non_mags for mag in non_mags[filter])
+    min_y = min(min_y_sel, min_y_non)
+    max_y_sel = max(mag for filter in mags for mag in mags[filter])
+    max_y_non = max(mag for filter in non_mags for mag in non_mags[filter])
+    max_y = max(max_y_sel, max_y_non)
+
     fig.add_shape(
     type="line",
     x0=init_t0-2450000.,
     x1=init_t0-2450000.,
     y0=min_y,
     y1=max_y,
-    line=dict(color="red", width=2,  dash="dash",))
+    line=dict(color="red", width=2, dash="dash"),
+    opacity=0.4)
     fig.add_shape(
     type="line",
     x0=init_t0-init_te-2450000.,
     x1=init_t0-init_te-2450000.,
     y0=min_y,
     y1=max_y,
-    line=dict(color="blue", width=2,  dash="dot",))
+    line=dict(color="blue", width=2,  dash="dot",),
+    opacity=0.3)
     fig.add_shape(
     type="line",
     x0=init_t0+init_te-2450000.,
     x1=init_t0+init_te-2450000.,
     y0=min_y,
     y1=max_y,
-    line=dict(color="blue", width=2,  dash="dot",))
+    line=dict(color="blue", width=2,  dash="dot",),
+    opacity=0.3)
 
     div = opy.plot(fig, auto_open=False, output_type='div', show_link=False)
 
