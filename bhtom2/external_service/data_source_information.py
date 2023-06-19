@@ -42,7 +42,7 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.LINEAR: "LINEAR",
     DataSource.FIRST: "FIRST",
     DataSource.PS1: "PS1",
-    DataSource.DECAPS: "DECAPS"
+    DataSource.DECAPS: "DECAPS",
 }
 
 
@@ -68,7 +68,7 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.LINEAR: "LINEAR name",
     DataSource.FIRST: "FIRST name",
     DataSource.PS1: "PS1 name",
-#    DataSource.DECAPS: "DECAPS name"
+    DataSource.DECAPS: "DECAPS name",
 }
 
 
@@ -87,6 +87,7 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.FIRST: ["Flux 1.4GHz"],
     DataSource.PS1: ["g", "r", "i", "z"],
     DataSource.DECAPS: ["g", "r", "i", "z"],
+    DataSource.CPCS: ["g", "r", "i", "z"], ##is it used anywhere?    
 }
 
 

@@ -97,10 +97,10 @@ class DECAPSBroker(BHTOMBroker):
             # Data could be a dict or pandas table as well
             reduced_datums = []
             for datum in data:
-                timestamp_g = Time(datum[8], format="mjd").to_datetime(timezone=TimezoneInfo())
-                timestamp_r = Time(datum[8], format="mjd").to_datetime(timezone=TimezoneInfo())
-                timestamp_i = Time(datum[8], format="mjd").to_datetime(timezone=TimezoneInfo())
-                timestamp_z = Time(datum[8], format="mjd").to_datetime(timezone=TimezoneInfo())
+                timestamp_g = Time(datum[8], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                timestamp_r = Time(datum[8], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                timestamp_i = Time(datum[8], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                timestamp_z = Time(datum[8], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
                 
                 if (datum[0] is not None and datum[4] is not None):
                    reduced_datum_g = ReducedDatum(target=target,

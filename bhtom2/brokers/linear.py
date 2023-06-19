@@ -88,7 +88,7 @@ class LINEARBroker(BHTOMBroker):
             # Data could be a dict or pandas table as well
             reduced_datums = []
             for datum in data:
-                timestamp = Time(datum[0], format="mjd").to_datetime(timezone=TimezoneInfo())
+                timestamp = Time(datum[0], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
                 
                 reduced_datum = ReducedDatum(target=target,
                                             data_type='photometry',

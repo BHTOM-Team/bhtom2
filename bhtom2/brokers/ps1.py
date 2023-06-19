@@ -88,10 +88,10 @@ class PS1Broker(BHTOMBroker):
             reduced_datums = []
             for datum in data:
                 
-                timestamp_g = Time(datum[8], format="mjd").to_datetime(timezone=TimezoneInfo())
-                timestamp_r = Time(datum[9], format="mjd").to_datetime(timezone=TimezoneInfo())
-                timestamp_i = Time(datum[10], format="mjd").to_datetime(timezone=TimezoneInfo())
-                timestamp_z = Time(datum[11], format="mjd").to_datetime(timezone=TimezoneInfo())
+                timestamp_g = Time(datum[8], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                timestamp_r = Time(datum[9], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                timestamp_i = Time(datum[10], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                timestamp_z = Time(datum[11], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
                 
                 if (datum[0] is not None and datum[4] is not None):
                    reduced_datum_g = ReducedDatum(target=target,

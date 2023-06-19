@@ -31,8 +31,8 @@ class SDSSBroker(BHTOMBroker):
         super().__init__(DataSource.SDSS_DR14)  # Add the DataSource here
 
         # If the survey is e.g. a space survey, fill the facility and observer names in and treat is as a constant
-        self.__FACILITY_NAME: str = "SDSS_DR14"
-        self.__OBSERVER_NAME: str = "SDSS_DR14"
+        self.__FACILITY_NAME: str = "SDSSDR"
+        self.__OBSERVER_NAME: str = "SDSSDR"
 
         self.__target_name_key: str = TARGET_NAME_KEYS.get(self.data_source, self.data_source.name)
 
@@ -58,7 +58,7 @@ class SDSSBroker(BHTOMBroker):
     def process_reduced_data(self, target, alert=None) -> Optional[LightcurveUpdateReport]:
 
         # Change the log message
-        self.logger.debug(f'Updating SDSS_DR14 lightcurve for target: {target.name}')
+        self.logger.debug(f'Updating SDSS lightcurve for target: {target.name}')
 
         ra, dec = target.ra, target.dec
 
@@ -95,11 +95,11 @@ class SDSSBroker(BHTOMBroker):
             # Data could be a dict or pandas table as well
             reduced_datums = []
             for datum in data:
-                timestamp_g = Time(datum[0], format="mjd").to_datetime(timezone=TimezoneInfo())
-                timestamp_r = Time(datum[9], format="mjd").to_datetime(timezone=TimezoneInfo())
-                timestamp_i = Time(datum[10], format="mjd").to_datetime(timezone=TimezoneInfo())
-                timestamp_z = Time(datum[11], format="mjd").to_datetime(timezone=TimezoneInfo())
-                timestamp_u = Time(datum[12], format="mjd").to_datetime(timezone=TimezoneInfo())
+                timestamp_g = Time(datum[0], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                timestamp_r = Time(datum[9], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                timestamp_i = Time(datum[10], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                timestamp_z = Time(datum[11], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                timestamp_u = Time(datum[12], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
                 
                 reduced_datum_g = ReducedDatum(target=target,
                                             data_type='photometry',
@@ -109,7 +109,7 @@ class SDSSBroker(BHTOMBroker):
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
                                             error=datum[5],
-                                            filter='SDSS_DR14(g)',
+                                            filter='SDSSDR(g)',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
 
@@ -121,7 +121,7 @@ class SDSSBroker(BHTOMBroker):
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
                                             error=datum[6],
-                                            filter='SDSS_DR14(r)',
+                                            filter='SDSSDR(r)',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
                 
@@ -133,7 +133,7 @@ class SDSSBroker(BHTOMBroker):
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
                                             error=datum[7],
-                                            filter='SDSS_DR14(i)',
+                                            filter='SDSSDR(i)',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
 
@@ -145,7 +145,7 @@ class SDSSBroker(BHTOMBroker):
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
                                             error=datum[8],
-                                            filter='SDSS_DR14(z)',
+                                            filter='SDSSDR(z)',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
 
@@ -157,7 +157,7 @@ class SDSSBroker(BHTOMBroker):
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
                                             error=datum[14],
-                                            filter='SDSS_DR14(u)',
+                                            filter='SDSSDR(u)',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
 
@@ -166,7 +166,7 @@ class SDSSBroker(BHTOMBroker):
             with transaction.atomic():
                 new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))
                 lightcurveupdatereport = LightcurveUpdateReport(new_points=new_points)
-                self.logger.info(f"SDSS Broker returned {new_points} points for {target.name}")
+                self.logger.info(f"SDSS Archive Broker returned {new_points} points for {target.name}")
         except Exception as e:
             self.logger.error(f'Error while saving reduced datapoints for {target.name}: {e}')
         

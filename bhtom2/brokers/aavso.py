@@ -21,8 +21,6 @@ logger: BHTOMLogger = BHTOMLogger(__name__, '[AAVSO data fetch]')
 
 DATA_SOURCE: DataSource = DataSource.AAVSO
 
-timezone_info: TimezoneInfo = TimezoneInfo()
-
 
 class AAVSOBroker(BHTOMBroker):
     name = DataSource.AAVSO.name

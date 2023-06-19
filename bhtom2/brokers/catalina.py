@@ -115,7 +115,7 @@ class CRTSBroker(BHTOMBroker):
             # Data could be a dict or pandas table as well
             reduced_datums = []
             for _, datum in df.iterrows():
-                timestamp = Time(datum.MJD, format="mjd").to_datetime(timezone=TimezoneInfo())
+                timestamp = Time(datum.MJD, format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
                 reduced_datum = ReducedDatum(target=target,
                                            data_type='photometry',
                                            timestamp=timestamp,
