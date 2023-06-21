@@ -29,11 +29,13 @@ def target_post_save(target, created, **kwargs):
         update_phot_class(target)
         names: Dict[DataSource, str] = query_all_services(target)
         for k, v in names.items():
-            try:
+            try: 
+                #checking if given source is already in the database
                 TargetName.objects.create(target=target, source_name=k.name, name=v)
             except Exception as e:
-                logger.warning(f'{"Target {target} already exists under different name - this should be caught ealier!"}')
-                raise e
+                logger.warning(f'{"Target {target} already exists under different name - this is not a problem anymore!"}')
+#                raise e
+                pass
             # te, _ = TargetExtra.objects.update_or_create(target=target,
             #                                              key=k,
             #                                              defaults={
@@ -44,6 +46,7 @@ def target_post_save(target, created, **kwargs):
 
         ##asking for all data (check for new data force)
         #TODO: make it run in the background?
+
         call_command('updatereduceddata', target_id=target.id, stdout=StringIO())
 
         mag_last, mjd_last, filter_last = last_jd.get_last(target)

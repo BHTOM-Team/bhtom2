@@ -200,8 +200,9 @@ def query_simbad_for_names(target: Target) -> Dict[str, str]:
 
 #searches Gaia DR3 for name using coordinates TODO: should we move this to GaiaBroker? Same for other searches?
 def query_gaia_dr3_for_name(target: Target) -> Dict[DataSource, str]:
-    coord = SkyCoord(ra=target.ra * u.degree,
-                        dec=target.dec * u.degree,
+
+    coord = SkyCoord(ra=target.ra,
+                        dec=target.dec, unit=u.deg,
                         frame=ICRS)
 
     try:
