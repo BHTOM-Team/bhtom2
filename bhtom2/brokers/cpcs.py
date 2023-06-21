@@ -105,6 +105,11 @@ class CPCSBroker(BHTOMBroker):
                 return return_for_no_new_points()
 
         print("CPCS STARTS name found ",cpcs_name)
+        
+        #adding ivo prefix if necessary:
+        if not cpcs_name.startswith("ivo://"):
+            cpcs_name = "ivo://" + cpcs_name
+
         try:        
             response: str = query_external_service(f'{cpcs_base_url}/get_alert_lc_data?alert_name={cpcs_name}',
                                                'CPCS', cookies={'hashtag': CPCS_DATA_ACCESS_HASHTAG})
