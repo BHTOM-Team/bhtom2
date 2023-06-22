@@ -411,7 +411,10 @@ class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
         import os
         from django.http import FileResponse
 
-        target_id: int = kwargs.get('pk', None)
+        if 'pk' in kwargs:
+            target_id = kwargs['pk']
+        elif 'name' in kwargs:
+            target_id = kwargs['name']
         logger.info(f'Generating file for target with id={target_id}...')
 
         tmp = None

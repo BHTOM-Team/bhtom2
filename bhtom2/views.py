@@ -64,7 +64,10 @@ class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
         import os
         from django.http import FileResponse
 
-        target_id: int = kwargs.get('pk', None)
+        if 'pk' in kwargs:
+            target_id = kwargs['pk']
+        elif 'name' in kwargs:
+            target_id = kwargs['name']
         logger.info(f'Generating photometry CSV file for target with id={target_id}...')
 
         tmp = None
@@ -82,6 +85,7 @@ class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
 
 class TargetDownloadPhotometryDataView(TargetDownloadDataView):
     def generate_data_method(self, target_id):
+        print("SAVE: targetid=",target_id)
         return save_photometry_data_for_target_to_csv_file(target_id)
 
 
@@ -216,8 +220,12 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
     permission_required = 'bhtom_targets.view_target'
 
     def get(self, request, *args, **kwargs):
-        target_id: int = kwargs.get('pk', None)
-        target: Target = Target.objects.get(pk=target_id)
+        target_id = kwargs.get('pk', None)
+        if isinstance(target_id, int):
+            target: Target = Target.objects.get(pk=target_id)
+        else:
+            target: Target = Target.objects.get(name=target_id)
+
 
         datums = ReducedDatum.objects.filter(target=target,
                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
