@@ -145,7 +145,7 @@ def query_antares_for_names(target: Target) -> Dict[DataSource, str]:
     try:
         coordinates: SkyCoord = SkyCoord(ra=target.ra, dec=target.dec, unit="deg")
         radius: Angle = Angle(1, unit="arcsec")
-
+   
         target: Optional[Any] = None
         result_dict: Dict[str] = {}
 

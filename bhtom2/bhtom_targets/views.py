@@ -1,3 +1,4 @@
+from io import StringIO
 import logging
 
 from django.conf import settings
@@ -8,6 +9,7 @@ from django.db import transaction
 from django.shortcuts import redirect, render
 from django.views.generic.edit import CreateView, UpdateView
 from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm, TargetLatexDescriptionForm
+from bhtom2.bhtom_targets.utils import import_targets
 from bhtom2.external_service.data_source_information import get_pretty_survey_name
 from bhtom2.utils.openai_utils import latex_target_title_prompt, latex_text_target, latex_text_target_prompt, get_response
 from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_stats_latex
@@ -28,6 +30,9 @@ from django.views.generic import View
 from django.views.generic.detail import DetailView
 from abc import ABC, abstractmethod
 from django.contrib.auth.mixins import PermissionRequiredMixin
+
+from django.views.generic import RedirectView, TemplateView, View
+from django.urls import reverse_lazy, reverse
 
 logger = logging.getLogger(__name__)
 
@@ -241,7 +246,6 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
         )
         return context
 
-    @transaction.atomic
     def form_valid(self, form):
         """
         Runs after form validation. Validates and saves the ``TargetExtra`` and ``TargetName`` formsets, then calls the
@@ -433,3 +437,27 @@ class TargetDownloadPhotometryStatsLatexTableView(TargetDownloadDataView):
     def generate_data_method(self, target_id):
         return get_photometry_stats_latex(target_id)
 
+#copied from bhtom_base to use my own utils.import_target
+class TargetImportView(LoginRequiredMixin, TemplateView):
+    """
+    View that handles the import of targets from a CSV. Requires authentication.
+    """
+    template_name = 'bhtom_targets/target_import.html'
+
+    def post(self, request):
+        """
+        Handles the POST requests to this view. Creates a StringIO object and passes it to ``import_targets``.
+
+        :param request: the request object passed to this view
+        :type request: HTTPRequest
+        """
+        csv_file = request.FILES['target_csv']
+        csv_stream = StringIO(csv_file.read().decode('utf-8'), newline=None)
+        result = import_targets(csv_stream)
+        messages.success(
+            request,
+            'Targets created: {}'.format(len(result['targets']))
+        )
+        for error in result['errors']:
+            messages.warning(request, error)
+        return redirect(reverse('bhtom2.bhtom_targets:list'))

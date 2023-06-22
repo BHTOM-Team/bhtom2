@@ -1,3 +1,4 @@
+from sqlite3 import IntegrityError
 from typing import Dict, Optional
 
 from bhtom2.external_service.catalog_name_lookup import query_all_services
@@ -15,6 +16,7 @@ from bhtom2.dataproducts import last_jd
 from bhtom2.utils.coordinate_utils import computeDtAndPriority
 from bhtom_base.bhtom_targets.models import TargetName
 from django.contrib import messages
+from django.db import transaction
 
 from bhtom2.utils.openai_utils import get_constel, latex_text_target
 
@@ -28,6 +30,7 @@ def target_post_save(target, created, **kwargs):
         update_sun_distance(target)
         update_phot_class(target)
         names: Dict[DataSource, str] = query_all_services(target)
+
         for k, v in names.items():
             try: 
                 #checking if given source is already in the database

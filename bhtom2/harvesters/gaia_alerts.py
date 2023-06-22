@@ -68,6 +68,7 @@ def search_term_in_gaia_data(term: str) -> pd.DataFrame:
         os.remove(GAIA_ALERTS_CACHE_PATH)
         raise InvalidExternalServiceResponseException(f'Gaia Alerts didn\'t return a valid csv file!')
 
+
     if len(term_data.index) > 0:
         target_data: pd.DataFrame = term_data.iloc[0]
         return target_data
@@ -142,6 +143,7 @@ class GaiaAlertsHarvester(AbstractHarvester):
 
     def query(self, term):
         self.catalog_data = get(term)
+        return self.catalog_data
 
     def to_target(self) -> Optional[Target]:
         # catalog_data contains now all fields needed to create a target
