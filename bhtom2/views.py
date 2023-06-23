@@ -85,7 +85,6 @@ class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
 
 class TargetDownloadPhotometryDataView(TargetDownloadDataView):
     def generate_data_method(self, target_id):
-        print("SAVE: targetid=",target_id)
         return save_photometry_data_for_target_to_csv_file(target_id)
 
 
