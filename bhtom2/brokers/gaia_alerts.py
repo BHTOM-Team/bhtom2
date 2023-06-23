@@ -230,7 +230,8 @@ class GaiaAlertsBroker(BHTOMBroker):
                                            source_name=self.name,
                                            source_location=alert_url,
                                            error=datum[1].error,
-                                           filter=datum[1].filter,
+                                        #    filter=datum[1].filter,
+                                           filter = "GSA(G)",#overwriting pretty name to maintain the convention
                                            observer=self.__OBSERVER_NAME,
                                            facility=self.__FACILITY_NAME) for datum in data]
             with transaction.atomic():
