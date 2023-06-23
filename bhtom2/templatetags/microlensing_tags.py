@@ -287,8 +287,8 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
 
         #FIG:
         best = result.x
-        tstart = best[0]-1000.
-        tstop = best[0]+500.
+        tstart = best[0]-fit_t_E*4.
+        tstop = best[0]+fit_t_E*4.
 
         plt.figure(figsize=(10, 6))
         grid = gridspec.GridSpec(2, 1, height_ratios=[3, 1])
@@ -302,8 +302,8 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
         my_event.plot_model(color='magenta', ls='--', t_start=tstart, t_stop=tstop, subtract_2450000=True, label=lab1)#, data_ref=0)
         plt.grid()
         plt.title(("%s")%(name))
-        xlim1= best[0]-500.-2450000
-        xlim2 = best[0]+500.-2450000
+        xlim1= best[0]-fit_t_E*4.-2450000
+        xlim2 = best[0]+fit_t_E*4.-2450000
         plt.xlim(xlim1, xlim2)
 
         plt.legend(loc='best')
