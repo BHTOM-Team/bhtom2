@@ -115,10 +115,14 @@ def save_photometry_data_for_target_to_csv_file(target_id_name) -> Tuple[NamedTe
     return save_data_to_temporary_file(data, columns, filename)
 
 
-def save_radio_data_for_target_to_csv_file(target_id: int) -> Tuple[NamedTemporaryFile, str]:
-    target: Target = Target.objects.get(pk=target_id)
+def save_radio_data_for_target_to_csv_file(target_id_name) -> Tuple[NamedTemporaryFile, str]:
+    #if target_id is int, this is the id, if str this is name:
+    if isinstance(target_id_name, int):
+        target: Target = Target.objects.get(pk=target_id_name)
+    else:
+        target: Target = Target.objects.get(name=target_id_name)
 
-    data, columns = get_radio_data_table(target_id)
+    data, columns = get_radio_data_table(target)
 
     filename: str = "target_%s_radio.csv" % target.name
 
