@@ -122,6 +122,8 @@ class TargetListView(SingleTableMixin, PermissionListMixin, FilterView):
                                 else TargetList.objects.none())
         context['query_string'] = self.request.META['QUERY_STRING']
 
+        context['target_count'] = context['object_list'].count
+
         mjd_now = Time(datetime.utcnow()).mjd
 
         prioritylist = []
@@ -211,6 +213,9 @@ class TargetListImagesView(SingleTableMixin, PermissionListMixin, FilterView):
                                 if self.request.user.is_authenticated
                                 else TargetList.objects.none())
         context['query_string'] = self.request.META['QUERY_STRING']
+
+        context['target_count'] = context['object_list'].count
+
         return context
 
 
