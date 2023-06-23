@@ -30,7 +30,7 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.CPCS: "CPCS",
     DataSource.AAVSO: "AAVSO",
     DataSource.TNS: "TNS",
-    DataSource.ASASSN: "ASAS-SN",
+    DataSource.ASASSN: "ASASSN",
     DataSource.ANTARES: "ANTARES",
     DataSource.GAIA_DR2: "Gaia DR2",
     DataSource.ZTF_DR8: "ZTF DR8",
@@ -87,7 +87,8 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.FIRST: ["Flux 1.4GHz"],
     DataSource.PS1: ["g", "r", "i", "z"],
     DataSource.DECAPS: ["g", "r", "i", "z"],
-    DataSource.CPCS: ["g", "r", "i", "z"], ##is it used anywhere?    
+    DataSource.CPCS: ["g", "r", "i", "z"], ##is it used anywhere?    it has to be specified because bhtom_broker reads it, but probably does not use
+    DataSource.ASASSN: ["g", "V"], 
 }
 
 

@@ -18,7 +18,7 @@ from bhtom_base.bhtom_targets.models import Target, TargetExtra
 
 # For DR8
 class ZTFBroker(BHTOMBroker):
-    name = DataSource.ZTF_DR8
+    name = "ZTF_DR8"
     form = None
 
     def __init__(self):

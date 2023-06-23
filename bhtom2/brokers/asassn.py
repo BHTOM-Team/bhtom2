@@ -19,9 +19,7 @@ from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 
 from bhtom_base.bhtom_targets.models import  TargetExtra, TargetName
 
-import csv
 import io
-from astropy.io import ascii
 
 class ASASSNBrokerQueryForm(GenericQueryForm):
     target_name = forms.CharField(required=False)
@@ -100,7 +98,6 @@ class ASASSNBroker(BHTOMBroker):
             response = requests.get(url)
             content = response.content.decode('utf-8')
 
-            file_like_object = io.StringIO(content)
             df = pd.read_csv(io.StringIO(content), header=0)
             # remove rows where mag_err >= 1
             df = df[df['mag_err'] < 1]

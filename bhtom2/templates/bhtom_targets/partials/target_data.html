@@ -115,6 +115,11 @@
       <a href='https://gaia.ari.uni-heidelberg.de/singlesource.html#id={{ value }}' target="_blank">        {{ value }}
       </a>
     </dd>
+    {% elif value.source_name == "ASASSN" %}
+    <dd class="col-sm-6">
+      <a href='https://asas-sn.osu.edu/sky-patrol/coordinate/{{ value }}' target="_blank">        {{ value }}
+      </a>
+    </dd>
     {% else %}
     <dd class="col-sm-6">{{ value }}</dd>
     {% endif %}
