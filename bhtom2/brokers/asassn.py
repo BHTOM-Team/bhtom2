@@ -119,7 +119,7 @@ class ASASSNBroker(BHTOMBroker):
         try:
             reduced_datums = []
             for _, datum in df.iterrows():
-                mjd = datum.HJD
+                mjd = datum.HJD-2400000.5
                 timestamp = Time(datum.HJD, format="jd", scale="utc").to_datetime(timezone=TimezoneInfo())
                 reduced_datum = ReducedDatum(target=target,
                                            data_type='photometry',
