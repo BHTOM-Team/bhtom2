@@ -98,7 +98,7 @@ class CPCSBroker(BHTOMBroker):
             cpcs_name = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.CPCS]).value            
         except:
             try:
-                cpcs_name = TargetName.objects.get(target=target, source_name=DataSource.CPCS.name)
+                cpcs_name = TargetName.objects.get(target=target, source_name=DataSource.CPCS.name).name
             except:
                 cpcs_name = ""
                 self.logger.error(f'no CPCS name for {target.name}')

@@ -230,14 +230,17 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
     radio_range = radio_max-radio_min
 
     try:
-        magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
+#        magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
         magnitude_range = 10
     except:
         magnitude_dtick_digit = 1
         radio_range = 10
     
     try:
-        radio_dtick_digit = (round(np.log10(radio_range)) - 1)
+        if (radio_range>0):
+            radio_dtick_digit = (round(np.log10(radio_range)) - 1)
+        else:
+                    radio_dtick_digit = 1
     except:
         radio_dtick_digit = 1
 
@@ -481,14 +484,17 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
     radio_range = radio_max-radio_min
 
     try:
-        magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
+#        magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
         magnitude_range = 10
     except:
         magnitude_dtick_digit = 1
         radio_range = 10
     
     try:
-        radio_dtick_digit = (round(np.log10(radio_range)) - 1)
+        if (radio_range>0):
+            radio_dtick_digit = (round(np.log10(radio_range)) - 1)
+        else:
+            radio_dtick_digit = 1
     except:
         radio_dtick_digit = 1
 
