@@ -163,11 +163,11 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         if extra.is_valid() and names.is_valid() and (not duplicate_names) and (not existing_names):
 #            messages.success(self.request, 'Target Create success, now grabbing all the data for it. Wait.')
 
-            messages.add_message(
-                self.request,
-                messages.INFO,
-                f"Target created. Downloading archival data. Wait..."
-            )
+            # messages.add_message(
+            #     self.request,
+            #     messages.INFO,
+            #     f"Target created. Downloading archival data. Wait..."
+            # )
             
             super().form_valid(form)
 
@@ -186,7 +186,17 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
 
             return super().form_invalid(form)
 
+        #storing all the names
         for source_name, name in target_names:
+            #clearing ASASSN and CPCS names from prefixes if provided:
+            if "ASASSN" in source_name:
+                if name.startswith("https://asas-sn.osu.edu/sky-patrol/coordinate/"):
+                    name= name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
+
+            if "CPCS" in source_name:
+                if name.startswith("ivo://"):
+                    name= name.replace("ivo://", "")
+
             to_add, _ = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
             to_add.name = name
             to_add.save()
@@ -280,6 +290,15 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
 
         # Update target names for given source
         for source_name, name in target_names:
+            #clearing ASASSN and CPCS names from prefixes if provided:
+            if "ASASSN" in source_name:
+                if name.startswith("https://asas-sn.osu.edu/sky-patrol/coordinate/"):
+                    name= name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
+
+            if "CPCS" in source_name:
+                if name.startswith("ivo://"):
+                    name= name.replace("ivo://", "")
+
             to_update, created = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
             to_update.name = name
             to_update.save(update_fields=['name'])

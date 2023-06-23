@@ -93,7 +93,11 @@ class ASASSNBroker(BHTOMBroker):
         #it will read page e.g.: https://asas-sn.osu.edu/sky-patrol/coordinate/9078bdcd-86ee-4029-8b7d-b7563ed5d740/export.csv
         #so only 9078bdcd-86ee-4029-8b7d-b7563ed5d740 is needed in name
         
+        if asassn_name.startswith("https://asas-sn.osu.edu/sky-patrol/coordinate/"):
+            asassn_name= asassn_name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
+
         url = "https://asas-sn.osu.edu/sky-patrol/coordinate/" + asassn_name + "/export.csv"
+
         try:
             response = requests.get(url)
             content = response.content.decode('utf-8')
@@ -125,7 +129,7 @@ class ASASSNBroker(BHTOMBroker):
                                            source_name=self.name,
                                            source_location='https://asas-sn.osu.edu',  # e.g. alerts url
                                            error=datum.mag_err,
-                                           filter="ASASSN("+datum.Filter")",
+                                           filter = "ASASSN(" + datum.Filter + ")",
                                            observer=self.__OBSERVER_NAME,
                                            facility=datum.Camera,
                                            value_unit = ReducedDatumUnit.MAGNITUDE)
