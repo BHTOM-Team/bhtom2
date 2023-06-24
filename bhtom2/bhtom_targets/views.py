@@ -23,15 +23,12 @@ from guardian.shortcuts import get_objects_for_user, get_groups_with_perms
 from django.forms import inlineformset_factory
 from astropy.coordinates import Angle
 from astropy import units as u
-from django.forms import ValidationError
-from django.http import HttpResponseRedirect
 from django.views.generic import View
 
-from django.views.generic.detail import DetailView
 from abc import ABC, abstractmethod
 from django.contrib.auth.mixins import PermissionRequiredMixin
 
-from django.views.generic import RedirectView, TemplateView, View
+from django.views.generic import  TemplateView, View
 from django.urls import reverse_lazy, reverse
 
 logger = logging.getLogger(__name__)
@@ -373,12 +370,22 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
         return form
 
 
+
 #form for generating latex description of the target (under Publication)
 #very similar form to update
 class TargetGenerateTargetDescriptionLatexView(UpdateView):
+    template_name = 'bhtom_targets/target_generate_latex_form.html'
     model = Target
     fields = '__all__'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        target = Target.objects.get(pk=self.kwargs['pk'])
+        # Add any additional context data here
+        context['target'] = target
+
+        return context
+        
     def get_form_class(self):
         """
         Return the form class to use in this view.
@@ -386,13 +393,6 @@ class TargetGenerateTargetDescriptionLatexView(UpdateView):
         return TargetLatexDescriptionForm
 
     def get_initial(self):
-        """
-        Returns the initial data to use for forms on this view. For the ``TargetUpdateView``, adds the groups that the
-        target is a member of.
-
-        :returns:
-        :rtype: dict
-        """
         initial = super().get_initial()
         initial['groups'] = get_groups_with_perms(self.get_object())
 
@@ -408,13 +408,10 @@ class TargetGenerateTargetDescriptionLatexView(UpdateView):
 
         return initial
 
-    def get_form(self, *args, **kwargs):
-        """
-        Gets an instance of the ``TargetCreateForm`` and populates it with the groups available to the current user.
+    def get_queryset(self, *args, **kwargs):
+        return get_objects_for_user(self.request.user, 'bhtom_targets.change_target')
 
-        :returns: instance of creation form
-        :rtype: subclass of TargetCreateForm
-        """
+    def get_form(self, *args, **kwargs):
         form = super().get_form(*args, **kwargs)
         if self.request.user.is_superuser:
             form.fields['groups'].queryset = Group.objects.all()
