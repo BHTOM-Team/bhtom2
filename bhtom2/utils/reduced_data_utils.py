@@ -37,8 +37,7 @@ def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str
     return data, columns
 
 
-def get_radio_data_table(target_id: int) -> Tuple[List[List[str]], List[str]]:
-    target: Target = Target.objects.get(pk=target_id)
+def get_radio_data_table(target: Target) -> Tuple[List[List[str]], List[str]]:
 
     logger.debug(
         f'Downloading radio data as a table for target {target.name}...')
