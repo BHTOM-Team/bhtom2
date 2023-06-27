@@ -47,10 +47,10 @@
                        data-toggle="tab">Photometry</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="spectroscopy-tab" href="#spectroscopy" role="tab" data-toggle="tab">Spectroscopy</a>
+                    <a class="nav-link" id="phot-models-tab" href="#phot-models" role="tab" data-toggle="tab">Models</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="upload-tab" href="#upload" role="tab" data-toggle="tab">Upload</a>
+                    <a class="nav-link" id="spectroscopy-tab" href="#spectroscopy" role="tab" data-toggle="tab">Spectroscopy</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" id="observe-tab" href="#observe" role="tab" data-toggle="tab">Observe</a>
@@ -73,7 +73,6 @@
         
             <div class="tab-content">
                 <div class="tab-pane active" id="photometry">
-                    <button onclick="open_microlensing_model()" class="btn btn-info" role="button" style="float:right;margin: 4px;">Microlensing model</button>
 
                     {% photometry_for_target target %}
                     <div class="row menu-row">
@@ -86,8 +85,17 @@
                       </div>
 
                       {% recent_photometry object limit=5 %}
-
                 </div>
+
+                <div class="tab-pane" id="phot-models">
+                    <h6>
+                        <button onclick="open_microlensing_model()" class="btn btn-info" role="button">Microlensing model standard</button> 
+                        The simplest microlensing model, single lens, single source, no parallax
+                    </h6>
+                    <br>
+                </div>
+
+
                 <div class="tab-pane" id="observe">
                     <h4>Observe</h4>
                     {% observing_buttons object user %}
@@ -147,8 +155,9 @@
 
                 {% comments_enabled as comments_are_enabled %}
                 <hr/>
-                <h5>Comments</h5>
+                <hr>
                 {% if comments_are_enabled %}
+                    <h5>Comments</h5>
                     {% render_comment_list for object %}
                     {% url 'targets:detail' object.id as next %}
                     {% if user.is_authenticated %}
