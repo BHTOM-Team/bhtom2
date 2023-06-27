@@ -219,7 +219,6 @@ class TargetListImagesView(SingleTableMixin, PermissionListMixin, FilterView):
 
 
 class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
-    template_name = 'bhtom_targets/target_microlensing.html'
     model = Target
     permission_required = 'bhtom_targets.view_target'
 

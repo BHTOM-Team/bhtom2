@@ -92,6 +92,10 @@
                         <button onclick="open_microlensing_model()" class="btn btn-info" role="button">Microlensing model standard</button> 
                         The simplest microlensing model, single lens, single source, no parallax
                     </h6>
+                    <h6>
+                        <button onclick="open_microlensing_parallax_model()" class="btn btn-info" role="button">Microlensing model parallax</button> 
+                        Microlensing model, single lens, single source, with parallax
+                    </h6>
                     <br>
                 </div>
 
@@ -183,6 +187,9 @@
 
     function open_microlensing_model() {
     window.open('{% url "microlensing_model" target.id %}', 'newwindow', 'width=1000,height=900');
+    }
+    function open_microlensing_parallax_model() {
+    window.open('{% url "microlensing_parallax_model" target.id %}', 'newwindow', 'width=1000,height=900');
     }
 
     function generate_target_description_latex() {

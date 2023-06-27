@@ -52,6 +52,7 @@ urlpatterns = [
          name='generate_target_description_latex'),
     path('catalogs/', include('bhtom2.bhtom_catalogs.urls')),
     path('proposals/', include('bhtom2.bhtom_observations.urls', namespace='proposals')),
-    path('targets/<int:pk>/microlensing', TargetMicrolensingView.as_view(), name="microlensing_model"),
+    path('targets/<int:pk>/microlensing', TargetMicrolensingView.as_view(template_name='bhtom_targets/target_microlensing.html'), name="microlensing_model"),
+    path('targets/<int:pk>/microlensing_parallax', TargetMicrolensingView.as_view(template_name='bhtom_targets/target_microlensing_parallax.html'), name="microlensing_parallax_model"),
     path('', include('bhtom_base.bhtom_common.urls')),
 ]
