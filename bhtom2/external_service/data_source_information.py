@@ -21,6 +21,7 @@ class DataSource(Enum):
     FIRST = auto()
     PS1 = auto()
     DECAPS = auto()
+    OGLE_EWS= auto()
 
 
 PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
@@ -43,6 +44,7 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.FIRST: "FIRST",
     DataSource.PS1: "PS1",
     DataSource.DECAPS: "DECAPS",
+    DataSource.OGLE_EWS:"OGLE-EWS"
 }
 
 
@@ -69,6 +71,7 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.FIRST: "FIRST name",
     DataSource.PS1: "PS1 name",
     DataSource.DECAPS: "DECAPS name",
+    DataSource.OGLE_EWS: "OGLE EWS name"
 }
 
 
@@ -89,6 +92,7 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.DECAPS: ["g", "r", "i", "z"],
     DataSource.CPCS: ["g", "r", "i", "z"], ##is it used anywhere?    it has to be specified because bhtom_broker reads it, but probably does not use
     DataSource.ASASSN: ["g", "V"], 
+    DataSource.OGLE_EWS: ['I'],
 }
 
 
