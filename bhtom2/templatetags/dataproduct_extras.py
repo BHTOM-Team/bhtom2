@@ -353,6 +353,16 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
 
     fig.update_layout(
         margin=dict(t= 40, r= 20, b= 40, l= 80),
+        xaxis=dict(
+            autorange=True,
+            title="date",
+            titlefont=dict(
+                color="#1f77b4"
+            ),
+            tickfont=dict(
+                color="#1f77b4"
+            ),
+        ),
         yaxis=dict(
             autorange=False,
             range=[np.ceil(magnitude_min), np.floor(magnitude_max)],
@@ -376,7 +386,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
             ),
             overlaying="y",
             side="right",
-            showgrid=False,
+            showgrid=False,# Turn off the grid for the secondary y-axis
         ),
         legend=dict(
             yanchor="top",
@@ -416,9 +426,10 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
     """
 
     color_map = {
-        'r': 'red',
-        'g': 'green',
-        'i': 'black'
+        'GSA(G)': ['black','circle',10],
+        'ZTF(zg)': ['green','diamond',4],
+        'ZTF(zi)': ['#800000','diamond',4],
+        'ZTF(zr)': ['red','diamond',4]
     }
 
     photometry_data = {}
@@ -505,7 +516,11 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
-                marker=dict(color=color_map.get(filter_name)),
+                marker=dict(
+                    color=color_map.get(filter_name, ['gray', 'circle', 6])[0], #default ['gray', 'circle', 6]
+                    symbol=color_map.get(filter_name, ['gray', 'circle', 6])[1],
+                    size=color_map.get(filter_name, ['gray', 'circle', 6])[2]
+                    ),
                 name=filter_name,
                 error_y=dict(
                     type='data',
@@ -521,7 +536,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
-                marker=dict(color=color_map.get(filter_name), symbol='diamond', line_color='black', line_width=2),
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol='diamond', line_color='black', line_width=2),
                 name=filter_name,
                 error_y=dict(
                     type='data',
@@ -537,7 +552,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                 y=filter_values['limit'],
                 mode='markers',
                 opacity=0.5,
-                marker=dict(color=color_map.get(filter_name), symbol=6),  # upside down triangle
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol=6),  # upside down triangle
                 name=filter_name + ' non-detection',
             )
             plot_data.append(series)
@@ -545,48 +560,70 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
     layout = go.Layout(
         height=height,
         width=width,
-        paper_bgcolor=background,
-        plot_bgcolor=background
-
+        # paper_bgcolor=background,
+        # plot_bgcolor=background
+        paper_bgcolor='white',  # Change the background color to white
+        plot_bgcolor='white'  # Change the plot area background color to white
     )
+
     layout.legend.font.color = label_color
     #no legend shown in icon view
-    layout.update(showlegend=False)
+    layout.update(showlegend=True)
     fig = go.Figure(data=plot_data, layout=layout)
     fig.update_layout(
-        title=target.name,
-        margin=dict(t= 40, r= 20, b= 40, l= 80),
-        yaxis=dict(
-            autorange=False,
-            range=[np.ceil(magnitude_min), np.floor(magnitude_max)],
-            title="magnitude",
-            titlefont=dict(
-                color="#1f77b4"
-            ),
-            tickfont=dict(
-                color="#1f77b4"
-            ),
+    title=target.name,
+    margin=dict(t=40, r=20, b=40, l=80),
+    xaxis=dict(
+        autorange=True,
+        title="date",
+        titlefont=dict(
+            color="#1f77b4"
         ),
-        yaxis2=dict(
-            autorange=False,
-            range=[np.floor(radio_min), np.ceil(radio_max)],
-            title="mJy",
-            titlefont=dict(
-                color="black"
-            ),
-            tickfont=dict(
-                color="black"
-            ),
-            overlaying="y",
-            side="right",
-            showgrid=False,
+        tickfont=dict(
+            color="#1f77b4"
         ),
-        legend=dict(
-            yanchor="top",
-            y=0.99,
-            xanchor="right",
-            x=1.35
-        )
+        showgrid=False,  # Do not show grid lines on the x-axis
+        showticklabels=True,
+        ticks="inside",
+        showline=True, linewidth=2, linecolor='#1f77b4'
+    ),
+    yaxis=dict(
+        autorange=False,
+        range=[np.ceil(magnitude_min), np.floor(magnitude_max)],
+        title="magnitude",
+        titlefont=dict(
+            color="#1f77b4"
+        ),
+        tickfont=dict(
+            color="#1f77b4"  # Change the tick color to black
+        ),
+        showgrid=False,  # Do not show grid lines on the y-axis
+        showticklabels=True,  # Show tick labels on the y-axis
+        ticks="inside",   # Place the tick marks inside the plot area
+        showline=True, linewidth=2, linecolor='#1f77b4'
+    ),
+    yaxis2=dict(
+        autorange=False,
+        range=[np.floor(radio_min), np.ceil(radio_max)],
+        title="mJy",
+        titlefont=dict(
+            color="black"
+        ),
+        tickfont=dict(
+            color="black"
+        ),
+        overlaying="y",
+        side="right",
+        showgrid=False,  # Do not show grid lines on the yaxis2
+    ),
+    legend_tracegroupgap=1,
+    legend=dict(
+#        yanchor="top",
+        y=0.5,
+#        xanchor="right",
+        x=1.00,
+#        font=dict(size=8)
+    )
     )
     return {
         'target': target,
