@@ -31,8 +31,8 @@ class SDSSBroker(BHTOMBroker):
         super().__init__(DataSource.SDSS_DR14)  # Add the DataSource here
 
         # If the survey is e.g. a space survey, fill the facility and observer names in and treat is as a constant
-        self.__FACILITY_NAME: str = "SDSSDR"
-        self.__OBSERVER_NAME: str = "SDSSDR"
+        self.__FACILITY_NAME: str = "SDSS-DR14"
+        self.__OBSERVER_NAME: str = "SDSS-DR14"
 
         self.__target_name_key: str = TARGET_NAME_KEYS.get(self.data_source, self.data_source.name)
 
@@ -109,7 +109,7 @@ class SDSSBroker(BHTOMBroker):
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
                                             error=datum[5],
-                                            filter='SDSSDR(g)',
+                                            filter='SDSS(g)',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
 
@@ -121,7 +121,7 @@ class SDSSBroker(BHTOMBroker):
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
                                             error=datum[6],
-                                            filter='SDSSDR(r)',
+                                            filter='SDSS(r)',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
                 
@@ -133,7 +133,7 @@ class SDSSBroker(BHTOMBroker):
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
                                             error=datum[7],
-                                            filter='SDSSDR(i)',
+                                            filter='SDSS(i)',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
 
@@ -145,7 +145,7 @@ class SDSSBroker(BHTOMBroker):
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
                                             error=datum[8],
-                                            filter='SDSSDR(z)',
+                                            filter='SDSS(z)',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
 
@@ -157,7 +157,7 @@ class SDSSBroker(BHTOMBroker):
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
                                             error=datum[14],
-                                            filter='SDSSDR(u)',
+                                            filter='SDSS(u)',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
 

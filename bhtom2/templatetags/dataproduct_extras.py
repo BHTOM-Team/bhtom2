@@ -427,11 +427,14 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
 
     color_map = {
         'GSA(G)': ['black','circle',10],
-        'ZTF(zg)': ['green','diamond',4],
-        'ZTF(zi)': ['#800000','diamond',4],
-        'ZTF(zr)': ['red','diamond',4],
-        'WISE(W1)': ['#FFCC00', 'diamond',2],
-        'WISE(W2)': ['blue', 'diamond', 2]
+        'ZTF(zg)': ['green','cross',4],
+        'ZTF(zi)': ['#800000','cross',4],
+        'ZTF(zr)': ['red','cross',4],
+        'WISE(W1)': ['#FFCC00', 'x',2],
+        'WISE(W2)': ['blue', 'x', 2],
+        'CRTS(CL)': ['#FF1493', 'diamond', 4],
+        'LINEAR(CL)': ['teal', 'diamond', 4],
+        
     }
 
     photometry_data = {}
