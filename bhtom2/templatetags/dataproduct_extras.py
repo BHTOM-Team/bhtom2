@@ -429,7 +429,9 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
         'GSA(G)': ['black','circle',10],
         'ZTF(zg)': ['green','diamond',4],
         'ZTF(zi)': ['#800000','diamond',4],
-        'ZTF(zr)': ['red','diamond',4]
+        'ZTF(zr)': ['red','diamond',4],
+        'WISE(W1)': ['#FFCC00', 'diamond',2],
+        'WISE(W2)': ['blue', 'diamond', 2]
     }
 
     photometry_data = {}
@@ -525,7 +527,9 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                 error_y=dict(
                     type='data',
                     array=filter_values['error'],
-                    visible=True
+                    visible=True,
+                    thickness=1.5,
+                    width=0
                 ),
             )
             plot_data.append(series)
@@ -541,7 +545,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                 error_y=dict(
                     type='data',
                     array=filter_values['error'],
-                    visible=True
+                    visible=True                    
                 ),
                 yaxis="y2"
             )
