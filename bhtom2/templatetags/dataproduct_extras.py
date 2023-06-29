@@ -207,6 +207,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
             photometry_data[datum.filter].setdefault('time', []).append(datum.timestamp)
             photometry_data[datum.filter].setdefault('magnitude', []).append(around(datum.value,3))
             photometry_data[datum.filter].setdefault('error', []).append(around(datum.error,3))
+            photometry_data[datum.filter].setdefault('facility', []).append(datum.facility)
 
             magnitude_min = (datum.value+datum.error) if (datum.value+datum.error) > magnitude_min else magnitude_min
             magnitude_max = (datum.value-datum.error) if (datum.value-datum.error) < magnitude_max else magnitude_max
@@ -268,7 +269,8 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                     array=filter_values['error'],
                     visible=True
                 ),
-                text=mjds_to_plot[filter_name],
+                text=mjds_to_plot[filter_name], 
+                customdata=filter_values['facility'],
 #                customdata = filter_values['error'],
             # hovertemplate='<br>'.join([
             # "%{x}",
@@ -277,7 +279,8 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
             # ]),
             hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
                 <br>MJD= %{text:.6f}\
-            <br>mag= %{y:.3f}&#177;%{error_y.array:3f}'
+            <br>mag= %{y:.3f}&#177;%{error_y.array:3f}\
+            <br>%{customdata}'
             )     
             plot_data.append(series)
         elif filter_values.get('limit'):  #limit in MAG

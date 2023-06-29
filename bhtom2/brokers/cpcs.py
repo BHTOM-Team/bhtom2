@@ -144,7 +144,7 @@ class CPCSBroker(BHTOMBroker):
                                             source_location=f'{cpcs_base_url}/get_alert_lc_data?alert_name={cpcs_name}&{id}',  # e.g. alerts url
                                             error=magerr_with_caliberr,
                                             filter=filter_name(filter, catalog),
-                                            observer=observatory,
+                                            observer="CPCS",
                                             facility=observatory,
                                             value_unit = ReducedDatumUnit.MAGNITUDE)
                                             

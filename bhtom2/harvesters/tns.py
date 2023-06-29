@@ -3,7 +3,8 @@ import requests
 from typing import Optional, Dict, Any
 
 from astropy import units as u
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import Angle, SkyCoord
+
 from collections import OrderedDict
 from django.conf import settings
 
@@ -24,6 +25,14 @@ except (AttributeError, KeyError):
         'user_agent': ''
     }
 
+TNS                 = "www.wis-tns.org"
+#TNS                 = "sandbox.wis-tns.org"
+url_tns_api         = "https://" + TNS + "/api/get"
+
+TNS_BOT_ID          = int(settings.BROKERS['TNS']['user_agent'].split('"tns_id":')[1].split(',')[0])
+TNS_BOT_NAME        = settings.BROKERS['TNS']['user_agent'].split('"name":"')[1].split('"')[0]
+TNS_API_KEY         = settings.BROKERS['TNS']['api_key']
+
 
 #removes AT or SN from the term
 def remove_initial_substring(string):
@@ -39,6 +48,7 @@ def remove_initial_substring(string):
         return string
     
 def get(term):
+
     get_url = TNS_URL + '/api/get/object'
 
     #term should be just YYYYabc, removing AT or SN if preceding
@@ -69,6 +79,33 @@ def get(term):
 
     return response_data['data']['reply']
 
+def cone_search(coordinates:SkyCoord, radius:Angle):
+    radiusUnits = radius.unit.to_string()
+
+    search_obj          = [("ra", coordinates.ra.value), ("dec", coordinates.dec.value), ("radius", radius.value), ("units", radiusUnits), 
+                       ("objname", ""), ("objname_exact_match", 0), ("internal_name", ""), 
+                       ("internal_name_exact_match", 0), ("objid", ""), ("public_timestamp", "")]
+
+    from io import StringIO
+
+    search_url = url_tns_api + "/search"
+
+    headers = {
+        'User-Agent': TNS_CREDENTIALS['user_agent']
+    }
+    json_file = OrderedDict(search_obj)
+    search_data = {'api_key': TNS_API_KEY, 'data': json.dumps(json_file)}
+    response = requests.post(search_url, headers = headers, data = search_data)
+    json_data = json.loads(response.text)
+
+    # Extract the prefix and objname values
+    prefix = json_data['data']['reply'][0]['prefix']
+    objname = json_data['data']['reply'][0]['objname']
+
+    # Concatenate prefix and objname
+    result_string = prefix + objname
+    print("TNS found: ",result_string)
+    return result_string
 
 class TNSHarvester(AbstractHarvester):
     """
