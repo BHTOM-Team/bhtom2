@@ -161,10 +161,16 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
     :type grid: bool
     """
 
+    #the same as for icon/visual list:
     color_map = {
-        'r': 'red',
-        'g': 'green',
-        'i': 'black'
+        'GSA(G)': ['black','circle',10],
+        'ZTF(zg)': ['green','cross',4],
+        'ZTF(zi)': ['#800000','cross',4],
+        'ZTF(zr)': ['red','cross',4],
+        'WISE(W1)': ['#FFCC00', 'x',2],
+        'WISE(W2)': ['blue', 'x', 2],
+        'CRTS(CL)': ['#FF1493', 'diamond', 4],
+        'LINEAR(CL)': ['teal', 'diamond', 4],
     }
 
     photometry_data = {}
@@ -262,7 +268,11 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
-                marker=dict(color=color_map.get(filter_name)),
+                marker=dict(
+                    color=color_map.get(filter_name, ['gray', 'circle', 6])[0], #default ['gray', 'circle', 6]
+                    symbol=color_map.get(filter_name, ['gray', 'circle', 6])[1],
+                    size=color_map.get(filter_name, ['gray', 'circle', 6])[2]
+                    ),
                 name=filter_name,
                 error_y=dict(
                     type='data',
@@ -289,7 +299,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 y=filter_values['limit'],
                 mode='markers',
                 opacity=0.5,
-                marker=dict(color=color_map.get(filter_name), symbol=6),  # upside down triangle
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol=6),  # upside down triangle
                 name=filter_name+" limit",
                 text=mjds_lim_to_plot[filter_name],
                 hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
@@ -314,7 +324,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
-                marker=dict(color=color_map.get(filter_name), symbol='diamond', line_color='black', line_width=2),
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol='diamond', line_color='black', line_width=2),
                 name=filter_name,
                 error_y=dict(
                     type='data',
@@ -335,7 +345,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 y=filter_values['limit'],
                 mode='markers',
                 opacity=0.5,
-                marker=dict(color=color_map.get(filter_name), symbol='star-triangle-down'),  # star triangle down
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol=6),  # upside down triangle
                 name=filter_name+" limit",
                 text=mjds_radio_lim_to_plot[filter_name],
                 hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
@@ -437,7 +447,6 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
         'WISE(W2)': ['blue', 'x', 2],
         'CRTS(CL)': ['#FF1493', 'diamond', 4],
         'LINEAR(CL)': ['teal', 'diamond', 4],
-        
     }
 
     photometry_data = {}
