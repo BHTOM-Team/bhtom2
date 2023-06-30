@@ -80,7 +80,7 @@ class CRTSBroker(BHTOMBroker):
             hasName = ""
         
         #extracts the data only if there is no CRTS name
-        if (hasName!=""):
+        if (hasName!="" and self.__update_cadence == None):
             self.logger.debug(f'CRTS data already downloaded. Skipping. {target.name}')
             return return_for_no_new_points()
 
