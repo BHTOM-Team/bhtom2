@@ -12,6 +12,7 @@ from bhtom2.external_service.data_source_information import DataSource, TARGET_N
 from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
 from bhtom_base.bhtom_dataproducts.models import DatumValue
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
+from bhtom_base.bhtom_targets.models import TargetExtra
 
 
 class PS1BrokerQueryForm(GenericQueryForm):
@@ -64,7 +65,19 @@ class PS1Broker(BHTOMBroker):
 
         radius = self.__cross_match_max_separation.value
 
-        sqlps1=("""Select gpsfmag, rpsfmag, ipsfmag, zpsfmag, gpsfmagerr, rpsfmagerr, ipsfmagerr, zpsfmagerr, gepoch, repoch, iepoch, zepoch from panstarrs_dr1.stackobjectthin 
+        hasName = ""
+        try:
+            hasName = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.PS1]).value
+        except:
+            hasName = ""
+        
+        #extracts the data only if there is no CRTS name
+        if (hasName!="" and self.__update_cadence == None):
+            self.logger.debug(f'PS1 data already downloaded. Skipping. {target.name}')
+            return return_for_no_new_points()
+
+
+        sqlps1=("""Select gpsfmag, rpsfmag, ipsfmag, zpsfmag, gpsfmagerr, rpsfmagerr, ipsfmagerr, zpsfmagerr, gepoch, repoch, iepoch, zepoch, objid from panstarrs_dr1.stackobjectthin 
         WHERE (ginfoflag3&panstarrs_dr1.detectionflags3('STACK_PRIMARY'))>0 AND q3c_radial_query(ra, dec, %f, %f, %f/3600.);""")%(ra, dec,radius)
         ps1res=[]
         try:
@@ -75,14 +88,26 @@ class PS1Broker(BHTOMBroker):
         # Process the data here to obtain a numpy array, list, or whatever feels comfortable to process
         data: List[Tuple] = ps1res
 
-        # Leave the try/except so that any erronerous data doesn't cause anything to break
 
+        # Leave the try/except so that any erronerous data doesn't cause anything to break
 
         lightcurveupdatereport = return_for_no_new_points()
 
-        #0     1 .       2 .      3       4           5           6           7           8       9 .     10      11
-#     gpsfmag, rpsfmag, ipsfmag, zpsfmag, gpsfmagerr, rpsfmagerr, ipsfmagerr, zpsfmagerr, gepoch, repoch, iepoch, zepoch 
+        #0     1 .       2 .      3       4           5           6           7           8       9 .     10      11,      12
+#     gpsfmag, rpsfmag, ipsfmag, zpsfmag, gpsfmagerr, rpsfmagerr, ipsfmagerr, zpsfmagerr, gepoch, repoch, iepoch, zepoch , objid
         try:
+            row = data[0]  # Accessing the first row
+            obj_str = str(row[12])
+
+            inventName: Optional[str] = "PS1_"+obj_str
+            TargetExtra.objects.update_or_create(target=target,
+                                            key=TARGET_NAME_KEYS[DataSource.PS1],
+                                            defaults={
+                                                'value': inventName
+                                            })
+            
+            self.logger.info(f"PS1 data found for {target.name}. Downloaded and stored as {inventName}")
+
             # Change the fields accordingly to the data format
             # Data could be a dict or pandas table as well
             reduced_datums = []
