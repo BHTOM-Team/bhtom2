@@ -58,8 +58,6 @@ class PS1Broker(BHTOMBroker):
 
     def process_reduced_data(self, target, alert=None) -> Optional[LightcurveUpdateReport]:
 
-        # Change the log message
-        self.logger.debug(f'Updating PS1 lightcurve for target: {target.name}')
 
         ra, dec = target.ra, target.dec
 
@@ -76,6 +74,8 @@ class PS1Broker(BHTOMBroker):
             self.logger.debug(f'PS1 data already downloaded. Skipping. {target.name}')
             return return_for_no_new_points()
 
+        # Change the log message
+        self.logger.debug(f'Updating PS1 lightcurve for target: {target.name}')
 
         sqlps1=("""Select gpsfmag, rpsfmag, ipsfmag, zpsfmag, gpsfmagerr, rpsfmagerr, ipsfmagerr, zpsfmagerr, gepoch, repoch, iepoch, zepoch, objid from panstarrs_dr1.stackobjectthin 
         WHERE (ginfoflag3&panstarrs_dr1.detectionflags3('STACK_PRIMARY'))>0 AND q3c_radial_query(ra, dec, %f, %f, %f/3600.);""")%(ra, dec,radius)

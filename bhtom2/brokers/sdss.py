@@ -12,6 +12,7 @@ from bhtom2.external_service.data_source_information import DataSource, TARGET_N
 from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
 from bhtom_base.bhtom_dataproducts.models import DatumValue
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
+from bhtom_base.bhtom_targets.models import TargetExtra
 
 
 class SDSSBrokerQueryForm(GenericQueryForm):
@@ -57,6 +58,17 @@ class SDSSBroker(BHTOMBroker):
 
     def process_reduced_data(self, target, alert=None) -> Optional[LightcurveUpdateReport]:
 
+        hasName = ""
+        try:
+            hasName = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.SDSS_DR14]).value
+        except:
+            hasName = ""
+        
+        #extracts the data only if there is no CRTS name
+        if (hasName!="" and self.__update_cadence == None):
+            self.logger.debug(f'SDSS_DR14 data already downloaded. Skipping. {target.name}')
+            return return_for_no_new_points()
+
         # Change the log message
         self.logger.debug(f'Updating SDSS lightcurve for target: {target.name}')
 
@@ -66,7 +78,7 @@ class SDSSBroker(BHTOMBroker):
 
         sqlsdss=("SELECT f.mjd_g, s.psfmag_g, s.psfmag_r, s.psfmag_i, s.psfmag_z, "+
            "s.psfmagerr_g, s.psfmagerr_r, s.psfmagerr_i, s.psfmagerr_z,  "+
-           "f.mjd_r, f.mjd_i, f.mjd_z, f.mjd_u, s.psfmag_u, s.psfmagerr_u "+
+           "f.mjd_r, f.mjd_i, f.mjd_z, f.mjd_u, s.psfmag_u, s.psfmagerr_u, s.objid "+
            "FROM sdssdr14.photoobjall as s, sdssdr14.field as f "+
             "WHERE s.psfmag_u>0 AND s.psfmag_g>0 AND s.psfmag_r>0 AND s.psfmag_i>0 AND s.psfmag_z>0 "+
             "AND s.field=f.field AND s.run=f.run AND s.rerun=f.rerun AND s.camcol=f.camcol "+
@@ -87,12 +99,25 @@ class SDSSBroker(BHTOMBroker):
 
         #0     1 .       2 .      3          4        5            6             7             8
         #mjd_g, psfmag_g, psfmag_r, psfmag_i, psfmag_z, psfmagerr_g, psfmagerr_r, psfmagerr_i, psfmagerr_z
-        # 9         10       11       12      13          14
-        #"f.mjd_r, f.mjd_i, f.mjd_z, f.mjd_u, s.psfmag_u, s.psfmagerr_u "+
+        # 9         10       11       12      13          14               15
+        #"f.mjd_r, f.mjd_i, f.mjd_z, f.mjd_u, s.psfmag_u, s.psfmagerr_u, s.objid
 
         try:
             # Change the fields accordingly to the data format
             # Data could be a dict or pandas table as well
+
+            row = data[0]  # Accessing the first row
+            obj_str = str(row[15])
+
+            inventName: Optional[str] = "SDSS_DR14_"+obj_str
+            TargetExtra.objects.update_or_create(target=target,
+                                            key=TARGET_NAME_KEYS[DataSource.SDSS_DR14],
+                                            defaults={
+                                                'value': inventName
+                                            })
+            
+            self.logger.info(f"SDSS data found for {target.name}. Downloaded and stored as {inventName}")
+
             reduced_datums = []
             for datum in data:
                 timestamp_g = Time(datum[0], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
