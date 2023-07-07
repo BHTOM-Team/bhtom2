@@ -12,28 +12,27 @@ from bhtom2.external_service.data_source_information import DataSource, TARGET_N
 from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
 from bhtom_base.bhtom_dataproducts.models import DatumValue
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
-from bhtom_base.bhtom_targets.models import TargetExtra
 
 
-class PS1BrokerQueryForm(GenericQueryForm):
+class DECAPSBrokerQueryForm(GenericQueryForm):
     target_name = forms.CharField(required=False)
 
     def clean(self):
         super().clean()
 
 
-class PS1Broker(BHTOMBroker):
-    name = 'PS1'  # Add the DataSource.XXX.name here -- DataSource is an enum with all possible sources of data
+class DECAPSBroker(BHTOMBroker):
+    name = 'DECAPS'  # Add the DataSource.XXX.name here -- DataSource is an enum with all possible sources of data
     # bhtom2.external_service.data_source_information
 
-    form = PS1BrokerQueryForm
+    form = DECAPSBrokerQueryForm
 
     def __init__(self):
-        super().__init__(DataSource.PS1)  # Add the DataSource here
+        super().__init__(DataSource.DECAPS)  # Add the DataSource here
 
         # If the survey is e.g. a space survey, fill the facility and observer names in and treat is as a constant
-        self.__FACILITY_NAME: str = "PS1"
-        self.__OBSERVER_NAME: str = "PS1"
+        self.__FACILITY_NAME: str = "DECAPS"
+        self.__OBSERVER_NAME: str = "DECAPS"
 
         self.__target_name_key: str = TARGET_NAME_KEYS.get(self.data_source, self.data_source.name)
 
@@ -58,65 +57,50 @@ class PS1Broker(BHTOMBroker):
 
     def process_reduced_data(self, target, alert=None) -> Optional[LightcurveUpdateReport]:
 
+        # Change the log message
+        self.logger.debug(f'Updating DECAPS lightcurve for target: {target.name}')
 
         ra, dec = target.ra, target.dec
 
         radius = self.__cross_match_max_separation.value
 
-        hasName = ""
+        sqlDECAPS=(
+            """ 
+            SELECT 
+            -2.5*log(nullif(greatest(mean_g,0),0)) as mag_g, 
+            -2.5*log(nullif(greatest(mean_r,0),0)) as mag_r, 
+            -2.5*log(nullif(greatest(mean_i,0), 0)) as mag_i, 
+            -2.5*log(nullif(greatest(mean_z,0), 0)) as mag_z,
+            2.5/ln(10)*nullif(err_g,0)/nullif(mean_g,0) as err_g,
+            2.5/ln(10)*nullif(err_r,0)/nullif(mean_r,0) as err_r, 
+            2.5/ln(10)*nullif(err_i,0)/nullif(mean_i,0) as err_i,
+            2.5/ln(10)*nullif(err_z,0)/nullif(mean_z,0) as err_z,
+            epochmean_ok, epochrange_ok
+            FROM decaps_dr1.main
+            WHERE """ +
+            "q3c_radial_query(ra, dec, %f, %f, %f/3600.);")%(ra, dec,radius)
+        DECAPSres=[]
         try:
-            hasName = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.PS1]).value
-        except:
-            hasName = ""
-        
-        #extracts the data only if there is no CRTS name
-        if (hasName!="" and self.__update_cadence == None):
-            self.logger.debug(f'PS1 data already downloaded. Skipping. {target.name}')
-            return return_for_no_new_points()
-
-        # Change the log message
-        self.logger.debug(f'Updating PS1 lightcurve for target: {target.name}')
-
-        sqlps1=("""Select gpsfmag, rpsfmag, ipsfmag, zpsfmag, gpsfmagerr, rpsfmagerr, ipsfmagerr, zpsfmagerr, gepoch, repoch, iepoch, zepoch, objid from panstarrs_dr1.stackobjectthin 
-        WHERE (ginfoflag3&panstarrs_dr1.detectionflags3('STACK_PRIMARY'))>0 AND q3c_radial_query(ra, dec, %f, %f, %f/3600.);""")%(ra, dec,radius)
-        ps1res=[]
-        try:
-            ps1res=WSDBConnection().run_query(sqlps1)
+            DECAPSres=WSDBConnection().run_query(sqlDECAPS)
         except Exception as e:
-            self.logger.error(f'Error with WSDB connection for PS1 for {target.name}: {e}')
+            self.logger.error(f'Error with WSDB connection for DECAPS for {target.name}: {e}')
 
         # Process the data here to obtain a numpy array, list, or whatever feels comfortable to process
-        data: List[Tuple] = ps1res
-
+        data: List[Tuple] = DECAPSres
 
         # Leave the try/except so that any erronerous data doesn't cause anything to break
 
         lightcurveupdatereport = return_for_no_new_points()
 
-        #0     1 .       2 .      3       4           5           6           7           8       9 .     10      11,      12
-#     gpsfmag, rpsfmag, ipsfmag, zpsfmag, gpsfmagerr, rpsfmagerr, ipsfmagerr, zpsfmagerr, gepoch, repoch, iepoch, zepoch , objid
         try:
-            row = data[0]  # Accessing the first row
-            obj_str = str(row[12])
-
-            inventName: Optional[str] = "PS1_"+obj_str
-            TargetExtra.objects.update_or_create(target=target,
-                                            key=TARGET_NAME_KEYS[DataSource.PS1],
-                                            defaults={
-                                                'value': inventName
-                                            })
-            
-            self.logger.info(f"PS1 data found for {target.name}. Downloaded and stored as {inventName}")
-
             # Change the fields accordingly to the data format
             # Data could be a dict or pandas table as well
             reduced_datums = []
             for datum in data:
-                
                 timestamp_g = Time(datum[8], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
-                timestamp_r = Time(datum[9], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
-                timestamp_i = Time(datum[10], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
-                timestamp_z = Time(datum[11], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                timestamp_r = Time(datum[8], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                timestamp_i = Time(datum[8], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                timestamp_z = Time(datum[8], format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
                 
                 if (datum[0] is not None and datum[4] is not None):
                    reduced_datum_g = ReducedDatum(target=target,
@@ -125,9 +109,9 @@ class PS1Broker(BHTOMBroker):
                                             mjd=datum[8],
                                             value=datum[0], #filter g
                                             source_name=self.name,
-                                            source_location='WSDB',  # e.g. alerts url
+                                            source_location='WSDB',  
                                             error=datum[4],
-                                            filter='PS1(g)',
+                                            filter='DECAPS(g)',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
                    reduced_datums.append(reduced_datum_g)
@@ -136,12 +120,12 @@ class PS1Broker(BHTOMBroker):
                     reduced_datum_r = ReducedDatum(target=target,
                                             data_type='photometry',
                                             timestamp=timestamp_r,
-                                            mjd=datum[9],
+                                            mjd=datum[8],
                                             value=datum[1], #filter r
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
                                             error=datum[5],
-                                            filter='PS1(r)',
+                                            filter='DECAPS(r)',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
                 
@@ -151,12 +135,12 @@ class PS1Broker(BHTOMBroker):
                     reduced_datum_i = ReducedDatum(target=target,
                                             data_type='photometry',
                                             timestamp=timestamp_i,
-                                            mjd=datum[10],
+                                            mjd=datum[8],
                                             value=datum[2], #filter i
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
                                             error=datum[6],
-                                            filter='PS1(i)',
+                                            filter='DECAPS(i)',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
 
@@ -166,22 +150,21 @@ class PS1Broker(BHTOMBroker):
                     reduced_datum_z = ReducedDatum(target=target,
                                             data_type='photometry',
                                             timestamp=timestamp_z,
-                                            mjd=datum[11],
+                                            mjd=datum[8],
                                             value=datum[3], #filter z
                                             source_name=self.name,
                                             source_location='WSDB',  # e.g. alerts url
                                             error=datum[7],
-                                            filter='PS1(z)',
+                                            filter='DECAPS(z)',
                                             observer=self.__OBSERVER_NAME,
                                             facility=self.__FACILITY_NAME)
 
                     reduced_datums.append(reduced_datum_z)
 
-
             with transaction.atomic():
                 new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))
                 lightcurveupdatereport = LightcurveUpdateReport(new_points=new_points)
-                self.logger.info(f"PS1 Broker returned {new_points} points for {target.name}")
+                self.logger.info(f"DECAPS Broker returned {new_points} points for {target.name}")
         except Exception as e:
             self.logger.error(f'Error while saving reduced datapoints for {target.name}: {e}')
         

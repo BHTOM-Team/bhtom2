@@ -1,0 +1,106 @@
+{% load targets_extras %}
+
+<div class="text" style="font-family: 'Montserrat', sans-serif">
+    <h1>Microlensing model for <b style="color:#1b6d85">{{ target|safe }}</b></h1>
+      <p style="font-size: small; text-align: justify">Gravitational microlensing model using MulensModel (Poleski&Yee 2018)</p>
+      <hr>
+  </div>
+  <div class="light-curve" style="font-family: 'Montserrat', sans-serif">
+      <p style="color: #ba2121">{{ error_message|safe }}</p>
+
+      <p>Fit initial values:</p>
+      <form method="get">
+      <label for="init_t0">t0:</label>
+      <input type="text" name="init_t0" id="init_t0" value="{{ init_t0|floatformat:6 }}" size="14">
+      <label for="init_te">tE:</label>
+      <input type="text" name="init_te" id="init_te" value="{{ init_te|floatformat:5 }}" size="8">
+      <label for="init_u0">u0:</label>
+      <input type="text" name="init_u0" id="init_u0" value="{{ init_u0|floatformat:6 }}" size="8">
+
+      <label for="logu0">logu0:</label>
+      <input type="checkbox" name="logu0" {% if logu0 %}checked{% endif %}>
+
+      <label for="fixblending" style="color: rgb(191, 0, 0);">fixblending:</label>
+      <input type="hidden" name="fixblending" value="off">
+      <input type="checkbox" id="fixblending" name="fixblending" {% if fixblending %}checked{% endif %}>
+      
+      <br>
+      <label for="auto_init" style="color: rgb(0, 255, 13);">auto_init:</label>
+      <input type="checkbox" name="auto_init"  {% if auto_init %}checked{% endif %}>
+      
+        <p> 
+          <label>Available filters and number of datapoints:</label>
+          <br><br>
+          
+          <button type="button" onclick="selectAll()">Select All</button>
+          <button type="button" onclick="deselectAll()">Deselect All</button>
+          <br>
+          {% for filter, checked in sel.items %}
+              {% with counts=filter_counts|default:""|get_item:filter %}
+                  <input type="checkbox" name="selected_filters" value="{{ filter }}" {% if checked %}checked{% endif %}> {{ filter }} {{ counts }}
+                  <br>
+              {% endwith %}
+          {% endfor %}
+          
+          <script>
+          function selectAll() {
+            var inputs = document.getElementsByName("selected_filters");
+            for (var i = 0; i < inputs.length; i++) {
+              inputs[i].checked = true;
+            }
+          }
+          
+          function deselectAll() {
+            var inputs = document.getElementsByName("selected_filters");
+            for (var i = 0; i < inputs.length; i++) {
+              inputs[i].checked = false;
+            }
+          }
+          </script>
+    
+          <br>
+          <input type="submit" style="color: whitesmoke; background: #1b6d85; border: none; border-radius: 5px;padding: 10px" value="MODEL">
+        </form>
+        
+        <hr>
+        <div class="plot-container">
+            {{ plot_div|safe }}
+        </div>
+        
+        <hr>
+        <h4>Fitted parameters<span style="position: absolute; right: 2rem"></span></h4>
+        <p><span style="left: 2rem">{{ fit_msg|safe }}</span></p>
+        <p><span style="left: 2rem">{{ fit_chi|safe }}</span></p>
+
+        <table>
+            <thead>
+              <tr>
+                <th>Filter</th>
+                <th>Mag0</th>
+                <th>FS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for filter in mag0_dict.keys %}
+                <tr>
+                  <td>{{ filter }}</td>
+                  <td>{{ mag0_dict|get_item:filter }}</td>
+                  <td>{{ fs_dict|get_item:filter }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          
+      <hr>
+      <hr>
+      <h4>Fitted light curve<span style="position: absolute; right: 2rem"></span></h4>
+
+      <img src="data:image/png;base64,{{ image|safe }}" alt="Microlensing model">
+        
+      <hr>
+      <p style="font-size: small">{{ executionTime|safe }}</p>
+  </div>
+  <div style="font-family: 'Montserrat', sans-serif; color:#d9dfc1">
+      <hr>
+      <p>Created by Kacper Raciborski/Lukasz Wyrzykowski 2022-2023, University of Warsaw.</p>
+  </div>

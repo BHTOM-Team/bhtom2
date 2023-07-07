@@ -7,8 +7,17 @@ For customization instructions, see bhtom_common/base.html
 <li class="nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
     <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
 </li>
-<li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
-    <a class="nav-link" href="{% url 'targets:list' %}">Targets</a>
+<li class="nav-item dropdown {% if 'targets' in request.resolver_match.url_name %}active{% endif %}">
+    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Targets
+    </a>
+    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item" href="{% url 'targets:list' %}">List</a>
+        <a class="dropdown-item" href="{% url 'images' %}">Visual list</a>
+        <a class="dropdown-item" href="{% url 'targets:create' %}">Create</a>
+        <a class="dropdown-item" href="{% url 'targets:import' %}">Import</a>
+        <a class="dropdown-item" href="{% url 'bhtom2.bhtom_catalogs:query' %}">Catalog Search</a>
+    </div>
 </li>
 <li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
     <a class="nav-link" href="{% url 'targets:targetgrouping' %}">Target Grouping</a>

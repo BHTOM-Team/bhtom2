@@ -2,9 +2,9 @@ from django.urls import path
 from bhtom2.views import TargetListView
 
 from bhtom_base.bhtom_targets.api_views import TargetExtraViewSet, TargetNameViewSet, TargetViewSet
-from bhtom_base.bhtom_targets.views import TargetAddRemoveGroupingView, TargetDeleteView, TargetDetailView, TargetExportView, TargetGroupingCreateView, TargetGroupingDeleteView, TargetGroupingView, TargetImportView, TargetNameSearchView
+from bhtom_base.bhtom_targets.views import TargetAddRemoveGroupingView, TargetDeleteView, TargetDetailView, TargetExportView, TargetGroupingCreateView, TargetGroupingDeleteView, TargetGroupingView, TargetNameSearchView
 
-from .views import TargetCreateView, TargetUpdateView, TargetGenerateTargetDescriptionLatexView
+from .views import TargetCreateView, TargetUpdateView, TargetGenerateTargetDescriptionLatexView, TargetImportView
 
 from bhtom_base.bhtom_common.api_router import SharedAPIRootRouter
 

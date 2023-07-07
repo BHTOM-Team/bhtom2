@@ -5,7 +5,7 @@ from bhtom_base.bhtom_targets.models import Target, TargetExtra
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
 from numpy import around
-from astropy.coordinates import get_sun, SkyCoord
+from astropy.coordinates import get_sun
 from datetime import datetime
 from astropy.time import Time
 from astroquery.gaia import Gaia
@@ -63,12 +63,66 @@ def update_sun_distance(target: Target, time_to_compute=None):
     sun_pos = get_sun(tt)
     obj_pos = SkyCoord(target.ra, target.dec, unit=u.deg)
     Sun_sep = around(sun_pos.separation(obj_pos).deg,0)
-    TargetExtra.objects.update_or_create(target=target,
+    te, _ = TargetExtra.objects.update_or_create(target=target,
         key='sun_separation',
         defaults={'value': Sun_sep})
+    te.save()
 
     return target
 
+def update_phot_class(target: Target):
+    """
+    Sends a request to photometric classifier (Gezer et al. 2021),
+    which uses archival photometric data to classify the target,
+    and returns the string with the best classification.
+    """
+    import requests
+    import json
+
+    result = "-"
+    try:
+        # api-endpoint
+        url = "https://photometric-classifier.herokuapp.com/classify"
+        # defining a params dict for the parameters to be sent to the API
+        obj_pos = SkyCoord(target.ra, target.dec, unit=u.deg)
+
+        ra=float(obj_pos.ra.to_string(decimal=True))
+        dec=float(obj_pos.dec.to_string(decimal=True))
+
+        payload = { "coordinates": [[ra,dec]] }
+
+        r = requests.post(url, data=json.dumps(payload))
+
+        data = r.json()
+#        print(data['payload']['results'][0])
+        pred = data['payload']['results'][0]['predictions']
+#        print(len(pred))
+        if len(pred)==0: 
+#            print("NO RESULT")
+            result = "--"
+        else:
+            #finding the best one
+            best=data['payload']['results'][0]['best_class']
+            arr=data['payload']['results'][0]['predictions']
+            for element in arr:
+                if element[0] == best:
+                    best_value = element[1]
+                    break
+
+            #print(best, '{:.1%}'.format(best_value))
+            result = best+' {:.1%}'.format(best_value)
+            print("Phot.class success: ",result)
+    except:
+        pass
+    
+    te, _ = TargetExtra.objects.update_or_create(target=target,
+        key='phot_class',
+        defaults={'value': result})
+
+    te.save()
+
+    return target
+    
 # computes priority based on dt 
 # if observed within the cadence, then returns just the pure target priority
 # if not, then priority increases

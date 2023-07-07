@@ -90,7 +90,7 @@ class FIRSTBroker(BHTOMBroker):
             # Data could be a dict or pandas table as well
             reduced_datums = []
             for datum in data:
-                timestamp = Time(datum[0], format="jd").to_datetime(timezone=TimezoneInfo())
+                timestamp = Time(datum[0], format="jd", scale="utc").to_datetime(timezone=TimezoneInfo())
                 mjd = Time(datum[0], format="jd").mjd
                 
                 reduced_datum = ReducedDatum(target=target,

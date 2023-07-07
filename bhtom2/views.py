@@ -6,9 +6,11 @@ from astropy.coordinates import get_sun, SkyCoord
 from astropy.time import Time
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic import View
+from bhtom2 import settings
 from bhtom2.utils.openai_utils import latex_text_target
 from django_filters.views import FilterView
 from django_tables2.views import SingleTableMixin
+from django.views.generic.detail import DetailView
 from guardian.mixins import PermissionListMixin
 from numpy import around
 
@@ -22,6 +24,8 @@ from bhtom_base.bhtom_alerts.alerts import get_service_classes
 from bhtom_base.bhtom_alerts.models import BrokerQuery
 from bhtom_base.bhtom_alerts.views import BrokerQueryFilter
 from bhtom_base.bhtom_targets.models import Target, TargetExtra, TargetList
+from bhtom_base.bhtom_dataproducts.models import  ReducedDatum
+
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[BHTOM2 views]')
 
@@ -60,7 +64,10 @@ class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
         import os
         from django.http import FileResponse
 
-        target_id: int = kwargs.get('pk', None)
+        if 'pk' in kwargs:
+            target_id = kwargs['pk']
+        elif 'name' in kwargs:
+            target_id = kwargs['name']
         logger.info(f'Generating photometry CSV file for target with id={target_id}...')
 
         tmp = None
@@ -113,6 +120,8 @@ class TargetListView(SingleTableMixin, PermissionListMixin, FilterView):
                                 if self.request.user.is_authenticated
                                 else TargetList.objects.none())
         context['query_string'] = self.request.META['QUERY_STRING']
+
+        context['target_count'] = context['object_list'].count
 
         mjd_now = Time(datetime.utcnow()).mjd
 
@@ -203,5 +212,100 @@ class TargetListImagesView(SingleTableMixin, PermissionListMixin, FilterView):
                                 if self.request.user.is_authenticated
                                 else TargetList.objects.none())
         context['query_string'] = self.request.META['QUERY_STRING']
+
+        context['target_count'] = context['object_list'].count
+
         return context
+
+
+class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
+    model = Target
+    permission_required = 'bhtom_targets.view_target'
+
+    def get(self, request, *args, **kwargs):
+        target_id = kwargs.get('pk', None)
+        if isinstance(target_id, int):
+            target: Target = Target.objects.get(pk=target_id)
+        else:
+            target: Target = Target.objects.get(name=target_id)
+
+
+        datums = ReducedDatum.objects.filter(target=target,
+                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
+                                             )
+
+        allobs = []
+        allobs_nowise = []
+        for datum in datums:
+            if str(datum.filter) == "WISE(W1)" or str(datum.filter) == "WISE(W2)":
+#                allobs.append(str("WISE"))
+                allobs.append(str(datum.filter))
+                continue
+            else:
+                allobs_nowise.append(str(datum.filter))
+                allobs.append(str(datum.filter))
+
+        #counting the number of entires per filter in order to remove the very short ones
+        filter_counts = {}
+        for obs in allobs:
+            if obs in filter_counts:
+                filter_counts[obs] += 1
+            else:
+                filter_counts[obs] = 1
+
+        # Create a new list that only includes filters with at least three occurrences
+        allobs_filtered = []
+        for obs in allobs_nowise:
+            if filter_counts[obs] > 2:
+                allobs_filtered.append(obs)
+                
+        #extracting uniq list and sort it alphabetically
+        all_filters = sorted(set(allobs))
+        #this will move the WISE to the end of the list, if present
+        if 'WISE(W1)' in all_filters:
+            all_filters.remove('WISE(W1)')
+            all_filters.append('WISE(W1)')
+        if 'WISE(W2)' in all_filters:
+            all_filters.remove('WISE(W2)')
+            all_filters.append('WISE(W2)')
+
+        all_filters_nowise = sorted(set(allobs_filtered)) #no wise and no short filters
+
+        #for form values:
+        if request.method == 'GET':
+            init_t0 = request.GET.get('init_t0', '')
+            init_te = request.GET.get('init_te', '')
+            init_u0 = request.GET.get('init_u0', '')
+            logu0 = request.GET.get('logu0', '')
+            fixblending = request.GET.get('fixblending', 'on')
+            auto_init = request.GET.get('auto_init', '')
+            selected_filters = request.GET.getlist('selected_filters')
+        else:
+            selected_filters = all_filters_nowise #by default, selecting all filters but wise
+
+
+        if len(selected_filters) == 0:
+            selected_filters = all_filters_nowise #by default, selecting all filters but wise
+
+        sel = {}
+        for f in all_filters:
+            if f in selected_filters:
+                sel[f] = True
+            else:
+                sel[f] = False
+
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
+        context['selected_filters'] = selected_filters
+        context['sel'] = sel
+        context.update({
+        'init_t0': init_t0,
+        'init_te': init_te,
+        'init_u0': init_u0,
+        'logu0': logu0,
+        'fixblending': fixblending,
+        'auto_init': auto_init,
+        'filter_counts': filter_counts
+        })
+        return self.render_to_response(context)
 

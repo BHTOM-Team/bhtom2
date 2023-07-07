@@ -72,7 +72,7 @@ class ALLWISEBroker(BHTOMBroker):
         
         try:
             res_str: str = query_external_service(query, 'ALLWISE')
-        except IndexError:
+        except Exception:
             self.logger.warning(f'Warning: ALLWISE server down or error in connecting - no response for {target.name}')
             return return_for_no_new_points()
 
@@ -91,7 +91,7 @@ class ALLWISEBroker(BHTOMBroker):
             # Data could be a dict or pandas table as well
             reduced_datums = []
             for _, datum in df.iterrows():
-                timestamp = Time(datum.mjd, format="mjd").to_datetime(timezone=TimezoneInfo())
+                timestamp = Time(datum.mjd, format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
                 if (not np.isnan(datum.w1mpro) and not np.isnan(datum.w1sigmpro)):
                     reduced_datum_w1 = ReducedDatum(target=target,
                                            data_type='photometry',

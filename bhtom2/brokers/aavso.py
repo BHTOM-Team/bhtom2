@@ -21,8 +21,6 @@ logger: BHTOMLogger = BHTOMLogger(__name__, '[AAVSO data fetch]')
 
 DATA_SOURCE: DataSource = DataSource.AAVSO
 
-timezone_info: TimezoneInfo = TimezoneInfo()
-
 
 class AAVSOBroker(BHTOMBroker):
     name = DataSource.AAVSO.name
@@ -59,9 +57,12 @@ class AAVSOBroker(BHTOMBroker):
 #LW: this checks for alias name among names, but we get key violation if the same name is used
 #that's why I'm moving the aavso name to extras
 #        aavso_name: Optional[str] = self.get_target_name(target)
+        aavso_name = ""
 
-        aavso_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.AAVSO])
-
+        try:
+            aavso_name: Optional[str] = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.AAVSO])
+        except:
+            pass
         if not aavso_name:
             self.logger.debug(f'No AAVSO name for {target.name}')
             return return_for_no_new_points()

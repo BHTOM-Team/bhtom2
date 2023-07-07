@@ -126,7 +126,7 @@ class GaiaBroker(BHTOMBroker):
         try:
             reduced_datums = [ReducedDatum(target=target,
                                            data_type='photometry',
-                                           timestamp=Time(datum['time_bjd'], format='mjd').to_datetime(timezone=TimezoneInfo()),
+                                           timestamp=Time(datum['time_bjd'], format='mjd', scale="utc").to_datetime(timezone=TimezoneInfo()),
                                            mjd=datum['time_bjd'],
                                            value=datum['mag'],
                                            source_name=self.name,

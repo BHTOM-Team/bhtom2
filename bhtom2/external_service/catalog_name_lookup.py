@@ -8,11 +8,12 @@ import astropy.units as u
 from astropy.coordinates import ICRS, SkyCoord
 from astropy.time import Time
 from astroquery.gaia import Gaia
+from bhtom2.brokers import gaia_alerts
 from bhtom2.brokers.gaia import GaiaBroker
 
 
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
-from bhtom2.harvesters.gaia_alerts import cone_search
+from bhtom2.harvesters import tns
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_targets.models import Target
 
@@ -135,17 +136,18 @@ TNS_OBJECT_URL_SLUG: str = "object"
 
 
 def query_all_services(target: Target) -> Dict[DataSource, str]:
+    tns_result: Dict[DataSource, str] = query_tns_for_names(target)
     alerce_result: Dict[DataSource, str] = query_antares_for_names(target)
     simbad_result: Dict[DataSource, str] = query_simbad_for_names(target)
     gaia_alerts_result: Dict[DataSource, str] = query_gaia_alerts_for_name(target)
     gaiadr3_result: Dict[DataSource, str] = query_gaia_dr3_for_name(target)
-    return {**alerce_result, **simbad_result, **gaia_alerts_result, **gaiadr3_result}
+    return {**alerce_result, **simbad_result, **gaia_alerts_result, **gaiadr3_result, **tns_result}
 
 def query_antares_for_names(target: Target) -> Dict[DataSource, str]:
     try:
         coordinates: SkyCoord = SkyCoord(ra=target.ra, dec=target.dec, unit="deg")
         radius: Angle = Angle(1, unit="arcsec")
-
+   
         target: Optional[Any] = None
         result_dict: Dict[str] = {}
 
@@ -200,8 +202,9 @@ def query_simbad_for_names(target: Target) -> Dict[str, str]:
 
 #searches Gaia DR3 for name using coordinates TODO: should we move this to GaiaBroker? Same for other searches?
 def query_gaia_dr3_for_name(target: Target) -> Dict[DataSource, str]:
-    coord = SkyCoord(ra=target.ra * u.degree,
-                        dec=target.dec * u.degree,
+
+    coord = SkyCoord(ra=target.ra,
+                        dec=target.dec, unit=u.deg,
                         frame=ICRS)
 
     try:
@@ -230,7 +233,7 @@ def query_gaia_alerts_for_name(target: Target) -> Dict[DataSource,str]:
 #        target: Optional[Any] = None
 
         #returns pd.DataFrame
-        result = cone_search(coordinates, radius)
+        result = gaia_alerts.cone_search(coordinates, radius)
         name=''
 #        if (result is not None):
         if ( result.empty==False ):
@@ -243,6 +246,28 @@ def query_gaia_alerts_for_name(target: Target) -> Dict[DataSource,str]:
     except Exception as e:
         logger.error(f'Exception when querying Gaia Alerts for target {target.name}: {e}')
         return {}
+
+def query_tns_for_names(target: Target) -> Dict[DataSource,str]:
+    coordinates: SkyCoord = SkyCoord(ra=target.ra, dec=target.dec, unit="deg")
+    radius: Angle = Angle(3, unit="arcsec")
+    
+    try:
+#        target: Optional[Any] = None
+
+        #returns pd.DataFrame
+        result = tns.cone_search(coordinates, radius)
+        name=''
+        if ( len(result) != 0 ):
+            name = result
+            logger.info(f'Found TNS name...{name}')
+            return {
+                    DataSource.TNS: name,
+                }
+        return {} #if nothing found, returns empty dictionary
+    except Exception as e:
+        logger.error(f'Exception when querying TNSfor target {target.name}: {e}')
+        return {}
+    
 
 def tns_id_to_url_slug(tns_id: str) -> str:
     import re

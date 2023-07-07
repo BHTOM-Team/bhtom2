@@ -43,7 +43,7 @@
 
     <button id="add-alias-form" class="btn btn-secondary">Add new alias</button>
 </div>
-<h3>Tags</h3>
+<!-- <h3>Tags</h3> -->
 {% bootstrap_formset extra_form %}
 {% buttons %}
     {% if not object %}
@@ -56,8 +56,11 @@
         <a href="{% url 'targets:detail' pk=object.id %}" class="btn btn-primary" title="Back">Back</a>
     {% endif %}
 {% endbuttons %}
+
+
 </form>
 {% endblock %}
+
 {% block extra_javascript %}
     <script type="text/JavaScript" src="{% static 'bhtom_targets/js/add_alias_formset.js' %}"></script>
 {% endblock %}

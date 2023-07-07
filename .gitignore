@@ -170,3 +170,5 @@ __pycache__/
 */cache
 *.pyc
 **/*.pyc
+.DS_Store
+bhtom2/.DS_Store

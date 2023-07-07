@@ -4,6 +4,7 @@ import pandas as pd
 from io import StringIO
 import requests
 from bhtom2.external_service.external_service_request import query_external_service
+from bhtom2.utils.bhtom_logger import BHTOMLogger
 import numpy as np
 from django import forms
 from django.db import transaction
@@ -16,26 +17,28 @@ from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
 from bhtom_base.bhtom_dataproducts.models import DatumValue, ReducedDatumUnit
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 
-from bhtom_base.bhtom_targets.models import  TargetExtra
+from bhtom_base.bhtom_targets.models import  TargetExtra, TargetName
 
-class CRTSBrokerQueryForm(GenericQueryForm):
+import io
+
+class ASASSNBrokerQueryForm(GenericQueryForm):
     target_name = forms.CharField(required=False)
 
     def clean(self):
         super().clean()
 
 
-class CRTSBroker(BHTOMBroker):
-    name = "CRTS"
+class ASASSNBroker(BHTOMBroker):
+    name = "ASASSN"
 
-    form = CRTSBrokerQueryForm
+    form = ASASSNBrokerQueryForm
 
     def __init__(self):
-        super().__init__(DataSource.CRTS)  # Add the DataSource here
+        super().__init__(DataSource.ASASSN)  # Add the DataSource here
 
         # If the survey is e.g. a space survey, fill the facility and observer names in and treat is as a constant
-        self.__FACILITY_NAME: str = "CRTS"
-        self.__OBSERVER_NAME: str = "CRTS"
+        self.__FACILITY_NAME: str = "ASASSN"
+        self.__OBSERVER_NAME: str = "ASASSN"
 
         self.__target_name_key: str = TARGET_NAME_KEYS.get(self.data_source, self.data_source.name)
 
@@ -65,75 +68,77 @@ class CRTSBroker(BHTOMBroker):
         # We are going to probably obtain some response from an API call or using a python package
         #response: str = ''
 
-        RadiusCRTS = str(0.1) #in arcmin
-        ra_str = str(target.ra)
-        dec_str = str(target.dec)
-        # search radius = 0.003 deg, ~10 arcsec, for testing 
-        query = "http://nunuku.caltech.edu/cgi-bin/getcssconedb_release_img.cgi?RA="+ra_str+"&Dec="+dec_str+"&Rad="+RadiusCRTS+"&DB=photcat&OUT=web&SHORT=short”"
-        # res = requests.get(query)._content
-        # res_str = res.decode()
+        # RadiusASASSN = str(0.1) #in arcmin
+        # ra_str = str(target.ra)
+        # dec_str = str(target.dec)
+        # # search radius = 0.003 deg, ~10 arcsec, for testing 
+        # query = "http://nunuku.caltech.edu/cgi-bin/getcssconedb_release_img.cgi?RA="+ra_str+"&Dec="+dec_str+"&Rad="+RadiusASASSN+"&DB=photcat&OUT=web&SHORT=short”"
+        # # res = requests.get(query)._content
+        # # res_str = res.decode()
 
-        hasName = ""
+        asassn_name = ""
         try:
-            hasName = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.CRTS]).value
+            asassn_name = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.ASASSN]).value            
         except:
-            hasName = ""
-        
-        #extracts the data only if there is no CRTS name
-        if (hasName!="" and self.__update_cadence == None):
-            self.logger.debug(f'CRTS data already downloaded. Skipping. {target.name}')
-            return return_for_no_new_points()
+            try:
+                asassn_name = TargetName.objects.get(target=target, source_name=DataSource.ASASSN.name).name
+            except:
+                asassn_name = ""
+                self.logger.warning(f'no ASASSN name for {target.name}')
+                return return_for_no_new_points()
+            
+    
 
         #downloading data only if not done before
-        try:        
-            res_str: str = query_external_service(query, 'CRTS')
-#            res_tab = res_str.split("null|\n",1)[1]
-        except Exception:
-                # Empty response or error in connection
-            self.logger.warning(f'Warning: CRTS server down or error in connecting - no response for {target.name}')
+        #it will read page e.g.: https://asas-sn.osu.edu/sky-patrol/coordinate/9078bdcd-86ee-4029-8b7d-b7563ed5d740/export.csv
+        #so only 9078bdcd-86ee-4029-8b7d-b7563ed5d740 is needed in name
+        
+        if asassn_name.startswith("https://asas-sn.osu.edu/sky-patrol/coordinate/"):
+            asassn_name= asassn_name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
+
+        url = "https://asas-sn.osu.edu/sky-patrol/coordinate/" + asassn_name + "/export.csv"
+
+        try:
+            response = requests.get(url)
+            content = response.content.decode('utf-8')
+
+            df = pd.read_csv(io.StringIO(content), header=0)
+            # remove rows where mag_err >= 1
+            df = df[df['mag_err'] < 1]
+
+            if len(df) < 1:
+                self.logger.error('[ASAS-SN PHOTOMETRY] Empty table!')
+                return return_for_no_new_points()
+        
+        except Exception as e:
+            # Empty response or error in connection
+            self.logger.warning(f'ASASSN returned no observations for {target.name}')
+            print("ASASSN error: ",e)
             return return_for_no_new_points()
-
+        
         try:
-            df = pd.read_html(StringIO(res_str), match='Photometry of Objs')
-            df = df[0]
-            #setting CRTS name when data found
-            inventName: Optional[str] = "CRTS+J"+ra_str+"_"+dec_str
-            TargetExtra.objects.update_or_create(target=target,
-                                            key=TARGET_NAME_KEYS[DataSource.CRTS],
-                                            defaults={
-                                                'value': inventName
-                                            })
-            self.logger.info(f"CRTS data found for {target.name}. Downloaded and stored as {inventName}")
-            
-        except Exception:
-           # Response not empty, but there is no data - no Coverage
-           self.logger.warning(f'Warning: CRTS returned no observations (no coverage) for {target.name}')
-           return return_for_no_new_points()
-
-        try:
-            # Change the fields accordingly to the data format
-            # Data could be a dict or pandas table as well
             reduced_datums = []
             for _, datum in df.iterrows():
-                timestamp = Time(datum.MJD, format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                mjd = datum.HJD-2400000.5
+                timestamp = Time(datum.HJD, format="jd", scale="utc").to_datetime(timezone=TimezoneInfo())
                 reduced_datum = ReducedDatum(target=target,
                                            data_type='photometry',
                                            timestamp=timestamp,
-                                           mjd=datum.MJD,
-                                           value=datum.Mag,
+                                           mjd=mjd,
+                                           value=datum.mag,
                                            source_name=self.name,
-                                           source_location='Caltech',  # e.g. alerts url
-                                           error=datum.Magerr,
-                                           filter='CRTS(CL)',
+                                           source_location='https://asas-sn.osu.edu',  # e.g. alerts url
+                                           error=datum.mag_err,
+                                           filter = "ASASSN(" + datum.Filter + ")",
                                            observer=self.__OBSERVER_NAME,
-                                           facility=self.__FACILITY_NAME,
+                                           facility=datum.Camera,
                                            value_unit = ReducedDatumUnit.MAGNITUDE)
                                            
                 reduced_datums.extend([reduced_datum])
 
             with transaction.atomic():
                 new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))
-                self.logger.info(f"Catalina Broker returned {new_points} points for {target.name}")
+                self.logger.info(f"ASASSN Broker returned {new_points} points for {target.name}")
 
         except Exception as e:
             self.logger.error(f'Error while saving reduced datapoints for {target.name}: {e}')
@@ -143,4 +148,4 @@ class CRTSBroker(BHTOMBroker):
 
 #returns a Latex String with citation needed when using data from this broker
 def getCitation():
-    return "CITATION TO CRTS and acknowledgment."
+    return "CITATION TO ASASSN and acknowledgment."

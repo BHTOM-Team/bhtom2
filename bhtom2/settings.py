@@ -265,6 +265,7 @@ TOM_ALERT_CLASSES = [
     'bhtom_base.bhtom_alerts.brokers.tns.TNSBroker',
     'bhtom_base.bhtom_alerts.brokers.fink.FinkBroker',
     'bhtom2.brokers.gaia_alerts.GaiaAlertsBroker',
+    'bhtom2.brokers.cpcs.CPCSBroker',
     'bhtom2.brokers.aavso.AAVSOBroker',
     'bhtom2.brokers.ztf.ZTFBroker',
     'bhtom2.brokers.gaia.GaiaBroker',
@@ -274,8 +275,11 @@ TOM_ALERT_CLASSES = [
     'bhtom2.brokers.linear.LINEARBroker',
     'bhtom2.brokers.first.FIRSTBroker',
     'bhtom2.brokers.ps1.PS1Broker',
-    'bhtom2.brokers.allwise.ALLWISEBroker'
+    'bhtom2.brokers.allwise.ALLWISEBroker',
     # 'bhtom2.brokers.antares.ANTARESBroker',
+    'bhtom2.brokers.decaps.DECAPSBroker',
+    'bhtom2.brokers.asassn.ASASSNBroker',
+    'bhtom2.brokers.ogleews.OGLEEWSBroker',
 ]
 
 BROKERS = {
@@ -326,13 +330,16 @@ EXTRA_FIELDS = [
     {'name': 'sun_separation', 'type': 'number'},
     {'name': 'creation_date', 'type': 'datetime'},
     {'name': 'constellation', 'type': 'string'},
-    {'name': 'dont_update_me', 'type': 'boolean'}]#, 'hidden': True}]
+    {'name': 'dont_update_me', 'type': 'boolean'},#, 'hidden': True}]
+    {'name': 'phot_class', 'type': 'string'} #classification from photometric classifier, automated
+    ]
+
 
 CREATE_TARGET_HIDDEN_EXTRA_FIELDS = [
     'sun_separation', 'dont_update_me', 
     'mjd_last', 'mag_last', 'priority',
     'pm_ra', 'pm_dec', 'galactic_lat', 'galactic_lng', 'distance', 'distance_err',
-    'constellation'
+    'constellation', 'phot_class'
 ]
 
 CREATE_TARGET_HIDDEN_FIELDS = [

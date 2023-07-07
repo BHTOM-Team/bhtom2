@@ -21,6 +21,8 @@ from bhtom_base.bhtom_targets.models import Target
 
 from numpy import around 
 
+from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_stats
+
 register = template.Library()
 
 
@@ -36,6 +38,30 @@ def recent_photometry(target, limit=1):
                       'facility': rd.facility} for rd in photometry
                      if rd.value_unit == ReducedDatumUnit.MAGNITUDE]}
 
+
+@register.inclusion_tag('bhtom_dataproducts/partials/photometry_stats.html')
+def photometry_stats(target):
+    import pandas as pd
+
+    """
+    Displays a table of the the photometric data stats for a target.
+    """
+    stats,columns = get_photometry_stats(target)
+    sort_by='Facility'    
+    sort_by_asc=True
+    df: pd.DataFrame = pd.DataFrame(data=stats,
+                                    columns=columns).sort_values(by=sort_by, ascending=sort_by_asc)
+
+    data_list = []
+    for index, row in df.iterrows():
+        data_dict = {'Facility': row['Facility'],
+                    'Filters': row['Filters'],
+                    'Data_points': row['Data_points'],
+                    'Min_MJD': row['Earliest_time'],
+                    'Max_MJD': row['Latest_time']}
+        data_list.append(data_dict)
+
+    return {'data': data_list}
 
 @register.inclusion_tag('bhtom_dataproducts/partials/dataproduct_list_for_target.html', takes_context=True)
 def dataproduct_list_for_target(context, target):
@@ -135,10 +161,16 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
     :type grid: bool
     """
 
+    #the same as for icon/visual list:
     color_map = {
-        'r': 'red',
-        'g': 'green',
-        'i': 'black'
+        'GSA(G)': ['black','circle',10],
+        'ZTF(zg)': ['green','cross',4],
+        'ZTF(zi)': ['#800000','cross',4],
+        'ZTF(zr)': ['red','cross',4],
+        'WISE(W1)': ['#FFCC00', 'x',2],
+        'WISE(W2)': ['blue', 'x', 2],
+        'CRTS(CL)': ['#FF1493', 'diamond', 4],
+        'LINEAR(CL)': ['teal', 'diamond', 4],
     }
 
     photometry_data = {}
@@ -181,6 +213,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
             photometry_data[datum.filter].setdefault('time', []).append(datum.timestamp)
             photometry_data[datum.filter].setdefault('magnitude', []).append(around(datum.value,3))
             photometry_data[datum.filter].setdefault('error', []).append(around(datum.error,3))
+            photometry_data[datum.filter].setdefault('facility', []).append(datum.facility)
 
             magnitude_min = (datum.value+datum.error) if (datum.value+datum.error) > magnitude_min else magnitude_min
             magnitude_max = (datum.value-datum.error) if (datum.value-datum.error) < magnitude_max else magnitude_max
@@ -204,14 +237,17 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
     radio_range = radio_max-radio_min
 
     try:
-        magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
+#        magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
         magnitude_range = 10
     except:
         magnitude_dtick_digit = 1
         radio_range = 10
     
     try:
-        radio_dtick_digit = (round(np.log10(radio_range)) - 1)
+        if (radio_range>0):
+            radio_dtick_digit = (round(np.log10(radio_range)) - 1)
+        else:
+                    radio_dtick_digit = 1
     except:
         radio_dtick_digit = 1
 
@@ -232,14 +268,19 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
-                marker=dict(color=color_map.get(filter_name)),
+                marker=dict(
+                    color=color_map.get(filter_name, ['gray', 'circle', 6])[0], #default ['gray', 'circle', 6]
+                    symbol=color_map.get(filter_name, ['gray', 'circle', 6])[1],
+                    size=color_map.get(filter_name, ['gray', 'circle', 6])[2]
+                    ),
                 name=filter_name,
                 error_y=dict(
                     type='data',
                     array=filter_values['error'],
                     visible=True
                 ),
-                text=mjds_to_plot[filter_name],
+                text=mjds_to_plot[filter_name], 
+                customdata=filter_values['facility'],
 #                customdata = filter_values['error'],
             # hovertemplate='<br>'.join([
             # "%{x}",
@@ -248,7 +289,8 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
             # ]),
             hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
                 <br>MJD= %{text:.6f}\
-            <br>mag= %{y:.3f}&#177;%{error_y.array:3f}'
+            <br>mag= %{y:.3f}&#177;%{error_y.array:3f}\
+            <br>%{customdata}'
             )     
             plot_data.append(series)
         elif filter_values.get('limit'):  #limit in MAG
@@ -257,7 +299,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 y=filter_values['limit'],
                 mode='markers',
                 opacity=0.5,
-                marker=dict(color=color_map.get(filter_name), symbol=6),  # upside down triangle
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol=6),  # upside down triangle
                 name=filter_name+" limit",
                 text=mjds_lim_to_plot[filter_name],
                 hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
@@ -282,7 +324,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
-                marker=dict(color=color_map.get(filter_name), symbol='diamond', line_color='black', line_width=2),
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol='diamond', line_color='black', line_width=2),
                 name=filter_name,
                 error_y=dict(
                     type='data',
@@ -303,7 +345,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 y=filter_values['limit'],
                 mode='markers',
                 opacity=0.5,
-                marker=dict(color=color_map.get(filter_name), symbol='star-triangle-down'),  # star triangle down
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol=6),  # upside down triangle
                 name=filter_name+" limit",
                 text=mjds_radio_lim_to_plot[filter_name],
                 hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
@@ -324,6 +366,16 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
 
     fig.update_layout(
         margin=dict(t= 40, r= 20, b= 40, l= 80),
+        xaxis=dict(
+            autorange=True,
+            title="date",
+            titlefont=dict(
+                color="#1f77b4"
+            ),
+            tickfont=dict(
+                color="#1f77b4"
+            ),
+        ),
         yaxis=dict(
             autorange=False,
             range=[np.ceil(magnitude_min), np.floor(magnitude_max)],
@@ -347,7 +399,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
             ),
             overlaying="y",
             side="right",
-            showgrid=False,
+            showgrid=False,# Turn off the grid for the secondary y-axis
         ),
         legend=dict(
             yanchor="top",
@@ -387,9 +439,14 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
     """
 
     color_map = {
-        'r': 'red',
-        'g': 'green',
-        'i': 'black'
+        'GSA(G)': ['black','circle',10],
+        'ZTF(zg)': ['green','cross',4],
+        'ZTF(zi)': ['#800000','cross',4],
+        'ZTF(zr)': ['red','cross',4],
+        'WISE(W1)': ['#FFCC00', 'x',2],
+        'WISE(W2)': ['blue', 'x', 2],
+        'CRTS(CL)': ['#FF1493', 'diamond', 4],
+        'LINEAR(CL)': ['teal', 'diamond', 4],
     }
 
     photometry_data = {}
@@ -455,14 +512,17 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
     radio_range = radio_max-radio_min
 
     try:
-        magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
+#        magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
         magnitude_range = 10
     except:
         magnitude_dtick_digit = 1
         radio_range = 10
     
     try:
-        radio_dtick_digit = (round(np.log10(radio_range)) - 1)
+        if (radio_range>0):
+            radio_dtick_digit = (round(np.log10(radio_range)) - 1)
+        else:
+            radio_dtick_digit = 1
     except:
         radio_dtick_digit = 1
 
@@ -473,12 +533,18 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
-                marker=dict(color=color_map.get(filter_name)),
+                marker=dict(
+                    color=color_map.get(filter_name, ['gray', 'circle', 6])[0], #default ['gray', 'circle', 6]
+                    symbol=color_map.get(filter_name, ['gray', 'circle', 6])[1],
+                    size=color_map.get(filter_name, ['gray', 'circle', 6])[2]
+                    ),
                 name=filter_name,
                 error_y=dict(
                     type='data',
                     array=filter_values['error'],
-                    visible=True
+                    visible=True,
+                    thickness=1.5,
+                    width=0
                 ),
             )
             plot_data.append(series)
@@ -489,12 +555,12 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
-                marker=dict(color=color_map.get(filter_name), symbol='diamond', line_color='black', line_width=2),
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol='diamond', line_color='black', line_width=2),
                 name=filter_name,
                 error_y=dict(
                     type='data',
                     array=filter_values['error'],
-                    visible=True
+                    visible=True                    
                 ),
                 yaxis="y2"
             )
@@ -505,7 +571,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                 y=filter_values['limit'],
                 mode='markers',
                 opacity=0.5,
-                marker=dict(color=color_map.get(filter_name), symbol=6),  # upside down triangle
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol=6),  # upside down triangle
                 name=filter_name + ' non-detection',
             )
             plot_data.append(series)
@@ -513,48 +579,70 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
     layout = go.Layout(
         height=height,
         width=width,
-        paper_bgcolor=background,
-        plot_bgcolor=background
-
+        # paper_bgcolor=background,
+        # plot_bgcolor=background
+        paper_bgcolor='white',  # Change the background color to white
+        plot_bgcolor='white'  # Change the plot area background color to white
     )
+
     layout.legend.font.color = label_color
     #no legend shown in icon view
-    layout.update(showlegend=False)
+    layout.update(showlegend=True)
     fig = go.Figure(data=plot_data, layout=layout)
     fig.update_layout(
-        title=target.name,
-        margin=dict(t= 40, r= 20, b= 40, l= 80),
-        yaxis=dict(
-            autorange=False,
-            range=[np.ceil(magnitude_min), np.floor(magnitude_max)],
-            title="magnitude",
-            titlefont=dict(
-                color="#1f77b4"
-            ),
-            tickfont=dict(
-                color="#1f77b4"
-            ),
+    title=target.name,
+    margin=dict(t=40, r=20, b=40, l=80),
+    xaxis=dict(
+        autorange=True,
+        title="date",
+        titlefont=dict(
+            color="#1f77b4"
         ),
-        yaxis2=dict(
-            autorange=False,
-            range=[np.floor(radio_min), np.ceil(radio_max)],
-            title="mJy",
-            titlefont=dict(
-                color="black"
-            ),
-            tickfont=dict(
-                color="black"
-            ),
-            overlaying="y",
-            side="right",
-            showgrid=False,
+        tickfont=dict(
+            color="#1f77b4"
         ),
-        legend=dict(
-            yanchor="top",
-            y=0.99,
-            xanchor="right",
-            x=1.35
-        )
+        showgrid=False,  # Do not show grid lines on the x-axis
+        showticklabels=True,
+        ticks="inside",
+        showline=True, linewidth=2, linecolor='#1f77b4'
+    ),
+    yaxis=dict(
+        autorange=False,
+        range=[np.ceil(magnitude_min), np.floor(magnitude_max)],
+        title="magnitude",
+        titlefont=dict(
+            color="#1f77b4"
+        ),
+        tickfont=dict(
+            color="#1f77b4"  # Change the tick color to black
+        ),
+        showgrid=False,  # Do not show grid lines on the y-axis
+        showticklabels=True,  # Show tick labels on the y-axis
+        ticks="inside",   # Place the tick marks inside the plot area
+        showline=True, linewidth=2, linecolor='#1f77b4'
+    ),
+    yaxis2=dict(
+        autorange=False,
+        range=[np.floor(radio_min), np.ceil(radio_max)],
+        title="mJy",
+        titlefont=dict(
+            color="black"
+        ),
+        tickfont=dict(
+            color="black"
+        ),
+        overlaying="y",
+        side="right",
+        showgrid=False,  # Do not show grid lines on the yaxis2
+    ),
+    legend_tracegroupgap=1,
+    legend=dict(
+#        yanchor="top",
+        y=0.5,
+#        xanchor="right",
+        x=1.00,
+#        font=dict(size=8)
+    )
     )
     return {
         'target': target,

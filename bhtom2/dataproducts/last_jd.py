@@ -67,7 +67,15 @@ def get_last(target: Target):
     return_mag = 0
     approxsign=""
 
+    if (len(datums)==0): 
+        return 99, 0, ""
+
     for datum in datums:
+
+        if (datum is None): 
+            print("DATUM is none")
+            continue
+
         photometry_data.setdefault(datum.filter, {})
         # print(datum.filter!="WISE(W1)")
         # mean_color

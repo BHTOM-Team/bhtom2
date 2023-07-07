@@ -14,8 +14,7 @@ import pandas as pd
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Reduced Datum utils]')
 
 
-def get_photometry_data_table(target_id: int) -> Tuple[List[List[str]], List[str]]:
-    target: Target = Target.objects.get(pk=target_id)
+def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str]]:
 
     logger.debug(
         f'Downloading photometry as a table for target {target.name}...')
@@ -38,8 +37,7 @@ def get_photometry_data_table(target_id: int) -> Tuple[List[List[str]], List[str
     return data, columns
 
 
-def get_radio_data_table(target_id: int) -> Tuple[List[List[str]], List[str]]:
-    target: Target = Target.objects.get(pk=target_id)
+def get_radio_data_table(target: Target) -> Tuple[List[List[str]], List[str]]:
 
     logger.debug(
         f'Downloading radio data as a table for target {target.name}...')
@@ -102,20 +100,28 @@ def save_data_to_latex_table(data: List[List[Any]],
     return tmp, filename
 
 
-def save_photometry_data_for_target_to_csv_file(target_id: int) -> Tuple[NamedTemporaryFile, str]:
-    target: Target = Target.objects.get(pk=target_id)
+def save_photometry_data_for_target_to_csv_file(target_id_name) -> Tuple[NamedTemporaryFile, str]:
+    #if target_id is int, this is the id, if str this is name:
+    if isinstance(target_id_name, int):
+        target: Target = Target.objects.get(pk=target_id_name)
+    else:
+        target: Target = Target.objects.get(name=target_id_name)
 
-    data, columns = get_photometry_data_table(target_id)
+    data, columns = get_photometry_data_table(target)
 
     filename: str = "target_%s_photometry.csv" % target.name
 
     return save_data_to_temporary_file(data, columns, filename)
 
 
-def save_radio_data_for_target_to_csv_file(target_id: int) -> Tuple[NamedTemporaryFile, str]:
-    target: Target = Target.objects.get(pk=target_id)
+def save_radio_data_for_target_to_csv_file(target_id_name) -> Tuple[NamedTemporaryFile, str]:
+    #if target_id is int, this is the id, if str this is name:
+    if isinstance(target_id_name, int):
+        target: Target = Target.objects.get(pk=target_id_name)
+    else:
+        target: Target = Target.objects.get(name=target_id_name)
 
-    data, columns = get_radio_data_table(target_id)
+    data, columns = get_radio_data_table(target)
 
     filename: str = "target_%s_radio.csv" % target.name
 

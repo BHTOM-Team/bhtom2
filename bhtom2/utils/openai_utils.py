@@ -54,18 +54,20 @@ def get_response(prompt):
     
     model_engine = "text-davinci-003"
 
+    try:
         # Generate a response
-    completion = openai.Completion.create(
-        engine=model_engine,
-        prompt=prompt,
-        max_tokens=1024,
-        n=1,
-        stop=None,
-        temperature=0.5,
-    )
-
-    # extracting useful part of response
-    response = completion.choices[0].text
+        completion = openai.Completion.create(
+            engine=model_engine,
+            prompt=prompt,
+            max_tokens=1024,
+            n=1,
+            stop=None,
+            temperature=0.7,
+        )
+        # extracting useful part of response
+        response = completion.choices[0].text
+    except:
+        response="  Error in AI..."
 
 #removes first 2x /n which are present in all responses
     return response[2:]
@@ -103,14 +105,17 @@ def latex_text_target_prompt(target:Target):
 #    discdate=target.discovery_date
     discdate=(TargetExtra.objects.get(target=target, key='discovery_date').value)
 
-    prompt_date=f"Rewrite datetime {discdate} UT in Month, day, year format, without time"
-    date=get_response(prompt_date)
+    # prompt_date=f"Rewrite datetime {discdate} UT in Month, day, year format, without time"
+    # date=get_response(prompt_date)
+
 #    print("DATE: ",date)
 #    prompt_hjd=f"Compute full Heliocentric Julian Date (HJD) for date {discdate} and subtract 2450000.0 from the result. Output only subtracted value."
 #    hjd=get_response(prompt_hjd)
     datetime_object = datetime.strptime(discdate, "%Y-%m-%d %H:%M:%S%z")
+    date=datetime_object.strftime('%Y-%m-%d %H:%M')
 
-    print(datetime_object)
+    human_readable_create_date = target.created.strftime('%Y-%m-%d %H:%M')
+
     t_utc = Time(datetime_object, format='datetime', scale='utc')
     # Convert to MJD
     mjd = around(t_utc.mjd,5)
@@ -121,12 +126,14 @@ def latex_text_target_prompt(target:Target):
     prompt1=f"Rephrase and keep LaTeX: \\quad {name}"
     if (tns): prompt1+="({tns} according to the IAU transient name server)"
     prompt1+=f" {name} was discovered by \
-            \\textit{{Gaia}} Science Alerts on {date} (MJD = {mjd}) \
+            \\textit{{Gaia}} Science Alerts (GSA) on {date} (MJD = {mjd}) \
             and was posted on the GSA website \\footnote{{\\href{{http://gsaweb.ast.cam.ac.uk/alerts/alert/{name}/}}{{http://gsaweb.ast.cam.ac.uk/alerts/alert/{name}/}}}}."
     if (aliases): prompt1+=f" Other surveys' names include: {aliases}. "
     prompt1+=f"The event was located at equatorial coordinates RA, Dec(J{epoch})= {ra}, {dec} and galactic coordinates l,b = {gall}, {galb} \
         in constellation {constel}. \
             The finding chart with the event's location on the sky is presented in Figure \\ref{{fig:fchart}}."
+    prompt1+=f"The target was added to BHTOM2\\footnote{{\\url{{https://bhtom.space}}}} \\citep{{BHTOM2}} on {human_readable_create_date} for detailed follow-up observations."
+
 
     return prompt1
 
@@ -140,6 +147,6 @@ def latex_target_title_prompt(target:Target):
     prompt2 = f"Suggest a catchy title about "\
     f" a black hole candidate"\
     f" found with microlensing"\
-    f" named {name}, found in constellation {constel}."
+    f" named {name}, found in the constellation {constel}."
 
     return prompt2

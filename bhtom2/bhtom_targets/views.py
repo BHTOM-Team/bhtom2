@@ -1,3 +1,4 @@
+from io import StringIO
 import logging
 
 from django.conf import settings
@@ -8,8 +9,10 @@ from django.db import transaction
 from django.shortcuts import redirect, render
 from django.views.generic.edit import CreateView, UpdateView
 from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm, TargetLatexDescriptionForm
+from bhtom2.bhtom_targets.utils import import_targets
 from bhtom2.external_service.data_source_information import get_pretty_survey_name
 from bhtom2.utils.openai_utils import latex_target_title_prompt, latex_text_target, latex_text_target_prompt, get_response
+from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_stats_latex
 from bhtom_base.bhtom_common.hooks import run_hook
 from bhtom_base.bhtom_common.mixins import Raise403PermissionRequiredMixin
 from bhtom_base.bhtom_targets.forms import TargetExtraFormset, TargetNamesFormset
@@ -20,10 +23,13 @@ from guardian.shortcuts import get_objects_for_user, get_groups_with_perms
 from django.forms import inlineformset_factory
 from astropy.coordinates import Angle
 from astropy import units as u
-from django.forms import ValidationError
-from django.http import HttpResponseRedirect
+from django.views.generic import View
 
-from django.views.generic.detail import DetailView
+from abc import ABC, abstractmethod
+from django.contrib.auth.mixins import PermissionRequiredMixin
+
+from django.views.generic import  TemplateView, View
+from django.urls import reverse_lazy, reverse
 
 logger = logging.getLogger(__name__)
 
@@ -146,13 +152,22 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         coords_names = check_for_existing_coords(ra, dec, 3./3600., stored)
         if (len(coords_names)!=0):
             ccnames = ' '.join(coords_names)
-            form.add_error(None, f"Source found already at these coordinates: {ccnames}")
+            form.add_error(None, f"Source found already at these coordinates (rad 3 arcsec): {ccnames}")
             return super().form_invalid(form)
 #            raise ValidationError(f'Source found already at these coordinates: {ccnames}')
 
         # Check if the form, extras and names are all valid:
         if extra.is_valid() and names.is_valid() and (not duplicate_names) and (not existing_names):
+#            messages.success(self.request, 'Target Create success, now grabbing all the data for it. Wait.')
+
+            # messages.add_message(
+            #     self.request,
+            #     messages.INFO,
+            #     f"Target created. Downloading archival data. Wait..."
+            # )
+            
             super().form_valid(form)
+
             extra.instance = self.object
             extra.save()
         else:
@@ -168,10 +183,21 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
 
             return super().form_invalid(form)
 
+        #storing all the names
         for source_name, name in target_names:
+            #clearing ASASSN and CPCS names from prefixes if provided:
+            if "ASASSN" in source_name:
+                if name.startswith("https://asas-sn.osu.edu/sky-patrol/coordinate/"):
+                    name= name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
+
+            if "CPCS" in source_name:
+                if name.startswith("ivo://"):
+                    name= name.replace("ivo://", "")
+
             to_add, _ = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
             to_add.name = name
             to_add.save()
+
 
 #        form.add_error(None,'Creating target, please wait...')
         # messages.add_message(self.request,
@@ -180,6 +206,9 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
 
         #TODO: there should be a message here on success and a warning to wait: Gathering archival data for target
         #TODO: the hook here should be run in the background 
+        
+
+
         logger.info('Target post save hook: %s created: %s', self.object, True)
         run_hook('target_post_save', target=self.object, created=True)
 
@@ -224,7 +253,6 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
         )
         return context
 
-    @transaction.atomic
     def form_valid(self, form):
         """
         Runs after form validation. Validates and saves the ``TargetExtra`` and ``TargetName`` formsets, then calls the
@@ -259,6 +287,15 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
 
         # Update target names for given source
         for source_name, name in target_names:
+            #clearing ASASSN and CPCS names from prefixes if provided:
+            if "ASASSN" in source_name:
+                if name.startswith("https://asas-sn.osu.edu/sky-patrol/coordinate/"):
+                    name= name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
+
+            if "CPCS" in source_name:
+                if name.startswith("ivo://"):
+                    name= name.replace("ivo://", "")
+
             to_update, created = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
             to_update.name = name
             to_update.save(update_fields=['name'])
@@ -280,6 +317,8 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
                 f'Deleted alias {to_delete.name} for {get_pretty_survey_name(to_delete.source_name)}'
             )
 
+        #the hook is run even if not called?
+        print("UPDATE: REDIRECTING TO "+self.get_success_url())
         return redirect(self.get_success_url())
 
     def get_queryset(self, *args, **kwargs):
@@ -331,12 +370,22 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
         return form
 
 
+
 #form for generating latex description of the target (under Publication)
 #very similar form to update
 class TargetGenerateTargetDescriptionLatexView(UpdateView):
+    template_name = 'bhtom_targets/target_generate_latex_form.html'
     model = Target
     fields = '__all__'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        target = Target.objects.get(pk=self.kwargs['pk'])
+        # Add any additional context data here
+        context['target'] = target
+
+        return context
+        
     def get_form_class(self):
         """
         Return the form class to use in this view.
@@ -344,13 +393,6 @@ class TargetGenerateTargetDescriptionLatexView(UpdateView):
         return TargetLatexDescriptionForm
 
     def get_initial(self):
-        """
-        Returns the initial data to use for forms on this view. For the ``TargetUpdateView``, adds the groups that the
-        target is a member of.
-
-        :returns:
-        :rtype: dict
-        """
         initial = super().get_initial()
         initial['groups'] = get_groups_with_perms(self.get_object())
 
@@ -366,13 +408,10 @@ class TargetGenerateTargetDescriptionLatexView(UpdateView):
 
         return initial
 
-    def get_form(self, *args, **kwargs):
-        """
-        Gets an instance of the ``TargetCreateForm`` and populates it with the groups available to the current user.
+    def get_queryset(self, *args, **kwargs):
+        return get_objects_for_user(self.request.user, 'bhtom_targets.change_target')
 
-        :returns: instance of creation form
-        :rtype: subclass of TargetCreateForm
-        """
+    def get_form(self, *args, **kwargs):
         form = super().get_form(*args, **kwargs)
         if self.request.user.is_superuser:
             form.fields['groups'].queryset = Group.objects.all()
@@ -380,59 +419,61 @@ class TargetGenerateTargetDescriptionLatexView(UpdateView):
             form.fields['groups'].queryset = self.request.user.groups.all()
         return form
 
-#     def post(self, request, *args, **kwargs):
-#         if request.method == "POST":
-#             form = TargetLatexDescriptionForm(request.POST)
-#             print("POST PROMPT: ",request.POST['prompt'])
 
-#             if form.is_valid():
-#                 print("POST: ",form.fields['prompt'])
-# #                form.save()
+class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
+    permission_required = 'tom_dataproducts.add_dataproduct'
 
-#                 prompt = form.changed_data[0]
-#                 latex = get_response(prompt)
+    @abstractmethod
+    def generate_data_method(self, target_id):
+        pass
 
-#                 initial = {prompt:form.cleaned_data[prompt]}
-#                 form = TargetLatexDescriptionForm(initial)
-#                 context = {'form': form, 'latex': latex}
-#                 return render(request,'bhtom_targets/target_generate_latex_form.html',context)
-#         else:
-#             form = TargetLatexDescriptionForm()
+    def get(self, request, *args, **kwargs):
+        import os
+        from django.http import FileResponse
 
-#             context = {'form': form, 'latex': ''}
-#             return render(request,'bhtom_targets/target_generate_latex_form.html',context)
+        if 'pk' in kwargs:
+            target_id = kwargs['pk']
+        elif 'name' in kwargs:
+            target_id = kwargs['name']
+        logger.info(f'Generating file for target with id={target_id}...')
 
+        tmp = None
+        try:
+            tmp, filename = self.generate_data_method(target_id)
+            return FileResponse(open(tmp.name, 'rb'),
+                                as_attachment=True,
+                                filename=filename)
+        except Exception as e:
+            logger.error(f'Error while generating file for target with id={target_id}: {e}')
+        finally:
+            if tmp:
+                os.remove(tmp.name)
 
-#    def form_valid(self, form):
+class TargetDownloadPhotometryStatsLatexTableView(TargetDownloadDataView):
+    def generate_data_method(self, target_id):
+        return get_photometry_stats_latex(target_id)
 
-        # target: Target = self.object
-        # lat= latex_text_target(target)
-        # print(lat)
-        # context = super().get_context_data()
+#copied from bhtom_base to use my own utils.import_target
+class TargetImportView(LoginRequiredMixin, TemplateView):
+    """
+    View that handles the import of targets from a CSV. Requires authentication.
+    """
+    template_name = 'bhtom_targets/target_import.html'
 
-        # context['latex'] = lat
+    def post(self, request):
+        """
+        Handles the POST requests to this view. Creates a StringIO object and passes it to ``import_targets``.
 
-#         if form.is_valid():
-# #            print("CLEANED: ",form.cleaned_data['prompt'])
-#             # form.fields['prompt'] = "DUUUPA"
-
-#             # prompt = form.changed_data[0]
-#             # latex = get_response(prompt)
-
-#             # initial = {prompt:form.cleaned_data[prompt]}
-#             # newform = form(initial)
-#             # context = {'form': newform, 'latex': latex}
-#             # form.cleaned_data['Email'] = GetEmailString()
-# #            form.fields["prompt"].initial = form.cleaned_data['prompt']
-#             form.initial['prompt'] = form.cleaned_data['prompt']
-#             form.initial['latex'] = (form.cleaned_data['prompt'])
-#             form.initial['latex'] = 'cos'
-#             form.save()
-#             print(form)
-# #            return self.form_invalid(form)
-# #            super().form_valid(form)
-
-#         #returns to the same page, unless back hit
-#         return HttpResponseRedirect(self.request.path_info)
-#        return render(request,'about/contact.html',{'form':form})
-
+        :param request: the request object passed to this view
+        :type request: HTTPRequest
+        """
+        csv_file = request.FILES['target_csv']
+        csv_stream = StringIO(csv_file.read().decode('utf-8'), newline=None)
+        result = import_targets(csv_stream)
+        messages.success(
+            request,
+            'Targets created: {}'.format(len(result['targets']))
+        )
+        for error in result['errors']:
+            messages.warning(request, error)
+        return redirect(reverse('bhtom2.bhtom_targets:list'))

@@ -76,13 +76,26 @@ class GaiaAlertsBroker(BHTOMBroker):
         try:
             self.__base_url: str = settings.GAIA_ALERTS_PATH
         except Exception as e:
-            self.logger.error(f'No GAIA_ALERTS_PATH in settings found!')
+            self.logger.warning(f'No GAIA_ALERTS_PATH in settings found!')
             self.__base_url = 'http://gsaweb.ast.cam.ac.uk'
 
         self.__GAIA_FILTER_NAME: str = FILTERS[DataSource.GAIA_ALERTS][0]
         self.__filter: str = filter_name(self.__GAIA_FILTER_NAME, get_pretty_survey_name(self.data_source.name))
         self.__FACILITY_NAME: str = "Gaia Alerts"
         self.__OBSERVER_NAME: str = "Gaia Alerts"
+
+        # If the data should be checked from time to time (for alerts), assing the self.__update_cadence
+        # If the data should be fetched just once, leave None
+        # Remember to pass it in astropy.unit format, e.g. 6*u.h for 6 hours
+        self.__update_cadence = None
+
+        # If you are going to perform searches by coordinates, you might want to change the max_separation
+        # Remember to pass it in astropy.unit format as well
+        # Here: 5 arcseconds
+        self.__cross_match_max_separation = 5*u.arcsec
+        # 5 arcseconds
+        self.__MATCHING_RADIUS: float = 5 * u.arcsec
+
 
     def fetch_alerts(self, parameters):
         """Must return an iterator"""
@@ -230,7 +243,8 @@ class GaiaAlertsBroker(BHTOMBroker):
                                            source_name=self.name,
                                            source_location=alert_url,
                                            error=datum[1].error,
-                                           filter=datum[1].filter,
+                                        #    filter=datum[1].filter,
+                                           filter = "GSA(G)",#overwriting pretty name to maintain the convention
                                            observer=self.__OBSERVER_NAME,
                                            facility=self.__FACILITY_NAME) for datum in data]
             with transaction.atomic():

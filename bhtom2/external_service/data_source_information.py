@@ -20,6 +20,8 @@ class DataSource(Enum):
     LINEAR = auto()
     FIRST = auto()
     PS1 = auto()
+    DECAPS = auto()
+    OGLE_EWS= auto()
 
 
 PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
@@ -29,18 +31,20 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.CPCS: "CPCS",
     DataSource.AAVSO: "AAVSO",
     DataSource.TNS: "TNS",
-    DataSource.ASASSN: "ASAS-SN",
+    DataSource.ASASSN: "ASASSN",
     DataSource.ANTARES: "ANTARES",
     DataSource.GAIA_DR2: "Gaia DR2",
     DataSource.ZTF_DR8: "ZTF DR8",
     DataSource.GAIA_DR3: "Gaia DR3",
-    DataSource.SDSS_DR14: "SDSS-DR14",
+    DataSource.SDSS_DR14: "SDSS",
     DataSource.NEOWISE: "NEOWISE",
     DataSource.ALLWISE: "ALLWISE",
     DataSource.CRTS: "CRTS",
     DataSource.LINEAR: "LINEAR",
     DataSource.FIRST: "FIRST",
-    DataSource.PS1: "PS1"
+    DataSource.PS1: "PS1",
+    DataSource.DECAPS: "DECAPS",
+    DataSource.OGLE_EWS:"OGLE-EWS"
 }
 
 
@@ -59,13 +63,15 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.GAIA_DR2: "Gaia DR2 id",
     DataSource.ZTF_DR8: "ZTF DR8 id",
     DataSource.GAIA_DR3: "Gaia DR3 id",
-    DataSource.SDSS_DR14: "SDSS-DR14 id",
+    DataSource.SDSS_DR14: "SDSS id",
     DataSource.NEOWISE: "NEOWISE name",
     DataSource.ALLWISE: "ALLWISE name",
     DataSource.CRTS: "CRTS name",
     DataSource.LINEAR: "LINEAR name",
     DataSource.FIRST: "FIRST name",
-    DataSource.PS1: "PS1 name"
+    DataSource.PS1: "PS1 name",
+    DataSource.DECAPS: "DECAPS name",
+    DataSource.OGLE_EWS: "OGLE EWS name"
 }
 
 
@@ -83,6 +89,10 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.LINEAR: ["CL"],
     DataSource.FIRST: ["Flux 1.4GHz"],
     DataSource.PS1: ["g", "r", "i", "z"],
+    DataSource.DECAPS: ["g", "r", "i", "z"],
+    DataSource.CPCS: ["g", "r", "i", "z"], ##is it used anywhere?    it has to be specified because bhtom_broker reads it, but probably does not use
+    DataSource.ASASSN: ["g", "V"], 
+    DataSource.OGLE_EWS: ['I'],
 }
 
 
