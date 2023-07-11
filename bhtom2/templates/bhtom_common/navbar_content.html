@@ -48,6 +48,9 @@ For customization instructions, see bhtom_common/base.html
 <li class="nav-item {% if request.resolver_match.namespace == 'proposals' %}active{% endif %}">
     <a class="nav-link" href="{% url 'proposals:list' %}">Proposals</a>
 </li>
+<li class="nav-item {% if request.resolver_match.namespace == 'observatory' %}active{% endif %}">
+    <a class="nav-link" href="{% url 'observatory:list' %}">Observatory</a>
+</li>
 <li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
-    <a class="nav-link" href="{% url 'user-list' %}">Users</a>
+    <a class="nav-link" href="{% url 'user-list' %}">Users1</a>
 </li>

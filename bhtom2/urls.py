@@ -55,4 +55,5 @@ urlpatterns = [
     path('targets/<int:pk>/microlensing', TargetMicrolensingView.as_view(template_name='bhtom_targets/target_microlensing.html'), name="microlensing_model"),
     path('targets/<int:pk>/microlensing_parallax', TargetMicrolensingView.as_view(template_name='bhtom_targets/target_microlensing_parallax.html'), name="microlensing_parallax_model"),
     path('', include('bhtom_base.bhtom_common.urls')),
+    path('observatory/', include('bhtom2.bhtom_observatory.urls', namespace='observatory')),
 ]

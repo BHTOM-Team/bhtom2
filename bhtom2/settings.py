@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     'bhtom_custom_registration.bhtom_registration.apps.TomRegistrationConfig',
     'rest_framework.authtoken',
     'bhtom2.apps.BHTOM2Config',
+    'bhtom2.bhtom_observatory.apps.BhtomObservatoryConfig',
     'crispy_bootstrap4',
 ]
 
