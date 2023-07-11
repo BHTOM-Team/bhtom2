@@ -39,7 +39,7 @@ class Observatory(models.Model):
         return self.name
 
     class Meta:
-        verbose_name_plural = "Obs info"
+        verbose_name_plural = "observatories"
 
 
 class ObservatoryMatrix(models.Model):

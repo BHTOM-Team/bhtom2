@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'bhtom2.apps.BHTOM2Config',
     'bhtom2.bhtom_observatory.apps.BhtomObservatoryConfig',
+    'bhtom2.bhtom_calibration.apps.BhtomCalibrationConfig',
     'crispy_bootstrap4',
 ]
 
