@@ -8,12 +8,11 @@ import astropy.units as u
 from astropy.coordinates import ICRS, SkyCoord
 from astropy.time import Time
 from astroquery.gaia import Gaia
-from bhtom2.brokers import gaia_alerts
 from bhtom2.brokers.gaia import GaiaBroker
 
 
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
-from bhtom2.harvesters import tns
+from bhtom2.harvesters import tns, gaia_alerts
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_targets.models import Target
 
