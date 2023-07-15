@@ -291,8 +291,8 @@ BROKERS = {
 }
 
 TOM_HARVESTER_CLASSES = [
-    'bhtom2.harvesters.ogleews.OGLEEWSHarvester',
     'bhtom2.harvesters.gaia_alerts.GaiaAlertsHarvester',
+    'bhtom2.harvesters.ogleews.OGLEEWSHarvester',
     'bhtom2.harvesters.tns.TNSHarvester',
     'bhtom2.harvesters.antares.ANTARESHarvester',
     'bhtom_base.bhtom_catalogs.harvesters.simbad.SimbadHarvester',
