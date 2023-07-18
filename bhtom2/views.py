@@ -13,7 +13,6 @@ from django_tables2.views import SingleTableMixin
 from django.views.generic.detail import DetailView
 from guardian.mixins import PermissionListMixin
 from numpy import around
-
 from bhtom2.bhtom_targets.filters import TargetFilter
 from bhtom2.dataproducts import last_jd
 from bhtom2.utils.bhtom_logger import BHTOMLogger
@@ -24,9 +23,26 @@ from bhtom_base.bhtom_alerts.alerts import get_service_classes
 from bhtom_base.bhtom_alerts.models import BrokerQuery
 from bhtom_base.bhtom_alerts.views import BrokerQueryFilter
 from bhtom_base.bhtom_targets.models import Target, TargetExtra, TargetList
-from bhtom_base.bhtom_dataproducts.models import  ReducedDatum
-
-
+from bhtom_base.bhtom_dataproducts.models import  ReducedDatum, DataProduct
+from bhtom_base.bhtom_dataproducts.exceptions import  InvalidFileFormatException
+from bhtom2.bhtom_observatory.models import Observatory
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+import requests
+import os
+from rest_framework import  status
+from rest_framework.response import Response
+from django.http import HttpResponse
+from bhtom_base.bhtom_common.hooks import run_hook
+from bhtom_base.bhtom_dataproducts.data_processor import run_data_processor
+from django.shortcuts import redirect
+from django.contrib import messages
+from rest_framework.authtoken.models import Token
+from bhtom2.forms import DataProductUploadForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import Group
+from django.views.generic.edit import FormView
 logger: BHTOMLogger = BHTOMLogger(__name__, '[BHTOM2 views]')
 
 
@@ -309,3 +325,162 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
         })
         return self.render_to_response(context)
 
+
+
+class DataProductUploadView(LoginRequiredMixin,FormView):
+    """
+    View that handles manual upload of DataProducts. Requires authentication.
+    """
+    form_class = DataProductUploadForm
+        
+    def get_form(self, *args, **kwargs):
+        form = super().get_form(*args, **kwargs)
+        if not settings.TARGET_PERMISSIONS_ONLY:
+            if self.request.user.is_superuser:
+                form.fields['groups'].queryset = Group.objects.all()
+            else:
+                form.fields['groups'].queryset = self.request.user.groups.all()
+        return form
+    
+    def form_valid(self, form):
+        """
+        Runs after ``DataProductUploadForm`` is validated. Saves each ``DataProduct`` and calls ``run_data_processor``
+        on each saved file. Redirects to the previous page.
+        """
+        target = form.cleaned_data['target']
+        if not target:
+            observation_record = form.cleaned_data['observation_record']
+            target = observation_record.target
+        else:
+            observation_record = None
+        dp_type = form.cleaned_data['data_product_type']
+        data_product_files = self.request.FILES
+        observatory = form.cleaned_data['observatory']
+        observation_filter = form.cleaned_data['filter']
+        MJD = form.cleaned_data['MJD']
+        ExpTime = form.cleaned_data['ExpTime']
+        matchDist = form.cleaned_data['matchDist']
+        dryRun = form.cleaned_data['dryRun']
+        comment = form.cleaned_data['comment']
+        facility = form.cleaned_data['facility']
+        observer = form.cleaned_data['observer']
+        user = self.request.user
+
+        if dp_type == 'fits_file' and observatory.cpcsOnly == True:
+            logger.error('observatory without ObsInfo: %s %s' % (str(f[0].name), str(target)))
+            messages.error(self.request, 'Used Observatory without ObsInfo')
+            return redirect(form.cleaned_data.get('referrer', '/'))
+
+        post_data = {
+            'filter': observation_filter,
+            'target': target,
+            'data_product_type': dp_type,
+            'matchDist': matchDist,
+            'comment': comment,
+            'dryRun': dryRun,
+            'observatory': observatory,
+            'MJD':MJD,
+            'ExpTime': ExpTime
+        }
+        token = Token.objects.get(user_id=user.id).key
+
+        headers = {
+            'Authorization': 'Token ' + token
+        }
+
+        # Make a POST request to upload-service with the extracted data
+        response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/', data=post_data, files=data_product_files, headers=headers)
+
+        if response.status_code == 201:
+            messages.success(self.request, 'Successfully uploaded')
+        else:
+            messages.error(self.request, 'There was a problem uploading your file')
+        return redirect(form.cleaned_data.get('referrer', '/'))
+    
+    def form_invalid(self, form):
+        """
+        Adds errors to Django messaging framework in the case of an invalid form and redirects to the previous page.
+        """
+        # TODO: Format error messages in a more human-readable way
+        messages.error(self.request, 'There was a problem uploading your file: {}'.format(form.errors.as_json()))
+        return redirect(form.cleaned_data.get('referrer', '/'))
+
+
+
+
+class FitsUploadAPIView(APIView):
+    def post(self, request):
+        # Extract the POST data from the original request
+        post_data = request.POST
+        # Extract the authorization header from the original request
+        authorization_header = request.headers.get('Authorization')
+
+        # Set headers for the POST request to upload-service
+        headers = {
+            'Authorization': authorization_header,
+        }
+
+        # Make a POST request to upload-service with the extracted data
+        response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/', data=post_data, files=request.FILES, headers=headers)
+
+        return HttpResponse(response.content, status=response.status_code)
+
+def deleteFits(dp):
+    try:
+        logger.info('try remove fits' + str(dp.data))
+        BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        url_base = BASE + '/data/'
+        url_result = os.path.join(url_base, str(dp.data))
+        os.remove(url_result)
+    except Exception as e:
+        logger.info(e)
+
+
+class ProceedUploadDPAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        dp, target_id, observatory, observation_filter, MJD, expTime, comment, user = None, None, None, None, None, None, None, None
+        fits_quantity = None
+
+        try:
+            dp_id = request.data.get('dp')
+            dp = DataProduct.objects.get(id=dp_id)
+
+            target_id = request.data.get('target_id')
+            observatory_name = request.data.get('observatory')
+            observatory = Observatory.objects.get(name=observatory_name)
+            observation_filter = request.data.get('observation_filter')
+            MJD = request.data.get('MMJD')
+            expTime = request.data.get('expTime')
+            dry_run = request.data.get('dryRun')
+            matchDist = request.data.get('matchDist')
+            comment = request.data.get('comment')
+            user = request.data.get('user')
+            fits_quantity = request.data.get('fits_quantity')
+
+            run_hook(
+                'data_product_post_upload',
+                dp, target_id, observatory,
+                observation_filter, MJD, expTime,
+                dry_run, matchDist, comment,
+                user, fits_quantity
+            )
+            run_data_processor(dp)
+
+        except InvalidFileFormatException as iffe:
+            deleteFits(dp)
+            # capture_exception(iffe)
+            ReducedDatum.objects.filter(data_product=dp).delete()
+            dp.delete()
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        except Exception as e:
+            deleteFits(dp)
+            # capture_exception(e)
+            ReducedDatum.objects.filter(data_product=dp).delete()
+            dp.delete()
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(status=status.HTTP_200_OK)

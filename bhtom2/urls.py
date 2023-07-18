@@ -18,7 +18,7 @@ from bhtom2.bhtom_targets.views import TargetCreateView, TargetDownloadPhotometr
 
 from bhtom_base.bhtom_targets.views import TargetDetailView, TargetImportView, TargetExportView
 
-from bhtom2.views import BrokerQueryListView, TargetDownloadPhotometryDataView, TargetDownloadRadioDataView, TargetListImagesView, TargetListView, TargetMicrolensingView
+from bhtom2.views import BrokerQueryListView, TargetDownloadPhotometryDataView, TargetDownloadRadioDataView, TargetListImagesView, TargetListView, TargetMicrolensingView, FitsUploadAPIView, ProceedUploadDPAPIView, DataProductUploadView
 
 urlpatterns = [
     path('targets/', include('bhtom2.bhtom_targets.urls', namespace='targets')),
@@ -56,4 +56,7 @@ urlpatterns = [
     path('targets/<int:pk>/microlensing_parallax', TargetMicrolensingView.as_view(template_name='bhtom_targets/target_microlensing_parallax.html'), name="microlensing_parallax_model"),
     path('', include('bhtom_base.bhtom_common.urls')),
     path('observatory/', include('bhtom2.bhtom_observatory.urls', namespace='observatory')),
+    path("upload-fits/", FitsUploadAPIView.as_view()),
+    path("proceed_upload/", ProceedUploadDPAPIView.as_view()),
+    path("dataUpload/", DataProductUploadView.as_view(), name="upload_data")
 ]

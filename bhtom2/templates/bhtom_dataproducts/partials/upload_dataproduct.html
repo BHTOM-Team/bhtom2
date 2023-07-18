@@ -1,0 +1,15 @@
+{% load bootstrap4 static %}
+<script src="{% static 'bhtom_targets/js/upload_data.js' %}"></script>
+<h4>Upload a data product</h4>
+<p>
+  For example CSVs, see the <a href="{% static 'bhtom_dataproducts/photometry_sample.csv' %}">photometry</a> and
+  <a href="{% static 'bhtom_dataproducts/spectrum_sample.csv' %}">spectroscopy</a> sample files. FITS is supported for
+  spectra.
+</p>
+<form method="POST" action="{% url 'upload_data'%}" enctype="multipart/form-data">
+  {% csrf_token %}
+  {% bootstrap_form data_product_form_from_user %}
+  {% buttons %}
+  <input type="submit" class="btn btn-primary" value="Upload" name="data_product_form_from_user">
+  {% endbuttons %}
+</form>

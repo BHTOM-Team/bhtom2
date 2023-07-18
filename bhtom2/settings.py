@@ -40,7 +40,7 @@ SITE_ID = int(secret.get("SITE_ID", 1))
 
 CPCS_BASE_URL = secret.get('CPCS_BASE_URL', None)
 CPCS_DATA_ACCESS_HASHTAG = secret.get('CPCS_DATA_ACCESS_HASHTAG', None)
-
+UPLOAD_SERVICE_URL = secret.get('UPLOAD_SERVICE_URL', None)
 WSDB_USER = secret.get('WSDB_USER','')
 WSDB_PASSWORD = secret.get('WSDB_PASSWORD','')
 WSDB_HOST = secret.get('WSDB_HOST','')
@@ -134,7 +134,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'USER': secret.get("POSTGRES_DB_USER", 'bhtom'),
         'PASSWORD': secret.get("POSTGRES_PASSWORD", ""),
-        'HOST': secret.get('POSTGRES_HOST', 'localhost'),
+        'HOST': 'localhost',
         'PORT': secret.get('POSTGRES_PORT', 5432),
         'TEST': {
             'NAME': secret.get("POSTGRES_TEST_DB_NAME", 'test_bhtom2')
@@ -370,9 +370,10 @@ OPEN_URLS = []
 
 HOOKS = {
     'target_post_save': 'bhtom2.hooks.target_post_save',
+    'data_product_post_upload': 'bhtom2.hooks.data_product_post_upload',
     'reduced_datum_pre_save': 'bhtom_base.bhtom_dataproducts.hooks.reduced_datum_pre_save',
     'observation_change_state': 'bhtom_base.bhtom_common.hooks.observation_change_state',
-    'data_product_post_upload': 'bhtom_base.bhtom_dataproducts.hooks.data_product_post_upload',
+    #'data_product_post_upload': 'bhtom_base.bhtom_dataproducts.hooks.data_product_post_upload',
     'data_product_post_save': 'bhtom_base.bhtom_dataproducts.hooks.data_product_post_save',
     'multiple_data_products_post_save': 'bhtom_base.bhtom_dataproducts.hooks.multiple_data_products_post_save',
 }
