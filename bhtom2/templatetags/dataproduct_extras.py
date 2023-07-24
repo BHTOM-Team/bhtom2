@@ -34,25 +34,25 @@ color_map = {
         'WISE(W2)':   ['blue', 'x', 2],
         'CRTS(CL)':   ['#FF1493', 'diamond', 4],
         'LINEAR(CL)': ['teal', 'diamond', 4],
-        'SDSSDR(r)':  ['red ', 'square' , 4],
-        'SDSSDR(i)':  [ '#800000', 'square' , 4],
-        'SDSSDR(u)':  ['#40E0D0'  , 'square' , 4],
-        'SDSSDR(z)':  ['#ff0074' , 'square' , 4],
-        'SDSSDR(g)':  ['green', 'square' , 4],
-        'DECAPS(r)':  ['red ', 'star-square' , 4],
-        'DECAPS(i)':  [ '#800000', 'star-square' , 4],
-        'DECAPS(u)':  ['#40E0D0'  , 'star-square' , 4],
-        'DECAPS(z)':  ['#ff0074' , 'star-square' , 4],
-        'DECAPS(g)':  ['green', 'star-square' , 4],
-        'PS1(r)': ['red', 'star-open', 4],
-        'PS1(i)': ['#800000', "star-open", 4],
-        'PS1(z)': ['#ff0074', "star-open", 4],
-        'PS1(g)': ['green', "star-open", 4],
-         'SDSS_DR14(r)':  ['red ', 'square' , 4],
-         'SDSS_DR14(i)':  [ '#800000', 'square' , 4],
-         'SDSS_DR14(u)':  ['#40E0D0'  , 'square' , 4],
-         'SDSS_DR14(z)':  ['#ff0074' , 'square' , 4],
-         'SDSS_DR14(g)':  ['green', 'square' , 4],
+        'SDSSDR(r)':  ['red ', 'square' , 5],
+        'SDSSDR(i)':  [ '#800000', 'square' , 5],
+        'SDSSDR(u)':  ['#40E0D0'  , 'square' , 5],
+        'SDSSDR(z)':  ['#ff0074' , 'square' , 5],
+        'SDSSDR(g)':  ['green', 'square' , 5],
+        'DECAPS(r)':  ['red ', 'star-square' , 5],
+        'DECAPS(i)':  [ '#800000', 'star-square' , 5],
+        'DECAPS(u)':  ['#40E0D0'  , 'star-square' , 5],
+        'DECAPS(z)':  ['#ff0074' , 'star-square' , 5],
+        'DECAPS(g)':  ['green', 'star-square' , 5],
+        'PS1(r)': ['red', 'star-open', 5],
+        'PS1(i)': ['#800000', "star-open", 5],
+        'PS1(z)': ['#ff0074', "star-open", 5],
+        'PS1(g)': ['green', "star-open", 5],
+         'SDSS_DR14(r)':  ['red ', 'square' , 5],
+         'SDSS_DR14(i)':  [ '#800000', 'square' , 5],
+         'SDSS_DR14(u)':  ['#40E0D0'  , 'square' , 5],
+         'SDSS_DR14(z)':  ['#ff0074' , 'square' , 5],
+         'SDSS_DR14(g)':  ['green', 'square' , 5],
          'RP(GAIA_DR3)':  ['#ff8A8A', 'circle' , 4],
          'BP(GAIA_DR3)':  ['#8A8Aff', 'circle' , 4],
          'G(GAIA_DR3)':   ['black', 'circle', 4],
@@ -302,10 +302,11 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
+                opacity=0.75,
                 marker=dict(
-                    color=color_map.get(filter_name, ['gray', 'circle', 6])[0], #default ['gray', 'circle', 6]
-                    symbol=color_map.get(filter_name, ['gray', 'circle', 6])[1],
-                    size=color_map.get(filter_name, ['gray', 'circle', 6])[2]
+                    color=color_map.get(filter_name, ['gray', 'circle', 4])[0], #default ['gray', 'circle', 6]
+                    symbol=color_map.get(filter_name, ['gray', 'circle', 4])[1],
+                    size=color_map.get(filter_name, ['gray', 'circle', 4])[2]
                     ),
                 name=filter_name,
                 error_y=dict(
@@ -333,7 +334,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 y=filter_values['limit'],
                 mode='markers',
                 opacity=0.5,
-                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol=6),  # upside down triangle
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol=6),  # upside down triangle
                 name=filter_name+" limit",
                 text=mjds_lim_to_plot[filter_name],
                 hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
@@ -358,7 +359,8 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
-                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol='diamond', line_color='black', line_width=2),
+                opacity=0.75,
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol='diamond', line_color='black', line_width=2),
                 name=filter_name,
                 error_y=dict(
                     type='data',
@@ -379,7 +381,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 y=filter_values['limit'],
                 mode='markers',
                 opacity=0.5,
-                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol=6),  # upside down triangle
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol=6),  # upside down triangle
                 name=filter_name+" limit",
                 text=mjds_radio_lim_to_plot[filter_name],
                 hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
@@ -560,9 +562,9 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                 y=filter_values['magnitude'],
                 mode='markers',
                 marker=dict(
-                    color=color_map.get(filter_name, ['gray', 'circle', 6])[0], #default ['gray', 'circle', 6]
-                    symbol=color_map.get(filter_name, ['gray', 'circle', 6])[1],
-                    size=color_map.get(filter_name, ['gray', 'circle', 6])[2]
+                    color=color_map.get(filter_name, ['gray', 'circle', 4])[0], #default ['gray', 'circle', 6]
+                    symbol=color_map.get(filter_name, ['gray', 'circle', 4])[1],
+                    size=color_map.get(filter_name, ['gray', 'circle', 4])[2]
                     ),
                 name=filter_name,
                 error_y=dict(
@@ -581,7 +583,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
-                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol='diamond', line_color='black', line_width=2),
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol='diamond', line_color='black', line_width=2),
                 name=filter_name,
                 error_y=dict(
                     type='data',
@@ -597,7 +599,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                 y=filter_values['limit'],
                 mode='markers',
                 opacity=0.5,
-                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol=6),  # upside down triangle
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol=6),  # upside down triangle
                 name=filter_name + ' non-detection',
             )
             plot_data.append(series)
