@@ -25,6 +25,51 @@ from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_s
 
 register = template.Library()
 
+color_map = {
+        'GSA(G)':     ['black','hexagon',10], 
+        'ZTF(zg)':    ['green','cross',4],
+        'ZTF(zi)':    ['#800000','cross',4],
+        'ZTF(zr)':    ['red','cross',4],
+        'WISE(W1)':   ['#FFCC00', 'x',2],
+        'WISE(W2)':   ['blue', 'x', 2],
+        'CRTS(CL)':   ['#FF1493', 'diamond', 4],
+        'LINEAR(CL)': ['teal', 'diamond', 4],
+        'SDSSDR(r)':  ['red ', 'square' , 4],
+        'SDSSDR(i)':  [ '#800000', 'square' , 4],
+        'SDSSDR(u)':  ['#40E0D0'  , 'square' , 4],
+        'SDSSDR(z)':  ['#ff0074' , 'square' , 4],
+        'SDSSDR(g)':  ['green', 'square' , 4],
+        'DECAPS(r)':  ['red ', 'star-square' , 4],
+        'DECAPS(i)':  [ '#800000', 'star-square' , 4],
+        'DECAPS(u)':  ['#40E0D0'  , 'star-square' , 4],
+        'DECAPS(z)':  ['#ff0074' , 'star-square' , 4],
+        'DECAPS(g)':  ['green', 'star-square' , 4],
+        'PS1(r)': ['red', 'star-open', 4],
+        'PS1(i)': ['#800000', "star-open", 4],
+        'PS1(z)': ['#ff0074', "star-open", 4],
+        'PS1(g)': ['green', "star-open", 4],
+         'SDSS_DR14(r)':  ['red ', 'square' , 4],
+         'SDSS_DR14(i)':  [ '#800000', 'square' , 4],
+         'SDSS_DR14(u)':  ['#40E0D0'  , 'square' , 4],
+         'SDSS_DR14(z)':  ['#ff0074' , 'square' , 4],
+         'SDSS_DR14(g)':  ['green', 'square' , 4],
+         'RP(GAIA_DR3)':  ['#ff8A8A', 'circle' , 4],
+         'BP(GAIA_DR3)':  ['#8A8Aff', 'circle' , 4],
+         'G(GAIA_DR3)':   ['black', 'circle', 4],
+        'I(GaiaSP)':  ['#6c1414','21', 4],
+        'g(GaiaSP)':  ['green','21', 4],
+        'R(GaiaSP)':  ['#d82727','21', 4],
+        'V(GaiaSP)':  ['darkgreen','21', 4],
+        'B(GaiaSP)':  ['#000034','21', 4],
+        'z(GaiaSP)':  ['#ff0074','21', 4],
+        'u(GaiaSP)':  ['#40E0D0','21', 4],
+        'r(GaiaSP)':  ['red','21', 4],
+        'U(GaiaSP)':  ['#5ac6bc','21', 4],
+        'i(GaiaSP)':  ['#800000','21' , 4],
+        'ASASSN(g)':  ['green', 'cross-thin',2], #add opacity
+        'ASASSN(V)':  ['darkgreen', 'cross-thin',2], #add opacity
+    }
+
 
 @register.inclusion_tag('bhtom_dataproducts/partials/recent_photometry.html')
 def recent_photometry(target, limit=1):
@@ -161,43 +206,6 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
     :type grid: bool
     """
 
-    color_map = {
-        'GSA(G)':     ['black','hexagon',10], 
-        'ZTF(zg)':    ['green','cross',4],
-        'ZTF(zi)':    ['#800000','cross',4],
-        'ZTF(zr)':    ['red','cross',4],
-        'WISE(W1)':   ['#FFCC00', 'x',2],
-        'WISE(W2)':   ['blue', 'x', 2],
-        'CRTS(CL)':   ['#FF1493', 'diamond', 4],
-        'LINEAR(CL)': ['teal', 'diamond', 4],
-        'SDSSDR(r)':  ['red ', 'square' , 4],
-        'SDSSDR(i)':  [ '#800000', 'square' , 4],
-        'SDSSDR(u)':  ['#40E0D0'  , 'square' , 4],
-        'SDSSDR(z)':  ['#ff0074' , 'square' , 4],
-        'SDSSDR(g)':  ['green', 'square' , 4],
-        'PS1(r)': ['red', 'star-open', 4],
-        'PS1(i)': ['#800000', "star-open", 4],
-        'PS1(z)': ['#ff0074', "star-open", 4],
-        'PS1(g)': ['green', "star-open", 4],
-         'SDSS_DR14(r)':  ['red ', 'square' , 4],
-         'SDSS_DR14(i)':  [ '#800000', 'square' , 4],
-         'SDSS_DR14(u)':  ['#40E0D0'  , 'square' , 4],
-         'SDSS_DR14(z)':  ['#ff0074' , 'square' , 4],
-         'SDSS_DR14(g)':  ['green', 'square' , 4],
-         'RP(GAIA_DR3)':  ['#ff8A8A', 'circle' , 4],
-         'BP(GAIA_DR3)':  ['#8A8Aff', 'circle' , 4],
-         'G(GAIA_DR3)':   ['black', 'circle', 4],
-        'I(GaiaSP)':  ['#6c1414','21', 4],
-        'g(GaiaSP)':  ['green','21', 4],
-        'R(GaiaSP)':  ['#d82727','21', 4],
-        'V(GaiaSP)':  ['#696969','21', 4],
-        'B(GaiaSP)':  ['#000034','21', 4],
-        'z(GaiaSP)':  ['#ff0074','21', 4],
-        'u(GaiaSP)':  ['#40E0D0','21', 4],
-        'r(GaiaSP)':  ['red','21', 4],
-        'U(GaiaSP)':  ['#5ac6bc','21', 4],
-        'i(GaiaSP)':  ['#800000','21' , 4],
-    }
 
     photometry_data = {}
     radio_data = {}
@@ -463,44 +471,6 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
     :param grid: Whether to show grid lines.
     :type grid: bool
     """
-
-    color_map = {
-        'GSA(G)':     ['black','hexagon',10], 
-        'ZTF(zg)':    ['green','cross',4],
-        'ZTF(zi)':    ['#800000','cross',4],
-        'ZTF(zr)':    ['red','cross',4],
-        'WISE(W1)':   ['#FFCC00', 'x',2],
-        'WISE(W2)':   ['blue', 'x', 2],
-        'CRTS(CL)':   ['#FF1493', 'diamond', 4],
-        'LINEAR(CL)': ['teal', 'diamond', 4],
-        'SDSSDR(r)':  ['red ', 'square' , 4],
-        'SDSSDR(i)':  [ '#800000', 'square' , 4],
-        'SDSSDR(u)':  ['#40E0D0'  , 'square' , 4],
-        'SDSSDR(z)':  ['#ff0074' , 'square' , 4],
-        'SDSSDR(g)':  ['green', 'square' , 4],
-        'PS1(r)': ['red', 'star-open', 4],
-        'PS1(i)': ['#800000', "star-open", 4],
-        'PS1(z)': ['#ff0074', "star-open", 4],
-        'PS1(g)': ['green', "star-open", 4],
-         'SDSS_DR14(r)':  ['red ', 'square' , 4],
-         'SDSS_DR14(i)':  [ '#800000', 'square' , 4],
-         'SDSS_DR14(u)':  ['#40E0D0'  , 'square' , 4],
-         'SDSS_DR14(z)':  ['#ff0074' , 'square' , 4],
-         'SDSS_DR14(g)':  ['green', 'square' , 4],
-         'RP(GAIA_DR3)':  ['#ff8A8A', 'circle' , 4],
-         'BP(GAIA_DR3)':  ['#8A8Aff', 'circle' , 4],
-         'G(GAIA_DR3)':   ['black', 'circle', 4],
-        'I(GaiaSP)':  ['#6c1414','21', 4],
-        'g(GaiaSP)':  ['green','21', 4],
-        'R(GaiaSP)':  ['#d82727','21', 4],
-        'V(GaiaSP)':  ['#696969','21', 4],
-        'B(GaiaSP)':  ['#000034','21', 4],
-        'z(GaiaSP)':  ['#ff0074','21', 4],
-        'u(GaiaSP)':  ['#40E0D0','21', 4],
-        'r(GaiaSP)':  ['red','21', 4],
-        'U(GaiaSP)':  ['#5ac6bc','21', 4],
-        'i(GaiaSP)':  ['#800000','21' , 4],
-    }
 
 
 
