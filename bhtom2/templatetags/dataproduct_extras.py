@@ -437,9 +437,10 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
         ),
         legend=dict(
             yanchor="top",
-            y=0.99,
-            xanchor="right",
-            x=1.35
+            y=-0.15,
+            xanchor="left",
+            x=0.0,
+            orientation="h"
         )
     )
     return {
@@ -613,6 +614,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
     layout.legend.font.color = label_color
     #no legend shown in icon view
     layout.update(showlegend=True)
+    
     fig = go.Figure(data=plot_data, layout=layout)
     fig.update_layout(
     title=target.name,
@@ -663,10 +665,13 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
     legend_tracegroupgap=1,
     legend=dict(
 #        yanchor="top",
-        y=0.5,
+        y=-0.20,
 #        xanchor="right",
-        x=1.00,
+        x=0.00,
 #        font=dict(size=8)
+    orientation="h",
+    yanchor="top",
+    xanchor="left",
     )
     )
     return {
