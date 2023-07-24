@@ -203,9 +203,10 @@ DATE_FORMAT = 'Y-m-d'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, '_static')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'bhtom2/static')]
-MEDIA_ROOT = os.path.join(BASE_DIR, 'data')
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'data')
+# MEDIA_URL = '/data/'
+MEDIA_ROOT = "/Users/yurii/AkondLab/bh-tom/data/"
 MEDIA_URL = '/data/'
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

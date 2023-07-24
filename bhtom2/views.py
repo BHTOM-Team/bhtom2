@@ -35,7 +35,7 @@ from rest_framework import  status
 from rest_framework.response import Response
 from django.http import HttpResponse
 from bhtom_base.bhtom_common.hooks import run_hook
-from bhtom_base.bhtom_dataproducts.data_processor import run_data_processor
+from bhtom_base.bhtom_dataproducts.data_processor import DataProcessor, run_data_processor
 from django.shortcuts import redirect
 from django.contrib import messages
 from rest_framework.authtoken.models import Token
@@ -441,7 +441,7 @@ class ProceedUploadDPAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        dp, target_id, observatory, observation_filter, MJD, expTime, comment, user = None, None, None, None, None, None, None, None
+        dp, target_id, observatory_name, observation_filter, MJD, expTime, comment, user, plot = None, None, None, None, None, None, None, None, None
         fits_quantity = None
 
         try:
@@ -450,34 +450,36 @@ class ProceedUploadDPAPIView(APIView):
 
             target_id = request.data.get('target_id')
             observatory_name = request.data.get('observatory')
-            observatory = Observatory.objects.get(name=observatory_name)
             observation_filter = request.data.get('observation_filter')
-            MJD = request.data.get('MMJD')
+            MJD = request.data.get('MJD')
             expTime = request.data.get('expTime')
             dry_run = request.data.get('dryRun')
             matchDist = request.data.get('matchDist')
             comment = request.data.get('comment')
             user = request.data.get('user')
             fits_quantity = request.data.get('fits_quantity')
+            plot = request.data.get('plot')
 
             run_hook(
                 'data_product_post_upload',
-                dp, target_id, observatory,
+                dp, target_id, observatory_name,
                 observation_filter, MJD, expTime,
                 dry_run, matchDist, comment,
-                user, fits_quantity
+                user, fits_quantity, plot
             )
             run_data_processor(dp)
 
         except InvalidFileFormatException as iffe:
-            deleteFits(dp)
+            #deleteFits(dp)
             # capture_exception(iffe)
+            print(str(iffe))
             ReducedDatum.objects.filter(data_product=dp).delete()
             dp.delete()
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         except Exception as e:
-            deleteFits(dp)
+            print(str(e))
+            #deleteFits(dp)
             # capture_exception(e)
             ReducedDatum.objects.filter(data_product=dp).delete()
             dp.delete()

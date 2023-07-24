@@ -1,10 +1,10 @@
 function dataProductSelect() {
 
-    var data_type_0 = document.getElementById("id_data_product_type_0").checked;
-    var data_type_1 = document.getElementById("id_data_product_type_1").checked;
-    var data_type_2 = document.getElementById("id_data_product_type_2").checked;
-    var data_type_3 = document.getElementById("id_data_product_type_3").checked;
-    var data_type_4 = document.getElementById("id_data_product_type_4").checked;
+    var data_type_photometry_sextractor = document.getElementById("id_data_product_type_0").checked;
+    var data_type_fits_file = document.getElementById("id_data_product_type_2").checked;
+    var data_type_spectrum = document.getElementById("id_data_product_type_3").checked;
+    var data_type_photometry = document.getElementById("id_data_product_type_0").checked;
+    var data_type_photometry_asas = document.getElementById("id_data_product_type_4").checked;
 
     var mjd = document.getElementById("mjd");
     var ExpTime = document.getElementById("ExpTime");
@@ -15,7 +15,7 @@ function dataProductSelect() {
     var observer = document.getElementById("id_observer");
     var facility = document.getElementById("id_facility");
 
-    if (data_type_0 === true) {
+    if (data_type_photometry_sextractor === true) {
 
         mjd.setAttribute("required", true);
         ExpTime.setAttribute("required", true);
@@ -36,7 +36,7 @@ function dataProductSelect() {
 
     }
 
-    if (data_type_1 === true) {
+    if (data_type_fits_file === true) {
 
         mjd.removeAttribute("required");
         ExpTime.removeAttribute("required");
@@ -57,7 +57,7 @@ function dataProductSelect() {
 
     }
 
-    if (data_type_2 === true || data_type_3 === true) {
+    if (data_type_spectrum === true || data_type_photometry === true) {
 
         mjd.removeAttribute("required");
         ExpTime.removeAttribute("required");
@@ -78,7 +78,7 @@ function dataProductSelect() {
 
     }
 
-    if (data_type_4 === true) {
+    if (data_type_photometry_asas === true) {
 
         mjd.removeAttribute("required");
         ExpTime.removeAttribute("required");
