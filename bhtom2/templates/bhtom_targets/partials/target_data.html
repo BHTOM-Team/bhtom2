@@ -122,8 +122,8 @@
     </dd>
     {% elif value.source_name == "TNS" %}
     <dd class="col-sm-6">
-      <a href='https://www.wis-tns.org/object/{{ value }}' target="_blank">        {{ value }}
-      </a>
+      <a href='https://www.wis-tns.org/object/{{ value|trim_chars:2 }}' target="_blank">{{ value }}</a>
+
     </dd>
     {% else %}
     <dd class="col-sm-6">{{ value }}</dd>
