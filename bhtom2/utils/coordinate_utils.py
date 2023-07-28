@@ -1,6 +1,6 @@
 from astropy.coordinates import Angle, SkyCoord
 import astropy.units as u
-from bhtom_base.bhtom_targets.models import Target, TargetExtra
+from bhtom_base.bhtom_targets.models import Target
 
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
@@ -33,10 +33,10 @@ def fill_galactic_coordinates(target: Target) -> Target:
     coordinates: SkyCoord = SkyCoord(ra=target.ra,
                                      dec=Angle(target.dec, unit=u.deg).wrap_at('90d').degree,
                                      unit='deg')
-                                     
+
     # rounding galactic coords to 6 decimal points
     glat = around(coordinates.galactic.b.degree, 6)
-    glng = around(coordinates.galactic.l.degree,6)
+    glng = around(coordinates.galactic.l.degree, 6)
     target.galactic_lat = glat
     target.galactic_lng = glng
 
@@ -47,6 +47,7 @@ def fill_galactic_coordinates(target: Target) -> Target:
 
     return target
 
+
 def update_sun_distance(target: Target, time_to_compute=None):
     """
     Computes the Sun-target distance in degrees for NOW 
@@ -54,21 +55,19 @@ def update_sun_distance(target: Target, time_to_compute=None):
     No decimal points, rounding to degrees.
     Optional parameter is of Time format
     """
-    #SUN's position now:
-    if (time_to_compute == None):
-        tt=Time(datetime.utcnow())
+    # SUN's position now:
+    if time_to_compute == None:
+        tt = Time(datetime.utcnow())
     else:
-        tt=time_to_compute
+        tt = time_to_compute
 
     sun_pos = get_sun(tt)
     obj_pos = SkyCoord(target.ra, target.dec, unit=u.deg)
-    Sun_sep = around(sun_pos.separation(obj_pos).deg,0)
-    te, _ = TargetExtra.objects.update_or_create(target=target,
-        key='sun_separation',
-        defaults={'value': Sun_sep})
-    te.save()
+    Sun_sep = around(sun_pos.separation(obj_pos).deg, 0)
+    target.sun_separation = Sun_sep
 
     return target
+
 
 def update_phot_class(target: Target):
     """
@@ -86,43 +85,43 @@ def update_phot_class(target: Target):
         # defining a params dict for the parameters to be sent to the API
         obj_pos = SkyCoord(target.ra, target.dec, unit=u.deg)
 
-        ra=float(obj_pos.ra.to_string(decimal=True))
-        dec=float(obj_pos.dec.to_string(decimal=True))
+        ra = float(obj_pos.ra.to_string(decimal=True))
+        dec = float(obj_pos.dec.to_string(decimal=True))
 
-        payload = { "coordinates": [[ra,dec]] }
+        payload = {"coordinates": [[ra, dec]]}
 
         r = requests.post(url, data=json.dumps(payload))
 
         data = r.json()
-#        print(data['payload']['results'][0])
+        #        print(data['payload']['results'][0])
         pred = data['payload']['results'][0]['predictions']
-#        print(len(pred))
-        if len(pred)==0: 
-#            print("NO RESULT")
+        #        print(len(pred))
+        if len(pred) == 0:
+            #            print("NO RESULT")
             result = "--"
         else:
-            #finding the best one
-            best=data['payload']['results'][0]['best_class']
-            arr=data['payload']['results'][0]['predictions']
+            best_value = None
+
+            # finding the best one
+            best = data['payload']['results'][0]['best_class']
+            arr = data['payload']['results'][0]['predictions']
             for element in arr:
                 if element[0] == best:
                     best_value = element[1]
                     break
 
-            #print(best, '{:.1%}'.format(best_value))
-            result = best+' {:.1%}'.format(best_value)
-            print("Phot.class success: ",result)
+            # print(best, '{:.1%}'.format(best_value))
+            if best_value is not None:
+                result = best + ' {:.1%}'.format(best_value)
+                print("Phot.class success: ", result)
     except:
         pass
-    
-    te, _ = TargetExtra.objects.update_or_create(target=target,
-        key='phot_class',
-        defaults={'value': result})
 
-    te.save()
+    target.phot_class = result
 
     return target
-    
+
+
 # computes priority based on dt 
 # if observed within the cadence, then returns just the pure target priority
 # if not, then priority increases
@@ -136,21 +135,23 @@ def computePriority(dt, imp, cadence):
     # alternative - linear scale
     if (cadence != 0):
         ret = dt / cadence
-    return around(ret * imp,1)
+    return around(ret * imp, 1)
 
-# computes dt (mjd_last - mjd_now) and then priority 
+
+# computes dt (mjd_last - mjd_now) and then priority
 # if observed within the cadence, then returns just the pure target priority
 # if not, then priority increases
-def computeDtAndPriority(mjd_last, imp, cadence,time_to_compute:Time=None):
+def computeDtAndPriority(mjd_last, imp, cadence, time_to_compute: Time = None):
     ret = 0
     if (time_to_compute == None):
-        tt=Time(datetime.utcnow())
+        tt = Time(datetime.utcnow())
     else:
-        tt=time_to_compute
+        tt = time_to_compute
 
-    dt = tt.mjd- mjd_last
+    dt = tt.mjd - mjd_last
 
     return computePriority(dt, imp, cadence)
+
 
 def query_Gaia_DR3_distance(id):
     """

@@ -1,37 +1,55 @@
+from datetime import datetime
 from io import StringIO
 import logging
 
+from astropy.coordinates import get_sun, SkyCoord
+from astropy.time import Time
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
-from django.db import transaction
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.views.generic.edit import CreateView, UpdateView
+from numpy import around
+
 from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm, TargetLatexDescriptionForm
 from bhtom2.bhtom_targets.utils import import_targets
+from bhtom2.dataproducts import last_jd
 from bhtom2.external_service.data_source_information import get_pretty_survey_name
-from bhtom2.utils.openai_utils import latex_target_title_prompt, latex_text_target, latex_text_target_prompt, get_response
+from bhtom2.utils.coordinate_utils import computePriority
+from bhtom2.utils.openai_utils import latex_target_title_prompt, latex_text_target_prompt, \
+    get_response
 from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_stats_latex
 from bhtom_base.bhtom_common.hooks import run_hook
 from bhtom_base.bhtom_common.mixins import Raise403PermissionRequiredMixin
-from bhtom_base.bhtom_targets.forms import TargetExtraFormset, TargetNamesFormset
-from bhtom_base.bhtom_targets.models import Target, TargetName
-from bhtom_base.bhtom_targets.templatetags.targets_extras import deg_to_sexigesimal
-from bhtom_base.bhtom_targets.utils import check_duplicate_source_names, check_for_existing_alias, check_for_existing_coords, get_nonempty_names_from_queryset, coords_to_degrees
+from bhtom_base.bhtom_targets.forms import TargetNamesFormset
+from bhtom_base.bhtom_targets.models import TargetName
+from bhtom2.bhtom_targets.utils import check_duplicate_source_names, check_for_existing_alias, \
+    check_for_existing_coords, get_nonempty_names_from_queryset, coords_to_degrees
 from guardian.shortcuts import get_objects_for_user, get_groups_with_perms
-from django.forms import inlineformset_factory
-from astropy.coordinates import Angle
-from astropy import units as u
-from django.views.generic import View
 
+
+from django.views.generic import TemplateView
+from django.urls import reverse
 from abc import ABC, abstractmethod
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.views.generic import View
+from bhtom2 import settings
+from django_filters.views import FilterView
+from django_tables2.views import SingleTableMixin
+from django.views.generic.detail import DetailView
+from guardian.mixins import PermissionListMixin
+from astropy import units as u
+from bhtom2.bhtom_targets.filters import TargetFilter
 
-from django.views.generic import  TemplateView, View
-from django.urls import reverse_lazy, reverse
+from bhtom2.utils.reduced_data_utils import save_photometry_data_for_target_to_csv_file, \
+    save_radio_data_for_target_to_csv_file
+
+from bhtom_base.bhtom_targets.models import Target, TargetList
+from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 
 logger = logging.getLogger(__name__)
+
 
 class TargetCreateView(LoginRequiredMixin, CreateView):
     """
@@ -39,6 +57,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
     """
     model = Target
     fields = '__all__'
+    template_name = 'bhtom_targets/target_form.html'
 
     def get_default_target_type(self):
         """
@@ -99,7 +118,6 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         context = super(TargetCreateView, self).get_context_data(**kwargs)
         context['type_choices'] = Target.TARGET_TYPES
         context['names_form'] = TargetNamesFormset()
-        context['extra_form'] = TargetExtraFormset()
         return context
 
     def get_form_class(self):
@@ -127,7 +145,6 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         :type form: subclass of TargetCreateForm
         """
 
-        extra = TargetExtraFormset(self.request.POST)
         names = TargetNamesFormset(self.request.POST)
 
         target_names = get_nonempty_names_from_queryset(names.data)
@@ -142,39 +159,35 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         except:
             form.add_error(None, "Invalid format of the coordinates")
             return super().form_invalid(form)
-#            raise ValidationError(f'Invalid format of the coordinates')
+        #            raise ValidationError(f'Invalid format of the coordinates')
 
-        if (ra<0 or ra>360 or dec<-90 or dec>90):
+        if ra < 0 or ra > 360 or dec < -90 or dec > 90:
             form.add_error(None, "Coordinates beyond range")
             return super().form_invalid(form)
-#            raise ValidationError(f'Coordinates beyond range error')
+        #            raise ValidationError(f'Coordinates beyond range error')
 
-        coords_names = check_for_existing_coords(ra, dec, 3./3600., stored)
-        if (len(coords_names)!=0):
+        coords_names = check_for_existing_coords(ra, dec, 3. / 3600., stored)
+        if len(coords_names) != 0:
             ccnames = ' '.join(coords_names)
             form.add_error(None, f"Source found already at these coordinates (rad 3 arcsec): {ccnames}")
             return super().form_invalid(form)
-#            raise ValidationError(f'Source found already at these coordinates: {ccnames}')
+        #            raise ValidationError(f'Source found already at these coordinates: {ccnames}')
 
         # Check if the form, extras and names are all valid:
-        if extra.is_valid() and names.is_valid() and (not duplicate_names) and (not existing_names):
-#            messages.success(self.request, 'Target Create success, now grabbing all the data for it. Wait.')
+        if names.is_valid() and (not duplicate_names) and (not existing_names):
+            #            messages.success(self.request, 'Target Create success, now grabbing all the data for it. Wait.')
 
             # messages.add_message(
             #     self.request,
             #     messages.INFO,
             #     f"Target created. Downloading archival data. Wait..."
             # )
-            
+
             super().form_valid(form)
 
-            extra.instance = self.object
-            extra.save()
         else:
             if duplicate_names:
                 form.add_error(None, 'Duplicate source names for aliases.')
-            form.add_error(None, extra.errors)
-            form.add_error(None, extra.non_form_errors())
             form.add_error(None, names.errors)
             form.add_error(None, names.non_form_errors())
             # if (len(coords_names)!=0):
@@ -183,31 +196,24 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
 
             return super().form_invalid(form)
 
-        #storing all the names
+        # storing all the names
         for source_name, name in target_names:
-            #clearing ASASSN and CPCS names from prefixes if provided:
+            # clearing ASASSN and CPCS names from prefixes if provided:
             if "ASASSN" in source_name:
                 if name.startswith("https://asas-sn.osu.edu/sky-patrol/coordinate/"):
-                    name= name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
-
-            if "CPCS" in source_name:
-                if name.startswith("ivo://"):
-                    name= name.replace("ivo://", "")
+                    name = name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
 
             to_add, _ = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
             to_add.name = name
             to_add.save()
 
-
-#        form.add_error(None,'Creating target, please wait...')
+        #        form.add_error(None,'Creating target, please wait...')
         # messages.add_message(self.request,
         #         messages.INFO,
         #         f'Creating target, please wait...')
 
-        #TODO: there should be a message here on success and a warning to wait: Gathering archival data for target
-        #TODO: the hook here should be run in the background 
-        
-
+        # TODO: there should be a message here on success and a warning to wait: Gathering archival data for target
+        # TODO: the hook here should be run in the background
 
         logger.info('Target post save hook: %s created: %s', self.object, True)
         run_hook('target_post_save', target=self.object, created=True)
@@ -236,6 +242,7 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
     permission_required = 'bhtom_targets.change_target'
     model = Target
     fields = '__all__'
+    template_name = 'bhtom_targets/target_form.html'
 
     def get_context_data(self, **kwargs):
         """
@@ -247,10 +254,7 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
         extra_field_names = [extra['name'] for extra in settings.EXTRA_FIELDS]
         context = super().get_context_data(**kwargs)
         context['names_form'] = TargetNamesFormset(instance=self.object)
-        context['extra_form'] = TargetExtraFormset(
-            instance=self.object,
-            queryset=self.object.targetextra_set.exclude(key__in=extra_field_names)
-        )
+
         return context
 
     def form_valid(self, form):
@@ -264,37 +268,26 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
         :param form: Form data for target update
         :type form: subclass of TargetCreateForm
         """
-        extra = TargetExtraFormset(self.request.POST, instance=self.object)
         names = TargetNamesFormset(self.request.POST, instance=self.object)
 
         target_names = get_nonempty_names_from_queryset(names.data)
         duplicate_names = check_duplicate_source_names(target_names)
 
-        # Check if the form, extras and names are all valid:
-        if extra.is_valid() and not duplicate_names:
-            extra.instance = self.object
-            extra.save()
-        else:
-            if duplicate_names:
-                form.add_error(None, 'Duplicate source names for aliases.')
-            form.add_error(None, extra.errors)
-            form.add_error(None, extra.non_form_errors())
-            form.add_error(None, names.errors)
-            form.add_error(None, names.non_form_errors())
-            return super().form_invalid(form)
+        if duplicate_names:
+            form.add_error(None, 'Duplicate source names for aliases.')
 
         super().form_valid(form)
 
         # Update target names for given source
         for source_name, name in target_names:
-            #clearing ASASSN and CPCS names from prefixes if provided:
+            # clearing ASASSN and CPCS names from prefixes if provided:
             if "ASASSN" in source_name:
                 if name.startswith("https://asas-sn.osu.edu/sky-patrol/coordinate/"):
-                    name= name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
+                    name = name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
 
             if "CPCS" in source_name:
                 if name.startswith("ivo://"):
-                    name= name.replace("ivo://", "")
+                    name = name.replace("ivo://", "")
 
             to_update, created = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
             to_update.name = name
@@ -317,8 +310,8 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
                 f'Deleted alias {to_delete.name} for {get_pretty_survey_name(to_delete.source_name)}'
             )
 
-        #the hook is run even if not called?
-        print("UPDATE: REDIRECTING TO "+self.get_success_url())
+        # the hook is run even if not called?
+        print("UPDATE: REDIRECTING TO " + self.get_success_url())
         return redirect(self.get_success_url())
 
     def get_queryset(self, *args, **kwargs):
@@ -370,9 +363,8 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
         return form
 
 
-
-#form for generating latex description of the target (under Publication)
-#very similar form to update
+# form for generating latex description of the target (under Publication)
+# very similar form to update
 class TargetGenerateTargetDescriptionLatexView(UpdateView):
     template_name = 'bhtom_targets/target_generate_latex_form.html'
     model = Target
@@ -385,7 +377,7 @@ class TargetGenerateTargetDescriptionLatexView(UpdateView):
         context['target'] = target
 
         return context
-        
+
     def get_form_class(self):
         """
         Return the form class to use in this view.
@@ -401,7 +393,7 @@ class TargetGenerateTargetDescriptionLatexView(UpdateView):
         initial['latex'] = get_response(prompt)
         initial['prompt'] = prompt
 
-        #title:
+        # title:
         prompt_title = latex_target_title_prompt(target)
         initial['title'] = get_response(prompt_title)
         initial['prompt_title'] = prompt_title
@@ -449,11 +441,13 @@ class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
             if tmp:
                 os.remove(tmp.name)
 
+
 class TargetDownloadPhotometryStatsLatexTableView(TargetDownloadDataView):
     def generate_data_method(self, target_id):
         return get_photometry_stats_latex(target_id)
 
-#copied from bhtom_base to use my own utils.import_target
+
+# copied from bhtom_base to use my own utils.import_target
 class TargetImportView(LoginRequiredMixin, TemplateView):
     """
     View that handles the import of targets from a CSV. Requires authentication.
@@ -477,3 +471,254 @@ class TargetImportView(LoginRequiredMixin, TemplateView):
         for error in result['errors']:
             messages.warning(request, error)
         return redirect(reverse('bhtom2.bhtom_targets:list'))
+
+
+class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
+    permission_required = 'tom_dataproducts.add_dataproduct'
+
+    @abstractmethod
+    def generate_data_method(self, target_id):
+        pass
+
+    def get(self, request, *args, **kwargs):
+        import os
+        from django.http import FileResponse
+
+        if 'pk' in kwargs:
+            target_id = kwargs['pk']
+        elif 'name' in kwargs:
+            target_id = kwargs['name']
+        logger.info(f'Generating photometry CSV file for target with id={target_id}...')
+
+        tmp = None
+        try:
+            tmp, filename = self.generate_data_method(target_id)
+            return FileResponse(open(tmp.name, 'rb'),
+                                as_attachment=True,
+                                filename=filename)
+        except Exception as e:
+            logger.error(f'Error while generating photometry CSV file for target with id={target_id}: {e}')
+        finally:
+            if tmp:
+                os.remove(tmp.name)
+
+
+class TargetDownloadPhotometryDataView(TargetDownloadDataView):
+    def generate_data_method(self, target_id):
+        return save_photometry_data_for_target_to_csv_file(target_id)
+
+
+class TargetDownloadRadioDataView(TargetDownloadDataView):
+    def generate_data_method(self, target_id):
+        return save_radio_data_for_target_to_csv_file(target_id)
+
+
+# overwriting the view from bhtom_base
+class TargetListView(SingleTableMixin, PermissionListMixin, FilterView):
+    """
+    View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
+    """
+    template_name = 'bhtom_targets/target_list.html'
+    strict = False
+    model = Target
+    # table_class = TargetTable
+    filterset_class = TargetFilter
+    permission_required = 'bhtom_targets.view_target'
+    table_pagination = False
+
+    def get_context_data(self, *args, **kwargs):
+        """
+        Adds the number of targets visible, the available ``TargetList`` objects if the user is authenticated, and
+        the query string to the context object.
+
+        :returns: context dictionary
+        :rtype: dict
+        """
+        context = super().get_context_data(*args, **kwargs)
+        # hide target grouping list if user not logged in
+        context['groupings'] = (TargetList.objects.all()
+                                if self.request.user.is_authenticated
+                                else TargetList.objects.none())
+        context['query_string'] = self.request.META['QUERY_STRING']
+
+        context['target_count'] = context['object_list'].count
+        #todo -> move to harvester-service ?
+        '''
+        mjd_now = Time(datetime.utcnow()).mjd
+
+        prioritylist = []
+        # SUN's position now:
+        sun_pos = get_sun(Time(datetime.utcnow()))
+
+        for target in context['object_list']:
+            # read dynamically from the current light curve:
+            mag_last, mjd_last, filter_last = last_jd.get_last(target)
+
+            # everytime the list is rendered, the last mag and last mjd are updated per target
+            target.mag_last = mag_last
+            target.mjd_last = mjd_last
+
+            # updating sun separation
+            try:
+                obj_pos = SkyCoord(target.ra, target.dec, unit=u.deg)
+                Sun_sep = around(sun_pos.separation(obj_pos).deg, 0)
+            except:
+                logger.error("Coordinates outside the range in {target} for Sun position calculation!")
+                obj_pos = SkyCoord(0, 0, unit=u.deg)
+                Sun_sep = "error"  # around(sun_pos.separation(obj_pos).deg,0)
+
+            target.sun_separation = Sun_sep
+            target.sun = Sun_sep #todo ????
+
+            out_filter = ""
+            if (mjd_last > 0):
+                out_filter = filter_last
+            else:
+                out_filter = "null"
+
+            target.last_mag = mag_last
+            target.last_filter = out_filter
+
+            try:
+                target.dt = (mjd_now - mjd_last)
+                dt = (mjd_now - mjd_last)
+            except:
+                dt = 10
+                target.dt = -1.
+
+            try:
+                imp = float(target.extra_field.get('importance'))
+                cadence = float(target.extra_field.get('cadence'))
+            except:
+                imp = 1
+                cadence = 1
+
+            target.cadencepriority = computePriority(dt, imp, cadence)
+            prioritylist.append(target.cadencepriority)
+            target.save()
+            '''
+        return context
+
+
+# Table list view with light curves only
+class TargetListImagesView(SingleTableMixin, PermissionListMixin, FilterView):
+    """
+    View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
+    """
+    template_name = 'bhtom_targets/target_list_images.html'
+    strict = False
+    model = Target
+    filterset_class = TargetFilter
+    permission_required = 'bhtom_targets.view_target'
+    table_pagination = False
+
+    def get_context_data(self, *args, **kwargs):
+        """
+        Adds the number of targets visible, the available ``TargetList`` objects if the user is authenticated, and
+        the query string to the context object.
+
+        :returns: context dictionary
+        :rtype: dict
+        """
+        context = super().get_context_data(*args, **kwargs)
+        # hide target grouping list if user not logged in
+        context['groupings'] = (TargetList.objects.all()
+                                if self.request.user.is_authenticated
+                                else TargetList.objects.none())
+        context['query_string'] = self.request.META['QUERY_STRING']
+
+        context['target_count'] = context['object_list'].count
+
+        return context
+
+
+class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
+    model = Target
+    permission_required = 'bhtom_targets.view_target'
+
+    def get(self, request, *args, **kwargs):
+        target_id = kwargs.get('pk', None)
+        if isinstance(target_id, int):
+            target: Target = Target.objects.get(pk=target_id)
+        else:
+            target: Target = Target.objects.get(name=target_id)
+
+        datums = ReducedDatum.objects.filter(target=target,
+                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
+                                             )
+
+        allobs = []
+        allobs_nowise = []
+        for datum in datums:
+            if str(datum.filter) == "WISE(W1)" or str(datum.filter) == "WISE(W2)":
+                #                allobs.append(str("WISE"))
+                allobs.append(str(datum.filter))
+                continue
+            else:
+                allobs_nowise.append(str(datum.filter))
+                allobs.append(str(datum.filter))
+
+        # counting the number of entires per filter in order to remove the very short ones
+        filter_counts = {}
+        for obs in allobs:
+            if obs in filter_counts:
+                filter_counts[obs] += 1
+            else:
+                filter_counts[obs] = 1
+
+        # Create a new list that only includes filters with at least three occurrences
+        allobs_filtered = []
+        for obs in allobs_nowise:
+            if filter_counts[obs] > 2:
+                allobs_filtered.append(obs)
+
+        # extracting uniq list and sort it alphabetically
+        all_filters = sorted(set(allobs))
+        # this will move the WISE to the end of the list, if present
+        if 'WISE(W1)' in all_filters:
+            all_filters.remove('WISE(W1)')
+            all_filters.append('WISE(W1)')
+        if 'WISE(W2)' in all_filters:
+            all_filters.remove('WISE(W2)')
+            all_filters.append('WISE(W2)')
+
+        all_filters_nowise = sorted(set(allobs_filtered))  # no wise and no short filters
+
+        # for form values:
+        if request.method == 'GET':
+            init_t0 = request.GET.get('init_t0', '')
+            init_te = request.GET.get('init_te', '')
+            init_u0 = request.GET.get('init_u0', '')
+            logu0 = request.GET.get('logu0', '')
+            fixblending = request.GET.get('fixblending', 'on')
+            auto_init = request.GET.get('auto_init', '')
+            selected_filters = request.GET.getlist('selected_filters')
+        else:
+            selected_filters = all_filters_nowise  # by default, selecting all filters but wise
+
+        if len(selected_filters) == 0:
+            selected_filters = all_filters_nowise  # by default, selecting all filters but wise
+
+        sel = {}
+        for f in all_filters:
+            if f in selected_filters:
+                sel[f] = True
+            else:
+                sel[f] = False
+
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
+        context['selected_filters'] = selected_filters
+        context['sel'] = sel
+        context.update({
+            'init_t0': init_t0,
+            'init_te': init_te,
+            'init_u0': init_u0,
+            'logu0': logu0,
+            'fixblending': fixblending,
+            'auto_init': auto_init,
+            'filter_counts': filter_counts
+        })
+        return self.render_to_response(context)
+
+

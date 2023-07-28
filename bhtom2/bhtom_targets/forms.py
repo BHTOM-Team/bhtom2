@@ -1,14 +1,10 @@
 from django import forms
-from astropy.coordinates import Angle
-from astropy import units as u
-from django.forms import ValidationError, inlineformset_factory, HiddenInput
+from django.forms import inlineformset_factory, HiddenInput
 from django.conf import settings
 from django.contrib.auth.models import Group
-from bhtom2.utils import openai_utils
 from guardian.shortcuts import assign_perm, get_groups_with_perms, remove_perm
 from datetime import datetime, timezone
 
-from bhtom_base.bhtom_targets.utils import check_for_existing_coords, coords_to_degrees
 from astropy.coordinates import Angle
 from astropy import units as u
 from django.forms import ValidationError

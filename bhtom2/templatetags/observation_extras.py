@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta, date
 from urllib.parse import urlencode
 
@@ -142,6 +143,8 @@ def observation_list(context, target=None):
     """
     Displays a list of all observations in the TOM, limited to an individual target if specified.
     """
+    time = datetime.now()
+
     if target:
         if settings.TARGET_PERMISSIONS_ONLY:
             observations = target.observationrecord_set.all()
@@ -152,6 +155,9 @@ def observation_list(context, target=None):
             ).filter(target=target)
     else:
         observations = ObservationRecord.objects.all().order_by('-created')
+
+    time2 = datetime.now()
+    logging.info("observations %s" % str(time-time2))
     return {'observations': observations}
 
 

@@ -1,5 +1,5 @@
 # importing the required module
-import logging
+'''import logging
 from os import path
 
 import astropy
@@ -800,3 +800,4 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
         'executionTime': info_executionTime,
         'image':image_base64,
     }
+'''

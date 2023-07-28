@@ -31,7 +31,10 @@ def recent_photometry(target, limit=1):
     """
     Displays a table of the most recent photometric points for a target.
     """
+    time = datetime.now()
     photometry = ReducedDatum.objects.filter(data_type='photometry', target=target).order_by('-timestamp')[:limit]
+    time2 = datetime.now()
+    logging.info("recent photometry %s" % str(time-time2))
     return {'data': [{'timestamp': rd.timestamp,
                       'magnitude': rd.value,
                       'filter': rd.filter,
@@ -41,6 +44,8 @@ def recent_photometry(target, limit=1):
 
 @register.inclusion_tag('bhtom_dataproducts/partials/photometry_stats.html')
 def photometry_stats(target):
+    time = datetime.now()
+
     import pandas as pd
 
     """
@@ -60,7 +65,8 @@ def photometry_stats(target):
                     'Min_MJD': row['Earliest_time'],
                     'Max_MJD': row['Latest_time']}
         data_list.append(data_dict)
-
+    time2 = datetime.now()
+    logging.info("photometry status %s" % str(time-time2))
     return {'data': data_list}
 
 @register.inclusion_tag('bhtom_dataproducts/partials/dataproduct_list_for_target.html', takes_context=True)
@@ -162,6 +168,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
     """
 
     #the same as for icon/visual list:
+    time = datetime.now()
     color_map = {
         'GSA(G)': ['black','circle',10],
         'ZTF(zg)': ['green','cross',4],
@@ -408,6 +415,8 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
             x=1.35
         )
     )
+    time2 = datetime.now()
+    logging.info("photometry %s" % str(time-time2))
     return {
         'target': target,
         'plot': offline.plot(fig, output_type='div', show_link=False)
@@ -656,6 +665,8 @@ def spectroscopy_for_target(context, target, dataproduct=None):
     Renders a spectroscopic plot for a ``Target``. If a ``DataProduct`` is specified, it will only render a plot with
     that spectrum.
     """
+    time = datetime.now()
+
     spectral_dataproducts = DataProduct.objects.filter(target=target,
                                                        data_product_type=settings.DATA_PRODUCT_TYPES['spectroscopy'][0])
     if dataproduct:
@@ -686,6 +697,8 @@ def spectroscopy_for_target(context, target, dataproduct=None):
             tickformat=".1eg"
         )
     )
+    time2 = datetime.now()
+    logging.info("spectroskopy %s" % str(time - time2))
     return {
         'target': target,
         'plot': offline.plot(go.Figure(data=plot_data, layout=layout), output_type='div', show_link=False)

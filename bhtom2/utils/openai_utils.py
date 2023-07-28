@@ -1,8 +1,8 @@
 from datetime import datetime
-from bhtom_base.bhtom_targets.templatetags.targets_extras import deg_to_sexigesimal
 import openai
 from django.conf import settings
 
+from bhtom2.templatetags.bhtom_targets_extras import deg_to_sexigesimal
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_targets.models import TargetExtra, Target
 

@@ -42,5 +42,5 @@ sphinx>=4.0
 lxml==4.9.1
 crispy-bootstrap4>=2022.1
 openai>=0.27.3
-MulensModel>=2.15.0
+#MulensModel>=2.15.0
 

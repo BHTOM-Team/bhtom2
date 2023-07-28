@@ -41,17 +41,17 @@ SITE_ID = int(secret.get("SITE_ID", 1))
 CPCS_BASE_URL = secret.get('CPCS_BASE_URL', None)
 CPCS_DATA_ACCESS_HASHTAG = secret.get('CPCS_DATA_ACCESS_HASHTAG', None)
 
-WSDB_USER = secret.get('WSDB_USER','')
-WSDB_PASSWORD = secret.get('WSDB_PASSWORD','')
-WSDB_HOST = secret.get('WSDB_HOST','')
-WSDB_PORT = secret.get('WSDB_PORT','')
+WSDB_USER = secret.get('WSDB_USER', '')
+WSDB_PASSWORD = secret.get('WSDB_PASSWORD', '')
+WSDB_HOST = secret.get('WSDB_HOST', '')
+WSDB_PORT = secret.get('WSDB_PORT', '')
 
 ADMIN_USERNAME = secret.get('ADMIN_USERNAME')
 ADMIN_PASSWORD = secret.get('ADMIN_PASSWORD')
-ADMIN_EMAIL = secret.get('ADMIN_EMAIL','')
+ADMIN_EMAIL = secret.get('ADMIN_EMAIL', '')
 
-PROPOSALS_API_KEYS={
-'LCO':secret.get('LCO_API_KEY','')
+PROPOSALS_API_KEYS = {
+    'LCO': secret.get('LCO_API_KEY', '')
 }
 
 OPENAI_API_KEY = secret.get('OPENAI_API_KEY')
@@ -132,8 +132,8 @@ DATABASES = {
     'default': {
         'NAME': secret.get("POSTGRES_DB_NAME", 'bhtom2'),
         'ENGINE': 'django.db.backends.postgresql',
-        'USER': secret.get("POSTGRES_DB_USER", 'bhtom'),
-        'PASSWORD': secret.get("POSTGRES_PASSWORD", ""),
+        'USER': secret.get("POSTGRES_DB_USER", 'bhtom2'),
+        'PASSWORD': secret.get("POSTGRES_PASSWORD", "bhtom2"),
         'HOST': secret.get('POSTGRES_HOST', 'localhost'),
         'PORT': secret.get('POSTGRES_PORT', 5432),
         'TEST': {
@@ -241,7 +241,6 @@ CACHES = {
 # TOM Specific configuration
 TARGET_TYPE = 'SIDEREAL'
 
-
 # Define the valid data product types for your TOM. Be careful when removing items, as previously valid types will no
 # longer be valid, and may cause issues unless the offending records are modified.
 DATA_PRODUCT_TYPES = {
@@ -256,7 +255,6 @@ DATA_PROCESSORS = {
     'photometry': 'bhtom_base.bhtom_dataproducts.processors.photometry_processor.PhotometryProcessor',
     'spectroscopy': 'bhtom_base.bhtom_dataproducts.processors.spectroscopy_processor.SpectroscopyProcessor',
 }
-
 
 TOM_ALERT_CLASSES = [
     'bhtom_base.bhtom_alerts.brokers.alerce.ALeRCEBroker',
@@ -286,8 +284,8 @@ TOM_ALERT_CLASSES = [
 
 BROKERS = {
     'TNS': {
-        #BHTOM_Bot TNS API
-        'api_key':  secret.get('TNS_API_KEY',''),
+        # BHTOM_Bot TNS API
+        'api_key': secret.get('TNS_API_KEY', ''),
         'user_agent': 'tns_marker{"tns_id":99624,"type": "bot", "name":"BHTOM_Bot"}'
     }
 }
@@ -302,13 +300,12 @@ TOM_HARVESTER_CLASSES = [
 ]
 
 HARVESTERS = {
-     'TNS': {
-        #BHTOM_Bot TNS API
-        'api_key':  secret.get('TNS_API_KEY',''),
+    'TNS': {
+        # BHTOM_Bot TNS API
+        'api_key': secret.get('TNS_API_KEY', ''),
         'user_agent': 'tns_marker{"tns_id":99624,"type": "bot", "name":"BHTOM_Bot"}'
     }
 }
-
 
 # Define extra target fields here. Types can be any of "number", "string", "boolean" or "datetime"
 # See https://tomtoolkit.github.io/docs/target_fields for documentation on this feature
@@ -319,34 +316,20 @@ HARVESTERS = {
 #     {'name': 'eligible', 'type': 'boolean'},
 #     {'name': 'dicovery_date', 'type': 'datetime'}
 # ]
-#'hidden':True # hides the extra field from target detail
+# 'hidden':True # hides the extra field from target detail
 
-EXTRA_FIELDS = [
-    {'name': 'classification', 'type': 'string'},
-    {'name': 'discovery_date', 'type': 'datetime'},
-    {'name': 'mjd_last', 'type': 'number'},
-    {'name': 'mag_last','type': 'number'},
-    {'name': 'importance', 'type': 'number'},
-    {'name': 'cadence', 'type': 'number'},
-    {'name': 'priority', 'type': 'number'},
-    {'name': 'sun_separation', 'type': 'number'},
-    {'name': 'creation_date', 'type': 'datetime'},
-    {'name': 'constellation', 'type': 'string'},
-    {'name': 'dont_update_me', 'type': 'boolean'},#, 'hidden': True}]
-    {'name': 'phot_class', 'type': 'string'} #classification from photometric classifier, automated
-    ]
+EXTRA_FIELDS = []
 
+CREATE_TARGET_HIDDEN_EXTRA_FIELDS = []
 
-CREATE_TARGET_HIDDEN_EXTRA_FIELDS = [
-    'sun_separation', 'dont_update_me', 
+CREATE_TARGET_HIDDEN_FIELDS = [
+    'pm_ra', 'pm_dec', 'galactic_lat', 'galactic_lng', 'distance', 'distance_err',
+    'sun_separation', 'dont_update_me',
     'mjd_last', 'mag_last', 'priority',
     'pm_ra', 'pm_dec', 'galactic_lat', 'galactic_lng', 'distance', 'distance_err',
     'constellation', 'phot_class'
 ]
 
-CREATE_TARGET_HIDDEN_FIELDS = [
-    'pm_ra', 'pm_dec', 'galactic_lat', 'galactic_lng', 'distance', 'distance_err'#, 'groups'
-]
 
 def generate_name_tuple(data_source: DataSource) -> tuple:
     return data_source.name, f'{data_source.name} name'
@@ -369,7 +352,7 @@ TARGET_PERMISSIONS_ONLY = True
 OPEN_URLS = []
 
 HOOKS = {
-    'target_post_save': 'bhtom2.hooks.target_post_save',
+    'target_post_save': 'bhtom2.bhtom_targets.hooks.target_post_save',
     'reduced_datum_pre_save': 'bhtom_base.bhtom_dataproducts.hooks.reduced_datum_pre_save',
     'observation_change_state': 'bhtom_base.bhtom_common.hooks.observation_change_state',
     'data_product_post_upload': 'bhtom_base.bhtom_dataproducts.hooks.data_product_post_upload',
