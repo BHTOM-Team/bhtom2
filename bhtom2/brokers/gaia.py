@@ -74,7 +74,7 @@ class GaiaBroker(BHTOMBroker):
         dl_keys = [inp for inp in datalink.keys()]
         dl_keys.sort()
 
-        self.logger.debug(f'len{dl_keys} lightcurves found.')
+        self.logger.debug(f'{len(dl_keys)} lightcurves found.')
         if len(dl_keys) == 0:
             return pd.DataFrame()
 
