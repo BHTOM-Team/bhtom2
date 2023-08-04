@@ -40,7 +40,7 @@ SITE_ID = int(secret.get("SITE_ID", 1))
 
 CPCS_BASE_URL = secret.get('CPCS_BASE_URL', None)
 CPCS_DATA_ACCESS_HASHTAG = secret.get('CPCS_DATA_ACCESS_HASHTAG', None)
-
+UPLOAD_SERVICE_URL = secret.get('UPLOAD_SERVICE_URL', None)
 WSDB_USER = secret.get('WSDB_USER', '')
 WSDB_PASSWORD = secret.get('WSDB_PASSWORD', '')
 WSDB_HOST = secret.get('WSDB_HOST', '')
@@ -128,19 +128,33 @@ WSGI_APPLICATION = 'bhtom2.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'NAME': secret.get("POSTGRES_DB_NAME", 'bhtom2'),
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'USER': secret.get("POSTGRES_DB_USER", 'bhtom2'),
+#         'PASSWORD': secret.get("POSTGRES_PASSWORD", "bhtom2"),
+#         'HOST': secret.get('POSTGRES_HOST', 'localhost'),
+#         'PORT': secret.get('POSTGRES_PORT', 5432),
+#         'TEST': {
+#             'NAME': secret.get("POSTGRES_TEST_DB_NAME", 'test_bhtom2')
+#         }
+#     },
+# }
 DATABASES = {
     'default': {
         'NAME': secret.get("POSTGRES_DB_NAME", 'bhtom2'),
         'ENGINE': 'django.db.backends.postgresql',
-        'USER': secret.get("POSTGRES_DB_USER", 'bhtom2'),
-        'PASSWORD': secret.get("POSTGRES_PASSWORD", "bhtom2"),
-        'HOST': secret.get('POSTGRES_HOST', 'localhost'),
+        'USER': secret.get("POSTGRES_DB_USER", 'bhtom'),
+        'PASSWORD': secret.get("POSTGRES_PASSWORD", ""),
+        'HOST': 'localhost',
         'PORT': secret.get('POSTGRES_PORT', 5432),
         'TEST': {
             'NAME': secret.get("POSTGRES_TEST_DB_NAME", 'test_bhtom2')
         }
     },
 }
+
 
 MIGRATION_MODULES = {
     'bhtom2': 'bhtom2.migrations'
@@ -370,13 +384,11 @@ HINTS_ENABLED = False
 HINT_LEVEL = 20
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        # other authentication classes if needed
     ],
-    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 100
 }
-
 try:
     from local_settings import *  # noqa
 except ImportError:
