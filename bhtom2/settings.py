@@ -401,6 +401,7 @@ except ImportError:
 GAIA_ALERTS_PATH: str = 'http://gsaweb.ast.cam.ac.uk'
 AAVSO_API_PATH: str = 'https://www.aavso.org/vsx/index.php'
 ZTF_DR_PATH: str = 'https://irsa.ipac.caltech.edu/cgi-bin/ZTF/nph_light_curves'
+OGLE_EWS_PATH: str = 'https://www.astrouw.edu.pl/ogle/ogle4/ews/'
 
 # Observatories possible to request data
 FACILITIES = {

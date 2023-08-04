@@ -153,11 +153,20 @@ class OGLEEWSBroker(BHTOMBroker):
 
         print("OGLE_EWS STARTS name found ",ogleews_name)
 
+        #trimming the OGLE or OGLE- beginning TODO: should be done while setting the alias in Create/Update
+        if ogleews_name.startswith("OGLE-"):
+            ogleews_name = ogleews_name.replace("OGLE-","")
+
+        if ogleews_name.startswith("OGLE "):
+            ogleews_name = ogleews_name.replace("OGLE ","")
+
         text = ogleews_name.split('-')
-        year = text[1]
-        num = text[3]
+        year = text[0]
+        num = text[2]
 
         url = ("https://www.astrouw.edu.pl/ogle/ogle4/ews/%s/blg-%s/phot.dat")%(year, num)
+
+        print("OGLEEWS: url:",url)
 
         try:        
             response: str = query_external_service(url,
