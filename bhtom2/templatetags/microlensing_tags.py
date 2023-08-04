@@ -63,7 +63,8 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     mags = defaultdict(list)
     errors = defaultdict(list)
     filters = selected_filters
-
+    max_median_error = 0
+    
     for datum in datums:
         if str(datum.filter) in selected_filters:
             try:
@@ -71,6 +72,8 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
                 times[filter].append(datum.mjd+2400000.5) #store JD here
                 mags[filter].append(datum.value)
                 errors[filter].append(datum.error)
+                med = np.median(errors[filter])
+                if (med>max_median_error): max_median_error=med
             except Exception:
                 logger("Error reading datapoint "+str(datum))
                 continue
@@ -334,7 +337,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
         # plt.plot(xmodel-2450000, difmodel, ls='--',color='magenta')
 
         plt.xlim(xlim1, xlim2)
-        plt.ylim(-0.23,0.23)
+        plt.ylim(-5*max_median_error, 5*max_median_error)
         plt.grid()
 
         import io
@@ -497,6 +500,7 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
     mags = defaultdict(list)
     errors = defaultdict(list)
     filters = selected_filters
+    max_median_error = 0
 
     for datum in datums:
         if str(datum.filter) in selected_filters:
@@ -505,6 +509,8 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
                 times[filter].append(datum.mjd+2400000.5) #store JD here
                 mags[filter].append(datum.value)
                 errors[filter].append(datum.error)
+                med = np.median(errors[filter])
+                if (med>max_median_error): max_median_error=med
             except Exception:
                 logger("Error reading datapoint "+str(datum))
                 continue
@@ -524,7 +530,7 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
                 logger("Error reading datapoint "+str(datum))
                 continue
 
-
+    
     #Reading Gaia ephemeris file from statics
     try:
         gaiaephem_path = path.join(settings.STATIC_ROOT, 'Gaia_ephemeris.txt')
@@ -649,6 +655,7 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
     max_y_sel = max(mag for filter in mags for mag in mags[filter])
     max_y_non = max(mag for filter in non_mags for mag in non_mags[filter])
     max_y = max(max_y_sel, max_y_non)
+    print("MEDIAN ERR: ",max_median_error)
 
     fig.add_shape(
     type="line",
@@ -772,7 +779,8 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
         # plt.plot(xmodel-2450000, difmodel, ls='--',color='magenta')
 
         plt.xlim(xlim1, xlim2)
-        plt.ylim(-0.23,0.23)
+#        plt.ylim(-0.23,0.23)
+        plt.ylim(-5*max_median_error, 5*max_median_error)
         plt.grid()
 
         import io
