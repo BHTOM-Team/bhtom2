@@ -177,4 +177,4 @@ class ASASSNBroker(BHTOMBroker):
 
 #returns a Latex String with citation needed when using data from this broker
 def getCitation():
-    return "CITATION TO ASASSN and acknowledgment."
+    return "CITATION TO ASASSN and acknowledgment. The ASAS-SN Catalog of Variable Stars: I."

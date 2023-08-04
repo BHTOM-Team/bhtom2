@@ -471,7 +471,7 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
             'error_message': "ERROR: Error in initial parameters.",
         }
 
-    print("INIT: ",init_piEN, init_u0, auto_init, filter_counts)    
+    print(f"INIT: {init_t0},{init_te}, {init_u0}, {init_piEN}, {init_piEE}, {auto_init}, {filter_counts}")    
     datums = ReducedDatum.objects.filter(target=target,
                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
                                              )
@@ -560,6 +560,8 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
 
     smartte = 50.
 
+    print("INIT2: ",init_piEN, init_u0, auto_init, filter_counts)    
+
     if init_t0 == '' or auto_init:
         init_t0 = smartt0
     if init_te == '' or auto_init:
@@ -574,6 +576,8 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
         fixblending = '' #this is because only empty string will be read as unchecked box
 
     params = dict()
+    params['t_0_par'] = init_t0 #DONT CHANGE LATER!
+
     params['t_0'] = init_t0# full JD has to go here!!!
     params['u_0'] = init_u0
     if (logu0 == 'on'): params['u_0'] = np.log10(init_u0)
@@ -707,7 +711,7 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
         print(mag0_dict)
         print("\nFs values:")
         print(fs_dict)
-
+        print("T0PAR:", params['t_0_par'])
         info_executionTime = "Time of fitting execution: %s seconds" % '{0:.3f}'.format((time.time() - start_time))
 
         #FIG:
