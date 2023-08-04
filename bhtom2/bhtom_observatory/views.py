@@ -2,7 +2,7 @@ import logging
 
 from django.db import transaction
 from django.shortcuts import redirect
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 from django.views.generic import FormView, ListView, UpdateView, DeleteView, DetailView
 from django.contrib import messages
 
@@ -23,21 +23,13 @@ class CreateObservatory(LoginRequiredMixin, FormView):
     def form_valid(self, form):
 
         try:
-            # super().form_valid(form)
-
             user = self.request.user
             name = form.cleaned_data['name']
             lon = form.cleaned_data['lon']
             lat = form.cleaned_data['lat']
-            cpcsOnly = form.cleaned_data['cpcsOnly']
-
+            calibration_flg = form.cleaned_data['calibration_flg']
             example_file = self.request.FILES.get('fits')
-
-            if cpcsOnly is True:
-                prefix = name + "_CalibrationOnly"
-            else:
-                prefix = name
-
+            altitude = form.cleaned_data['altitude']
             gain = form.cleaned_data['gain']
             readout_noise = form.cleaned_data['readout_noise']
             binning = form.cleaned_data['binning']
@@ -49,20 +41,26 @@ class CreateObservatory(LoginRequiredMixin, FormView):
             filters = form.cleaned_data['filters']
             comment = form.cleaned_data['comment']
 
-            if readout_speed is None:
-                readout_speed = 9999.
-            if pixel_size is None:
-                pixel_size = 13.5
+            if calibration_flg is True:
+                prefix = name + "_CalibrationOnly"
+            else:
+                prefix = name
+        except TypeError as e:
+            logger.error('CreateObservatory error: ' + str(e))
+            messages.error(self.request, 'Error with creating the observatory')
+            return redirect(self.get_success_url())
 
+        try:
             observatory = Observatory.objects.create(
                 name=name,
                 lon=lon,
                 lat=lat,
-                isActive=False,
+                active_flg=False,
                 prefix=prefix,
-                cpcsOnly=cpcsOnly,
+                calibration_flg=calibration_flg,
                 example_file=example_file,
                 user=user,
+                altitude=altitude,
                 gain=gain,
                 readout_noise=readout_noise,
                 binning=binning,
@@ -76,13 +74,14 @@ class CreateObservatory(LoginRequiredMixin, FormView):
             )
 
             observatory.save()
-            logger.info('Send mail, create new obserwatory:  %s' % str(name))
+            logger.info('Create new obserwatory:  %s' % str(name))
 
         except Exception as e:
             logger.error('CreateObservatory error: ' + str(e))
             messages.error(self.request, 'Error with creating the observatory')
             return redirect(self.get_success_url())
-        messages.success(self.request, 'Successfully created %s' % str(name))
+
+        messages.success(self.request, '%s successfully created, observatory requires administrator approval' % str(name))
         return redirect(self.get_success_url())
 
 
@@ -93,14 +92,14 @@ class ObservatoryList(LoginRequiredMixin, ListView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        userObservatory = ObservatoryMatrix.objects.filter(user_id=self.request.user).order_by('observatory_id__name')
+        userObservatory = ObservatoryMatrix.objects.filter(user=self.request.user).order_by('observatory__name')
 
         observatory_user_list = []
         for row in userObservatory:
             observatory_user_list.append(
-                [row.id, row.isActive, row.comment, Observatory.objects.get(id=row.observatory_id.id)])
+                [row.id, row.active_flg, row.comment, Observatory.objects.get(id=row.observatory.id)])
 
-        context['observatory_list'] = Observatory.objects.filter(isActive=True).order_by('name')
+        context['observatory_list'] = Observatory.objects.filter(active_flg=True).order_by('name')
         context['observatory_user_list'] = observatory_user_list
 
         return context
@@ -116,6 +115,7 @@ class UpdateObservatory(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         super().form_valid(form)
         messages.success(self.request, 'Successfully updated %s' % form.cleaned_data['name'])
+        logger.info("Update observatory %s, user: %s" % (str(form.instance), str(self.request.user)))
         return redirect(self.get_success_url())
 
 
@@ -132,6 +132,7 @@ class DeleteObservatory(LoginRequiredMixin, DeleteView):
     def form_valid(self, form):
         super().form_valid(form)
         messages.success(self.request, 'Successfully delete')
+        logger.info("Delete observatory %s, user: %s" % (str(self.request), str(self.request.user)))
         return redirect(self.get_success_url())
 
 
@@ -161,25 +162,28 @@ class CreateUserObservatory(LoginRequiredMixin, FormView):
     def form_valid(self, form):
 
         user = self.request.user
-        observatoryID = form.cleaned_data['observatory']
+        observatoryId = form.cleaned_data['observatory']
         comment = form.cleaned_data['comment']
-        observatoryUser = None
+
+        if not observatoryId.active_flg:
+            logger.error('observatory is not active')
+            messages.error(self.request, 'Error with creating the user observatory')
+            return redirect(self.get_success_url())
 
         try:
             observatoryUser = ObservatoryMatrix.objects.create(
-                user_id=user,
-                observatory_id=observatoryID,
-                isActive=True,
+                user=user,
+                observatory=observatoryId,
+                active_flg=True,
                 comment=comment
             )
             observatoryUser.save()
 
-            logger.info('Send mail, %s, %s' % (observatoryID.name, str(user)))
+            logger.info('Create user observatory, %s, %s' % (observatoryId.name, str(user)))
 
         except Exception as e:
-            logger.error('CreateInstrument error: ' + str(e))
-            messages.error(self.request, 'Error with creating the instrument')
-            observatoryUser.delete()
+            logger.error('Create user observatory error: ' + str(e))
+            messages.error(self.request, 'Error with creating the user observatory')
             return redirect(self.get_success_url())
 
         messages.success(self.request, 'Successfully created')
@@ -199,6 +203,7 @@ class DeleteUserObservatory(LoginRequiredMixin, DeleteView):
     def form_valid(self, form):
         super().form_valid(form)
         messages.success(self.request, 'Successfully delete')
+        logger.info('Delete user observatory, %s, %s' % (str(self.object), str(self.request.user)))
         return redirect(self.get_success_url())
 
 
@@ -212,5 +217,5 @@ class UpdateUserObservatory(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         super().form_valid(form)
         messages.success(self.request, 'Successfully updated')
+        logger.info('Update user observatory, %s, %s' % (str(form.instance.observatory), str(self.request.user)))
         return redirect(self.get_success_url())
-

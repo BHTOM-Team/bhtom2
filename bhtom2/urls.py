@@ -14,10 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
+
 from bhtom2.views import BrokerQueryListView
 from bhtom_base.bhtom_common.api_router import SharedAPIRootRouter
 
 router = SharedAPIRootRouter()
+
 
 urlpatterns = [
     path('', include('bhtom2.bhtom_targets.urls')),
@@ -31,4 +33,6 @@ urlpatterns = [
                      namespace='registration')),
     path('alerts/query/list/', BrokerQueryListView.as_view(template_name='bhtom_alerts/brokerquery_list.html'),
          name='alerts:list'),
+
 ]
+

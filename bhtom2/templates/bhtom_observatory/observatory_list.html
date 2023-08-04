@@ -50,7 +50,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
               <td>{{ observatory.lat }}</td>
               <td>{{ observatory.prefix }}</td>
               <td>{{ observatory.comment }}</td>
-              <td>{{ observatory.cpcsOnly }}</td>
+              <td>{{ observatory.calibration_flg }}</td>
               <td>
                 <a href="{% url 'observatory:detail' pk=observatory.id %}" title="Observatory details" class="btn  btn-primary">Details</a>
               </td>
@@ -76,12 +76,12 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
             </tr>
           </thead>
           <tbody>
-            {% for id, isActive, comment, observatory in observatory_user_list %}
+            {% for id, active_flg, comment, observatory in observatory_user_list %}
             <tr>
               <td>{{ observatory.name }}</td>
               <td>{{ observatory.lon }}</td>
               <td>{{ observatory.lat }}</td>
-              <td>{% if isActive %} True {%else%} False{% endif %}</td>
+              <td>{% if active_flg %} True {%else%} False{% endif %}</td>
               <td><div title="{{comment}}">{{ comment|truncatechars:15 }}</div></td>
               <td>
                 <a href="{% url 'observatory:detail' pk=observatory.id %}" title="Observatory details" class="btn  btn-primary">Details</a>

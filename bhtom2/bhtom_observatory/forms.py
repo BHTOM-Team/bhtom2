@@ -6,24 +6,24 @@ from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix
 class ObservatoryChoiceField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj):
-        if obj.cpcsOnly:
+        if obj.calibration_flg:
             return '{name} ({prefix}) (Only Instrumental photometry file)'.format(name=obj.name,
-                                                                                     prefix=obj.prefix)
+                                                                                  prefix=obj.prefix)
         else:
             return '{name} ({prefix})'.format(name=obj.name, prefix=obj.prefix)
 
 
 class ObservatoryCreationForm(forms.ModelForm):
-    cpcsOnly = forms.BooleanField(
+    calibration_flg = forms.BooleanField(
         label='Only instrumental photometry file',
         required=False
     )
 
-    fits = forms.FileField(label='Sample fits',
-                           help_text='Provide one sample fits per filter, clearly labelled.',
-                           widget=forms.ClearableFileInput(
-                               attrs={'multiple': True}
-                           ))
+    example_file = forms.FileField(label='Sample fits',
+                                   help_text='Provide one sample fits per filter, clearly labelled.',
+                                   widget=forms.ClearableFileInput(
+                                       attrs={'multiple': True}
+                                   ))
 
     gain = forms.FloatField(required=True,
                             initial=None,
@@ -57,6 +57,11 @@ class ObservatoryCreationForm(forms.ModelForm):
                                       initial=None,
                                       label='Approx. limit magnitude in V band* [mag]',
                                       widget=forms.NumberInput(attrs={'placeholder': '18.0'}))
+
+    altitude = forms.FloatField(required=False,
+                                initial=None,
+                                label='Altitude [m]',
+                                widget=forms.NumberInput(attrs={'placeholder': '0.0'}))
     filters = forms.CharField(required=True,
                               initial=None,
                               label='Filters*',
@@ -64,16 +69,16 @@ class ObservatoryCreationForm(forms.ModelForm):
 
     class Meta:
         model = Observatory
-        fields = ('name', 'lon', 'lat', 'altitude',
-                  'cpcsOnly', 'fits',
+        fields = ('name', 'lon', 'lat',
+                  'calibration_flg', 'example_file',
                   'gain', 'readout_noise', 'binning', 'saturation_level',
                   'pixel_scale', 'readout_speed', 'pixel_size',
-                  'approx_lim_mag', 'filters',
-                  'comment')
+                  'approx_lim_mag', 'filters', 'altitude',
+                  'comment' )
 
 
 class ObservatoryUpdateForm(forms.ModelForm):
-    cpcsOnly = forms.BooleanField(
+    calibration_flg = forms.BooleanField(
         label='Only instrumental photometry file',
         required=False
     )
@@ -113,6 +118,9 @@ class ObservatoryUpdateForm(forms.ModelForm):
     approx_lim_mag = forms.FloatField(required=True,
                                       label='Approx. limit magnitude in V band* [mag]',
                                       widget=forms.NumberInput(attrs={'placeholder': '18.0'}))
+    altitude = forms.FloatField(required=False,
+                                label='Altitude [m]',
+                                widget=forms.NumberInput(attrs={'placeholder': '0.0'}))
     filters = forms.CharField(required=True,
                               initial=None,
                               label='Filters*',
@@ -120,11 +128,11 @@ class ObservatoryUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Observatory
-        fields = ('name', 'lon', 'lat', 'altitude',
-                  'cpcsOnly', 'example_file',
-                  'gain', 'binning', 'saturation_level',
+        fields = ('name', 'lon', 'lat',
+                  'calibration_flg', 'example_file',
+                  'gain','readout_noise', 'binning', 'saturation_level',
                   'pixel_scale', 'readout_speed', 'pixel_size',
-                  'approx_lim_mag', 'filters',
+                  'approx_lim_mag', 'filters', 'altitude',
                   'comment')
 
 
@@ -147,14 +155,14 @@ class ObservatoryUserCreationForm(forms.Form):
         user = kwargs.pop('user')
         super(ObservatoryUserCreationForm, self).__init__(*args, **kwargs)
 
-        observatory = ObservatoryMatrix.objects.filter(user_id=user)
+        observatory = ObservatoryMatrix.objects.filter(user=user)
         insTab = []
         for ins in observatory:
-            insTab.append(ins.observatory_id.id)
+            insTab.append(ins.observatory.id)
 
         self.fields['observatory'] = ObservatoryChoiceField(
 
-            queryset=Observatory.objects.exclude(id__in=insTab).filter(isActive=True).order_by('name'),
+            queryset=Observatory.objects.exclude(id__in=insTab).filter(active_flg=True).order_by('name'),
             widget=forms.Select(),
             required=True
         )
