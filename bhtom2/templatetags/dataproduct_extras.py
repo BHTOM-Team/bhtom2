@@ -68,6 +68,8 @@ color_map = {
         'i(GaiaSP)':  ['#800000','21' , 4],
         'ASASSN(g)':  ['green', 'cross-thin',2], #add opacity
         'ASASSN(V)':  ['darkgreen', 'cross-thin',2], #add opacity
+        'OGLE(I)': ['#6c1414','diamond',2],
+        
     }
 
 

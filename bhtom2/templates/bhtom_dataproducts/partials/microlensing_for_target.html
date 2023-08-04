@@ -12,10 +12,10 @@
       <form method="get">
       <label for="init_t0">t0:</label>
       <input type="text" name="init_t0" id="init_t0" value="{{ init_t0|floatformat:6 }}" size="14">
-      <label for="init_te">tE:</label>
-      <input type="text" name="init_te" id="init_te" value="{{ init_te|floatformat:5 }}" size="8">
       <label for="init_u0">u0:</label>
       <input type="text" name="init_u0" id="init_u0" value="{{ init_u0|floatformat:6 }}" size="8">
+      <label for="init_te">tE:</label>
+      <input type="text" name="init_te" id="init_te" value="{{ init_te|floatformat:5 }}" size="8">
 
       <label for="logu0">logu0:</label>
       <input type="checkbox" name="logu0" {% if logu0 %}checked{% endif %}>

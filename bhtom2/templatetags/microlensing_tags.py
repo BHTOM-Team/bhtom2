@@ -5,6 +5,7 @@ from os import path
 import astropy
 from astropy.time import Time
 from django import template
+from bhtom2.templatetags.dataproduct_extras import color_map
 
 from bhtom_base.bhtom_targets.templatetags.targets_extras import deg_to_sexigesimal
 from bhtom2.utils.bhtom_logger import BHTOMLogger
@@ -111,20 +112,22 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     num_points_all=0
     for filter in filters:
         mulens_datas[filter] = mm.MulensData(
-		    data_list = (times[filter], mags[filter], errors[filter]),
-		    phot_fmt = 'mag',
+            data_list = (times[filter], mags[filter], errors[filter]),
+            phot_fmt = 'mag',
             add_2450000=False,
-            plot_properties={'label': filter, 'marker' : 'o'}
+            plot_properties={'label': filter, 'marker' : 'o', 'color':color_map.get(filter, ['gray', 'circle', 4])[0], 'markersize':color_map.get(filter, ['gray', 'circle', 4])[2]}
             )
-        num_points_all+=len(times[filter])
-
-        if (filter=='G(GAIA_ALERTS)' or filter=='G(GAIA)' or filter=='BP(GAIA)' or filter=='RP(GAIA)' or filter=='G(Gaia)' or filter=='BP(Gaia)' or filter=='RP(Gaia)'):
+            
+        #overwriting the settings for Gaia data:
+        if (filter=='G(GAIA_ALERTS)' or filter=='G(GAIA)' or filter=='BP(GAIA)' or filter=='RP(GAIA)' or filter=='G(Gaia)' or filter=='BP(Gaia)' or filter=='RP(Gaia)' or filter=='G(GAIA_DR3)' or filter=='RP(GAIA_DR3)' or filter=='BP(GAIA_DR3)'):
             mulens_datas[filter] = mm.MulensData(
                 data_list = (times[filter], mags[filter], errors[filter]),
                 phot_fmt = 'mag',
                 ephemerides_file = gaiaephem_path,
                 add_2450000=False,
-                plot_properties={'label': filter, 'marker' : 'o', 'marker' : '.', 'markersize':15, 'zorder': 100})
+                plot_properties={'label': filter, 'marker' : '.', 'color':color_map.get(filter, ['gray', 'circle', 4])[0], 'markersize':10, 'zorder': 100})
+
+        num_points_all+=len(times[filter])
 	
 
     #guessing some of the parameters for init, from the first data set
@@ -163,13 +166,24 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
 
     for filter in filters:
         fig.add_trace(go.Scatter(x=np.array(times[filter])-2450000., y=mags[filter], 
-                          error_y=dict(type='data', array=errors[filter]), 
-                          mode='markers', name=str(filter)))
+                          error_y=dict(type='data', array=errors[filter],visible=True, thickness=1.5,width=0), 
+                          mode='markers', name=str(filter),
+                            marker=dict(
+                                    color=color_map.get(filter, ['gray', 'circle', 4])[0], #default ['gray', 'circle', 6]
+                                    symbol=color_map.get(filter, ['gray', 'circle', 4])[1],
+                                    size=color_map.get(filter, ['gray', 'circle', 4])[2]
+                                    ),
+                            ))
 
     for filter in non_selected_filters:
         fig.add_trace(go.Scatter(x=np.array(non_times[filter])-2450000., y=non_mags[filter], 
-                                 error_y=dict(type='data', array=non_errors[filter]), 
+                          error_y=dict(type='data', array=errors[filter],visible=True, thickness=1.5,width=0), 
                                  mode='markers', name=str(filter), 
+                                 marker=dict(
+                                    color=color_map.get(filter, ['gray', 'circle', 4])[0], #default ['gray', 'circle', 6]
+                                    symbol=color_map.get(filter, ['gray', 'circle', 4])[1],
+                                    size=color_map.get(filter, ['gray', 'circle', 4])[2]
+                                    ),
                                  opacity=0.1))
 
     fig.update_layout(title="%s"%(name), 
@@ -532,21 +546,21 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
     num_points_all=0
     for filter in filters:
         mulens_datas[filter] = mm.MulensData(
-		    data_list = (times[filter], mags[filter], errors[filter]),
-		    phot_fmt = 'mag',
+            data_list = (times[filter], mags[filter], errors[filter]),
+            phot_fmt = 'mag',
             add_2450000=False,
-            plot_properties={'label': filter, 'marker' : 'o'}
+            plot_properties={'label': filter, 'marker' : 'o', 'color':color_map.get(filter, ['gray', 'circle', 4])[0], 'markersize':color_map.get(filter, ['gray', 'circle', 4])[2]}
             )
-        num_points_all+=len(times[filter])
-
-        if (filter=='G(GAIA_ALERTS)' or filter=='G(GAIA)' or filter=='BP(GAIA)' or filter=='RP(GAIA)' or filter=='G(Gaia)' or filter=='BP(Gaia)' or filter=='RP(Gaia)'):
+            
+        #overwriting the settings for Gaia data:
+        if (filter=='G(GAIA_ALERTS)' or filter=='G(GAIA)' or filter=='BP(GAIA)' or filter=='RP(GAIA)' or filter=='G(Gaia)' or filter=='BP(Gaia)' or filter=='RP(Gaia)' or filter=='G(GAIA_DR3)' or filter=='RP(GAIA_DR3)' or filter=='BP(GAIA_DR3)'):
             mulens_datas[filter] = mm.MulensData(
                 data_list = (times[filter], mags[filter], errors[filter]),
                 phot_fmt = 'mag',
                 ephemerides_file = gaiaephem_path,
                 add_2450000=False,
-                plot_properties={'label': filter, 'marker' : 'o', 'marker' : '.', 'markersize':15, 'zorder': 100})
-	
+                plot_properties={'label': filter, 'marker' : '.', 'color':color_map.get(filter, ['gray', 'circle', 4])[0], 'markersize':10, 'zorder': 100})
+        num_points_all+=len(times[filter])
 
     #guessing some of the parameters for init, from the first data set
     largets_set = max(filters, key=lambda x: len(times[x]))
@@ -559,8 +573,6 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
     smartu0 = invert_delta_mag(delta_m)
 
     smartte = 50.
-
-    print("INIT2: ",init_piEN, init_u0, auto_init, filter_counts)    
 
     if init_t0 == '' or auto_init:
         init_t0 = smartt0
@@ -592,13 +604,24 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
 
     for filter in filters:
         fig.add_trace(go.Scatter(x=np.array(times[filter])-2450000., y=mags[filter], 
-                          error_y=dict(type='data', array=errors[filter]), 
-                          mode='markers', name=str(filter)))
+                          error_y=dict(type='data', array=errors[filter],visible=True, thickness=1.5,width=0), 
+                          mode='markers', name=str(filter),
+                                marker=dict(
+                                    color=color_map.get(filter, ['gray', 'circle', 4])[0], #default ['gray', 'circle', 6]
+                                    symbol=color_map.get(filter, ['gray', 'circle', 4])[1],
+                                    size=color_map.get(filter, ['gray', 'circle', 4])[2]
+                                    ),
+                                    ))
 
     for filter in non_selected_filters:
         fig.add_trace(go.Scatter(x=np.array(non_times[filter])-2450000., y=non_mags[filter], 
-                                 error_y=dict(type='data', array=non_errors[filter]), 
+                                 error_y=dict(type='data', array=non_errors[filter],visible=True, thickness=1.5,width=0),
                                  mode='markers', name=str(filter), 
+                                marker=dict(
+                                    color=color_map.get(filter, ['gray', 'circle', 4])[0], #default ['gray', 'circle', 6]
+                                    symbol=color_map.get(filter, ['gray', 'circle', 4])[1],
+                                    size=color_map.get(filter, ['gray', 'circle', 4])[2]
+                                    ),
                                  opacity=0.1))
 
     fig.update_layout(title="%s"%(name), 
@@ -724,9 +747,9 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
         axes = plt.subplot(grid[0])
         my_event.plot_data(subtract_2450000=True)
         if (fixblending=='on'): 
-            lab1 = "no-bl."
+            lab1 = "par.no-bl."
         else:
-            lab1 = "blended"
+            lab1 = "par.blended"
     #    my_event.plot_model(color='black', t_start=tstart, t_stop=tstop, lw=2, subtract_2450000=True, label=lab1)#, data_ref=1)
         my_event.plot_model(color='magenta', ls='--', t_start=tstart, t_stop=tstop, subtract_2450000=True, label=lab1)#, data_ref=0)
         plt.grid()
@@ -773,6 +796,7 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
         'init_u0': init_u0,
         'init_piEN': init_piEN,
         'init_piEE': init_piEE,
+        't0par': params['t_0_par'],
         'logu0': logu0,
         'fixblending': fixblending,
         'auto_init': auto_init,
@@ -791,6 +815,7 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
         'init_u0': init_u0,
         'init_piEN': init_piEN,
         'init_piEE': init_piEE,
+        't0par': params['t_0_par'],
         'logu0': logu0,
         'fixblending': fixblending,
         'auto_init': auto_init,
