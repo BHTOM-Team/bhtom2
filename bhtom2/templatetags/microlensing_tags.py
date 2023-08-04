@@ -64,7 +64,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     errors = defaultdict(list)
     filters = selected_filters
     max_median_error = 0
-    
+
     for datum in datums:
         if str(datum.filter) in selected_filters:
             try:
@@ -209,10 +209,10 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
 
     # # Set y0 and y1 to the minimum and maximum values of the y-axis range
     min_y_sel = min(mag for filter in mags for mag in mags[filter])
-    min_y_non = min(mag for filter in non_mags for mag in non_mags[filter])
+    min_y_non = 10000 if not non_mags else min(mag for filter in non_mags for mag in non_mags[filter])
     min_y = min(min_y_sel, min_y_non)
     max_y_sel = max(mag for filter in mags for mag in mags[filter])
-    max_y_non = max(mag for filter in non_mags for mag in non_mags[filter])
+    max_y_non = 0 if not non_mags else max(mag for filter in non_mags for mag in non_mags[filter])
     max_y = max(max_y_sel, max_y_non)
 
     fig.add_shape(
@@ -650,10 +650,10 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
 
     # # Set y0 and y1 to the minimum and maximum values of the y-axis range
     min_y_sel = min(mag for filter in mags for mag in mags[filter])
-    min_y_non = min(mag for filter in non_mags for mag in non_mags[filter])
+    min_y_non = 10000 if not non_mags else min(mag for filter in non_mags for mag in non_mags[filter])
     min_y = min(min_y_sel, min_y_non)
     max_y_sel = max(mag for filter in mags for mag in mags[filter])
-    max_y_non = max(mag for filter in non_mags for mag in non_mags[filter])
+    max_y_non = 0 if not non_mags else max(mag for filter in non_mags for mag in non_mags[filter])
     max_y = max(max_y_sel, max_y_non)
     print("MEDIAN ERR: ",max_median_error)
 
