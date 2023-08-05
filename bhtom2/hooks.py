@@ -17,6 +17,7 @@ from bhtom2.utils.coordinate_utils import computeDtAndPriority
 from bhtom_base.bhtom_targets.models import TargetName
 from django.contrib import messages
 from django.db import transaction
+from datetime import datetime, timezone
 
 from bhtom2.utils.openai_utils import get_constel, latex_text_target
 
@@ -25,6 +26,7 @@ logger: BHTOMLogger = BHTOMLogger(__name__, '[Hooks]')
 # actions done just after saving the target (in creation or update)
 def target_post_save(target, created, **kwargs):
 
+#this will run also for update (created=False)
     if created:
         fill_galactic_coordinates(target)
         update_sun_distance(target)
@@ -51,7 +53,6 @@ def target_post_save(target, created, **kwargs):
         #TODO: make it run in the background?
 
         call_command('updatereduceddata', target_id=target.id, stdout=StringIO())
-
         mag_last, mjd_last, filter_last = last_jd.get_last(target)
 
         #everytime the list is rendered, the last mag and last mjd are updated per target
@@ -68,9 +69,19 @@ def target_post_save(target, created, **kwargs):
         try:
             imp = float(target.extra_field.get('importance'))
             cadence = float(target.extra_field.get('cadence'))
-        except:
+        except Exception as e:
+            print("HOOK error: ",e)
             imp = 1
             cadence = 1
+            te, _ = TargetExtra.objects.update_or_create(target=target,
+            key='importance',
+            defaults={'value': imp})
+            te.save()
+            te, _ = TargetExtra.objects.update_or_create(target=target,
+            key='cadence',
+            defaults={'value': cadence})
+            te.save()
+        
 
         priority = computeDtAndPriority(mjd_last, imp, cadence)
         te, _ = TargetExtra.objects.update_or_create(target=target,
@@ -83,6 +94,18 @@ def target_post_save(target, created, **kwargs):
         key='constellation',
         defaults={'value': constellation})
         te.save()
+
+        #in import the creation date will be missing, as this is set in Create Form.
+        try:
+            creation_date = float(target.extra_field.get('creation_date'))
+        except:
+            creation_date = datetime.now(timezone.utc).isoformat()
+            te, _ = TargetExtra.objects.update_or_create(target=target,
+            key='creation_date',
+            defaults={'value': creation_date})
+            te.save()
+
+
 
         #LW: setting AAVSO name always to the name
         #it can then be changed

@@ -16,14 +16,23 @@ from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_s
 from bhtom_base.bhtom_common.hooks import run_hook
 from bhtom_base.bhtom_common.mixins import Raise403PermissionRequiredMixin
 from bhtom_base.bhtom_targets.forms import TargetExtraFormset, TargetNamesFormset
-from bhtom_base.bhtom_targets.models import Target, TargetName
+from bhtom_base.bhtom_targets.models import Target, TargetExtra, TargetName
 from bhtom_base.bhtom_targets.templatetags.targets_extras import deg_to_sexigesimal
 from bhtom_base.bhtom_targets.utils import check_duplicate_source_names, check_for_existing_alias, check_for_existing_coords, get_nonempty_names_from_queryset, coords_to_degrees
+from bhtom2.utils.coordinate_utils import computeDtAndPriority
 from guardian.shortcuts import get_objects_for_user, get_groups_with_perms
 from django.forms import inlineformset_factory
 from astropy.coordinates import Angle
 from astropy import units as u
 from django.views.generic import View
+
+from astropy import units as u
+from astropy.coordinates import get_sun, SkyCoord
+from astropy.time import Time
+from numpy import around
+from datetime import datetime
+from django.core.management import call_command
+from bhtom2.dataproducts import last_jd
 
 from abc import ABC, abstractmethod
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -185,10 +194,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
 
         #storing all the names
         for source_name, name in target_names:
-            #clearing ASASSN and CPCS names from prefixes if provided:
-            if "ASASSN" in source_name:
-                if name.startswith("https://asas-sn.osu.edu/sky-patrol/coordinate/"):
-                    name= name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
+            #clearing CPCS names from prefixes if provided:
 
             if "CPCS" in source_name:
                 if name.startswith("ivo://"):
@@ -205,9 +211,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         #         f'Creating target, please wait...')
 
         #TODO: there should be a message here on success and a warning to wait: Gathering archival data for target
-        #TODO: the hook here should be run in the background 
-        
-
+        #TODO: the hook here should be run in the background         
 
         logger.info('Target post save hook: %s created: %s', self.object, True)
         run_hook('target_post_save', target=self.object, created=True)
@@ -287,10 +291,9 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
 
         # Update target names for given source
         for source_name, name in target_names:
-            #clearing ASASSN and CPCS names from prefixes if provided:
-            if "ASASSN" in source_name:
-                if name.startswith("https://asas-sn.osu.edu/sky-patrol/coordinate/"):
-                    name= name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
+            #clearing  CPCS names from prefixes if provided:
+
+            #Not clearing ASASSN, as it can have different prefixes
 
             if "CPCS" in source_name:
                 if name.startswith("ivo://"):
@@ -318,7 +321,76 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
             )
 
         #the hook is run even if not called?
-        print("UPDATE: REDIRECTING TO "+self.get_success_url())
+        #hook fails in Update giving me errors on openned transactions, atomic and stuff. Not running hook, but taking care of importance/cadence changes only
+        # logger.info('Target post save hook: %s created: %s', self.object, False)
+        # run_hook('target_post_save', target=self.object, created=False)
+        
+        # to_update = TargetExtra.objects.update_or_create(target=self.object, key='importance')
+        # to_update.save(update_fields=['name'])
+
+        try:
+            call_command('updatereduceddata', target_id=self.object.id, stdout=StringIO())
+            mag_last, mjd_last, filter_last = last_jd.get_last(self.object)
+
+            #everytime the list is rendered, the last mag and last mjd are updated per target
+            te, _ = TargetExtra.objects.update_or_create(target=self.object,
+            key='mag_last',
+            defaults={'value': mag_last})
+            te.save()
+
+            te, _ = TargetExtra.objects.update_or_create(target=self.object,
+            key='mjd_last',
+            defaults={'value': mjd_last})
+            te.save()
+
+            messages.add_message(
+            self.request,
+            messages.INFO,
+            f'Checked for new data in {self.object}. MJD_last = {mjd_last}')
+        except Exception as e:
+            logger.error("Error checking for new data after Update for {self.object}!")
+
+        #updating priority:
+        oldpriority =  float(TargetExtra.objects.get(target=self.object, key='priority').value)
+
+        try:
+            imp = float(extra.data['importance'])
+            cadence = float(extra.data['cadence'])
+        except:
+            #what if not provided?
+            pass
+
+        #mjd_last = extra.data['mjd_last']
+        mjd_last = float(TargetExtra.objects.get(target=self.object, key='mjd_last').value)
+        priority = computeDtAndPriority(mjd_last, imp, cadence)
+        te, _ = TargetExtra.objects.update_or_create(target=self.object,
+        key='priority',
+        defaults={'value': priority})
+        te.save()
+
+        if (oldpriority!=priority):
+            messages.add_message(
+                self.request,
+                messages.INFO,
+                f'Observing priority changed to {priority}'
+            )
+
+        # updating sun separation
+        sun_pos = get_sun(Time(datetime.utcnow()))
+
+        try:
+            obj_pos = SkyCoord(extra.data['ra'], extra.data['dec'], unit=u.deg)
+            Sun_sep = around(sun_pos.separation(obj_pos).deg, 0)
+        except:
+            logger.error("Coordinates outside the range in {target} for Sun position calculation!")
+            obj_pos = SkyCoord(0, 0, unit=u.deg)
+            Sun_sep = "error"  # around(sun_pos.separation(obj_pos).deg,0)
+
+        TargetExtra.objects.update_or_create(target=self.object,
+                                                key='sun_separation',
+                                                defaults={'value': Sun_sep})
+        print("NEW SUN SEP: ",Sun_sep)
+
         return redirect(self.get_success_url())
 
     def get_queryset(self, *args, **kwargs):
