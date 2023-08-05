@@ -191,6 +191,12 @@ def gaia_stats(target):
                         from gaiadr2.ruwe where source_id={source_id};")
     ruwe2=job.get_results().to_pandas().ruwe.item()
 
+    job = Gaia.launch_job(f"select  \
+                        r_med_geo,     r_lo_geo,      r_hi_geo,  r_med_photogeo,  r_lo_photogeo,  r_hi_photogeo\
+                        from external.gaiaedr3_distance where source_id={source_id};")
+    r=job.get_results().to_pandas()
+    r3_med_geo = r.r_med_geo.item()
+
     #external.external.gaiadr2_geometric_distance
     #external.external.gaiaedr3_distance
 
@@ -215,6 +221,12 @@ def gaia_stats(target):
     data_dict = {'Parameter': 'RUWE / AEN [mas]',
                 'GDR2': f'{around(ruwe2,3)} / {around(aen2,3)}',
                 'GDR3': f'{around(ruwe3,3)} / {around(aen3,3)}'
+                }
+    data_list.append(data_dict)
+
+    data_dict = {'Parameter': 'Dist_med_geo [kpc]',
+                'GDR2': '-',
+                'GDR3': f'{around(r3_med_geo/1000.,3)}'
                 }
     data_list.append(data_dict)
 
