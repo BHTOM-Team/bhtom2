@@ -145,19 +145,22 @@
                     <div class="row">
                       <div class="col-md-12">
                         <a href="{% url 'targets:generate_target_description_latex' pk=target.id %}" role="button" title="Generate LaTeX" class="btn btn-info" style="background-color: red;">Generate LaTeX target description</a>
-                        <!-- <button formaction='{% url "generate_target_description_latex" target.id %}' class="btn btn-info" role="button">Generate LaTeX target description                            
-                        </button> -->
-                        <!-- <button onclick="download_photometry_stats_latex()" class="btn btn-info" role="button">Download photometry stats latex table</button>
-                        <button onclick="download_photometry_stats()" class="btn btn-info" role="button">Download photometry stats</button> -->
                       </div>
                     </div>
+                    <div style="margin-top: 20px;">
                     {% photometry_stats object %}
+                    </div>
+
+                    <div>
+                    <button onclick="download_photometry_stats_latex()" class="btn btn-info" role="button">Download photometry stats as LaTeX table</button>
+                    </div>
+
+                    <div style="margin-top: 20px;" class="col-lg-6">
+                    {% gaia_stats object %}
+                    </div>
                 </div>
-                    <button onclick="download_photometry_stats_latex()" class="btn btn-info" role="button">Download photometry stats latex table</button>
                 {% endif %}
-                <div style="margin-top: 20px;">
-                {% gaia_stats object %}
-                </div>
+
 
                 {% comments_enabled as comments_are_enabled %}
                 <hr/>
