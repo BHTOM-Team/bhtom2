@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from urllib.parse import urlencode
+from bhtom2.external_service.data_source_information import DataSource
 
 import numpy as np
 import plotly.graph_objs as go
@@ -17,7 +18,7 @@ from bhtom_base.bhtom_dataproducts.forms import DataProductUploadForm
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, ReducedDatumUnit
 from bhtom_base.bhtom_dataproducts.processors.data_serializers import SpectrumSerializer
 from bhtom_base.bhtom_observations.models import ObservationRecord
-from bhtom_base.bhtom_targets.models import Target
+from bhtom_base.bhtom_targets.models import Target, TargetName
 
 from numpy import around 
 
@@ -109,6 +110,116 @@ def photometry_stats(target):
         data_list.append(data_dict)
 
     return {'data': data_list}
+
+@register.inclusion_tag('bhtom_dataproducts/partials/gaia_stats.html')
+def gaia_stats(target):
+    import pandas as pd
+    from astroquery.gaia import Gaia 
+
+    """
+    Displays a table of the stats and info from Gaia DR2 and DR3 for a target.
+    """
+#LATEX: from 18cbf Kruszynska22
+# \begin{table}
+# \caption{\label{tab:gdrsVals}Gaia astrometric parameters for the source star in Gaia18cbf.}.
+#      \centering
+#         \begin{tabular}{c c c}
+#         \hline
+#         \noalign{\smallskip}
+#              Parameter &  GDR2 & GEDR3 \\
+#              \noalign{\smallskip}
+#         \hline
+#         \hline
+#         \noalign{\smallskip}
+#              $\varpi$ [mas] & $-1.11\pm0.70$ &  $-0.36\pm0.59$ \\
+#              $\mu_{\alpha}$ [$\mathrm{mas} \, \mathrm{yr}^{-1}$] & $-0.68\pm1.96$ & $-1.83\pm0.68$ \\
+#              $\mu_{\delta}$ [$\mathrm{mas}\, \mathrm{yr}^{-1}$] & $-0.76\pm1.16$ & $-1.82\pm0.46$ \\
+#         \noalign{\smallskip}
+#         \hline
+#         \noalign{\smallskip}
+#          \multicolumn{3}{c}{Bailer-Jones et al. distances} \\
+#         \noalign{\smallskip}
+#         \hline
+#         \noalign{\smallskip}
+#              $r_{\rm est}$ [kpc] &  $4.4^{+3.2}_{-2.9}$ & --\\
+#              $r_{\rm geo, est}$ [kpc] &  -- & $5.4^{+2.2}_{-1.9}$ \\
+#              $r_{\rm photgeo, est}$ [kpc] &  -- & $7.8^{+2.0}_{-1.4}$ \\
+#         \noalign{\smallskip}
+#         \hline
+#         \end{tabular}
+# \end{table}
+
+    #TODO: add check for Gaia DR2 name and use in queries, also display in the table
+    #do we want to show the ra dec too?
+
+    #TODO: this will be bloody slow, as the query will be run every time we go to Publication...
+
+    data_list = []
+    try:
+        gaia_name = TargetName.objects.get(target=target, source_name=DataSource.GAIA_DR3.name).name
+    except:
+        return {'data': data_list}
+
+    source_id = gaia_name
+
+    job = Gaia.launch_job(f"select  \
+                        parallax, parallax_error, \
+                        pmra, pmra_error, pmdec, pmdec_error, ruwe, astrometric_excess_noise \
+                        from gaiadr3.gaia_source where source_id={source_id};")
+    r3 = job.get_results().to_pandas()
+    parallax3, parallax3_error = r3.parallax.item(), r3.parallax_error.item()
+    pmra3, pmra3_error = r3.pmra.item(), r3.pmra_error.item()
+    pmdec3, pmdec3_error = r3.pmdec.item(), r3.pmdec_error.item()
+    ruwe3 = r3.ruwe.item()
+    aen3 = r3.astrometric_excess_noise.item()
+
+    job = Gaia.launch_job(f"select  \
+                        parallax, parallax_error, \
+                        pmra, pmra_error, pmdec, pmdec_error,astrometric_excess_noise \
+                        from gaiadr2.gaia_source where source_id={source_id};")
+    r2 = job.get_results().to_pandas()
+    parallax2 = r2.parallax.item()
+    parallax2_error = r2.parallax_error.item()
+    pmra2 = r2.pmra.item()
+    pmra2_error = r2.pmra_error.item()
+    pmdec2 = r2.pmdec.item()
+    pmdec2_error = r2.pmdec_error.item()
+    aen2 = r2.astrometric_excess_noise.item()
+
+    job = Gaia.launch_job(f"select  \
+                        ruwe \
+                        from gaiadr2.ruwe where source_id={source_id};")
+    ruwe2=job.get_results().to_pandas().ruwe.item()
+
+    #external.external.gaiadr2_geometric_distance
+    #external.external.gaiaedr3_distance
+
+    data_dict = {'Parameter': 'parallax [mas]',
+                'GDR2': f'{around(parallax2,3)}&plusmn;{around(parallax2_error,3)}',
+                'GDR3': f'{around(parallax3,3)}&plusmn;{around(parallax3_error,3)}'
+                }
+    data_list.append(data_dict)
+
+    data_dict = {'Parameter': 'PM RA [mas/yr]',
+                'GDR2': f'{around(pmra2,3)}&plusmn;{around(pmra2_error,3)}',
+                'GDR3': f'{around(pmra3,3)}&plusmn;{around(pmra3_error,3)}'
+                }
+    data_list.append(data_dict)
+
+    data_dict = {'Parameter': 'PM Dec [mas/yr]',
+                'GDR2': f'{around(pmdec2,3)}&plusmn;{around(pmdec2_error,3)}',
+                'GDR3': f'{around(pmdec3,3)}&plusmn;{around(pmdec3_error,3)}'
+                }
+    data_list.append(data_dict)
+
+    data_dict = {'Parameter': 'RUWE / AEN [mas]',
+                'GDR2': f'{around(ruwe2,3)} / {around(aen2,3)}',
+                'GDR3': f'{around(ruwe3,3)} / {around(aen3,3)}'
+                }
+    data_list.append(data_dict)
+
+    return {'data': data_list}
+
 
 @register.inclusion_tag('bhtom_dataproducts/partials/dataproduct_list_for_target.html', takes_context=True)
 def dataproduct_list_for_target(context, target):

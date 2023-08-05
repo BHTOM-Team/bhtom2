@@ -154,9 +154,10 @@
                     {% photometry_stats object %}
                 </div>
                     <button onclick="download_photometry_stats_latex()" class="btn btn-info" role="button">Download photometry stats latex table</button>
-
                 {% endif %}
-
+                <div style="margin-top: 20px;">
+                {% gaia_stats object %}
+                </div>
 
                 {% comments_enabled as comments_are_enabled %}
                 <hr/>
