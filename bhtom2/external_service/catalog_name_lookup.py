@@ -207,7 +207,7 @@ def query_gaia_dr3_for_name(target: Target) -> Dict[DataSource, str]:
                         frame=ICRS)
 
     try:
-        rad: Angle = Angle(0.5, unit="arcsec")
+        rad: Angle = Angle(1, unit="arcsec")
         result = Gaia.query_object_async(coordinate=coord,
                                             radius=rad
                                             ).to_pandas().sort_values(
