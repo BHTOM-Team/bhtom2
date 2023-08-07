@@ -40,3 +40,12 @@ def get_item(dictionary, key):
     Custom filter that retrieves the value of a dictionary based on a given key.
     """
     return dictionary.get(key)
+
+
+@register.inclusion_tag('bhtom_targets/partials/target_table.html')
+def target_table(targets):
+    """
+    Returns a partial for a table of targets, used in the target_list.html template
+    by default
+    """
+    return {'object_list': targets}

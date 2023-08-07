@@ -29,7 +29,7 @@
             </div>
 
             {% select_target_js %}
-            {% cache 3600 target_distribution_cache object_list %}
+            {% cache 86400 target_distribution_cache object_list %}
                 {% target_distribution filter.qs %}
             {% endcache %}
 
@@ -52,74 +52,12 @@
                     <button type="submit" class="btn btn-outline-primary ml-1" name="move">Move</button>
                     <button type="submit" class="btn btn-outline-danger ml-1" name="remove">Remove</button>
                 </div>
-
-            {% cache 3600 targets_list_cache object_list %}
-
-                <table class="table table-hover sortable">
-                    <thead>
-                    <tr>
-                        <th><label><input type="checkbox" id="selectPage"
-                                          onClick="select_page(this, {{ target_count }})"/></label></th>
-                        <th>Names</th>
-                        <th>RA</th>
-                        <th>Dec</th>
-                        <th>Nobs</th>
-                        <th>Last Gmag</th>
-                        <th>Last Filter</th>
-                        <th>Importance</th>
-                        <th>Created</th>
-                        <th>Priority</th>
-                        <th>Sun</th>
-                        <th>Class</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for target in object_list %}
-                        <tr>
-                            <td><label>
-                                <input type="checkbox" name="selected-target" value="{{ target.id }}"
-                                       onClick="single_select()"/>
-                            </label></td>
-                            <td>
-                                <a href="{% url 'targets:detail' target.name %}"
-                                   title="{{ target.name }}">{{ target.names|join:", " }}</a>
-                            </td>
-
-                            <td>{{ target.ra|deg_to_sexigesimal:"hms" }}</td>
-                            <td>{{ target.dec|deg_to_sexigesimal:"dms" }}</td>
-                            <td>{{ target.reduceddatum_set.count }}</td>
-                            <td>{{ target.last_mag|floatformat:1 }}</td>
-                            <td>{{ target.last_filter }}</td>
-                            <td>{{ target.importance }}</td>
-                            <td>{{ target.created }}</td>
-                            <td>
-                                {% if target.cadencepriority >= 10 %}
-                                    <div class="red">
-                                {% else %}
-                                    <div>
-                                {% endif %}
-                                    {{ target.cadencepriority|floatformat:1 }}
-                                </div>
-                            </td>
-                            <td>{{ target.sun|floatformat:0 }}</td>
-                            <td>{{ target.classification }}</td>
-                        </tr>
-
-                    {% empty %}
-                        <tr>
-                            <td colspan="5">
-                                {% if target_count == 0 %}
-                                    No targets yet.
-                                {% else %}
-                                    No targets match those filters.
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                {% if query_string == '' %}
+                         {% target_table object_list %}
+                {% else %}
+                     {% target_table object_list %}
+                {% endif %}
             </form>
-            {% endcache %}
             <!-- closing table and form to add targets -->
 
         </div>

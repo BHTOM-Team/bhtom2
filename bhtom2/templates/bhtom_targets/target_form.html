@@ -44,7 +44,7 @@
     <button id="add-alias-form" class="btn btn-secondary">Add new alias</button>
 </div>
 <!-- <h3>Tags</h3> -->
-{% bootstrap_formset extra_form %}
+
 {% buttons %}
     {% if not object %}
         <button type="submit" id="submit-btn" formaction="{% url 'targets:create' %}" class="btn btn-primary">Submit

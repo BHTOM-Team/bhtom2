@@ -37,7 +37,7 @@ In these special cases, the Gaia Alerts harvester will gather all information fr
 </p>
 <hr style="border-top: 1px solid grey;">
 </p>
-<form method="POST" action="{% url 'bhtom2.bhtom_targets:import' %}" enctype="multipart/form-data">
+<form method="POST" action="{% url 'targets:import' %}" enctype="multipart/form-data">
   {% csrf_token %}
   <input type="file" name="target_csv" style="color: rgb(0, 217, 255);">
   {% buttons %}

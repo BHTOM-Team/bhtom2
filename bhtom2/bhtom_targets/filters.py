@@ -59,6 +59,7 @@ def filter_text(queryset, name, value):
 
 
 class TargetFilter(django_filters.FilterSet):
+    #todo delete targetExtra
     key = django_filters.CharFilter(field_name='targetextra__key', label='Key')
     value = django_filters.CharFilter(field_name='targetextra__value', label='Value')
 

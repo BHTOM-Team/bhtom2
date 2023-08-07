@@ -1,11 +1,19 @@
+import os
 from sqlite3 import IntegrityError
 from typing import Dict, Any, Tuple, List
 
+from django.core.cache import cache
 from django.db.models import Count
 
 import csv
+
+from django.http import HttpRequest
+from django.shortcuts import render
+
+from bhtom2.bhtom_targets.filters import TargetFilter
 from bhtom2.harvesters.gaia_alerts import GaiaAlertsHarvester
-from bhtom_base.bhtom_targets.models import Target, TargetName, TargetExtra
+from bhtom2.templatetags.bhtom_targets_extras import target_table
+from bhtom_base.bhtom_targets.models import Target, TargetName, TargetExtra, TargetList
 from io import StringIO
 from django.db.models import ExpressionWrapper, FloatField
 from django.db.models.functions.math import ACos, Cos, Radians, Pi, Sin
@@ -253,3 +261,17 @@ def coords_to_degrees(value, c_type):
             return a.to(u.degree).value
         except Exception:
             raise Exception('Invalid format. Please use sexigesimal or degrees')
+
+
+def update_template_cache():
+    cachePath = os.path.join(settings.BASE_DIR, "bhtom2/cache/")
+    for file in os.listdir(cachePath):
+        f = os.path.join(cachePath, file)
+        if file.endswith('.djcache') and os.path.isfile(f):
+            os.remove(f)
+    context = {}
+    target = Target.objects.all()
+    context['object_list'] = target
+    request = HttpRequest()
+    render(request, 'bhtom_targets/partials/target_table.html', context)
+

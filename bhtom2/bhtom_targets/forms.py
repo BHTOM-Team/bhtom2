@@ -64,7 +64,7 @@ class TargetForm(forms.ModelForm):
         # for field in self.fields.keys():
         #     if (field in settings.CREATE_TARGET_HIDDEN_FIELDS): 
         #         self.fields[field].widget = forms.HiddenInput()
-        
+
         self.extra_fields = {}
         for extra_field in settings.EXTRA_FIELDS:
             # Add extra fields to the form
@@ -73,12 +73,13 @@ class TargetForm(forms.ModelForm):
             self.extra_fields[field_name] = extra_field_to_form_field(extra_field['type'])
             # Populate them with initial values if this is an update
             # or with default values if the first create
-            if (field_name=='importance'): self.extra_fields[field_name].initial = 9.99
-            if (field_name=='cadence'): self.extra_fields[field_name].initial = 1.0
-            if (field_name=='creation_date'): self.extra_fields[field_name].initial = datetime.now(timezone.utc).isoformat()
-            if (field_name=='dont_update_me'): self.extra_fields[field_name].initial = False
+            if (field_name == 'importance'): self.extra_fields[field_name].initial = 9.99
+            if (field_name == 'cadence'): self.extra_fields[field_name].initial = 1.0
+            if (field_name == 'creation_date'): self.extra_fields[field_name].initial = datetime.now(
+                timezone.utc).isoformat()
+            if (field_name == 'dont_update_me'): self.extra_fields[field_name].initial = False
 
-            #the values are going to be overwritten if the update
+            # the values are going to be overwritten if the update
             if kwargs['instance']:
                 te = TargetExtra.objects.filter(target=kwargs['instance'], key=field_name)
                 if te.exists():
@@ -94,20 +95,20 @@ class TargetForm(forms.ModelForm):
             for field in settings.EXTRA_FIELDS:
                 if self.cleaned_data.get(field['name']) is not None:
                     TargetExtra.objects.update_or_create(
-                            target=instance,
-                            key=field['name'],
-                            defaults={'value': self.cleaned_data[field['name']]}
+                        target=instance,
+                        key=field['name'],
+                        defaults={'value': self.cleaned_data[field['name']]}
                     )
 
-#             # #writing the creation date:
-#             if (not self.cleaned_data.get('creation_date')):
-#                 now = datetime.now(timezone.utc).isoformat()
-# #                print("Saving now as the creation date for target ",now,instance.name)
-#                 TargetExtra.objects.update_or_create(target=instance,
-#                 key='creation_date',
-#                 defaults={'value': now})
+            #             # #writing the creation date:
+            #             if (not self.cleaned_data.get('creation_date')):
+            #                 now = datetime.now(timezone.utc).isoformat()
+            # #                print("Saving now as the creation date for target ",now,instance.name)
+            #                 TargetExtra.objects.update_or_create(target=instance,
+            #                 key='creation_date',
+            #                 defaults={'value': now})
 
-            #In hooks the light curves should be downloaded and priority computed                
+            # In hooks the light curves should be downloaded and priority computed
 
             # Save groups for this target
             for group in self.cleaned_data['groups']:
@@ -146,19 +147,19 @@ class SiderealTargetCreateForm(TargetForm):
 
         self.fields['epoch'].initial = 2000.0
 
-        self.extra_fields['classification'].required = True
-        self.extra_fields['classification'].help_text = 'Classification of the object (e.g. variable star, microlensing event)'
-        self.extra_fields['classification'].label = 'Classification*'
-        self.extra_fields['classification'].widget.attrs['rows'] = 1
+        # self.fields['classification'].required = True
+        # self.fields['classification'].help_text = 'Classification of the object (e.g. variable star, microlensing event)'
+        # self.fields['classification'].label = 'Classification*'
+        # self.fields['classification'].widget.attrs['rows'] = 1
 
-        self.extra_fields['discovery_date'].required = False
-        self.extra_fields['discovery_date'].help_text = 'Date of the discovery, YYYY-MM-DDTHH-MM-SS, or leave blank'
-        self.extra_fields['importance'].required = True
-        self.extra_fields['importance'].help_text = 'Target importance as an integer 0-10 (10 is the highest)'
-        self.extra_fields['importance'].label = 'Importance*'
-        self.extra_fields['cadence'].required = True
-        self.extra_fields['cadence'].help_text = 'Requested cadence (0-100 days)'
-        self.extra_fields['cadence'].label = 'Cadence*'
+        # self.fields['discovery_date'].required = False
+        # self.fields['discovery_date'].help_text = 'Date of the discovery, YYYY-MM-DDTHH-MM-SS, or leave blank'
+        # self.fields['importance'].required = True
+        # self.fields['importance'].help_text = 'Target importance as an integer 0-10 (10 is the highest)'
+        # self.fields['importance'].label = 'Importance*'
+        # self.fields['cadence'].required = True
+        # self.fields['cadence'].help_text = 'Requested cadence (0-100 days)'
+        # self.fields['cadence'].label = 'Cadence*'
 
         # # self.fields['gaia_alert_name'].widget = TextInput(attrs={'maxlength': 100})
         # # self.fields['calib_server_name'].widget = TextInput(attrs={'maxlength': 100})
@@ -187,26 +188,25 @@ class SiderealTargetCreateForm(TargetForm):
     #     if (ra<0 or ra>360 or dec<-90 or dec>90):
     #         raise ValidationError(f'Coordinates beyond range error')
 
-        # if this is an update, do not check if target exists at these coordinates:
-#        target = self.data['target']
-        # target = self.data.get('target',None)
-        # print(target)
-        # cd = cleaned_data.get('creation_date',None)
-        # print(cd)
-#        te = TargetExtra.objects.filter(target=target, key="creation_date")
-#        if not te.exists():
-        # if (cd is None):
-        #     coords_names = check_for_existing_coords(ra, dec, 3./3600., stored)
-        #     if (len(coords_names)!=0):
-        #         ccnames = ' '.join(coords_names)
-        #         raise ValidationError(f'Source found already at these coordinates: {ccnames}')
-
+    # if this is an update, do not check if target exists at these coordinates:
+    #        target = self.data['target']
+    # target = self.data.get('target',None)
+    # print(target)
+    # cd = cleaned_data.get('creation_date',None)
+    # print(cd)
+    #        te = TargetExtra.objects.filter(target=target, key="creation_date")
+    #        if not te.exists():
+    # if (cd is None):
+    #     coords_names = check_for_existing_coords(ra, dec, 3./3600., stored)
+    #     if (len(coords_names)!=0):
+    #         ccnames = ' '.join(coords_names)
+    #         raise ValidationError(f'Source found already at these coordinates: {ccnames}')
 
     class Meta(TargetForm.Meta):
         # fields = ('name', 'type', 'ra', 'dec', 'epoch', 'parallax',
         #           'pm_ra', 'pm_dec', 'galactic_lng', 'galactic_lat',
         #           'distance', 'distance_err')
-        fields = ('name', 'type', 'ra', 'dec', 'epoch')
+        fields = ('name', 'type', 'ra', 'dec', 'epoch', 'classification', 'discovery_date', 'importance', 'cadence')
     # class Meta(TargetForm.Meta):
     #     fields = SIDEREAL_FIELDS
 
@@ -263,7 +263,8 @@ TargetExtraFormset = inlineformset_factory(Target, TargetExtra, fields=('key', '
 
 TargetNamesFormset = inlineformset_factory(Target, TargetName, fields=('source_name', 'name',), validate_min=False,
                                            can_delete=False, extra=1, max_num=100,
-                                           widgets={'name': forms.TextInput()},)
+                                           widgets={'name': forms.TextInput()}, )
+
 
 class TargetLatexDescriptionForm(TargetForm):
     ra = CoordinateField(required=True, label='Right Ascension', c_type='ra',
@@ -275,36 +276,36 @@ class TargetLatexDescriptionForm(TargetForm):
                                     ' https://docs.astropy.org/en/stable/api/astropy.coordinates.Angle.html for '
                                     'supported sexagesimal inputs.')
     latex = forms.CharField(
-        label = 'ChatGPT-generated LaTeX target description:', 
-        required = False,
+        label='ChatGPT-generated LaTeX target description:',
+        required=False,
         widget=forms.Textarea(attrs={
-            'rows': 6, 
+            'rows': 6,
             'cols': 80,
-            'style': 'background-color: #ffeb3b; color: #000000;'        }),
+            'style': 'background-color: #ffeb3b; color: #000000;'}),
         help_text="Copy/paste to your paper"
     )
 
     prompt = forms.CharField(
-        label = 'Prompt used', required = False,                     
-        widget=forms.Textarea(attrs={'rows':6, 'cols':80}),
-#        help_text="Modify below in order to generate a new response from AI"
-        )
+        label='Prompt used', required=False,
+        widget=forms.Textarea(attrs={'rows': 6, 'cols': 80}),
+        #        help_text="Modify below in order to generate a new response from AI"
+    )
 
     title = forms.CharField(
-        label = 'ChatGPT-generated title:', 
-        required = False,
+        label='ChatGPT-generated title:',
+        required=False,
         widget=forms.Textarea(attrs={
-            'rows': 2, 
+            'rows': 2,
             'cols': 80,
-            'style': 'background-color: #ffeb3b; color: #000000;'        }),
+            'style': 'background-color: #ffeb3b; color: #000000;'}),
         help_text="Copy/paste to your paper"
     )
 
     prompt_title = forms.CharField(
-        label = 'Prompt used for the title', required = False,                     
-        widget=forms.Textarea(attrs={'rows':2, 'cols':80}),
-#        help_text="Modify below in order to generate a new response from AI"
-        )
+        label='Prompt used for the title', required=False,
+        widget=forms.Textarea(attrs={'rows': 2, 'cols': 80}),
+        #        help_text="Modify below in order to generate a new response from AI"
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -325,7 +326,7 @@ class TargetLatexDescriptionForm(TargetForm):
         # # self.fields['TNS_ID'].widget = TextInput(attrs={'maxlength': 100})
         # self.fields['classification'].widget = TextInput(attrs={'maxlength': 250})
 
-        #hidding irrelevant fields
+        # hidding irrelevant fields
         self.fields['ra'].widget = HiddenInput()
         self.fields['dec'].widget = HiddenInput()
         self.fields['importance'].widget = HiddenInput()
@@ -344,7 +345,7 @@ class TargetLatexDescriptionForm(TargetForm):
 
     class Meta:
         model = Target
-        fields = ('title','prompt_title','latex','prompt')
+        fields = ('title', 'prompt_title', 'latex', 'prompt')
 
         # fields = ('latex','prompt','name', 'ra', 'dec', 'galactic_lng', 'galactic_lat',
         #           'epoch', 'parallax',
@@ -353,8 +354,8 @@ class TargetLatexDescriptionForm(TargetForm):
 #        fields = ('name', 'type', 'ra', 'dec', 'epoch')
 
 
-    # def clean(self):
-    #     cleaned_data = super().clean()
-    #     prompt = cleaned_data.get('prompt')
-    #     if not prompt:
-    #         raise forms.ValidationError('The prompt can not be empty')
+# def clean(self):
+#     cleaned_data = super().clean()
+#     prompt = cleaned_data.get('prompt')
+#     if not prompt:
+#         raise forms.ValidationError('The prompt can not be empty')

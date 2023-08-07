@@ -1,22 +1,16 @@
-from datetime import datetime
 from io import StringIO
 import logging
 
-from astropy.coordinates import get_sun, SkyCoord
-from astropy.time import Time
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.shortcuts import redirect
 from django.views.generic.edit import CreateView, UpdateView
-from numpy import around
 
 from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm, TargetLatexDescriptionForm
 from bhtom2.bhtom_targets.utils import import_targets
-from bhtom2.dataproducts import last_jd
 from bhtom2.external_service.data_source_information import get_pretty_survey_name
-from bhtom2.utils.coordinate_utils import computePriority
 from bhtom2.utils.openai_utils import latex_target_title_prompt, latex_text_target_prompt, \
     get_response
 from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_stats_latex
@@ -28,7 +22,6 @@ from bhtom2.bhtom_targets.utils import check_duplicate_source_names, check_for_e
     check_for_existing_coords, get_nonempty_names_from_queryset, coords_to_degrees
 from guardian.shortcuts import get_objects_for_user, get_groups_with_perms
 
-
 from django.views.generic import TemplateView
 from django.urls import reverse
 from abc import ABC, abstractmethod
@@ -39,7 +32,6 @@ from django_filters.views import FilterView
 from django_tables2.views import SingleTableMixin
 from django.views.generic.detail import DetailView
 from guardian.mixins import PermissionListMixin
-from astropy import units as u
 from bhtom2.bhtom_targets.filters import TargetFilter
 
 from bhtom2.utils.reduced_data_utils import save_photometry_data_for_target_to_csv_file, \
@@ -156,33 +148,28 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         try:
             ra = coords_to_degrees(cleaned_data['ra'], 'ra')
             dec = coords_to_degrees(cleaned_data['dec'], 'dec')
-        except:
+        except Exception as e:
+            logger.error("Invalid format of the coordinates: %s " % str(e))
             form.add_error(None, "Invalid format of the coordinates")
             return super().form_invalid(form)
-        #            raise ValidationError(f'Invalid format of the coordinates')
+        # raise ValidationError(f'Invalid format of the coordinates')
 
         if ra < 0 or ra > 360 or dec < -90 or dec > 90:
+            logger.error("Coordinates beyond range")
             form.add_error(None, "Coordinates beyond range")
             return super().form_invalid(form)
         #            raise ValidationError(f'Coordinates beyond range error')
 
         coords_names = check_for_existing_coords(ra, dec, 3. / 3600., stored)
         if len(coords_names) != 0:
-            ccnames = ' '.join(coords_names)
+            ccnames = ' '.join(coords_names) #todo 'Iterable[str]', got 'list[tuple[str, str]]' instead
+            logger.error("Source found already at these coordinates (rad 3 arcsec)")
             form.add_error(None, f"Source found already at these coordinates (rad 3 arcsec): {ccnames}")
             return super().form_invalid(form)
         #            raise ValidationError(f'Source found already at these coordinates: {ccnames}')
 
         # Check if the form, extras and names are all valid:
         if names.is_valid() and (not duplicate_names) and (not existing_names):
-            #            messages.success(self.request, 'Target Create success, now grabbing all the data for it. Wait.')
-
-            # messages.add_message(
-            #     self.request,
-            #     messages.INFO,
-            #     f"Target created. Downloading archival data. Wait..."
-            # )
-
             super().form_valid(form)
 
         else:
@@ -207,13 +194,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             to_add.name = name
             to_add.save()
 
-        #        form.add_error(None,'Creating target, please wait...')
-        # messages.add_message(self.request,
-        #         messages.INFO,
-        #         f'Creating target, please wait...')
-
-        # TODO: there should be a message here on success and a warning to wait: Gathering archival data for target
-        # TODO: the hook here should be run in the background
+        messages.success(self.request, 'Target Create success, now grabbing all the data for it.')
 
         logger.info('Target post save hook: %s created: %s', self.object, True)
         run_hook('target_post_save', target=self.object, created=True)
@@ -235,6 +216,38 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         return form
 
 
+# overwriting the view from bhtom_base
+class TargetListView(SingleTableMixin, PermissionListMixin, FilterView):
+    """
+    View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
+    """
+    template_name = 'bhtom_targets/target_list.html'
+    strict = False
+    model = Target
+    # table_class = TargetTable
+    filterset_class = TargetFilter
+    permission_required = 'bhtom_targets.view_target'
+    table_pagination = False
+
+    def get_context_data(self, *args, **kwargs):
+        """
+        Adds the number of targets visible, the available ``TargetList`` objects if the user is authenticated, and
+        the query string to the context object.
+
+        :returns: context dictionary
+        :rtype: dict
+        """
+        context = super().get_context_data(*args, **kwargs)
+        # hide target grouping list if user not logged in
+        context['groupings'] = (TargetList.objects.all()
+                                if self.request.user.is_authenticated
+                                else TargetList.objects.none())
+        context['query_string'] = self.request.META['QUERY_STRING']
+        context['target_count'] = context['object_list'].count
+
+        return context
+
+
 class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
     """
     View that handles updating a target. Requires authorization.
@@ -251,7 +264,6 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
         :returns: context object
         :rtype: dict
         """
-        extra_field_names = [extra['name'] for extra in settings.EXTRA_FIELDS]
         context = super().get_context_data(**kwargs)
         context['names_form'] = TargetNamesFormset(instance=self.object)
 
@@ -284,10 +296,6 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
             if "ASASSN" in source_name:
                 if name.startswith("https://asas-sn.osu.edu/sky-patrol/coordinate/"):
                     name = name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
-
-            if "CPCS" in source_name:
-                if name.startswith("ivo://"):
-                    name = name.replace("ivo://", "")
 
             to_update, created = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
             to_update.name = name
@@ -423,11 +431,13 @@ class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
         import os
         from django.http import FileResponse
 
+        target_id = None
+
         if 'pk' in kwargs:
             target_id = kwargs['pk']
         elif 'name' in kwargs:
             target_id = kwargs['name']
-        logger.info(f'Generating file for target with id={target_id}...')
+        logger.info(f'Generating file for target with id={str(target_id)}...')
 
         tmp = None
         try:
@@ -513,93 +523,6 @@ class TargetDownloadRadioDataView(TargetDownloadDataView):
         return save_radio_data_for_target_to_csv_file(target_id)
 
 
-# overwriting the view from bhtom_base
-class TargetListView(SingleTableMixin, PermissionListMixin, FilterView):
-    """
-    View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
-    """
-    template_name = 'bhtom_targets/target_list.html'
-    strict = False
-    model = Target
-    # table_class = TargetTable
-    filterset_class = TargetFilter
-    permission_required = 'bhtom_targets.view_target'
-    table_pagination = False
-
-    def get_context_data(self, *args, **kwargs):
-        """
-        Adds the number of targets visible, the available ``TargetList`` objects if the user is authenticated, and
-        the query string to the context object.
-
-        :returns: context dictionary
-        :rtype: dict
-        """
-        context = super().get_context_data(*args, **kwargs)
-        # hide target grouping list if user not logged in
-        context['groupings'] = (TargetList.objects.all()
-                                if self.request.user.is_authenticated
-                                else TargetList.objects.none())
-        context['query_string'] = self.request.META['QUERY_STRING']
-
-        context['target_count'] = context['object_list'].count
-        #todo -> move to harvester-service ?
-        '''
-        mjd_now = Time(datetime.utcnow()).mjd
-
-        prioritylist = []
-        # SUN's position now:
-        sun_pos = get_sun(Time(datetime.utcnow()))
-
-        for target in context['object_list']:
-            # read dynamically from the current light curve:
-            mag_last, mjd_last, filter_last = last_jd.get_last(target)
-
-            # everytime the list is rendered, the last mag and last mjd are updated per target
-            target.mag_last = mag_last
-            target.mjd_last = mjd_last
-
-            # updating sun separation
-            try:
-                obj_pos = SkyCoord(target.ra, target.dec, unit=u.deg)
-                Sun_sep = around(sun_pos.separation(obj_pos).deg, 0)
-            except:
-                logger.error("Coordinates outside the range in {target} for Sun position calculation!")
-                obj_pos = SkyCoord(0, 0, unit=u.deg)
-                Sun_sep = "error"  # around(sun_pos.separation(obj_pos).deg,0)
-
-            target.sun_separation = Sun_sep
-            target.sun = Sun_sep #todo ????
-
-            out_filter = ""
-            if (mjd_last > 0):
-                out_filter = filter_last
-            else:
-                out_filter = "null"
-
-            target.last_mag = mag_last
-            target.last_filter = out_filter
-
-            try:
-                target.dt = (mjd_now - mjd_last)
-                dt = (mjd_now - mjd_last)
-            except:
-                dt = 10
-                target.dt = -1.
-
-            try:
-                imp = float(target.extra_field.get('importance'))
-                cadence = float(target.extra_field.get('cadence'))
-            except:
-                imp = 1
-                cadence = 1
-
-            target.cadencepriority = computePriority(dt, imp, cadence)
-            prioritylist.append(target.cadencepriority)
-            target.save()
-            '''
-        return context
-
-
 # Table list view with light curves only
 class TargetListImagesView(SingleTableMixin, PermissionListMixin, FilterView):
     """
@@ -649,6 +572,7 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
 
         allobs = []
         allobs_nowise = []
+
         for datum in datums:
             if str(datum.filter) == "WISE(W1)" or str(datum.filter) == "WISE(W2)":
                 #                allobs.append(str("WISE"))
@@ -720,5 +644,3 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
             'filter_counts': filter_counts
         })
         return self.render_to_response(context)
-
-

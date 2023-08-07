@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     'bhtom2.bhtom_observatory.apps.BhtomObservatoryConfig',
     'bhtom2.bhtom_calibration.apps.BhtomCalibrationConfig',
     'crispy_bootstrap4',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -234,7 +235,7 @@ LOGGING = {
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': tempfile.gettempdir()
+        'LOCATION': os.path.join(BASE_DIR, 'bhtom2/cache')
     }
 }
 

@@ -2,6 +2,7 @@ from django import forms
 from bhtom_base.bhtom_catalogs.harvester import get_service_classes
 from bhtom2.utils.coordinate_utils import fill_galactic_coordinates
 
+
 class CatalogQueryForm(forms.Form):
     """
     Form used for catalog harvesters ``CatalogQueryView``.
@@ -21,9 +22,8 @@ class CatalogQueryForm(forms.Form):
         service.query(self.cleaned_data['term'])
         t = service.to_target()
         fill_galactic_coordinates(t)
-        #checks if the service/harvester generates extras, if yes, returns them
+        # checks if the service/harvester generates extras, if yes, returns them
         ex = {}
         if (hasattr(service, 'to_extras')):
             ex = service.to_extras()
         return t, ex
-
