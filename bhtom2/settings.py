@@ -40,7 +40,7 @@ SITE_ID = int(secret.get("SITE_ID", 1))
 
 CPCS_BASE_URL = secret.get('CPCS_BASE_URL', None)
 CPCS_DATA_ACCESS_HASHTAG = secret.get('CPCS_DATA_ACCESS_HASHTAG', None)
-
+UPLOAD_SERVICE_URL = secret.get('UPLOAD_SERVICE_URL', None)
 WSDB_USER = secret.get('WSDB_USER', '')
 WSDB_PASSWORD = secret.get('WSDB_PASSWORD', '')
 WSDB_HOST = secret.get('WSDB_HOST', '')
@@ -142,6 +142,7 @@ DATABASES = {
         }
     },
 }
+
 
 MIGRATION_MODULES = {
     'bhtom2': 'bhtom2.migrations'
@@ -371,13 +372,11 @@ HINTS_ENABLED = False
 HINT_LEVEL = 20
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        # other authentication classes if needed
     ],
-    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 100
 }
-
 try:
     from local_settings import *  # noqa
 except ImportError:

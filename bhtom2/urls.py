@@ -18,14 +18,13 @@ from django.urls import path, include
 from bhtom2.views import BrokerQueryListView
 from bhtom_base.bhtom_common.api_router import SharedAPIRootRouter
 
-router = SharedAPIRootRouter()
-
-
 urlpatterns = [
-    path('targets/', include('bhtom2.bhtom_targets.urls', namespace='targets')),
+    path('', include('bhtom2.bhtom_targets.urls')),
+    path('calibration/', include('bhtom2.bhtom_calibration.urls', namespace='calibration')),
     path('catalogs/', include('bhtom2.bhtom_catalogs.urls', namespace='catalogs')),
     path('proposals/', include('bhtom2.bhtom_observations.urls', namespace='proposals')),
     path('observatory/', include('bhtom2.bhtom_observatory.urls', namespace='observatory')),
+    path('', include('bhtom2.bhtom_dataproducts.urls')),
     path('', include('bhtom_base.bhtom_common.urls')),
     path('', include('bhtom_custom_registration.bhtom_registration.registration_flows.approval_required.urls',
                      namespace='registration')),

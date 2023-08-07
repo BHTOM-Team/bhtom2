@@ -42,5 +42,6 @@ sphinx>=4.0
 lxml==4.9.1
 crispy-bootstrap4>=2022.1
 openai>=0.27.3
+drf_yasg==1.21.6 #swagger
 #MulensModel>=2.15.0
 aiokafka==0.8.1

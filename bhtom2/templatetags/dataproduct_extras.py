@@ -13,7 +13,7 @@ from guardian.shortcuts import get_objects_for_user
 from plotly import offline
 from astropy.time import Time
 
-from bhtom_base.bhtom_dataproducts.forms import DataProductUploadForm
+from bhtom2.bhtom_dataproducts.forms import DataProductUploadForm
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, ReducedDatumUnit
 from bhtom_base.bhtom_dataproducts.processors.data_serializers import SpectrumSerializer
 from bhtom_base.bhtom_observations.models import ObservationRecord
@@ -141,7 +141,7 @@ def upload_dataproduct(context, obj):
             form.fields['groups'].queryset = Group.objects.all()
         else:
             form.fields['groups'].queryset = user.groups.all()
-    return {'data_product_form': form}
+    return {'data_product_form_from_user': form}
 
 
 @register.inclusion_tag('bhtom_dataproducts/partials/photometry_for_target.html', takes_context=True)

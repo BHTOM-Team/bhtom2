@@ -6,13 +6,17 @@ from django.db.models import Q
 
 from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix
 from bhtom2.bhtom_observatory.rest.serializers import ObservatorySerializers, ObservatoryMatrixSerializers
-
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 logger = logging.getLogger(__name__)
 
 
 class GetObservatory(generics.ListCreateAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+  
     serializer_class = ObservatorySerializers
-
+  
     def get_queryset(self):
         query = Q()
 
@@ -45,6 +49,8 @@ class GetObservatory(generics.ListCreateAPIView):
 
 
 class CreateObservatory(generics.ListCreateAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         serializer = ObservatorySerializers(data=request.data)
@@ -55,6 +61,9 @@ class CreateObservatory(generics.ListCreateAPIView):
 
 
 class UpdateObservatory(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     queryset = Observatory.objects.all()
 
     def patch(self, request, *args, **kwargs):
@@ -68,6 +77,9 @@ class UpdateObservatory(generics.RetrieveUpdateDestroyAPIView):
 
 
 class DeleteObservatory(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
     queryset = Observatory.objects.all()
     serializer_class = ObservatorySerializers
 
@@ -77,6 +89,9 @@ class DeleteObservatory(generics.RetrieveUpdateDestroyAPIView):
 
 
 class GetObservatoryMatrix(generics.ListCreateAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
     serializer_class = ObservatoryMatrixSerializers
 
     def get_queryset(self):
@@ -105,6 +120,8 @@ class GetObservatoryMatrix(generics.ListCreateAPIView):
 
 
 class CreateObservatoryMatrix(generics.ListCreateAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         serializer = ObservatoryMatrixSerializers(data=request.data)
@@ -115,6 +132,9 @@ class CreateObservatoryMatrix(generics.ListCreateAPIView):
 
 
 class UpdateObservatoryMatrix(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
     queryset = ObservatoryMatrix.objects.all()
 
     def patch(self, request, *args, **kwargs):
@@ -128,9 +148,12 @@ class UpdateObservatoryMatrix(generics.RetrieveUpdateDestroyAPIView):
 
 
 class DeleteObservatoryMatrix(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
     queryset = Observatory.objects.all()
     serializer_class = ObservatoryMatrixSerializers
-
+    
     def delete(self, request, *args, **kwargs):
         self.destroy(request, *args, **kwargs)
         return Response("OK", status=202)
