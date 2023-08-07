@@ -9,7 +9,6 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 from django.conf import settings
 from .forms import DataProductUploadForm
 
-
 logger = BHTOMLogger(__name__, '[BHTOM2 views]')
 
 
@@ -43,6 +42,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
 
 
 class FitsUploadAPIView(APIView):
+ 
     def post(self, request):
         # Extract the POST data from the original request
         post_data = request.POST
