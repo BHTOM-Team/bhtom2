@@ -5,7 +5,7 @@
 {{ users }}
 
 {% if object %}
-<form action="{% url 'observatory:update' object.id %}" enctype="multipart/form-data" method="POST">
+<form action="{% url 'bhtom_observatory:update' object.id %}" enctype="multipart/form-data" method="POST">
 {% else %}
   <h4> Create a new Observatory. </h4>
   <br>
@@ -17,7 +17,7 @@
       The sample fits file is necessary for new observatories for verification of the automatic photometric processing.
       Please refer to the BHTOM Manual or get in touch.
     </p>
-<form action="{% url 'observatory:create' %}" enctype="multipart/form-data" method="POST">
+<form action="{% url 'bhtom_observatory:create' %}" enctype="multipart/form-data" method="POST">
 {% endif %}
 {% csrf_token %}
 {% bootstrap_form form %}

@@ -12,15 +12,15 @@ For customization instructions, see bhtom_common/base.html
         Targets
     </a>
     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-        <a class="dropdown-item" href="{% url 'targets:list' %}">List</a>
-        <a class="dropdown-item" href="{% url 'targets:images' %}">Visual list</a>
-        <a class="dropdown-item" href="{% url 'targets:create' %}">Create</a>
-        <a class="dropdown-item" href="{% url 'targets:import' %}">Import</a>
-        <a class="dropdown-item" href="{% url 'catalogs:query' %}">Catalog Search</a>
+        <a class="dropdown-item" href="{% url 'bhtom_targets:list' %}">List</a>
+        <a class="dropdown-item" href="{% url 'bhtom_targets:images' %}">Visual list</a>
+        <a class="dropdown-item" href="{% url 'bhtom_targets:create' %}">Create</a>
+        <a class="dropdown-item" href="{% url 'bhtom_targets:import' %}">Import</a>
+        <a class="dropdown-item" href="{% url 'bhtom_catalogs:query' %}">Catalog Search</a>
     </div>
 </li>
 <li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
-    <a class="nav-link" href="{% url 'targets:targetgrouping' %}">Target Grouping</a>
+    <a class="nav-link" href="{% url 'bhtom_targets:targetgrouping' %}">Target Grouping</a>
 </li>
 <li class="nav-item {% if request.resolver_match.namespace == 'alerts' %}active{% endif %}">
     <a class="nav-link" href="{% url 'alerts:list' %}">Alerts</a>
@@ -46,10 +46,10 @@ For customization instructions, see bhtom_common/base.html
     <a class="nav-link" href="{% url 'bhtom_base.bhtom_dataproducts:list' %}">Data</a>
 </li>
 <li class="nav-item {% if request.resolver_match.namespace == 'proposals' %}active{% endif %}">
-    <a class="nav-link" href="{% url 'proposals:list' %}">Proposals</a>
+    <a class="nav-link" href="{% url 'bhtom_proposals:list' %}">Proposals</a>
 </li>
 <li class="nav-item {% if request.resolver_match.namespace == 'observatory' %}active{% endif %}">
-    <a class="nav-link" href="{% url 'observatory:list' %}">Observatory</a>
+    <a class="nav-link" href="{% url 'bhtom_observatory:list' %}">Observatory</a>
 </li>
 <li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
     <a class="nav-link" href="{% url 'user-list' %}">Users</a>

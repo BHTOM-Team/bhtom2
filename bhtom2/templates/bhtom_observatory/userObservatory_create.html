@@ -5,7 +5,7 @@
 {{ users }}
 
 {% if object %}
-<form action="{% url 'observatory:userObservatory_update' object.id %}" enctype="multipart/form-data" method="POST">
+<form action="{% url 'bhtom_observatory:userObservatory_update' object.id %}" enctype="multipart/form-data" method="POST">
 {% else %}
   <h4> Add a new Observatory/Instrument to your list.
   </h4><p>
@@ -16,7 +16,7 @@
       If your observatory is not yet registered you can create a new entry. 
     </p>
 
-<form action="{% url 'observatory:userObservatory_create' %}" enctype="multipart/form-data" method="POST">
+<form action="{% url 'bhtom_observatory:userObservatory_create' %}" enctype="multipart/form-data" method="POST">
 {% endif %}
 {% csrf_token %}
 {% bootstrap_form form %}
@@ -27,7 +27,7 @@
     <button type="submit" class="btn btn-primary" title="Add this Observatory to my list"> Add to my list</button>
     <p>
       <hr>
-    <a href="{% url 'observatory:create' %}" title="Create new Observatory (if not on the list)" class="btn btn-primary">Create new Observatory</a>
+    <a href="{% url 'bhtom_observatory:create' %}" title="Create new Observatory (if not on the list)" class="btn btn-primary">Create new Observatory</a>
   {% endif %}
 
 {% endbuttons %}

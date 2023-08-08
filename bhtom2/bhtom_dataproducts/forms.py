@@ -13,7 +13,7 @@ from bhtom2.bhtom_calibration.models import catalogs as Catalogs
 class ObservatoryChoiceField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj):
-        if obj.cpcsOnly:
+        if obj.calibration_flg:
             return '{name} ({prefix}) (Only Instrumental photometry file)'.format(name=obj.name,
                                                                                      prefix=obj.prefix)
         else:
@@ -108,7 +108,7 @@ class DataProductUploadForm(forms.Form):
             
         super(DataProductUploadForm, self).__init__(*args, **kwargs)    
         self.fields['observatory'] = ObservatoryChoiceField(
-            queryset= Observatory.objects.filter(isActive=True).order_by('name'),
+            queryset= Observatory.objects.filter(active_flg=True).order_by('name'),
             widget=forms.Select(),
             required=False
         )
