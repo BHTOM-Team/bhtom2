@@ -131,7 +131,7 @@ class ASASSNBroker(BHTOMBroker):
         except Exception as e:
             # Empty response or error in connection
             self.logger.warning(f'ASASSN returned no observations for {target.name}')
-            self.logged.error(f'ASASSN data reading error: {e}')
+            self.logger.error(f'ASASSN data reading error: {e}')
             return return_for_no_new_points()
         
         try:
