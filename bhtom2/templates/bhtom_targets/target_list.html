@@ -25,26 +25,12 @@
       </span>
                 </div>
             </div>
+            <div style="padding-bottom: 20px;"></div>
             {% select_target_js %}
             {% target_distribution filter.qs %}
             <label id="displaySelected"></label>
             <button id="optionSelectAll" type="button" class="btn btn-link"
                     onClick="select_all({{ target_count }})"></button>
-            <form id="grouping-form" action="{% url 'targets:add-remove-grouping' %}" method="POST">
-                {% csrf_token %}
-                <div class="form-group d-flex justify-content-end align-items-baseline">
-                    <label>Add/Remove from grouping</label>
-                    <select name="grouping" class="form-control w-25 ml-1">
-                        {% for grouping in groupings %}
-                            <option value="{{ grouping.id }}">{{ grouping.name }}</option>
-                        {% endfor %}
-                    </select>
-                    <input type="hidden" value="{{ query_string }}" name="query_string">
-                    <input type="hidden" value="False" id="isSelectAll" name="isSelectAll">
-                    <button type="submit" class="btn btn-outline-primary ml-1" name="add">Add</button>
-                    <button type="submit" class="btn btn-outline-primary ml-1" name="move">Move</button>
-                    <button type="submit" class="btn btn-outline-danger ml-1" name="remove">Remove</button>
-                </div>
 
             <!-- TABLE with targets, embeded in the form to add targets to a group -->
         <!-- {% render_table table %} -->
@@ -112,6 +98,23 @@
 
         </div>
         </div>
+
+        {% comment %} Grouping below the table {% endcomment %}
+        <form id="grouping-form" action="{% url 'targets:add-remove-grouping' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group d-flex justify-content-end align-items-baseline">
+                <label>Add/Remove from grouping</label>
+                <select name="grouping" class="form-control w-25 ml-1">
+                    {% for grouping in groupings %}
+                        <option value="{{ grouping.id }}">{{ grouping.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="hidden" value="{{ query_string }}" name="query_string">
+                <input type="hidden" value="False" id="isSelectAll" name="isSelectAll">
+                <button type="submit" class="btn btn-outline-primary ml-1" name="add">Add</button>
+                <button type="submit" class="btn btn-outline-primary ml-1" name="move">Move</button>
+                <button type="submit" class="btn btn-outline-danger ml-1" name="remove">Remove</button>
+            </div>
 
         <!-- filters below the table (new row) -->
         <div class="row">
