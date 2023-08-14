@@ -70,7 +70,7 @@ def target_post_save(target, created, **kwargs):
             imp = float(target.extra_field.get('importance'))
             cadence = float(target.extra_field.get('cadence'))
         except Exception as e:
-            print("HOOK error: ",e)
+#            print("HOOK error: ",e)
             imp = 1
             cadence = 1
             te, _ = TargetExtra.objects.update_or_create(target=target,

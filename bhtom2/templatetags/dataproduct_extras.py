@@ -162,29 +162,38 @@ def gaia_stats(target):
 
     source_id = gaia_name
 
+    # Initialize all variables to 0
+    parallax3 = parallax3_error = pmra3 = pmra3_error = pmdec3 = pmdec3_error = ruwe3 = aen3 = 0
+    parallax2 = parallax2_error = pmra2 = pmra2_error = pmdec2 = pmdec2_error = aen2 = ruwe2 = 0
+    r3_med_geo = 0
+
     job = Gaia.launch_job(f"select  \
                         parallax, parallax_error, \
                         pmra, pmra_error, pmdec, pmdec_error, ruwe, astrometric_excess_noise \
                         from gaiadr3.gaia_source where source_id={source_id};")
     r3 = job.get_results().to_pandas()
-    parallax3, parallax3_error = r3.parallax.item(), r3.parallax_error.item()
-    pmra3, pmra3_error = r3.pmra.item(), r3.pmra_error.item()
-    pmdec3, pmdec3_error = r3.pmdec.item(), r3.pmdec_error.item()
-    ruwe3 = r3.ruwe.item()
-    aen3 = r3.astrometric_excess_noise.item()
+    if not r3.empty:
+        r3 = r3.iloc[0] #assuring only first row will be read
+        parallax3, parallax3_error = r3.parallax.item(), r3.parallax_error.item()
+        pmra3, pmra3_error = r3.pmra.item(), r3.pmra_error.item()
+        pmdec3, pmdec3_error = r3.pmdec.item(), r3.pmdec_error.item()
+        ruwe3 = r3.ruwe.item()
+        aen3 = r3.astrometric_excess_noise.item()
 
     job = Gaia.launch_job(f"select  \
                         parallax, parallax_error, \
                         pmra, pmra_error, pmdec, pmdec_error,astrometric_excess_noise \
                         from gaiadr2.gaia_source where source_id={source_id};")
     r2 = job.get_results().to_pandas()
-    parallax2 = r2.parallax.item()
-    parallax2_error = r2.parallax_error.item()
-    pmra2 = r2.pmra.item()
-    pmra2_error = r2.pmra_error.item()
-    pmdec2 = r2.pmdec.item()
-    pmdec2_error = r2.pmdec_error.item()
-    aen2 = r2.astrometric_excess_noise.item()
+    if not r2.empty:
+        r2 = r2.iloc[0] #assuring only first row will be read
+        parallax2 = r2.parallax.item()
+        parallax2_error = r2.parallax_error.item()
+        pmra2 = r2.pmra.item()
+        pmra2_error = r2.pmra_error.item()
+        pmdec2 = r2.pmdec.item()
+        pmdec2_error = r2.pmdec_error.item()
+        aen2 = r2.astrometric_excess_noise.item()
 
     job = Gaia.launch_job(f"select  \
                         ruwe \
@@ -195,7 +204,9 @@ def gaia_stats(target):
                         r_med_geo,     r_lo_geo,      r_hi_geo,  r_med_photogeo,  r_lo_photogeo,  r_hi_photogeo\
                         from external.gaiaedr3_distance where source_id={source_id};")
     r=job.get_results().to_pandas()
-    r3_med_geo = r.r_med_geo.item()
+    if not r.empty:
+        r = r.iloc[0]
+        r3_med_geo = r.r_med_geo.item()
 
     #external.external.gaiadr2_geometric_distance
     #external.external.gaiaedr3_distance
