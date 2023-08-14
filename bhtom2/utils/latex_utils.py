@@ -6,7 +6,10 @@ from pylatex.table import Tabularx
 def data_to_latex_table(data: List[List[Any]], columns: List[str], filename: str) -> str:
     doc: Document = Document(filename)
 
-    with doc.create(Tabularx("lX lX lX lX l", width=5)) as table:
+    # Generate column format string based on number of columns
+    col_format = " ".join(["lX"] * len(columns))
+
+    with doc.create(Tabularx(col_format, width=len(columns))) as table:
         table.add_hline()
         table.add_row([col.replace('_', ' ') for col in columns])
         table.add_hline()
