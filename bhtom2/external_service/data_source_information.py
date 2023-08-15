@@ -4,13 +4,13 @@ from typing import Dict, List
 
 class DataSource(Enum):
     GAIA_ALERTS = auto()
-    GAIA_DR3 = auto()
-    GAIA_DR2 = auto()
-    ZTF = auto()
     CPCS = auto()
+    ASASSN = auto()
+    OGLE_EWS= auto()
+    ZTF = auto()
+    ATLAS = auto()
     AAVSO = auto()
     TNS = auto()
-    ASASSN = auto()
     ANTARES = auto()
     ZTF_DR8 = auto()
     SDSS_DR14 = auto()
@@ -21,7 +21,8 @@ class DataSource(Enum):
     FIRST = auto()
     PS1 = auto()
     DECAPS = auto()
-    OGLE_EWS= auto()
+    GAIA_DR3 = auto()
+    GAIA_DR2 = auto()
 
 
 PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
@@ -44,7 +45,8 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.FIRST: "FIRST",
     DataSource.PS1: "PS1",
     DataSource.DECAPS: "DECAPS",
-    DataSource.OGLE_EWS:"OGLE-EWS"
+    DataSource.OGLE_EWS:"OGLE-EWS",
+    DataSource.ATLAS:"ATLAS"
 }
 
 
@@ -58,7 +60,8 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.CPCS: "CPCS name",
     DataSource.AAVSO: "AAVSO name",
     DataSource.TNS: "TNS name",
-    DataSource.ASASSN: "ASASSN name",
+    DataSource.ASASSN: "ASASSN url",
+    DataSource.OGLE_EWS: "OGLE EWS name",
     DataSource.ANTARES: "ANTARES name",
     DataSource.GAIA_DR2: "Gaia DR2 id",
     DataSource.ZTF_DR8: "ZTF DR8 id",
@@ -71,7 +74,7 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.FIRST: "FIRST name",
     DataSource.PS1: "PS1 name",
     DataSource.DECAPS: "DECAPS name",
-    DataSource.OGLE_EWS: "OGLE EWS name"
+    DataSource.ATLAS:"ATLAS url"
 }
 
 
@@ -93,6 +96,7 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.CPCS: ["g", "r", "i", "z"], ##is it used anywhere?    it has to be specified because bhtom_broker reads it, but probably does not use
     DataSource.ASASSN: ["g", "V"], 
     DataSource.OGLE_EWS: ['I'],
+    DataSource.ATLAS: ['o','c']
 }
 
 

@@ -70,7 +70,8 @@ color_map = {
         'ASASSN(g)':  ['green', 'cross-thin',2], #add opacity
         'ASASSN(V)':  ['darkgreen', 'cross-thin',2], #add opacity
         'OGLE(I)': ['#6c1414','diamond',2],
-        
+        'ATLAS(c)': ['#1f7e7d','circle',2], #add opacity
+        'ATLAS(o)': ['#f88f1e','circle',2], #add opacity
     }
 
 
