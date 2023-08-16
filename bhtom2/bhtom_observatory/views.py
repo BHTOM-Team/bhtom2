@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class CreateObservatory(LoginRequiredMixin, FormView):
     template_name = 'bhtom_observatory/observatory_create.html'
     form_class = ObservatoryCreationForm
-    success_url = reverse_lazy('observatory:list')
+    success_url = reverse_lazy('bhtom_observatory:list')
 
     def form_valid(self, form):
 
@@ -108,7 +108,7 @@ class ObservatoryList(LoginRequiredMixin, ListView):
 class UpdateObservatory(LoginRequiredMixin, UpdateView):
     template_name = 'bhtom_observatory/observatory_create.html'
     form_class = ObservatoryUpdateForm
-    success_url = reverse_lazy('observatory:list')
+    success_url = reverse_lazy('bhtom_observatory:list')
     model = Observatory
 
     @transaction.atomic
@@ -120,7 +120,7 @@ class UpdateObservatory(LoginRequiredMixin, UpdateView):
 
 
 class DeleteObservatory(LoginRequiredMixin, DeleteView):
-    success_url = reverse_lazy('observatory:list')
+    success_url = reverse_lazy('bhtom_observatory:list')
     model = Observatory
     template_name = 'bhtom_observatory/observatory_delete.html'
 
@@ -152,7 +152,7 @@ class CreateUserObservatory(LoginRequiredMixin, FormView):
 
     template_name = 'bhtom_observatory/userObservatory_create.html'
     form_class = ObservatoryUserCreationForm
-    success_url = reverse_lazy('observatory:list')
+    success_url = reverse_lazy('bhtom_observatory:list')
 
     def get_form_kwargs(self):
         kwargs = super(CreateUserObservatory, self).get_form_kwargs()
@@ -191,7 +191,7 @@ class CreateUserObservatory(LoginRequiredMixin, FormView):
 
 
 class DeleteUserObservatory(LoginRequiredMixin, DeleteView):
-    success_url = reverse_lazy('observatory:list')
+    success_url = reverse_lazy('bhtom_observatory:list')
     model = ObservatoryMatrix
     template_name = 'bhtom_observatory/userObservatory_delete.html'
 
@@ -210,7 +210,7 @@ class DeleteUserObservatory(LoginRequiredMixin, DeleteView):
 class UpdateUserObservatory(LoginRequiredMixin, UpdateView):
     template_name = 'bhtom_observatory/userObservatory_create.html'
     form_class = ObservatoryUserUpdateForm
-    success_url = reverse_lazy('observatory:list')
+    success_url = reverse_lazy('bhtom_observatory:list')
     model = ObservatoryMatrix
 
     @transaction.atomic

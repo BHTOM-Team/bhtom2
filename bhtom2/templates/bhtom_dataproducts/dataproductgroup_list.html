@@ -1,0 +1,79 @@
+{% extends 'bhtom_common/base.html' %}
+{% block title %}Data Product Groups{% endblock %}
+{% block content %}
+
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs" id="tabs">
+                <li class="nav-item">
+                    <span class="nav-link active" data-target="#all" data-toggle="tab">All Group</span>
+                </li>
+                <li class="nav-item">
+                    <span class="nav-link" data-target="#user" data-toggle="tab">Your Group</span>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane active" id="all">
+
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Products</th>
+                            <th>Created</th>
+                            <th>Private</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for group in object_list %}
+                            <tr>
+
+                                {% if group.private == False %}
+                                    <td>
+                                        <a href="{% url 'bhtom_base.bhtom_dataproducts:group-detail' group.id %}">{{ group.name }}</a>
+                                    </td>
+                                {% else %}
+                                    <td>{{ group.name }}</td>
+                                {% endif %}
+                                <td>{{ group.dataproduct_set.count }}</td>
+                                <td>{{ group.created }}</td>
+                                <td>{{ group.private }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+                <div class="tab-pane" id="user">
+                    <a href="{% url 'bhtom_base.bhtom_dataproducts:group-create' %}" class="btn btn-primary">Create New
+                        Group</a>
+
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Products</th>
+                            <th>Created</th>
+                            <th>Private</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for group in user_group %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'bhtom_base.bhtom_dataproducts:group-detail' group.id %}">{{ group.name }}</a>
+                                </td>
+                                <td>{{ group.dataproduct_set.count }}</td>
+                                <td>{{ group.created }}</td>
+                                <td>{{ group.private }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

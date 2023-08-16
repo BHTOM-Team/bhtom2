@@ -64,7 +64,7 @@ class ObservatoryMatrix(models.Model):
     last_file_process = models.DateTimeField(null=True, blank=True, editable=True)
 
     def __str__(self):
-        return self.user.username
+        return self.observatory.name
 
     class Meta:
         verbose_name_plural = "observatory matrix"

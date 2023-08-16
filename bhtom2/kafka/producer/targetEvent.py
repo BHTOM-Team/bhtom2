@@ -1,6 +1,7 @@
+import logging
 import os
 
-from confluent_kafka import Producer
+from confluent_kafka import Producer, KafkaError
 
 import json
 
@@ -19,7 +20,10 @@ class KafkaProducer:
         conf = {
             'bootstrap.servers': secret.get("kafka_servers")
         }
-        self.producer = Producer(conf)
+        try:
+            self.producer = Producer(conf)
+        except KafkaError as e:
+            logging.error("error ")
 
     def send_message(self, topic, target):
         if self.producer is None:
@@ -34,4 +38,4 @@ class KafkaProducer:
 
         message_json = json.dumps(value)
         self.producer.produce(topic, value=message_json)
-        self.producer.flush()
+        self.producer.poll()
