@@ -35,11 +35,16 @@ color_map = {
         'WISE(W2)':   ['blue', 'x', 2],
         'CRTS(CL)':   ['#FF1493', 'diamond', 4],
         'LINEAR(CL)': ['teal', 'diamond', 4],
-        'SDSSDR(r)':  ['red ', 'square' , 5],
-        'SDSSDR(i)':  [ '#800000', 'square' , 5],
-        'SDSSDR(u)':  ['#40E0D0'  , 'square' , 5],
-        'SDSSDR(z)':  ['#ff0074' , 'square' , 5],
-        'SDSSDR(g)':  ['green', 'square' , 5],
+        'SDSS(r)':  ['red ', 'square' , 5],
+        'SDSS(i)':  [ '#800000', 'square' , 5],
+        'SDSS(u)':  ['#40E0D0'  , 'square' , 5],
+        'SDSS(z)':  ['#ff0074' , 'square' , 5],
+        'SDSS(g)':  ['green', 'square' , 5],
+        # 'SDSSDR(r)':  ['red ', 'square' , 5],
+        # 'SDSSDR(i)':  [ '#800000', 'square' , 5],
+        # 'SDSSDR(u)':  ['#40E0D0'  , 'square' , 5],
+        # 'SDSSDR(z)':  ['#ff0074' , 'square' , 5],
+        # 'SDSSDR(g)':  ['green', 'square' , 5],
         'DECAPS(r)':  ['red ', 'star-square' , 5],
         'DECAPS(i)':  [ '#800000', 'star-square' , 5],
         'DECAPS(u)':  ['#40E0D0'  , 'star-square' , 5],
@@ -49,11 +54,11 @@ color_map = {
         'PS1(i)': ['#800000', "star-open", 5],
         'PS1(z)': ['#ff0074', "star-open", 5],
         'PS1(g)': ['green', "star-open", 5],
-         'SDSS_DR14(r)':  ['red ', 'square' , 5],
-         'SDSS_DR14(i)':  [ '#800000', 'square' , 5],
-         'SDSS_DR14(u)':  ['#40E0D0'  , 'square' , 5],
-         'SDSS_DR14(z)':  ['#ff0074' , 'square' , 5],
-         'SDSS_DR14(g)':  ['green', 'square' , 5],
+        #  'SDSS_DR14(r)':  ['red ', 'square' , 5],
+        #  'SDSS_DR14(i)':  [ '#800000', 'square' , 5],
+        #  'SDSS_DR14(u)':  ['#40E0D0'  , 'square' , 5],
+        #  'SDSS_DR14(z)':  ['#ff0074' , 'square' , 5],
+        #  'SDSS_DR14(g)':  ['green', 'square' , 5],
          'RP(GAIA_DR3)':  ['#ff8A8A', 'circle' , 4],
          'BP(GAIA_DR3)':  ['#8A8Aff', 'circle' , 4],
          'G(GAIA_DR3)':   ['black', 'circle', 4],
@@ -492,7 +497,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
 
     for filter_name, filter_values in radio_data.items():
         if filter_values['magnitude']:
-            series = go.Scatter(
+            series2 = go.Scatter(
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
@@ -511,9 +516,9 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
 
                 yaxis="y2"
             )
-            plot_data.append(series)
+            plot_data.append(series2)
         elif filter_values.get('limit'):
-            series = go.Scatter(
+            series2 = go.Scatter(
                 x=filter_values['time'],
                 y=filter_values['limit'],
                 mode='markers',
@@ -525,7 +530,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 <br>MJD= %{text:.6f}\
             <br>limit flux= (%{y:.3f})'
             )
-            plot_data.append(series)
+            plot_data.append(series2)
 
     layout = go.Layout(
         height=height,
@@ -694,7 +699,9 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
 
     plot_data = []
     for filter_name, filter_values in photometry_data.items():
-        if (filter_name == "G(GAIA_ALERTS)"): continue
+        if (filter_name == "G(GAIA_ALERTS)"): continue #for older targets, which still have G(GAIA_ALERTS) instead of GSA(G)
+        if (filter_name == "SDSSDR(u)" or filter_name =="SDSSDR(g)" or filter_name=="SDSSDR(r)" or filter_name=="SDSSDR(i)" or filter_name=="SDSS(z)"): continue
+        if (filter_name == "SDSS_DR14(u)" or filter_name =="SDSS_DR14(g)" or filter_name=="SDSS_DR14(r)" or filter_name=="SDSS_DR14(i)" or filter_name=="SDSS_DR14(z)"): continue
         if filter_values['magnitude']:
             series = go.Scatter(
                 x=filter_values['time'],
@@ -718,7 +725,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
 
     for filter_name, filter_values in radio_data.items():
         if filter_values['magnitude']:
-            series = go.Scatter(
+            series2 = go.Scatter(
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
@@ -731,9 +738,9 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                 ),
                 yaxis="y2"
             )
-            plot_data.append(series)
+            plot_data.append(series2)
         elif filter_values.get('limit'):
-            series = go.Scatter(
+            series2 = go.Scatter(
                 x=filter_values['time'],
                 y=filter_values['limit'],
                 mode='markers',
@@ -741,7 +748,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                 marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol=6),  # upside down triangle
                 name=filter_name + ' non-detection',
             )
-            plot_data.append(series)
+            plot_data.append(series2)
 
     layout = go.Layout(
         height=height,
