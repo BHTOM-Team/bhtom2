@@ -439,6 +439,9 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
             mjds_lim_to_plot[filter_name]=Time(filter_values['time'], format="datetime").mjd
 
     for filter_name, filter_values in photometry_data.items():
+        if (filter_name == "G(GAIA_ALERTS)"): continue #for older targets, which still have G(GAIA_ALERTS) instead of GSA(G)
+        if (filter_name == "SDSSDR(u)" or filter_name =="SDSSDR(g)" or filter_name=="SDSSDR(r)" or filter_name=="SDSSDR(i)" or filter_name=="SDSS(z)"): continue
+        if (filter_name == "SDSS_DR14(u)" or filter_name =="SDSS_DR14(g)" or filter_name=="SDSS_DR14(r)" or filter_name=="SDSS_DR14(i)" or filter_name=="SDSS_DR14(z)"): continue
         if filter_values['magnitude']:
             series = go.Scatter(
                 x=filter_values['time'],
@@ -570,10 +573,10 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
             range=[np.floor(radio_min), np.ceil(radio_max)],
             title="mJy",
             titlefont=dict(
-                color="black"
+                color="#1f77b4"
             ),
             tickfont=dict(
-                color="black"
+                color="#1f77b4"
             ),
             overlaying="y",
             side="right",
@@ -751,12 +754,33 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
             plot_data.append(series2)
 
     layout = go.Layout(
-        height=height,
+        height=height + (len(photometry_data.items())//5)*10,
         width=width,
         # paper_bgcolor=background,
         # plot_bgcolor=background
         paper_bgcolor='white',  # Change the background color to white
-        plot_bgcolor='white'  # Change the plot area background color to white
+        plot_bgcolor='white',  # Change the plot area background color to white
+        shapes=[
+        dict( #vertical line for y2, will be used for radio axis
+            type='line',
+            yref='paper', y0=0, y1=1,
+            xref='paper', x0=1, x1=1,
+            line=dict(
+                color='black',
+                width=1,
+            )
+        ),
+                dict( #horizonal line at the top, closing the plot
+            type='line',
+            yref='paper', y0=1, y1=1,
+            xref='paper', x0=0, x1=1,
+            line=dict(
+                color='#1f77b4',
+                width=1,
+            )
+        )
+
+    ]
     )
 
     layout.legend.font.color = label_color
@@ -809,6 +833,8 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
         overlaying="y",
         side="right",
         showgrid=False,  # Do not show grid lines on the yaxis2
+        showticklabels=True,  # Display the tick labels
+        ticks='inside',
     ),
     legend_tracegroupgap=1,
     legend=dict(
