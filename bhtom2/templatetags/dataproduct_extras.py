@@ -694,6 +694,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
 
     plot_data = []
     for filter_name, filter_values in photometry_data.items():
+        if (filter_name == "G(GAIA_ALERTS)"): continue
         if filter_values['magnitude']:
             series = go.Scatter(
                 x=filter_values['time'],
