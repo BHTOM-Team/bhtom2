@@ -91,9 +91,10 @@ class DataProductUploadForm(forms.Form):
     def __init__(self, *args, **kwargs):
         filter = {}
         filter['no'] = 'Auto'
-        catalogs = Catalogs.objects.all().values_list('filters')
+        catalogs = Catalogs.objects.all()
         for curval in catalogs:
-            curname, filters = curval
+            curname = curval.survey
+            filters = curval.filters
             for i, f in enumerate(filters):
                 filter[curname + '/' + f] = curname + '/' + f
             filter['%s/any' % (curname)] = '%s/any' % (curname)
