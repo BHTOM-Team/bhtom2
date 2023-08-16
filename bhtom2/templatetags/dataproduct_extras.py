@@ -27,10 +27,10 @@ from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_s
 register = template.Library()
 
 color_map = {
-        'GSA(G)':     ['black','hexagon',10], 
-        'ZTF(zg)':    ['green','cross',4],
-        'ZTF(zi)':    ['#800000','cross',4],
-        'ZTF(zr)':    ['red','cross',4],
+        'GSA(G)':     ['black','hexagon',8], 
+        'ZTF(zg)':    ['green','x',6],
+        'ZTF(zi)':    ['#800000','x',6],
+        'ZTF(zr)':    ['red','x',6],
         'WISE(W1)':   ['#FFCC00', 'x',2],
         'WISE(W2)':   ['blue', 'x', 2],
         'CRTS(CL)':   ['#FF1493', 'diamond', 4],
@@ -582,6 +582,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
             orientation="h"
         )
     )
+
     return {
         'target': target,
         'plot': offline.plot(fig, output_type='div', show_link=False)
