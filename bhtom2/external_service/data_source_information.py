@@ -23,7 +23,8 @@ class DataSource(Enum):
     DECAPS = auto()
     GAIA_DR3 = auto()
     GAIA_DR2 = auto()
-
+    KMT_NET= auto()
+ 
 
 PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.GAIA_ALERTS: "Gaia Alerts",
@@ -46,7 +47,8 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.PS1: "PS1",
     DataSource.DECAPS: "DECAPS",
     DataSource.OGLE_EWS:"OGLE-EWS",
-    DataSource.ATLAS:"ATLAS"
+    DataSource.ATLAS:"ATLAS",
+    DataSource.KMT_NET:"KMT-NET"
 }
 
 
@@ -74,7 +76,8 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.FIRST: "FIRST name",
     DataSource.PS1: "PS1 name",
     DataSource.DECAPS: "DECAPS name",
-    DataSource.ATLAS:"ATLAS url"
+    DataSource.ATLAS:"ATLAS url",
+    DataSource.KMT_NET:"KMT name"
 }
 
 
@@ -96,7 +99,8 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.CPCS: ["g", "r", "i", "z"], ##is it used anywhere?    it has to be specified because bhtom_broker reads it, but probably does not use
     DataSource.ASASSN: ["g", "V"], 
     DataSource.OGLE_EWS: ['I'],
-    DataSource.ATLAS: ['o','c']
+    DataSource.ATLAS: ['o','c'],
+    DataSource.KMT_NET: ['I']
 }
 
 
