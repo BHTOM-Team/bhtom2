@@ -177,6 +177,7 @@ class KMTNETBroker(BHTOMBroker):
                     break
 
         fNum = field[3:5]
+        fNum2 = "4" + fNum[1:]
 
         eventNr = "KB"+year[-2:]+num
 
@@ -188,8 +189,10 @@ class KMTNETBroker(BHTOMBroker):
                 if(year == "2015"):  #WHY?
                     return data
                 else:
-                    url = "https://kmtnet.kasi.re.kr/~ulens/event/%s/data/%s/diapl/%s%s_I.diapl"%(year, eventNr, site, fNum)
-
+#                    url = "https://kmtnet.kasi.re.kr/~ulens/event/%s/data/%s/diapl/%s%s_I.diapl"%(year, eventNr, site, fNum)
+                    url = "https://kmtnet.kasi.re.kr/~ulens/event/%s/data/%s/pysis/%s%s_I.pysis"%(year, eventNr, site, fNum)
+                    url2= "https://kmtnet.kasi.re.kr/~ulens/event/%s/data/%s/pysis/%s%s_I.pysis"%(year, eventNr, site, fNum2)
+                    
                 print("KMTNET : url:",url)
 
                 obser=("%s_%s")%(self.__OBSERVER_NAME,site)
@@ -205,13 +208,16 @@ class KMTNETBroker(BHTOMBroker):
                         if(l[0:1]!="<"):
                             if(len(l)>0):
                                 col = l.split()
-                                if(col[0] != "#" and abs(float(col[1])-0.)>1e-8 and float(col[4])>0. and abs(-99.0 - float(col[1]))>1e-8):
-                                    m, er = mm.utils.Utils.get_mag_and_err_from_flux(float(col[1]), float(col[2]))
-                                    if(not np.isnan(m) and er<1):
-                                        print(float(col[0]))
+                                if(col[0] != "#"):# and abs(float(col[1])-0.)>1e-8 and float(col[4])>0. and abs(-99.0 - float(col[1]))>1e-8):
+#                                    m, er = mm.utils.Utils.get_mag_and_err_from_flux(float(col[1]), float(col[2]))
+                                    m = float(col[3])
+                                    er = float(col[4])
+                                    fwhm = float(col[5])
+                                    if(er<1 and fwhm<10):
+#                                        print(float(col[0]))
                                         mjd: float = float(col[0])+2450000-2400000.5
                                         timestamp = Time(mjd, format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
-                                        print(mjd, timestamp, m, er, obser)
+#                                        print(mjd, timestamp, m, er, obser)
                                         reduced_datum = ReducedDatum(target=target,
                                             data_type='photometry',
                                             timestamp=timestamp,
