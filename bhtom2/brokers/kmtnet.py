@@ -221,7 +221,9 @@ class KMTNETBroker(BHTOMBroker):
                                                 m = float(col[3])
                                                 er = float(col[4])
                                                 fwhm = float(col[5])
-                                            if(er<1 and fwhm<10):
+                                                sky = float(col[6]) #could be stored in future
+                                                secz = float(col[7]) #airmass
+                                            if(er<1 and fwhm<10 and fwhm>0):
                                                 mjd: float = float(col[0])+2450000-2400000.5
                                                 timestamp = Time(mjd, format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
                                                 reduced_datum = ReducedDatum(target=target,
