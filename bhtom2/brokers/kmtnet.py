@@ -119,7 +119,6 @@ class KMTNETBroker(BHTOMBroker):
  
     def process_reduced_data(self, target, alert=None) -> Optional[LightcurveUpdateReport]:
         import urllib.request
-        import MulensModel as mm
 
         # We are going to probably obtain some response from an API call or using a python package
         #response: str = ''
@@ -184,54 +183,61 @@ class KMTNETBroker(BHTOMBroker):
         try:  #per all sites
 
             obs = ["KMTA", "KMTC", "KMTS"]
+            urls = []
             for site in obs:
 
-                if(year == "2015"):  #WHY?
-                    return data
+                if(year == "2015"): 
+                    urls=["https://kmtnet.kasi.re.kr/~ulens/event/2015/pysis/%s/%s%s_I.pysis"%(eventNr, site,fNum)]
                 else:
-#                    url = "https://kmtnet.kasi.re.kr/~ulens/event/%s/data/%s/diapl/%s%s_I.diapl"%(year, eventNr, site, fNum)
-                    url = "https://kmtnet.kasi.re.kr/~ulens/event/%s/data/%s/pysis/%s%s_I.pysis"%(year, eventNr, site, fNum)
+                    url1 = "https://kmtnet.kasi.re.kr/~ulens/event/%s/data/%s/pysis/%s%s_I.pysis"%(year, eventNr, site, fNum)
                     url2= "https://kmtnet.kasi.re.kr/~ulens/event/%s/data/%s/pysis/%s%s_I.pysis"%(year, eventNr, site, fNum2)
+                    urls = [url1, url2]
+                    #second url might not exist
                     
-                print("KMTNET : url:",url)
+#                print("KMTNET : urls:",urls)
 
                 obser=("%s_%s")%(self.__OBSERVER_NAME,site)
-#                print(obser)
 
                 reduced_datums = []
-                response: str = query_external_service(url,
-                                                    'KMT_NET')
-                text = response
-                lines = text.split('\n')
-                if(len(lines)>1):
-                    for l in lines:
-                        if(l[0:1]!="<"):
-                            if(len(l)>0):
-                                col = l.split()
-                                if(col[0] != "#"):# and abs(float(col[1])-0.)>1e-8 and float(col[4])>0. and abs(-99.0 - float(col[1]))>1e-8):
-#                                    m, er = mm.utils.Utils.get_mag_and_err_from_flux(float(col[1]), float(col[2]))
-                                    m = float(col[3])
-                                    er = float(col[4])
-                                    fwhm = float(col[5])
-                                    if(er<1 and fwhm<10):
-#                                        print(float(col[0]))
-                                        mjd: float = float(col[0])+2450000-2400000.5
-                                        timestamp = Time(mjd, format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
-#                                        print(mjd, timestamp, m, er, obser)
-                                        reduced_datum = ReducedDatum(target=target,
-                                            data_type='photometry',
-                                            timestamp=timestamp,
-                                            mjd=mjd,
-                                            value=m,
-                                            source_name=self.name,
-                                            source_location=url,
-                                            error=er,
-                                            filter='KMTNET(I)',
-                                            observer=obser,
-                                            facility=self.__FACILITY_NAME,
-                                            value_unit = ReducedDatumUnit.MAGNITUDE)
-                                            
-                                        reduced_datums.extend([reduced_datum])
+
+                for url in urls:
+                    response = requests.get(url)
+                    if response.status_code == 200:
+                        response: str = query_external_service(url,
+                                                            'KMT_NET')
+                        text = response
+                        lines = text.split('\n')
+                        if(len(lines)>1):
+                            for l in lines:
+                                if(l[0:1]!="<"):
+                                    if(len(l)>0):
+                                        col = l.split()
+                                        if(col[0] != "#"):# and abs(float(col[1])-0.)>1e-8 and float(col[4])>0. and abs(-99.0 - float(col[1]))>1e-8):
+                                            if (year == "2015"):
+                                                m = float(col[1])
+                                                er = float(col[2])
+                                                fwhm = 4 #no value provided
+                                            else:
+                                                m = float(col[3])
+                                                er = float(col[4])
+                                                fwhm = float(col[5])
+                                            if(er<1 and fwhm<10):
+                                                mjd: float = float(col[0])+2450000-2400000.5
+                                                timestamp = Time(mjd, format="mjd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                                                reduced_datum = ReducedDatum(target=target,
+                                                    data_type='photometry',
+                                                    timestamp=timestamp,
+                                                    mjd=mjd,
+                                                    value=m,
+                                                    source_name=self.name,
+                                                    source_location=url,
+                                                    error=er,
+                                                    filter='KMTNET(I)',
+                                                    observer=obser,
+                                                    facility=self.__FACILITY_NAME,
+                                                    value_unit = ReducedDatumUnit.MAGNITUDE)
+                                                    
+                                                reduced_datums.extend([reduced_datum])
         except Exception as e:
                 print("KMT ERROR: ",e)
                 self.logger.error(f'KMT_NET data load error {target.name}')
@@ -240,10 +246,6 @@ class KMTNETBroker(BHTOMBroker):
         with transaction.atomic():
             new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))
             self.logger.info(f"KMT_NET Broker returned {new_points} points for {target.name}")
-
-        # except Exception as e:
-        #     self.logger.error(f'KMT_NET broker: Error while saving reduced datapoints for {target.name}: {e}')
-        #     return return_for_no_new_points()
 
 
         return LightcurveUpdateReport(new_points=new_points)

@@ -74,9 +74,10 @@ color_map = {
         'i(GaiaSP)':  ['#800000','21' , 4],
         'ASASSN(g)':  ['green', 'cross-thin',2], #add opacity
         'ASASSN(V)':  ['darkgreen', 'cross-thin',2], #add opacity
-        'OGLE(I)': ['#6c1414','diamond',2],
+        'OGLE(I)': ['#800080','diamond',4],
         'ATLAS(c)': ['#1f7e7d','circle',2], #add opacity
         'ATLAS(o)': ['#f88f1e','circle',2], #add opacity
+        'KMTNET(I)': ['#8c4646', 'diamond-tall', 2]
     }
 
 
@@ -451,13 +452,14 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 marker=dict(
                     color=color_map.get(filter_name, ['gray', 'circle', 4])[0], #default ['gray', 'circle', 6]
                     symbol=color_map.get(filter_name, ['gray', 'circle', 4])[1],
-                    size=color_map.get(filter_name, ['gray', 'circle', 4])[2]
+                    size=1.2*color_map.get(filter_name, ['gray', 'circle', 4])[2]
                     ),
                 name=filter_name,
                 error_y=dict(
                     type='data',
                     array=filter_values['error'],
-                    visible=True
+                    visible=True,
+                    thickness=0.5
                 ),
                 text=mjds_to_plot[filter_name], 
                 customdata=filter_values['facility'],
@@ -713,7 +715,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                 marker=dict(
                     color=color_map.get(filter_name, ['gray', 'circle', 4])[0], #default ['gray', 'circle', 6]
                     symbol=color_map.get(filter_name, ['gray', 'circle', 4])[1],
-                    size=color_map.get(filter_name, ['gray', 'circle', 4])[2]
+                    size=1.2*color_map.get(filter_name, ['gray', 'circle', 4])[2]
                     ),
                 name=filter_name,
                 error_y=dict(
@@ -732,7 +734,13 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
-                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol='diamond', line_color='black', line_width=2),
+                                marker=dict(
+                    color=color_map.get(filter_name, ['black', 'circle', 4])[0], #default ['gray', 'circle', 6]
+                    symbol=color_map.get(filter_name, ['black', 'circle', 4])[1],
+                    size=color_map.get(filter_name, ['black', 'circle', 4])[2],
+                    line_color='black',line_width=2
+                    ),
+#                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol='diamond', line_color='black', line_width=2),
                 name=filter_name,
                 error_y=dict(
                     type='data',
