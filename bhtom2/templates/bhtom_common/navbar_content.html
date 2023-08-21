@@ -42,8 +42,16 @@ For customization instructions, see bhtom_common/base.html
         </li>
     </ul>
 </li>
-<li class="nav-item {% if request.resolver_match.namespace == 'dataproducts' %}active{% endif %}">
-    <a class="nav-link" href="{% url 'bhtom_base.bhtom_dataproducts:list' %}">Data</a>
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" data-toggle="dropdown">Data</a>
+    <ul class="dropdown-menu">
+        <li class="nav-item {% if request.resolver_match.namespace == 'dataproducts' %}active{% endif %}">
+            <a class="nav-link" href="{% url 'bhtom_dataproducts:list' %}" style="color:black">Public data</a>
+        </li>
+        <li class="nav-item {% if request.resolver_match.namespace == 'dataproducts-group' %}active{% endif %}">
+            <a class="nav-link" href="{% url 'bhtom_dataproducts:group-list' %}" style="color:black">Data group</a>
+        </li>
+    </ul>
 </li>
 <li class="nav-item {% if request.resolver_match.namespace == 'proposals' %}active{% endif %}">
     <a class="nav-link" href="{% url 'bhtom_proposals:list' %}">Proposals</a>

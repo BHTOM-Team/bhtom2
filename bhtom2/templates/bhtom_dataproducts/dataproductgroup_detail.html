@@ -1,0 +1,40 @@
+{% extends 'bhtom_common/base.html' %}
+{% block title %} Data Product Group {{ object.name }} {% endblock %}
+{% block content %}
+    <h3>{{ object.name }}</h3>
+    <form method="POST">
+        {% csrf_token %}
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th><label><input type="checkbox" id="selectPage"
+                                  onClick="select_page(this, {{ target_count }})"/></label></th>
+                <th>File</th>
+                <th>Photometry</th>
+                <th>Target</th>
+                <th>Type</th>
+                <th>Observatory</th>
+                <th>Owner</th>
+                <th>Status</th>
+                <th>Details</th>
+                <th>Remove</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for product in object.dataproduct_set.all %}
+                <tr>
+                    <td><label>
+                        <input type="checkbox" name="selected-target" value="{{ target.id }}"
+                               onClick="single_select()"/>
+                    </label></td>
+                    <td><a href="{{ product.data.url }}">{{ product.data.name }}</a></td>
+                    <td><input type="checkbox" name="products" id="product{{ product.id }}" value="{{ product.id }}">
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <input type="submit" value="Remove selected" class="btn btn-danger float-right">
+        <input type="submit" value="Remove selected" class="btn btn-danger float-right">
+    </form>
+{% endblock %}
