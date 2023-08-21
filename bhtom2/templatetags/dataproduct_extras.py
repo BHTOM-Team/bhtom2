@@ -544,6 +544,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
         plot_bgcolor=background
 
     )
+    layout.update(showlegend=True)
     layout.legend.font.color = label_color
     fig = go.Figure(data=plot_data, layout=layout)
 
@@ -592,6 +593,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
             orientation="h"
         )
     )
+
 
     return {
         'target': target,
