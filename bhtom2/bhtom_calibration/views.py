@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from bhtom2.bhtom_calibration.models import calibration_data
 from django.core import serializers
+from bhtom2.bhtom_calibration.models import catalogs as Calibration_catalog
 
 class CalibrationResultsApiView(APIView):
     authentication_classes = [TokenAuthentication]
@@ -25,3 +26,13 @@ class CalibrationResultsApiView(APIView):
     def list(self, request, *args, **kwargs):
         ret = super().list(request, *args, **kwargs)
         return ret
+
+class GetCatalogsApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        try:
+            instance = Calibration_catalog.objects.all().values('filters')
+        except Exception as e:
+            return Response({"Error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"Catalogs": instance}, status=status.HTTP_200_OK)

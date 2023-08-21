@@ -143,7 +143,6 @@ DATABASES = {
     },
 }
 
-
 MIGRATION_MODULES = {
     'bhtom2': 'bhtom2.migrations'
 }
