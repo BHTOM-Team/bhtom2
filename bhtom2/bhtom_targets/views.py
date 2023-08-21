@@ -157,23 +157,17 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             form.add_error(None, "Coordinates beyond range")
             return super().form_invalid(form)
 #            raise ValidationError(f'Coordinates beyond range error')
-
+        
         coords_names = check_for_existing_coords(ra, dec, 3./3600., stored)
         if (len(coords_names)!=0):
             ccnames = ' '.join(coords_names)
-            form.add_error(None, f"Source found already at these coordinates (rad 3 arcsec): {ccnames}")
+            form.add_error(None, f"There is a source found already at these coordinates (rad 3 arcsec): {ccnames}")
             return super().form_invalid(form)
 #            raise ValidationError(f'Source found already at these coordinates: {ccnames}')
 
         # Check if the form, extras and names are all valid:
         if extra.is_valid() and names.is_valid() and (not duplicate_names) and (not existing_names):
 #            messages.success(self.request, 'Target Create success, now grabbing all the data for it. Wait.')
-
-            # messages.add_message(
-            #     self.request,
-            #     messages.INFO,
-            #     f"Target created. Downloading archival data. Wait..."
-            # )
             
             super().form_valid(form)
 
@@ -186,9 +180,6 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             form.add_error(None, extra.non_form_errors())
             form.add_error(None, names.errors)
             form.add_error(None, names.non_form_errors())
-            # if (len(coords_names)!=0):
-            #     ccnames = ' '.join(coords_names)
-            #     raise ValidationError(f'Source found already at these coordinates: {ccnames}')
 
             return super().form_invalid(form)
 
