@@ -339,7 +339,8 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
             messages.INFO,
             f'Checked for new data in {self.object}. MJD_last = {mjd_last}')
         except Exception as e:
-            logger.error("Error checking for new data after Update for {self.object}!")
+            logger.error(f"Error checking for new data after Update for {self.object}!")
+            logger.error(f"{e}")
 
         #updating priority:
         oldpriority =  float(TargetExtra.objects.get(target=self.object, key='priority').value)
