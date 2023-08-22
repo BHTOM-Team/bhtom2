@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, Any
 
 from astropy import units as u
-from astropy.coordinates import get_sun, SkyCoord
+from astropy.coordinates import get_body, SkyCoord
 from astropy.time import Time
 from bhtom_base.bhtom_targets.models import Target
 
@@ -20,7 +20,7 @@ def update_sun_separation(target: Target) -> Optional[float]:
     """
     # Updating sun separation
 
-    sun_pos: Any = get_sun(Time(datetime.utcnow()))
+    sun_pos: Any = get_body("sun",Time(datetime.utcnow()))
     obj_pos: SkyCoord = SkyCoord(target.ra, target.dec, unit=u.deg)
 
     sun_sep = sun_pos.separation(obj_pos).deg

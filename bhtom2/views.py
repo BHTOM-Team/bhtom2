@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 from astropy import units as u
-from astropy.coordinates import get_sun, SkyCoord
+from astropy.coordinates import get_body, SkyCoord
 from astropy.time import Time
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic import View
@@ -127,7 +127,7 @@ class TargetListView(SingleTableMixin, PermissionListMixin, FilterView):
 
         prioritylist = []
         # SUN's position now:
-        sun_pos = get_sun(Time(datetime.utcnow()))
+        sun_pos = get_body("sun",Time(datetime.utcnow()))
 
         for target in context['object_list']:
             # read dynamically from the current light curve:

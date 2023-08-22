@@ -27,7 +27,7 @@ from astropy import units as u
 from django.views.generic import View
 
 from astropy import units as u
-from astropy.coordinates import get_sun, SkyCoord
+from astropy.coordinates import get_body, SkyCoord
 from astropy.time import Time
 from numpy import around
 from datetime import datetime
@@ -368,7 +368,7 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
             )
 
         # updating sun separation
-        sun_pos = get_sun(Time(datetime.utcnow()))
+        sun_pos = get_body("sun",Time(datetime.utcnow()))
 
         try:
             obj_pos = SkyCoord(extra.data['ra'], extra.data['dec'], unit=u.deg)

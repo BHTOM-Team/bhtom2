@@ -27,7 +27,7 @@ psycopg2-binary==2.9.3
 sentry-sdk==1.5.10
 typing-extensions>=4.2.0
 ztfquery==1.18.2
-astropy>=5.0.4
+astropy>=5.3.2
 astroquery>=0.4.4
 numpy>=1.22.3
 requests>=2.27.1
