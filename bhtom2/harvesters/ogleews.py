@@ -5,6 +5,9 @@ from numpy import around, sqrt
 from typing import Optional, Dict, Any
 import requests
 
+from astropy.coordinates import Angle, SkyCoord
+from astropy import units as u
+
 import pandas as pd
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -16,8 +19,6 @@ from bhtom2.external_service.data_source_information import DataSource, TARGET_N
 from bhtom2.external_service.external_service_request import query_external_service
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
-from astropy.coordinates import Angle, SkyCoord
-
 ALERT_SOURCE: DataSource = DataSource.OGLE_EWS
 OGLE_EWS_CACHE_FILE: str = os.path.join(settings.BASE_DIR, "bhtom2/cache/ogle_lenses.txt")
 
@@ -25,10 +26,10 @@ logger: BHTOMLogger = BHTOMLogger(__name__, '[OGLE EWS Harvester]')
 
 
 # Fetch CSV containing all alerts and save it to file (so that it doesn't have to be fetched every single request)
-def fetch_alerts_csv():
+def fetch_alerts_csv(to_file:str=OGLE_EWS_CACHE_FILE):
     # Update OGLE EWS cache file
     try:
-        download_all_ews(OGLE_EWS_CACHE_FILE)
+        download_all_ews(to_file)
     except Exception as e:
         logger.error(f'Error downloading OGLE EWS data from web! {e}')
 
@@ -40,19 +41,19 @@ def search_term_in_ogleews_data(term: str) -> pd.DataFrame:
     # Check if the cache file exists
     if os.path.exists(OGLE_EWS_CACHE_FILE):
         try:
-            ogle_data: pd.DataFrame = pd.read_csv(str(OGLE_EWS_CACHE_FILE), header=None, names=['name','field','starno','ra', 'dec'])
+            ogle_data: pd.DataFrame = pd.read_csv(OGLE_EWS_CACHE_FILE, header=None, names=['name','field','starno','ra', 'dec'])
             term_data: pd.DataFrame = ogle_data.loc[ogle_data['name'].str.lower() == term.lower()]
             if len(term_data.index) > 0:
                 target_data: pd.DataFrame = term_data.iloc[0]
                 return target_data
         except :
 #            raise InvalidExternalServiceResponseException(f'OGLE EWS didn\'t return a valid csv file!')
-            logger.error(f'OGLE EWS target not found, downloading again.')
+            logger.warning(f'OGLE EWS target not found in cache, downloading again.')
 
 
     # Term is not found or the CSV file doesn't exist, so CSV needs to be updated
     fetch_alerts_csv()
-    new_ogle_data: pd.DataFrame = pd.read_csv(str(OGLE_EWS_CACHE_FILE), header=None, names=['name','field','starno','ra', 'dec'])
+    ogle_data: pd.DataFrame = pd.read_csv(OGLE_EWS_CACHE_FILE, header=None, names=['name','field','starno','ra', 'dec'])
 
     try:
         term_data: pd.DataFrame = ogle_data.loc[ogle_data['name'].str.lower() == term.lower()]
@@ -63,7 +64,7 @@ def search_term_in_ogleews_data(term: str) -> pd.DataFrame:
             raise MissingDataException(f'No result for {term} in OGLE EWS!')
     except :
 #        raise InvalidExternalServiceResponseException(f'OGLE EWS didn\'t return a valid csv file!')
-        logger.error(f'OGLE EWS didn\'t return a valid csv file!')
+        logger.error(f'NOT FOUND in OGLE EWS.')
         raise MissingDataException(f'No result in OGLE EWS!')
 
 
@@ -86,8 +87,6 @@ def download_all_ews(output_file):
     'http://www.astrouw.edu.pl/ogle/ogle4/ews/2017/lenses.par',
     'http://www.astrouw.edu.pl/ogle/ogle4/ews/2018/lenses.par',
     'http://www.astrouw.edu.pl/ogle/ogle4/ews/2019/lenses.par',
-    'http://www.astrouw.edu.pl/ogle/ogle4/ews/2020/lenses.par',
-    'http://www.astrouw.edu.pl/ogle/ogle4/ews/2021/lenses.par',
     'http://www.astrouw.edu.pl/ogle/ogle4/ews/2022/lenses.par',
     'http://www.astrouw.edu.pl/ogle/ogle4/ews/2023/lenses.par',
     'http://www.astrouw.edu.pl/ogle/ogle3/ews/2002/lenses.par',
@@ -109,9 +108,9 @@ def download_all_ews(output_file):
         for url in urls:
             print("downloading ",url)
             # Read the contents of the URL
-            response = requests.get(url)
-            content = response.text
-            
+            # response = requests.get(url)
+            # content = response.text
+            content = query_external_service(url) 
             # Split the content into lines and skip the first two lines
             lines = content.split('\n')[2:]
             
@@ -121,7 +120,6 @@ def download_all_ews(output_file):
                 if line.strip():
                     # Split the line into columns using spaces as the separator
                     columns = line.split()
-                    
                     # Write columns 0 to 4 to the output file
                     writer.writerow(columns[:5])
 
@@ -137,8 +135,18 @@ class OGLEEWSHarvester(AbstractHarvester):
         target = super().to_target()
 
         ogle_name: str = self.catalog_data[TARGET_NAME_KEYS[DataSource.OGLE_EWS]]
-        ra: str = self.catalog_data['ra']
-        dec: str = self.catalog_data['dec']
+
+        #Failed using Angle from astropy - errors
+        ras=(self.catalog_data['ra'])
+        h, m, s = map(float, ras.split(':'))
+        ra = h * 15. + m * 0.25 + s * (15/3600.)
+
+        decs = self.catalog_data['dec']
+        d, m, s = map(float, decs.split(':'))
+        dec = d + m/60. + s/3600. if d >= 0 else d - m/60. - s/3600.
+        
+        # ra: float = float(self.catalog_data['ra'])
+        # dec: float = float(self.catalog_data['dec'])
         # disc: str = self.catalog_data["disc"]
         # classif: str = self.catalog_data["classif"]
 
@@ -215,9 +223,9 @@ class OGLEEWSHarvester(AbstractHarvester):
 
         extras : Dict[str] = {}
         extras["classification"] = "ulens candidate"
-        # extras["importance"] = str(9.99)
+        extras["importance"] = str(9.99)
         # extras["discovery_date"] = disc
-        # extras["cadence"] = str(1.0)
+        extras["cadence"] = str(1.0)
 
         return extras
 
@@ -232,51 +240,59 @@ def get(term: str):
 
     catalog_data: Dict[str, Any] = {
         TARGET_NAME_KEYS[DataSource.OGLE_EWS]: term_data['name'],
-        "ra": (term_data['ra']), #dropping Decimal (LW), returning string
-        "dec": (term_data['dec']), #dropping Decimal (LW), returning string
+        "ra": (term_data['ra']), #string, sex
+        "dec": (term_data['dec']), #string, sex
+        "field": term_data['field'],
+        "starno": term_data['starno']
     }
 
     return catalog_data
 
+def ra_to_decimal(ra):
+    h, m, s = [float(i) for i in ra.split(":")]
+    return 15 * (h + m/60 + s/3600)
 
-# #performs a cone search on Gaia CSV file - TODO: is there an API for Gaia Alerts to do that?
-# #returns the name of the target if present
-# def cone_search(coordinates:SkyCoord, radius:Angle):
-#     from io import StringIO
-#     import astropy.units as u
+def dec_to_decimal(dec):
+    d, m, s = [float(i) for i in dec.split(":")]
+    if d < 0:
+        return d - m/60 - s/3600
+    else:
+        return d + m/60 + s/3600
 
-#     # Check if the cache file exists
-#     if os.path.exists(GAIA_ALERTS_CACHE_PATH):
-#         logger.debug("Using cashed Gaia Alerts csv file in cone_search for Gaia Alert name")
-#         gaia_data: pd.DataFrame = pd.read_csv(str(GAIA_ALERTS_CACHE_PATH))
-#         gaia_data["diff"] = ((sqrt((gaia_data[" RaDeg"]-coordinates.ra)**2)+((gaia_data[" DecDeg"]-coordinates.dec)**2))<radius.degree)
+#performs a cone search on OGLE files 
+#returns the name of the target if present 
+def cone_search(coordinates:SkyCoord, radius:Angle):
+    from io import StringIO
+    import astropy.units as u
 
-#         try:
-#             term_data: pd.DataFrame = gaia_data.loc[gaia_data['diff'] == True]
-#         except KeyError:
-#             os.remove(GAIA_ALERTS_CACHE_PATH)
-#             raise InvalidExternalServiceResponseException(f'Gaia Alerts didn\'t return a valid csv file!')
+    from io import StringIO
 
-#         if len(term_data.index) > 0:
-#             target_data: pd.DataFrame = term_data.iloc[0]
-#             return target_data
+    # Check if the cache file exists
+    if not os.path.exists(OGLE_EWS_CACHE_FILE):
+        print("NO OGLE CACHE, updating")
+        fetch_alerts_csv()
+    else:
+        print("CACHE FOR OGLE FOUND")
 
-#     # Term is not found or the CSV file doesn't exist, so CSV needs to be updated
-#     new_gaia_data = pd.read_csv(StringIO(fetch_alerts_csv()))
+    ogle_data = pd.read_csv(str(OGLE_EWS_CACHE_FILE), 
+                    names=['name', 'field', 'starno', 'ra', 'dec'],
+                )
+    
+    # Apply the conversion functions to the 'ra' and 'dec' columns
+    ogle_data['ra'] = ogle_data['ra'].apply(ra_to_decimal)
+    ogle_data['dec'] = ogle_data['dec'].apply(dec_to_decimal)
 
-#     #simple cone search, computing the difference in coordinates column
-#     new_gaia_data["diff"] = ((sqrt((new_gaia_data[" RaDeg"]-coordinates.ra)**2)+((new_gaia_data[" DecDeg"]-coordinates.dec)**2))<radius.degree)
-# #    new_gaia_data.sort_values(by=['diff'], inplace=True)
+    coords = SkyCoord(ogle_data['ra'], ogle_data['dec'], unit=(u.deg, u.deg))
+    # Perform the cone search
+    sep = coords.separation(coordinates)
+    # Select only those within the radius
+    indices_within_radius = sep < radius
 
-#     try:
-#         term_data: pd.DataFrame = new_gaia_data.loc[new_gaia_data['diff'] == True]
-#     except KeyError:
-#         os.remove(GAIA_ALERTS_CACHE_PATH)
-#         raise InvalidExternalServiceResponseException(f'Gaia Alerts didn\'t return a valid csv file!')
+    if len(indices_within_radius) > 0:
+        target_data = ogle_data.loc[indices_within_radius]
 
-#     if len(term_data.index) > 0:
-#         target_data: pd.DataFrame = term_data.iloc[0]
-#         return target_data
-#     else:
-#         logger.info('Cone Search returned no results in Gaia Alerts!')
-#         return pd.DataFrame() #empty data frame returned
+        return target_data
+    else:
+        logger.info('Cone Search returned no results in OGLE EWS!')
+        return pd.DataFrame() #empty data frame returned
+

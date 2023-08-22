@@ -15,7 +15,7 @@ from astropy.time import Time, TimezoneInfo
 
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
-from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
+from bhtom_base.bhtom_alerts.alerts import GenericAlert, GenericQueryForm
 from bhtom_base.bhtom_dataproducts.models import DatumValue, ReducedDatumUnit
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 
@@ -25,6 +25,8 @@ from bhtom2 import settings
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
 from astropy.coordinates import SkyCoord
+
+from dateutil.parser import parse
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[OGLE_EWS Broker]')
 
@@ -119,10 +121,29 @@ class OGLEEWSBroker(BHTOMBroker):
 
 
     def fetch_alert(self, target_name):
-        pass
+
+        alert_list = list(self.fetch_alerts({'target_name': target_name, 'cone': None}))
+
+        if len(alert_list) == 1:
+            return alert_list[0]
+        else:
+            return {}
 
     def to_generic_alert(self, alert):
-        pass
+        timestamp = parse(alert['obstime'])
+        alert_link = alert.get('per_alert', {})['link']
+        url = f'{self.__base_url}/{alert_link}'
+
+        return GenericAlert(
+            timestamp=timestamp,
+            url=url,
+            id=alert['name'],
+            name=alert['name'],
+            ra=alert['ra'],
+            dec=alert['dec'],
+            mag=alert['alertMag'],
+            score=1.0
+        )
  
     def process_reduced_data(self, target, alert=None) -> Optional[LightcurveUpdateReport]:
      

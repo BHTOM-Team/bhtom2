@@ -12,7 +12,7 @@ from bhtom2.brokers.gaia import GaiaBroker
 
 
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
-from bhtom2.harvesters import tns, gaia_alerts
+from bhtom2.harvesters import ogleews, tns, gaia_alerts
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_targets.models import Target
 
@@ -140,7 +140,8 @@ def query_all_services(target: Target) -> Dict[DataSource, str]:
     simbad_result: Dict[DataSource, str] = query_simbad_for_names(target)
     gaia_alerts_result: Dict[DataSource, str] = query_gaia_alerts_for_name(target)
     gaiadr3_result: Dict[DataSource, str] = query_gaia_dr3_for_name(target)
-    return {**alerce_result, **simbad_result, **gaia_alerts_result, **gaiadr3_result, **tns_result}
+    ogle_ews_result: Dict[DataSource, str] = query_ogle_ews_for_name(target)
+    return {**alerce_result, **simbad_result, **gaia_alerts_result, **gaiadr3_result, **tns_result, **ogle_ews_result}
 
 def query_antares_for_names(target: Target) -> Dict[DataSource, str]:
     try:
@@ -283,3 +284,24 @@ def assign_group_to_internal_name(name: str) -> List[str]:
 
 def tns_internal_name_xpath(group_name: str) -> str:
     return f'//tr[td[@class="cell-groups" and text()="{group_name}"]]/td[@class="cell-internal_name"]/text()'
+
+#searches OGLE EWS for names of this target
+def query_ogle_ews_for_name(target: Target) -> Dict[DataSource,str]:
+    coordinates: SkyCoord = SkyCoord(ra=target.ra, dec=target.dec, unit="deg")
+    radius: Angle = Angle(1.5, unit="arcsec")
+    try:
+
+        #returns pd.DataFrame
+        result = ogleews.cone_search(coordinates, radius)
+        name=''
+#        if (result is not None):
+        if ( result.empty==False ):
+            name = result["name"]
+            logger.info(f'Found OGLE EWS name...{name}')
+            return {
+                    DataSource.OGLE_EWS: name,
+                }
+        return {} #if nothing found, returns empty dictionary
+    except Exception as e:
+        logger.error(f'Exception when querying OGLE EWS for target {target.name}: {e}')
+        return {}
