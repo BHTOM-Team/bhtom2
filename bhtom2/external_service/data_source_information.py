@@ -13,7 +13,7 @@ class DataSource(Enum):
     TNS = auto()
     ANTARES = auto()
     ZTF_DR8 = auto()
-    SDSS_DR14 = auto()
+    SDSS = auto()
     NEOWISE = auto()
     ALLWISE = auto()
     CRTS = auto()
@@ -38,7 +38,7 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.GAIA_DR2: "Gaia DR2",
     DataSource.ZTF_DR8: "ZTF DR8",
     DataSource.GAIA_DR3: "Gaia DR3",
-    DataSource.SDSS_DR14: "SDSS",
+    DataSource.SDSS: "SDSS",
     DataSource.NEOWISE: "NEOWISE",
     DataSource.ALLWISE: "ALLWISE",
     DataSource.CRTS: "CRTS",
@@ -68,7 +68,7 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.GAIA_DR2: "Gaia DR2 id",
     DataSource.ZTF_DR8: "ZTF DR8 id",
     DataSource.GAIA_DR3: "Gaia DR3 id",
-    DataSource.SDSS_DR14: "SDSS id",
+    DataSource.SDSS: "SDSS id",
     DataSource.NEOWISE: "NEOWISE name",
     DataSource.ALLWISE: "ALLWISE name",
     DataSource.CRTS: "CRTS name",
@@ -88,7 +88,7 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.ANTARES: ["R", "g"],
     DataSource.ZTF_DR8: ["g", "i", "r"],
     DataSource.GAIA_DR3: ["RP", "G", "BP"],
-    DataSource.SDSS_DR14: ["u","g", "r", "i", "z"],
+    DataSource.SDSS: ["u","g", "r", "i", "z"],
     DataSource.NEOWISE: ["W1", "W2"],
     DataSource.ALLWISE: ["W1", "W2"],
     DataSource.CRTS: ["CL"],

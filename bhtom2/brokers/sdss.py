@@ -23,17 +23,17 @@ class SDSSBrokerQueryForm(GenericQueryForm):
 
 
 class SDSSBroker(BHTOMBroker):
-    name = 'SDSS_DR14'  # Add the DataSource.XXX.name here -- DataSource is an enum with all possible sources of data
+    name = 'SDSS'  # Add the DataSource.XXX.name here -- DataSource is an enum with all possible sources of data
     # bhtom2.external_service.data_source_information
 
     form = SDSSBrokerQueryForm
 
     def __init__(self):
-        super().__init__(DataSource.SDSS_DR14)  # Add the DataSource here
+        super().__init__(DataSource.SDSS)  # Add the DataSource here
 
         # If the survey is e.g. a space survey, fill the facility and observer names in and treat is as a constant
-        self.__FACILITY_NAME: str = "SDSS-DR14"
-        self.__OBSERVER_NAME: str = "SDSS-DR14"
+        self.__FACILITY_NAME: str = "SDSS"
+        self.__OBSERVER_NAME: str = "SDSS"
 
         self.__target_name_key: str = TARGET_NAME_KEYS.get(self.data_source, self.data_source.name)
 
@@ -60,13 +60,13 @@ class SDSSBroker(BHTOMBroker):
 
         hasName = ""
         try:
-            hasName = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.SDSS_DR14]).value
+            hasName = TargetExtra.objects.get(target=target, key=TARGET_NAME_KEYS[DataSource.SDSS]).value
         except:
             hasName = ""
         
         #extracts the data only if there is no CRTS name
         if (hasName!="" and self.__update_cadence == None):
-            self.logger.debug(f'SDSS_DR14 data already downloaded. Skipping. {target.name}')
+            self.logger.debug(f'SDSS data already downloaded. Skipping. {target.name}')
             return return_for_no_new_points()
 
         # Change the log message
@@ -109,9 +109,9 @@ class SDSSBroker(BHTOMBroker):
             row = data[0]  # Accessing the first row
             obj_str = str(row[15])
 
-            inventName: Optional[str] = "SDSS_DR14_"+obj_str
+            inventName: Optional[str] = "SDSS_"+obj_str
             TargetExtra.objects.update_or_create(target=target,
-                                            key=TARGET_NAME_KEYS[DataSource.SDSS_DR14],
+                                            key=TARGET_NAME_KEYS[DataSource.SDSS],
                                             defaults={
                                                 'value': inventName
                                             })
@@ -132,7 +132,7 @@ class SDSSBroker(BHTOMBroker):
                                             mjd=datum[0],
                                             value=datum[1], #filter g
                                             source_name=self.name,
-                                            source_location='WSDB',  # e.g. alerts url
+                                            source_location='WSDB/SDSS_DR14',  # e.g. alerts url
                                             error=datum[5],
                                             filter='SDSS(g)',
                                             observer=self.__OBSERVER_NAME,
@@ -144,7 +144,7 @@ class SDSSBroker(BHTOMBroker):
                                             mjd=datum[9],
                                             value=datum[2], #filter r
                                             source_name=self.name,
-                                            source_location='WSDB',  # e.g. alerts url
+                                            source_location='WSDB/SDSS_DR14',  # e.g. alerts url
                                             error=datum[6],
                                             filter='SDSS(r)',
                                             observer=self.__OBSERVER_NAME,
@@ -156,7 +156,7 @@ class SDSSBroker(BHTOMBroker):
                                             mjd=datum[10],
                                             value=datum[3], #filter i
                                             source_name=self.name,
-                                            source_location='WSDB',  # e.g. alerts url
+                                            source_location='WSDB/SDSS_DR14',  # e.g. alerts url
                                             error=datum[7],
                                             filter='SDSS(i)',
                                             observer=self.__OBSERVER_NAME,
@@ -168,7 +168,7 @@ class SDSSBroker(BHTOMBroker):
                                             mjd=datum[11],
                                             value=datum[4], #filter z
                                             source_name=self.name,
-                                            source_location='WSDB',  # e.g. alerts url
+                                            source_location='WSDB/SDSS_DR14',  # e.g. alerts url
                                             error=datum[8],
                                             filter='SDSS(z)',
                                             observer=self.__OBSERVER_NAME,
@@ -180,7 +180,7 @@ class SDSSBroker(BHTOMBroker):
                                             mjd=datum[12],
                                             value=datum[13], #filter u
                                             source_name=self.name,
-                                            source_location='WSDB',  # e.g. alerts url
+                                            source_location='WSDB/SDSS_DR14',  # e.g. alerts url
                                             error=datum[14],
                                             filter='SDSS(u)',
                                             observer=self.__OBSERVER_NAME,
