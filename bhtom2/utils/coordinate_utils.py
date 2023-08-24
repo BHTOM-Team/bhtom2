@@ -5,7 +5,7 @@ from bhtom_base.bhtom_targets.models import Target
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
 from numpy import around
-from astropy.coordinates import get_sun
+from astropy.coordinates import get_body
 from datetime import datetime
 from astropy.time import Time
 from astroquery.gaia import Gaia
@@ -61,7 +61,7 @@ def update_sun_distance(target: Target, time_to_compute=None):
     else:
         tt = time_to_compute
 
-    sun_pos = get_sun(tt)
+    sun_pos = get_body("sun",tt)
     obj_pos = SkyCoord(target.ra, target.dec, unit=u.deg)
     Sun_sep = around(sun_pos.separation(obj_pos).deg, 0)
     target.sun_separation = Sun_sep

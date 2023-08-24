@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from urllib.parse import urlencode
+from bhtom2.external_service.data_source_information import DataSource
 
 import numpy as np
 import plotly.graph_objs as go
@@ -13,17 +14,61 @@ from guardian.shortcuts import get_objects_for_user
 from plotly import offline
 from astropy.time import Time
 
-from bhtom2.bhtom_dataproducts.forms import DataProductUploadForm
+from bhtom_base.bhtom_dataproducts.forms import DataProductUploadForm
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, ReducedDatumUnit
 from bhtom_base.bhtom_dataproducts.processors.data_serializers import SpectrumSerializer
 from bhtom_base.bhtom_observations.models import ObservationRecord
-from bhtom_base.bhtom_targets.models import Target
+from bhtom_base.bhtom_targets.models import Target, TargetName
 
-from numpy import around
+from numpy import around 
 
 from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_stats
 
 register = template.Library()
+
+color_map = {
+        'GSA(G)':     ['black','hexagon',8], 
+        'ZTF(zg)':    ['green','x',6],
+        'ZTF(zi)':    ['#800000','x',6],
+        'ZTF(zr)':    ['red','x',6],
+        'WISE(W1)':   ['#FFCC00', 'x',3],
+        'WISE(W2)':   ['blue', 'x', 3],
+        'CRTS(CL)':   ['#FF1493', 'diamond', 4],
+        'LINEAR(CL)': ['teal', 'diamond', 4],
+        'SDSS(r)':  ['red ', 'square' , 5],
+        'SDSS(i)':  [ '#800000', 'square' , 5],
+        'SDSS(u)':  ['#40E0D0'  , 'square' , 5],
+        'SDSS(z)':  ['#ff0074' , 'square' , 5],
+        'SDSS(g)':  ['green', 'square' , 5],
+        'DECAPS(r)':  ['red ', 'star-square' , 5],
+        'DECAPS(i)':  [ '#800000', 'star-square' , 5],
+        'DECAPS(u)':  ['#40E0D0'  , 'star-square' , 5],
+        'DECAPS(z)':  ['#ff0074' , 'star-square' , 5],
+        'DECAPS(g)':  ['green', 'star-square' , 5],
+        'PS1(r)': ['red', 'star-open', 5],
+        'PS1(i)': ['#800000', "star-open", 5],
+        'PS1(z)': ['#ff0074', "star-open", 5],
+        'PS1(g)': ['green', "star-open", 5],
+         'RP(GAIA_DR3)':  ['#ff8A8A', 'circle' , 4],
+         'BP(GAIA_DR3)':  ['#8A8Aff', 'circle' , 4],
+         'G(GAIA_DR3)':   ['black', 'circle', 4],
+        'I(GaiaSP)':  ['#6c1414','21', 4],
+        'g(GaiaSP)':  ['green','21', 4],
+        'R(GaiaSP)':  ['#d82727','21', 4],
+        'V(GaiaSP)':  ['darkgreen','21', 4],
+        'B(GaiaSP)':  ['#000034','21', 4],
+        'z(GaiaSP)':  ['#ff0074','21', 4],
+        'u(GaiaSP)':  ['#40E0D0','21', 4],
+        'r(GaiaSP)':  ['red','21', 4],
+        'U(GaiaSP)':  ['#5ac6bc','21', 4],
+        'i(GaiaSP)':  ['#800000','21' , 4],
+        'ASASSN(g)':  ['green', 'cross-thin',2], #add opacity
+        'ASASSN(V)':  ['darkgreen', 'cross-thin',2], #add opacity
+        'OGLE(I)': ['#800080','diamond',4],
+        'ATLAS(c)': ['#1f7e7d','circle',2], #add opacity
+        'ATLAS(o)': ['#f88f1e','circle',2], #add opacity
+        'KMTNET(I)': ['#8c4646', 'diamond-tall', 2]
+    }
 
 
 @register.inclusion_tag('bhtom_dataproducts/partials/recent_photometry.html')
@@ -31,10 +76,7 @@ def recent_photometry(target, limit=1):
     """
     Displays a table of the most recent photometric points for a target.
     """
-    time = datetime.now()
     photometry = ReducedDatum.objects.filter(data_type='photometry', target=target).order_by('-timestamp')[:limit]
-    time2 = datetime.now()
-    logging.info("recent photometry %s" % str(time - time2))
     return {'data': [{'timestamp': rd.timestamp,
                       'magnitude': rd.value,
                       'filter': rd.filter,
@@ -44,29 +86,158 @@ def recent_photometry(target, limit=1):
 
 @register.inclusion_tag('bhtom_dataproducts/partials/photometry_stats.html')
 def photometry_stats(target):
-    time = datetime.now()
-
     import pandas as pd
 
     """
     Displays a table of the the photometric data stats for a target.
     """
-    stats, columns = get_photometry_stats(target)
-    sort_by = 'Facility'
-    sort_by_asc = True
+    stats,columns = get_photometry_stats(target)
+    sort_by='Facility'    
+    sort_by_asc=True
     df: pd.DataFrame = pd.DataFrame(data=stats,
                                     columns=columns).sort_values(by=sort_by, ascending=sort_by_asc)
 
     data_list = []
     for index, row in df.iterrows():
         data_dict = {'Facility': row['Facility'],
-                     'Filters': row['Filters'],
-                     'Data_points': row['Data_points'],
-                     'Min_MJD': row['Earliest_time'],
-                     'Max_MJD': row['Latest_time']}
+                    'Filters': row['Filters'],
+                    'Data_points': row['Data_points'],
+                    'Min_MJD': row['Earliest_time'],
+                    'Max_MJD': row['Latest_time']}
         data_list.append(data_dict)
-    time2 = datetime.now()
-    logging.info("photometry status %s" % str(time - time2))
+
+    return {'data': data_list}
+
+@register.inclusion_tag('bhtom_dataproducts/partials/gaia_stats.html')
+def gaia_stats(target):
+    import pandas as pd
+    from astroquery.gaia import Gaia 
+
+    """
+    Displays a table of the stats and info from Gaia DR2 and DR3 for a target.
+    """
+#LATEX: from 18cbf Kruszynska22
+# \begin{table}
+# \caption{\label{tab:gdrsVals}Gaia astrometric parameters for the source star in Gaia18cbf.}.
+#      \centering
+#         \begin{tabular}{c c c}
+#         \hline
+#         \noalign{\smallskip}
+#              Parameter &  GDR2 & GEDR3 \\
+#              \noalign{\smallskip}
+#         \hline
+#         \hline
+#         \noalign{\smallskip}
+#              $\varpi$ [mas] & $-1.11\pm0.70$ &  $-0.36\pm0.59$ \\
+#              $\mu_{\alpha}$ [$\mathrm{mas} \, \mathrm{yr}^{-1}$] & $-0.68\pm1.96$ & $-1.83\pm0.68$ \\
+#              $\mu_{\delta}$ [$\mathrm{mas}\, \mathrm{yr}^{-1}$] & $-0.76\pm1.16$ & $-1.82\pm0.46$ \\
+#         \noalign{\smallskip}
+#         \hline
+#         \noalign{\smallskip}
+#          \multicolumn{3}{c}{Bailer-Jones et al. distances} \\
+#         \noalign{\smallskip}
+#         \hline
+#         \noalign{\smallskip}
+#              $r_{\rm est}$ [kpc] &  $4.4^{+3.2}_{-2.9}$ & --\\
+#              $r_{\rm geo, est}$ [kpc] &  -- & $5.4^{+2.2}_{-1.9}$ \\
+#              $r_{\rm photgeo, est}$ [kpc] &  -- & $7.8^{+2.0}_{-1.4}$ \\
+#         \noalign{\smallskip}
+#         \hline
+#         \end{tabular}
+# \end{table}
+
+    #TODO: add check for Gaia DR2 name and use in queries, also display in the table
+    #do we want to show the ra dec too?
+
+    #TODO: this will be bloody slow, as the query will be run every time we go to Publication...
+
+    data_list = []
+    try:
+        gaia_name = TargetName.objects.get(target=target, source_name=DataSource.GAIA_DR3.name).name
+    except:
+        return {'data': data_list}
+
+    source_id = gaia_name
+
+    # Initialize all variables to 0
+    parallax3 = parallax3_error = pmra3 = pmra3_error = pmdec3 = pmdec3_error = ruwe3 = aen3 = 0
+    parallax2 = parallax2_error = pmra2 = pmra2_error = pmdec2 = pmdec2_error = aen2 = ruwe2 = 0
+    r3_med_geo = 0
+
+    job = Gaia.launch_job(f"select  \
+                        parallax, parallax_error, \
+                        pmra, pmra_error, pmdec, pmdec_error, ruwe, astrometric_excess_noise \
+                        from gaiadr3.gaia_source where source_id={source_id};")
+    r3 = job.get_results().to_pandas()
+    if not r3.empty:
+        r3 = r3.iloc[0] #assuring only first row will be read
+        parallax3, parallax3_error = r3.parallax.item(), r3.parallax_error.item()
+        pmra3, pmra3_error = r3.pmra.item(), r3.pmra_error.item()
+        pmdec3, pmdec3_error = r3.pmdec.item(), r3.pmdec_error.item()
+        ruwe3 = r3.ruwe.item()
+        aen3 = r3.astrometric_excess_noise.item()
+
+    job = Gaia.launch_job(f"select  \
+                        parallax, parallax_error, \
+                        pmra, pmra_error, pmdec, pmdec_error,astrometric_excess_noise \
+                        from gaiadr2.gaia_source where source_id={source_id};")
+    r2 = job.get_results().to_pandas()
+    if not r2.empty:
+        r2 = r2.iloc[0] #assuring only first row will be read
+        parallax2 = r2.parallax.item()
+        parallax2_error = r2.parallax_error.item()
+        pmra2 = r2.pmra.item()
+        pmra2_error = r2.pmra_error.item()
+        pmdec2 = r2.pmdec.item()
+        pmdec2_error = r2.pmdec_error.item()
+        aen2 = r2.astrometric_excess_noise.item()
+
+    job = Gaia.launch_job(f"select  \
+                        ruwe \
+                        from gaiadr2.ruwe where source_id={source_id};")
+    ruwe2=job.get_results().to_pandas().ruwe.item()
+
+    job = Gaia.launch_job(f"select  \
+                        r_med_geo,     r_lo_geo,      r_hi_geo,  r_med_photogeo,  r_lo_photogeo,  r_hi_photogeo\
+                        from external.gaiaedr3_distance where source_id={source_id};")
+    r=job.get_results().to_pandas()
+    if not r.empty:
+        r = r.iloc[0]
+        r3_med_geo = r.r_med_geo.item()
+
+    #external.external.gaiadr2_geometric_distance
+    #external.external.gaiaedr3_distance
+
+    data_dict = {'Parameter': 'parallax [mas]',
+                'GDR2': f'{around(parallax2,3)}&plusmn;{around(parallax2_error,3)}',
+                'GDR3': f'{around(parallax3,3)}&plusmn;{around(parallax3_error,3)}'
+                }
+    data_list.append(data_dict)
+
+    data_dict = {'Parameter': 'PM RA [mas/yr]',
+                'GDR2': f'{around(pmra2,3)}&plusmn;{around(pmra2_error,3)}',
+                'GDR3': f'{around(pmra3,3)}&plusmn;{around(pmra3_error,3)}'
+                }
+    data_list.append(data_dict)
+
+    data_dict = {'Parameter': 'PM Dec [mas/yr]',
+                'GDR2': f'{around(pmdec2,3)}&plusmn;{around(pmdec2_error,3)}',
+                'GDR3': f'{around(pmdec3,3)}&plusmn;{around(pmdec3_error,3)}'
+                }
+    data_list.append(data_dict)
+
+    data_dict = {'Parameter': 'RUWE / AEN [mas]',
+                'GDR2': f'{around(ruwe2,3)} / {around(aen2,3)}',
+                'GDR3': f'{around(ruwe3,3)} / {around(aen3,3)}'
+                }
+    data_list.append(data_dict)
+
+    data_dict = {'Parameter': 'Dist_med_geo [kpc]',
+                'GDR2': '-',
+                'GDR3': f'{around(r3_med_geo/1000.,3)}'
+                }
+    data_list.append(data_dict)
+
     return {'data': data_list}
 
 
@@ -141,7 +312,7 @@ def upload_dataproduct(context, obj):
             form.fields['groups'].queryset = Group.objects.all()
         else:
             form.fields['groups'].queryset = user.groups.all()
-    return {'data_product_form_from_user': form}
+    return {'data_product_form': form}
 
 
 @register.inclusion_tag('bhtom_dataproducts/partials/photometry_for_target.html', takes_context=True)
@@ -168,18 +339,6 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
     :type grid: bool
     """
 
-    # the same as for icon/visual list:
-    time = datetime.now()
-    color_map = {
-        'GSA(G)': ['black', 'circle', 10],
-        'ZTF(zg)': ['green', 'cross', 4],
-        'ZTF(zi)': ['#800000', 'cross', 4],
-        'ZTF(zr)': ['red', 'cross', 4],
-        'WISE(W1)': ['#FFCC00', 'x', 2],
-        'WISE(W2)': ['blue', 'x', 2],
-        'CRTS(CL)': ['#FF1493', 'diamond', 4],
-        'LINEAR(CL)': ['teal', 'diamond', 4],
-    }
 
     photometry_data = {}
     radio_data = {}
@@ -190,8 +349,8 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                                              value_unit=ReducedDatumUnit.MAGNITUDE)
 
         radio_datums = ReducedDatum.objects.filter(target=target,
-                                                   data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
-                                                   value_unit=ReducedDatumUnit.MILLIJANSKY)
+                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
+                                             value_unit=ReducedDatumUnit.MILLIJANSKY)
     else:
         datums = get_objects_for_user(context['request'].user,
                                       'bhtom_dataproducts.view_reduceddatum',
@@ -201,11 +360,11 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                                           value_unit=ReducedDatumUnit.MAGNITUDE))
 
         radio_datums = get_objects_for_user(context['request'].user,
-                                            'bhtom_dataproducts.view_reduceddatum',
-                                            klass=ReducedDatum.objects.filter(
-                                                target=target,
-                                                data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
-                                                value_unit=ReducedDatumUnit.MILLIJANSKY))
+                                      'bhtom_dataproducts.view_reduceddatum',
+                                      klass=ReducedDatum.objects.filter(
+                                        target=target,
+                                        data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
+                                        value_unit=ReducedDatumUnit.MILLIJANSKY))
 
     # set the datum max and min the silly way, we already iterate through all the datums anyway
     magnitude_min = -100
@@ -219,101 +378,101 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
 
         if datum.value:
             photometry_data[datum.filter].setdefault('time', []).append(datum.timestamp)
-            photometry_data[datum.filter].setdefault('magnitude', []).append(around(datum.value, 3))
-            photometry_data[datum.filter].setdefault('error', []).append(around(datum.error, 3))
+            photometry_data[datum.filter].setdefault('magnitude', []).append(around(datum.value,3))
+            photometry_data[datum.filter].setdefault('error', []).append(around(datum.error,3))
             photometry_data[datum.filter].setdefault('facility', []).append(datum.facility)
 
-            magnitude_min = (datum.value + datum.error) if (
-                                                                       datum.value + datum.error) > magnitude_min else magnitude_min
-            magnitude_max = (datum.value - datum.error) if (
-                                                                       datum.value - datum.error) < magnitude_max else magnitude_max
+            magnitude_min = (datum.value+datum.error) if (datum.value+datum.error) > magnitude_min else magnitude_min
+            magnitude_max = (datum.value-datum.error) if (datum.value-datum.error) < magnitude_max else magnitude_max
 
     for radio_datum in radio_datums:
         radio_data.setdefault(radio_datum.filter, {})
 
         if radio_datum.value:
             radio_data[radio_datum.filter].setdefault('time', []).append(radio_datum.timestamp)
-            radio_data[radio_datum.filter].setdefault('magnitude', []).append(around(radio_datum.value, 3))
-            radio_data[radio_datum.filter].setdefault('error', []).append(around(radio_datum.error, 3))
+            radio_data[radio_datum.filter].setdefault('magnitude', []).append(around(radio_datum.value,3))
+            radio_data[radio_datum.filter].setdefault('error', []).append(around(radio_datum.error,3))
 
-            radio_min = (radio_datum.value - radio_datum.error) if (
-                                                                               radio_datum.value - radio_datum.error) < radio_min else radio_min
-            radio_max = (radio_datum.value + radio_datum.error) if (
-                                                                               radio_datum.value + radio_datum.error) > radio_max else radio_max
+            radio_min = (radio_datum.value-radio_datum.error) if (radio_datum.value-radio_datum.error) < radio_min else radio_min
+            radio_max = (radio_datum.value+radio_datum.error) if (radio_datum.value+radio_datum.error) > radio_max else radio_max
 
         # TODO: handle limits
         # photometry_data[datum.filter].setdefault('limit', []).append(datum.value.get('limit'))
 
     # Calculate min/max values for ranges and ticks
-    magnitude_range = magnitude_min - magnitude_max
-    radio_range = radio_max - radio_min
+    magnitude_range = magnitude_min-magnitude_max
+    radio_range = radio_max-radio_min
 
     try:
-        #        magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
+#        magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
         magnitude_range = 10
     except:
         magnitude_dtick_digit = 1
         radio_range = 10
-
+    
     try:
-        if (radio_range > 0):
+        if (radio_range>0):
             radio_dtick_digit = (round(np.log10(radio_range)) - 1)
         else:
-            radio_dtick_digit = 1
+                    radio_dtick_digit = 1
     except:
         radio_dtick_digit = 1
 
     plot_data = []
 
-    ##MAG:
+##MAG:
     mjds_to_plot = {}
     mjds_lim_to_plot = {}
     for filter_name, filter_values in photometry_data.items():
         if filter_values['magnitude']:
-            mjds_to_plot[filter_name] = Time(filter_values['time'], format="datetime").mjd
+            mjds_to_plot[filter_name]=Time(filter_values['time'], format="datetime").mjd
         if filter_values.get('limit'):
-            mjds_lim_to_plot[filter_name] = Time(filter_values['time'], format="datetime").mjd
+            mjds_lim_to_plot[filter_name]=Time(filter_values['time'], format="datetime").mjd
 
     for filter_name, filter_values in photometry_data.items():
+        if (filter_name == "G(GAIA_ALERTS)"): continue #for older targets, which still have G(GAIA_ALERTS) instead of GSA(G)
+        if (filter_name == "SDSSDR(u)" or filter_name =="SDSSDR(g)" or filter_name=="SDSSDR(r)" or filter_name=="SDSSDR(i)" or filter_name=="SDSS(z)"): continue
+        if (filter_name == "SDSS_DR14(u)" or filter_name =="SDSS_DR14(g)" or filter_name=="SDSS_DR14(r)" or filter_name=="SDSS_DR14(i)" or filter_name=="SDSS_DR14(z)"): continue
         if filter_values['magnitude']:
             series = go.Scatter(
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
+                opacity=0.75,
                 marker=dict(
-                    color=color_map.get(filter_name, ['gray', 'circle', 6])[0],  # default ['gray', 'circle', 6]
-                    symbol=color_map.get(filter_name, ['gray', 'circle', 6])[1],
-                    size=color_map.get(filter_name, ['gray', 'circle', 6])[2]
-                ),
+                    color=color_map.get(filter_name, ['gray', 'circle', 4])[0], #default ['gray', 'circle', 6]
+                    symbol=color_map.get(filter_name, ['gray', 'circle', 4])[1],
+                    size=1.2*color_map.get(filter_name, ['gray', 'circle', 4])[2]
+                    ),
                 name=filter_name,
                 error_y=dict(
                     type='data',
                     array=filter_values['error'],
-                    visible=True
+                    visible=True,
+                    thickness=0.5
                 ),
-                text=mjds_to_plot[filter_name],
+                text=mjds_to_plot[filter_name], 
                 customdata=filter_values['facility'],
-                #                customdata = filter_values['error'],
-                # hovertemplate='<br>'.join([
-                # "%{x}",
-                # "%{y:.2f}",
-                # "%{customdata}",
-                # ]),
-                hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
+#                customdata = filter_values['error'],
+            # hovertemplate='<br>'.join([
+            # "%{x}",
+            # "%{y:.2f}",
+            # "%{customdata}",
+            # ]),
+            hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
                 <br>MJD= %{text:.6f}\
             <br>mag= %{y:.3f}&#177;%{error_y.array:3f}\
             <br>%{customdata}'
-            )
+            )     
             plot_data.append(series)
-        elif filter_values.get('limit'):  # limit in MAG
+        elif filter_values.get('limit'):  #limit in MAG
             series = go.Scatter(
                 x=filter_values['time'],
                 y=filter_values['limit'],
                 mode='markers',
                 opacity=0.5,
-                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol=6),
-                # upside down triangle
-                name=filter_name + " limit",
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol=6),  # upside down triangle
+                name=filter_name+" limit",
                 text=mjds_lim_to_plot[filter_name],
                 hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
                 <br>MJD= %{text:.6f}\
@@ -321,52 +480,52 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
             )
             plot_data.append(series)
 
-    ##RADIO:
+
+##RADIO:
     mjds_radio_to_plot = {}
     mjds_radio_lim_to_plot = {}
     for filter_name, filter_values in radio_data.items():
         if filter_values['magnitude']:
-            mjds_radio_to_plot[filter_name] = Time(filter_values['time'], format="datetime").mjd
+            mjds_radio_to_plot[filter_name]=Time(filter_values['time'], format="datetime").mjd
         if filter_values.get('limit'):
-            mjds_radio_lim_to_plot[filter_name] = Time(filter_values['time'], format="datetime").mjd
+            mjds_radio_lim_to_plot[filter_name]=Time(filter_values['time'], format="datetime").mjd
 
     for filter_name, filter_values in radio_data.items():
         if filter_values['magnitude']:
-            series = go.Scatter(
+            series2 = go.Scatter(
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
-                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol='diamond',
-                            line_color='black', line_width=2),
+                opacity=0.75,
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol='diamond', line_color='black', line_width=2),
                 name=filter_name,
                 error_y=dict(
                     type='data',
                     array=filter_values['error'],
                     visible=True
                 ),
-                text=mjds_radio_to_plot[filter_name],
-                hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
+            text=mjds_radio_to_plot[filter_name],
+            hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
                 <br>MJD= %{text:.6f}\
             <br>flux= %{y:.3f}&#177;%{error_y.array:3f}',
 
                 yaxis="y2"
             )
-            plot_data.append(series)
+            plot_data.append(series2)
         elif filter_values.get('limit'):
-            series = go.Scatter(
+            series2 = go.Scatter(
                 x=filter_values['time'],
                 y=filter_values['limit'],
                 mode='markers',
                 opacity=0.5,
-                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol=6),
-                # upside down triangle
-                name=filter_name + " limit",
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol=6),  # upside down triangle
+                name=filter_name+" limit",
                 text=mjds_radio_lim_to_plot[filter_name],
                 hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
                 <br>MJD= %{text:.6f}\
             <br>limit flux= (%{y:.3f})'
             )
-            plot_data.append(series)
+            plot_data.append(series2)
 
     layout = go.Layout(
         height=height,
@@ -375,11 +534,12 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
         plot_bgcolor=background
 
     )
+    layout.update(showlegend=True)
     layout.legend.font.color = label_color
     fig = go.Figure(data=plot_data, layout=layout)
 
     fig.update_layout(
-        margin=dict(t=40, r=20, b=40, l=80),
+        margin=dict(t= 40, r= 20, b= 40, l= 80),
         xaxis=dict(
             autorange=True,
             title="date",
@@ -406,30 +566,29 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
             range=[np.floor(radio_min), np.ceil(radio_max)],
             title="mJy",
             titlefont=dict(
-                color="black"
+                color="#1f77b4"
             ),
             tickfont=dict(
-                color="black"
+                color="#1f77b4"
             ),
             overlaying="y",
             side="right",
-            showgrid=False,  # Turn off the grid for the secondary y-axis
+            showgrid=False,# Turn off the grid for the secondary y-axis
         ),
         legend=dict(
             yanchor="top",
-            y=0.99,
-            xanchor="right",
-            x=1.35
+            y=-0.15,
+            xanchor="left",
+            x=0.0,
+            orientation="h"
         )
     )
-    time2 = datetime.now()
-    logging.info("photometry %s" % str(time - time2))
+
 
     return {
         'target': target,
         'plot': offline.plot(fig, output_type='div', show_link=False)
     }
-
 
 ### static and simpler version of the plot for massive list table
 @register.inclusion_tag('bhtom_dataproducts/partials/photometry_for_target_icon.html', takes_context=True)
@@ -456,16 +615,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
     :type grid: bool
     """
 
-    color_map = {
-        'GSA(G)': ['black', 'circle', 10],
-        'ZTF(zg)': ['green', 'cross', 4],
-        'ZTF(zi)': ['#800000', 'cross', 4],
-        'ZTF(zr)': ['red', 'cross', 4],
-        'WISE(W1)': ['#FFCC00', 'x', 2],
-        'WISE(W2)': ['blue', 'x', 2],
-        'CRTS(CL)': ['#FF1493', 'diamond', 4],
-        'LINEAR(CL)': ['teal', 'diamond', 4],
-    }
+
 
     photometry_data = {}
     radio_data = {}
@@ -476,8 +626,8 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                                              value_unit=ReducedDatumUnit.MAGNITUDE)
 
         radio_datums = ReducedDatum.objects.filter(target=target,
-                                                   data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
-                                                   value_unit=ReducedDatumUnit.MILLIJANSKY)
+                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
+                                             value_unit=ReducedDatumUnit.MILLIJANSKY)
     else:
         datums = get_objects_for_user(context['request'].user,
                                       'bhtom_dataproducts.view_reduceddatum',
@@ -487,11 +637,11 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
                                           value_unit=ReducedDatumUnit.MAGNITUDE))
 
         radio_datums = get_objects_for_user(context['request'].user,
-                                            'bhtom_dataproducts.view_reduceddatum',
-                                            klass=ReducedDatum.objects.filter(
-                                                target=target,
-                                                data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
-                                                value_unit=ReducedDatumUnit.MILLIJANSKY))
+                                      'bhtom_dataproducts.view_reduceddatum',
+                                      klass=ReducedDatum.objects.filter(
+                                        target=target,
+                                        data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
+                                        value_unit=ReducedDatumUnit.MILLIJANSKY))
 
     # set the datum max and min the silly way, we already iterate through all the datums anyway
     magnitude_min = -100
@@ -508,10 +658,8 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
             photometry_data[datum.filter].setdefault('magnitude', []).append(datum.value)
             photometry_data[datum.filter].setdefault('error', []).append(datum.error)
 
-            magnitude_min = (datum.value + datum.error) if (
-                                                                       datum.value + datum.error) > magnitude_min else magnitude_min
-            magnitude_max = (datum.value - datum.error) if (
-                                                                       datum.value - datum.error) < magnitude_max else magnitude_max
+            magnitude_min = (datum.value+datum.error) if (datum.value+datum.error) > magnitude_min else magnitude_min
+            magnitude_max = (datum.value-datum.error) if (datum.value-datum.error) < magnitude_max else magnitude_max
 
     for radio_datum in radio_datums:
         radio_data.setdefault(radio_datum.filter, {})
@@ -521,27 +669,25 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
             radio_data[radio_datum.filter].setdefault('magnitude', []).append(radio_datum.value)
             radio_data[radio_datum.filter].setdefault('error', []).append(radio_datum.error)
 
-            radio_min = (radio_datum.value - radio_datum.error) if (
-                                                                               radio_datum.value - radio_datum.error) < radio_min else radio_min
-            radio_max = (radio_datum.value + radio_datum.error) if (
-                                                                               radio_datum.value + radio_datum.error) > radio_max else radio_max
+            radio_min = (radio_datum.value-radio_datum.error) if (radio_datum.value-radio_datum.error) < radio_min else radio_min
+            radio_max = (radio_datum.value+radio_datum.error) if (radio_datum.value+radio_datum.error) > radio_max else radio_max
 
         # TODO: handle limits
         # photometry_data[datum.filter].setdefault('limit', []).append(datum.value.get('limit'))
 
     # Calculate min/max values for ranges and ticks
-    magnitude_range = magnitude_min - magnitude_max
-    radio_range = radio_max - radio_min
+    magnitude_range = magnitude_min-magnitude_max
+    radio_range = radio_max-radio_min
 
     try:
-        #        magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
+#        magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
         magnitude_range = 10
     except:
         magnitude_dtick_digit = 1
         radio_range = 10
-
+    
     try:
-        if (radio_range > 0):
+        if (radio_range>0):
             radio_dtick_digit = (round(np.log10(radio_range)) - 1)
         else:
             radio_dtick_digit = 1
@@ -550,16 +696,19 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
 
     plot_data = []
     for filter_name, filter_values in photometry_data.items():
+        if (filter_name == "G(GAIA_ALERTS)"): continue #for older targets, which still have G(GAIA_ALERTS) instead of GSA(G)
+        if (filter_name == "SDSSDR(u)" or filter_name =="SDSSDR(g)" or filter_name=="SDSSDR(r)" or filter_name=="SDSSDR(i)" or filter_name=="SDSS(z)"): continue
+        if (filter_name == "SDSS_DR14(u)" or filter_name =="SDSS_DR14(g)" or filter_name=="SDSS_DR14(r)" or filter_name=="SDSS_DR14(i)" or filter_name=="SDSS_DR14(z)"): continue
         if filter_values['magnitude']:
             series = go.Scatter(
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
                 marker=dict(
-                    color=color_map.get(filter_name, ['gray', 'circle', 6])[0],  # default ['gray', 'circle', 6]
-                    symbol=color_map.get(filter_name, ['gray', 'circle', 6])[1],
-                    size=color_map.get(filter_name, ['gray', 'circle', 6])[2]
-                ),
+                    color=color_map.get(filter_name, ['gray', 'circle', 4])[0], #default ['gray', 'circle', 6]
+                    symbol=color_map.get(filter_name, ['gray', 'circle', 4])[1],
+                    size=1.2*color_map.get(filter_name, ['gray', 'circle', 4])[2]
+                    ),
                 name=filter_name,
                 error_y=dict(
                     type='data',
@@ -573,104 +722,135 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
 
     for filter_name, filter_values in radio_data.items():
         if filter_values['magnitude']:
-            series = go.Scatter(
+            series2 = go.Scatter(
                 x=filter_values['time'],
                 y=filter_values['magnitude'],
                 mode='markers',
-                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol='diamond',
-                            line_color='black', line_width=2),
+                                marker=dict(
+                    color=color_map.get(filter_name, ['black', 'circle', 4])[0], #default ['gray', 'circle', 6]
+                    symbol=color_map.get(filter_name, ['black', 'circle', 4])[1],
+                    size=color_map.get(filter_name, ['black', 'circle', 4])[2],
+                    line_color='black',line_width=2
+                    ),
+#                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol='diamond', line_color='black', line_width=2),
                 name=filter_name,
                 error_y=dict(
                     type='data',
                     array=filter_values['error'],
-                    visible=True
+                    visible=True                    
                 ),
                 yaxis="y2"
             )
-            plot_data.append(series)
+            plot_data.append(series2)
         elif filter_values.get('limit'):
-            series = go.Scatter(
+            series2 = go.Scatter(
                 x=filter_values['time'],
                 y=filter_values['limit'],
                 mode='markers',
                 opacity=0.5,
-                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 6])[0], symbol=6),
-                # upside down triangle
+                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol=6),  # upside down triangle
                 name=filter_name + ' non-detection',
             )
-            plot_data.append(series)
+            plot_data.append(series2)
 
     layout = go.Layout(
-        height=height,
+        height=height + (len(photometry_data.items())//5)*10,
         width=width,
         # paper_bgcolor=background,
         # plot_bgcolor=background
         paper_bgcolor='white',  # Change the background color to white
-        plot_bgcolor='white'  # Change the plot area background color to white
+        plot_bgcolor='white',  # Change the plot area background color to white
+        shapes=[
+        dict( #vertical line for y2, will be used for radio axis
+            type='line',
+            yref='paper', y0=0, y1=1,
+            xref='paper', x0=1, x1=1,
+            line=dict(
+                color='black',
+                width=1,
+            )
+        ),
+                dict( #horizonal line at the top, closing the plot
+            type='line',
+            yref='paper', y0=1, y1=1,
+            xref='paper', x0=0, x1=1,
+            line=dict(
+                color='#1f77b4',
+                width=1,
+            )
+        )
+
+    ]
     )
 
     layout.legend.font.color = label_color
-    # no legend shown in icon view
+    #no legend shown in icon view
     layout.update(showlegend=True)
+    
     fig = go.Figure(data=plot_data, layout=layout)
     fig.update_layout(
-        title=target.name,
-        margin=dict(t=40, r=20, b=40, l=80),
-        xaxis=dict(
-            autorange=True,
-            title="date",
-            titlefont=dict(
-                color="#1f77b4"
-            ),
-            tickfont=dict(
-                color="#1f77b4"
-            ),
-            showgrid=False,  # Do not show grid lines on the x-axis
-            showticklabels=True,
-            ticks="inside",
-            showline=True, linewidth=2, linecolor='#1f77b4'
+    title=target.name,
+    margin=dict(t=40, r=20, b=40, l=80),
+    xaxis=dict(
+        autorange=True,
+        title="date",
+        titlefont=dict(
+            color="#1f77b4"
         ),
-        yaxis=dict(
-            autorange=False,
-            range=[np.ceil(magnitude_min), np.floor(magnitude_max)],
-            title="magnitude",
-            titlefont=dict(
-                color="#1f77b4"
-            ),
-            tickfont=dict(
-                color="#1f77b4"  # Change the tick color to black
-            ),
-            showgrid=False,  # Do not show grid lines on the y-axis
-            showticklabels=True,  # Show tick labels on the y-axis
-            ticks="inside",  # Place the tick marks inside the plot area
-            showline=True, linewidth=2, linecolor='#1f77b4'
+        tickfont=dict(
+            color="#1f77b4"
         ),
-        yaxis2=dict(
-            autorange=False,
-            range=[np.floor(radio_min), np.ceil(radio_max)],
-            title="mJy",
-            titlefont=dict(
-                color="black"
-            ),
-            tickfont=dict(
-                color="black"
-            ),
-            overlaying="y",
-            side="right",
-            showgrid=False,  # Do not show grid lines on the yaxis2
+        showgrid=False,  # Do not show grid lines on the x-axis
+        showticklabels=True,
+        ticks="inside",
+        showline=True, linewidth=2, linecolor='#1f77b4'
+    ),
+    yaxis=dict(
+        autorange=False,
+        range=[np.ceil(magnitude_min), np.floor(magnitude_max)],
+        title="magnitude",
+        titlefont=dict(
+            color="#1f77b4"
         ),
-        legend_tracegroupgap=1,
-        legend=dict(
-            #        yanchor="top",
-            y=0.5,
-            #        xanchor="right",
-            x=1.00,
-            #        font=dict(size=8)
-        )
+        tickfont=dict(
+            color="#1f77b4"  # Change the tick color to black
+        ),
+        showgrid=False,  # Do not show grid lines on the y-axis
+        showticklabels=True,  # Show tick labels on the y-axis
+        ticks="inside",   # Place the tick marks inside the plot area
+        showline=True, linewidth=2, linecolor='#1f77b4'
+    ),
+    yaxis2=dict(
+        autorange=False,
+        range=[np.floor(radio_min), np.ceil(radio_max)],
+        title="mJy",
+        titlefont=dict(
+            color="black"
+        ),
+        tickfont=dict(
+            color="black"
+        ),
+        overlaying="y",
+        side="right",
+        showgrid=False,  # Do not show grid lines on the yaxis2
+        showticklabels=True,  # Display the tick labels
+        ticks='inside',
+    ),
+    legend_tracegroupgap=1,
+    legend=dict(
+#        yanchor="top",
+        y=-0.20,
+#        xanchor="right",
+        x=0.00,
+#        font=dict(size=8)
+    orientation="h",
+    yanchor="top",
+    xanchor="left",
+    )
     )
     return {
         'target': target,
-        'plot': offline.plot(fig, output_type='div', show_link=True, config=dict({'staticPlot': True}))
+        'plot': offline.plot(fig, output_type='div', show_link=True, config=dict({'staticPlot':True}))
     }
 
 
@@ -680,8 +860,6 @@ def spectroscopy_for_target(context, target, dataproduct=None):
     Renders a spectroscopic plot for a ``Target``. If a ``DataProduct`` is specified, it will only render a plot with
     that spectrum.
     """
-    time = datetime.now()
-
     spectral_dataproducts = DataProduct.objects.filter(target=target,
                                                        data_product_type=settings.DATA_PRODUCT_TYPES['spectroscopy'][0])
     if dataproduct:
@@ -712,8 +890,6 @@ def spectroscopy_for_target(context, target, dataproduct=None):
             tickformat=".1eg"
         )
     )
-    time2 = datetime.now()
-    logging.info("spectroskopy %s" % str(time - time2))
     return {
         'target': target,
         'plot': offline.plot(go.Figure(data=plot_data, layout=layout), output_type='div', show_link=False)

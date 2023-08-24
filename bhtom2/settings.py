@@ -277,10 +277,12 @@ TOM_ALERT_CLASSES = [
     'bhtom2.brokers.first.FIRSTBroker',
     'bhtom2.brokers.ps1.PS1Broker',
     'bhtom2.brokers.allwise.ALLWISEBroker',
-    # 'bhtom2.brokers.antares.ANTARESBroker',
+    'bhtom2.brokers.antares.ANTARESBroker',
     'bhtom2.brokers.decaps.DECAPSBroker',
     'bhtom2.brokers.asassn.ASASSNBroker',
     'bhtom2.brokers.ogleews.OGLEEWSBroker',
+    'bhtom2.brokers.atlas.ATLASBroker',
+    'bhtom2.brokers.kmtnet.KMTNETBroker'
 ]
 
 BROKERS = {
@@ -293,6 +295,7 @@ BROKERS = {
 
 TOM_HARVESTER_CLASSES = [
     'bhtom2.harvesters.gaia_alerts.GaiaAlertsHarvester',
+    'bhtom2.harvesters.ogleews.OGLEEWSHarvester',
     'bhtom2.harvesters.tns.TNSHarvester',
     'bhtom2.harvesters.antares.ANTARESHarvester',
     'bhtom_base.bhtom_catalogs.harvesters.simbad.SimbadHarvester',
@@ -384,6 +387,7 @@ except ImportError:
 GAIA_ALERTS_PATH: str = 'http://gsaweb.ast.cam.ac.uk'
 AAVSO_API_PATH: str = 'https://www.aavso.org/vsx/index.php'
 ZTF_DR_PATH: str = 'https://irsa.ipac.caltech.edu/cgi-bin/ZTF/nph_light_curves'
+OGLE_EWS_PATH: str = 'https://www.astrouw.edu.pl/ogle/ogle4/ews/'
 
 # Observatories possible to request data
 FACILITIES = {

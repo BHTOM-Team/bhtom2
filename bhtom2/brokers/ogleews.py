@@ -1,5 +1,7 @@
+import csv
 from datetime import datetime
 import json
+import re
 from typing import Optional, List, Tuple
 import pandas as pd
 from io import StringIO
@@ -13,7 +15,7 @@ from astropy.time import Time, TimezoneInfo
 
 from bhtom2.brokers.bhtom_broker import BHTOMBroker, LightcurveUpdateReport, return_for_no_new_points
 from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
-from bhtom_base.bhtom_alerts.alerts import GenericQueryForm
+from bhtom_base.bhtom_alerts.alerts import GenericAlert, GenericQueryForm
 from bhtom_base.bhtom_dataproducts.models import DatumValue, ReducedDatumUnit
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 
@@ -21,6 +23,10 @@ from bhtom_base.bhtom_targets.models import  TargetExtra, TargetName
 
 from bhtom2 import settings
 from bhtom2.utils.bhtom_logger import BHTOMLogger
+
+from astropy.coordinates import SkyCoord
+
+from dateutil.parser import parse
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[OGLE_EWS Broker]')
 
@@ -57,19 +63,87 @@ class OGLEEWSBroker(BHTOMBroker):
 
         # If you are going to perform searches by coordinates, you might want to change the max_separation
         # Remember to pass it in astropy.unit format as well
-        # Here: 5 arcseconds
-        self.__cross_match_max_separation = 5*u.arcsec
+        # Here: 3 arcseconds
+        self.__cross_match_max_separation = 3*u.arcsec
         # 5 arcseconds
         self.__MATCHING_RADIUS: float = 5 * u.arcsec
 
+        try:
+            self.__base_url: str = settings.OGLE_EWS_PATH
+        except Exception as e:
+            self.logger.warning(f'No OGLE_EWS_PATH in settings found!')
+            self.__base_url = 'https://www.astrouw.edu.pl/ogle/ogle4/ews/'  #ONLY OGLE-IV
+
     def fetch_alerts(self, parameters):
-        pass
+        """Must return an iterator"""
+        response = query_external_service(f'{self.__base_url}/2011/lenses.par', self.name, 'content')
+#https://www.astrouw.edu.pl/ogle/ogle4/ews/2011/lenses.par
+
+
+        alert_list = []
+        pattern = re.compile(r'\s+')
+        rows = [pattern.split(line.strip()) for line in response.splitlines()]
+        headers = rows[0]
+        for row in rows[1:]:
+            print(dict(zip(headers, row)))
+            alert = dict(zip(headers, row))
+            alert_list.append(alert)
+            
+        print("OGLE: ",alert_list)
+
+        if parameters['cone'] is not None and len(parameters['cone']) > 0:
+            cone_params = parameters['cone'].split(',')
+            if len(cone_params) > 3:
+                parameters['cone_ra'] = float(cone_params[0])
+                parameters['cone_dec'] = float(cone_params[1])
+                parameters['cone_radius'] = float(cone_params[2]) * u.deg
+                parameters['cone_centre'] = SkyCoord(float(cone_params[0]),
+                                                     float(cone_params[1]),
+                                                     frame="icrs", unit="deg")
+
+        filtered_alerts = []
+        if parameters.get('target_name'):
+            for alert in alert_list:
+                if parameters['target_name'] in alert['name']:
+                    filtered_alerts.append(alert)
+
+        elif 'cone_radius' in parameters.keys():
+            for alert in alert_list:
+                c = SkyCoord(float(alert['RA(J2000)']), float(alert['Dec(J2000)']),
+                             frame="icrs", unit="deg")
+                if parameters['cone_centre'].separation(c) <= parameters['cone_radius']:
+                    filtered_alerts.append(alert)
+
+        else:
+            filtered_alerts = alert_list
+
+        return iter(filtered_alerts)
+
 
     def fetch_alert(self, target_name):
-        pass
+
+        alert_list = list(self.fetch_alerts({'target_name': target_name, 'cone': None}))
+
+        if len(alert_list) == 1:
+            return alert_list[0]
+        else:
+            return {}
 
     def to_generic_alert(self, alert):
-        pass
+        timestamp = parse(alert['obstime'])
+        alert_link = alert.get('per_alert', {})['link']
+        url = f'{self.__base_url}/{alert_link}'
+
+        return GenericAlert(
+            timestamp=timestamp,
+            url=url,
+            id=alert['name'],
+            name=alert['name'],
+            ra=alert['ra'],
+            dec=alert['dec'],
+            mag=alert['alertMag'],
+            score=1.0
+        )
  
     def process_reduced_data(self, target, alert=None) -> Optional[LightcurveUpdateReport]:
      
@@ -100,11 +174,20 @@ class OGLEEWSBroker(BHTOMBroker):
 
         print("OGLE_EWS STARTS name found ",ogleews_name)
 
+        #trimming the OGLE or OGLE- beginning TODO: should be done while setting the alias in Create/Update
+        if ogleews_name.startswith("OGLE-"):
+            ogleews_name = ogleews_name.replace("OGLE-","")
+
+        if ogleews_name.startswith("OGLE "):
+            ogleews_name = ogleews_name.replace("OGLE ","")
+
         text = ogleews_name.split('-')
-        year = text[1]
-        num = text[3]
+        year = text[0]
+        num = text[2]
 
         url = ("https://www.astrouw.edu.pl/ogle/ogle4/ews/%s/blg-%s/phot.dat")%(year, num)
+
+        print("OGLEEWS: url:",url)
 
         try:        
             response: str = query_external_service(url,
@@ -156,4 +239,4 @@ class OGLEEWSBroker(BHTOMBroker):
 
 #returns a Latex String with citation needed when using data from this broker
 def getCitation():
-    return "CITATION TO OGLE_EWS and acknowledgment."
+    return "CITATION TO OGLE_EWS Udalski(2015) and acknowledgment."

@@ -87,24 +87,42 @@ class ASASSNBroker(BHTOMBroker):
                 self.logger.warning(f'no ASASSN name for {target.name}')
                 return return_for_no_new_points()
             
-    
+
 
         #downloading data only if not done before
         #it will read page e.g.: https://asas-sn.osu.edu/sky-patrol/coordinate/9078bdcd-86ee-4029-8b7d-b7563ed5d740/export.csv
         #so only 9078bdcd-86ee-4029-8b7d-b7563ed5d740 is needed in name
         
-        if asassn_name.startswith("https://asas-sn.osu.edu/sky-patrol/coordinate/"):
-            asassn_name= asassn_name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
+        #or https://asas-sn.osu.edu/photometry/31a0bd00-3b2c-541b-9bb6-1a3bf050da34
+        #        https://asas-sn.osu.edu/photometry/export_source/31a0bd00-3b2c-541b-9bb6-1a3bf050da34?type=excel
 
-        url = "https://asas-sn.osu.edu/sky-patrol/coordinate/" + asassn_name + "/export.csv"
+        #added also variable:
+        #https://asas-sn.osu.edu/variables/06870f80-f5a7-5a8a-b9cd-a3f41de3e48e.csv
+        #TODO: they also have read names...ASASSN-V J140509.49-475134.9
+
+        url=""
+        if asassn_name.startswith("https://asas-sn.osu.edu/sky-patrol/coordinate/"):
+            short_asassn_name= asassn_name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
+            url = "https://asas-sn.osu.edu/sky-patrol/coordinate/" + short_asassn_name + "/export.csv"
+
+        if asassn_name.startswith("https://asas-sn.osu.edu/photometry/"):
+            short_asassn_name = asassn_name.replace("https://asas-sn.osu.edu/photometry/","")
+            url="https://asas-sn.osu.edu/photometry/"+short_asassn_name+".csv"
+        
+        #https://asas-sn.osu.edu/variables/06870f80-f5a7-5a8a-b9cd-a3f41de3e48e.csv  #we will trim the .csv
+        if asassn_name.startswith("https://asas-sn.osu.edu/variables/"):
+            asassn_name = asassn_name.replace(".csv","")
+            short_asassn_name = asassn_name.replace("https://asas-sn.osu.edu/variables/","")
+            url="https://asas-sn.osu.edu/variables/"+short_asassn_name+".csv"
 
         try:
             response = requests.get(url)
             content = response.content.decode('utf-8')
 
-            df = pd.read_csv(io.StringIO(content), header=0)
+            df = pd.read_csv(io.StringIO(content), header=0)  #in sky-patrol header is HJD, in photometry:hjd, ignoring the case, convering to uppercase
             # remove rows where mag_err >= 1
             df = df[df['mag_err'] < 1]
+            print("ASASSN: ",df)
 
             if len(df) < 1:
                 self.logger.error('[ASAS-SN PHOTOMETRY] Empty table!')
@@ -113,25 +131,36 @@ class ASASSNBroker(BHTOMBroker):
         except Exception as e:
             # Empty response or error in connection
             self.logger.warning(f'ASASSN returned no observations for {target.name}')
-            print("ASASSN error: ",e)
+            self.logger.error(f'ASASSN data reading error: {e}')
             return return_for_no_new_points()
         
         try:
             reduced_datums = []
             for _, datum in df.iterrows():
-                mjd = datum.HJD-2400000.5
-                timestamp = Time(datum.HJD, format="jd", scale="utc").to_datetime(timezone=TimezoneInfo())
+
+                if asassn_name.startswith("https://asas-sn.osu.edu/sky-patrol/coordinate/"):
+                    mjd = datum.HJD-2400000.5
+                    timestamp = Time(datum.HJD, format="jd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                    fil = "ASASSN(" + datum.Filter + ")"
+                    fac="ASASSN-"+datum.Camera
+                else:
+    #                if asassn_name.startswith("https://asas-sn.osu.edu/photometry/"): #variable has the same format
+                    mjd = datum.hjd-2400000.5
+                    timestamp = Time(datum.hjd, format="jd", scale="utc").to_datetime(timezone=TimezoneInfo())
+                    fil = "ASASSN(V)"
+                    fac="ASASSN-"+datum.camera
+                    
                 reduced_datum = ReducedDatum(target=target,
                                            data_type='photometry',
                                            timestamp=timestamp,
                                            mjd=mjd,
                                            value=datum.mag,
                                            source_name=self.name,
-                                           source_location='https://asas-sn.osu.edu',  # e.g. alerts url
+                                           source_location=url,#'https://asas-sn.osu.edu',  # e.g. alerts url
                                            error=datum.mag_err,
-                                           filter = "ASASSN(" + datum.Filter + ")",
+                                           filter = fil,
                                            observer=self.__OBSERVER_NAME,
-                                           facility=datum.Camera,
+                                           facility=fac,
                                            value_unit = ReducedDatumUnit.MAGNITUDE)
                                            
                 reduced_datums.extend([reduced_datum])
@@ -148,4 +177,4 @@ class ASASSNBroker(BHTOMBroker):
 
 #returns a Latex String with citation needed when using data from this broker
 def getCitation():
-    return "CITATION TO ASASSN and acknowledgment."
+    return "CITATION TO ASASSN and acknowledgment. The ASAS-SN Catalog of Variable Stars: I."
