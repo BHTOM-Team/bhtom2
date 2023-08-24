@@ -296,7 +296,7 @@ def query_ogle_ews_for_name(target: Target) -> Dict[DataSource,str]:
         name=''
 #        if (result is not None):
         if ( result.empty==False ):
-            name = result["name"]
+            name = result["name"].values[0]
             logger.info(f'Found OGLE EWS name...{name}')
             return {
                     DataSource.OGLE_EWS: name,

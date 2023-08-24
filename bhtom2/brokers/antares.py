@@ -424,6 +424,7 @@ class ANTARESBroker(BHTOMBroker):
 
         result: Optional[Locus] = get_by_id(antares_name)
 
+        
         if not result:
             return_for_no_new_points()
 
@@ -442,7 +443,7 @@ class ANTARESBroker(BHTOMBroker):
                 filter: str = filter_name(DataSource.ZTF.name,row['ant_passband'].lower()) #from ANTARES the filters will be called ZTF(r) and ZTF(g), but from ZTF DR they are ZTF(zr) and ZTF(zg) - making it consistent here
                 if (filter=="ZTF(r)"): filter="ZTF(zr)"
                 if (filter=="ZTF(g)"): filter="ZTF(zg)"
-                
+
                 # Detection
                 mag: float = float(row['ant_mag_corrected'])
                 magerr: float = float(row['ant_magerr_corrected'])
@@ -474,6 +475,8 @@ class ANTARESBroker(BHTOMBroker):
                                            facility=self.__FACILITY_NAME) for datum in data]
             with transaction.atomic():
                 new_points = len(ReducedDatum.objects.bulk_create(reduced_datums, ignore_conflicts=True))
+                self.logger.info(f"ANTARES Broker returned {new_points} points for {target.name}")
+
         except Exception as e:
             self.logger.error(f'Error while saving reduced datapoints for target {target.name} with '
                               f'ANTARES name {antares_name}: {e}')

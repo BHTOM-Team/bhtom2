@@ -290,7 +290,6 @@ def cone_search(coordinates:SkyCoord, radius:Angle):
 
     if len(indices_within_radius) > 0:
         target_data = ogle_data.loc[indices_within_radius]
-
         return target_data
     else:
         logger.info('Cone Search returned no results in OGLE EWS!')
