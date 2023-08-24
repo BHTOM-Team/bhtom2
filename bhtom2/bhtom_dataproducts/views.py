@@ -6,7 +6,6 @@ from django.views import View
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import FormView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import Group
 from django_filters.views import FilterView
 from guardian.shortcuts import get_objects_for_user
 from rest_framework.views import APIView
@@ -32,12 +31,13 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
     form_class = DataProductUploadForm
 
     def get_form(self, *args, **kwargs):
-        form = super().get_form(*args, **kwargs)
-        if not settings.TARGET_PERMISSIONS_ONLY:
-            if self.request.user.is_superuser:
-                form.fields['groups'].queryset = Group.objects.all()
-            else:
-                form.fields['groups'].queryset = self.request.user.groups.all()
+        form = super().get_form(self, *args, **kwargs)
+        if self.request.user.is_superuser:
+            groups = DataProductGroup.objects.all()
+        else:
+            groups = DataProductGroup_user.objects.filter(user=self.request.user, active_flg=True).order_by('created'),
+        print(groups)
+        form.fields['group'].choices = [g.name for g in groups]
         return form
 
     def form_valid(self, form):

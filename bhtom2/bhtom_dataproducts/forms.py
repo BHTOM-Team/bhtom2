@@ -1,15 +1,9 @@
 from django import forms
-from django.contrib.auth.models import Group
 from django.conf import settings
-
-from bhtom_base.bhtom_dataproducts.models import DataProductGroup, DataProduct
 from bhtom_base.bhtom_observations.models import ObservationRecord
 from bhtom_base.bhtom_targets.models import Target
 from bhtom2.bhtom_observatory.models import Observatory
-from django.contrib.auth.models import User
 from bhtom2.bhtom_calibration.models import catalogs as Catalogs
-
-
 class ObservatoryChoiceField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj):
@@ -88,6 +82,7 @@ class DataProductUploadForm(forms.Form):
         required=False
     )
 
+   
     def __init__(self, *args, **kwargs):
         filter = {}
         filter['no'] = 'Auto'
@@ -101,12 +96,8 @@ class DataProductUploadForm(forms.Form):
 
         for f in ['U', 'B', 'V', 'R', 'I', 'u', 'g', 'r', 'i', 'z']:
             filter['any/%s' % f] = 'any/%s' % f
-
-        if not settings.TARGET_PERMISSIONS_ONLY:
-            self.fields['groups'] = forms.ModelMultipleChoiceField(Group.objects.none(),
-                                                                   required=False,
-                                                                   widget=forms.CheckboxSelectMultiple)
-            
+        
+      
         super(DataProductUploadForm, self).__init__(*args, **kwargs)    
         self.fields['observatory'] = ObservatoryChoiceField(
             queryset= Observatory.objects.filter(active_flg=True).order_by('name'),
@@ -126,3 +117,13 @@ class DataProductUploadForm(forms.Form):
             required=False,
             label='Comment',
         )
+        self.fields['group'] = forms.ChoiceField(
+            choices= [],
+            widget=forms.Select(),
+            initial = 'public',
+            required=False,
+            label='Group',
+        )
+
+
+     
