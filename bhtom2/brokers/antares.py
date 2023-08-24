@@ -437,6 +437,7 @@ class ANTARESBroker(BHTOMBroker):
         new_points: int = 0
         data: List[Tuple[datetime, DatumValue]] = []
 
+        if len(lightcurve.iterrows())>0: logger.info("Data found. Temporarily downloading non-corrected(differential) magnitudes from ANTARES.")
         for _, row in lightcurve.iterrows():
             try:
                 mjd: Time = Time(float(row['ant_mjd']), format='mjd', scale='utc')
@@ -445,9 +446,11 @@ class ANTARESBroker(BHTOMBroker):
                 if (filter=="ZTF(g)"): filter="ZTF(zg)"
 
                 # Detection
-                mag: float = float(row['ant_mag_corrected'])
-                magerr: float = float(row['ant_magerr_corrected'])
-
+                # mag: float = float(row['ant_mag_corrected'])
+                # magerr: float = float(row['ant_magerr_corrected'])
+                mag: float = float(row['ant_mag'])  #TODO: temporarily switching to non_corrected mags (differential???)
+                magerr: float = float(row['ant_magerr'])
+#                print("ANTARES: ",mjd, filter, mag, magerr)
                 # Detection
                 if not math.isnan(mag):
                     data.append((mjd.to_datetime(timezone=TimezoneInfo()),
