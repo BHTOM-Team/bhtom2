@@ -43,5 +43,5 @@ lxml==4.9.1
 crispy-bootstrap4>=2022.1
 openai>=0.27.3
 drf_yasg==1.21.6 #swagger
-#MulensModel>=2.15.0
+#MulensModel>=2.15.0 #todo
 aiokafka==0.8.1

@@ -1,7 +1,5 @@
 {% extends 'bhtom_common/base.html' %}
 {% load dataproduct_extras %}
-{% load dataproduct_extras %}
-{% load dataproduct_extras %}
 {% load comments bootstrap4 bhtom_common_extras targets_extras observation_extras dataproduct_extras static cache %}
 {% block title %}Target {{ object.name }}{% endblock %}
 {% block additional_css %}
@@ -158,10 +156,22 @@
                     </div>
                 </div>
                 {% cache 3600 photometry_stats %}
+                    <div style="margin-top: 20px;">
                 {% photometry_stats object %}
+                    </div>
                 {% endcache %}
+
+            <div>
+                    <button onclick="download_photometry_stats_latex()" class="btn btn-info" role="button">Download photometry stats as LaTeX table</button>
+                    </div>
+
+                    <div style="margin-top: 20px;" class="col-lg-6">
+                    {% gaia_stats object %}
+                    </div>
             </div>
+
             {% endif %}
+
 
             <div class="tab-pane" id="manage-data">
                 {% if user.is_authenticated %}
@@ -201,6 +211,10 @@
 
     function generate_target_description_latex() {
         window.open('{% url "targets:generate_target_description_latex" target.id %}')
+    }
+
+    function download_photometry_stats_latex() {
+      window.open('{% url "targets:download_photometry_stats_latex" target.id %}')
     }
 
 </script>

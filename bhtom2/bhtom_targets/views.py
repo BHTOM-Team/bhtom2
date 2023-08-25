@@ -162,8 +162,8 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
 
         coords_names = check_for_existing_coords(ra, dec, 3. / 3600., stored)
         if len(coords_names) != 0:
-            ccnames = ' '.join(coords_names) #todo 'Iterable[str]', got 'list[tuple[str, str]]' instead
-            logger.error("Source found already at these coordinates (rad 3 arcsec)")
+            ccnames = ' '.join(coords_names)
+            logger.error("There is a source found already at these coordinates (rad 3 arcsec)")
             form.add_error(None, f"Source found already at these coordinates (rad 3 arcsec): {ccnames}")
             return super().form_invalid(form)
         #            raise ValidationError(f'Source found already at these coordinates: {ccnames}')
@@ -177,18 +177,12 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
                 form.add_error(None, 'Duplicate source names for aliases.')
             form.add_error(None, names.errors)
             form.add_error(None, names.non_form_errors())
-            # if (len(coords_names)!=0):
-            #     ccnames = ' '.join(coords_names)
-            #     raise ValidationError(f'Source found already at these coordinates: {ccnames}')
 
             return super().form_invalid(form)
 
         # storing all the names
         for source_name, name in target_names:
-            # clearing ASASSN and CPCS names from prefixes if provided:
-            if "ASASSN" in source_name:
-                if name.startswith("https://asas-sn.osu.edu/sky-patrol/coordinate/"):
-                    name = name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
+            # clearing CPCS names from prefixes if provided:
 
             to_add, _ = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
             to_add.name = name
@@ -292,10 +286,9 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
 
         # Update target names for given source
         for source_name, name in target_names:
-            # clearing ASASSN and CPCS names from prefixes if provided:
-            if "ASASSN" in source_name:
-                if name.startswith("https://asas-sn.osu.edu/sky-patrol/coordinate/"):
-                    name = name.replace("https://asas-sn.osu.edu/sky-patrol/coordinate/", "")
+            # clearing  CPCS names from prefixes if provided:
+
+            # Not clearing ASASSN, as it can have different prefixes
 
             to_update, created = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
             to_update.name = name
@@ -318,8 +311,6 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
                 f'Deleted alias {to_delete.name} for {get_pretty_survey_name(to_delete.source_name)}'
             )
 
-        # the hook is run even if not called?
-        print("UPDATE: REDIRECTING TO " + self.get_success_url())
         return redirect(self.get_success_url())
 
     def get_queryset(self, *args, **kwargs):
@@ -572,7 +563,6 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
 
         allobs = []
         allobs_nowise = []
-
         for datum in datums:
             if str(datum.filter) == "WISE(W1)" or str(datum.filter) == "WISE(W2)":
                 #                allobs.append(str("WISE"))
@@ -613,6 +603,8 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
             init_t0 = request.GET.get('init_t0', '')
             init_te = request.GET.get('init_te', '')
             init_u0 = request.GET.get('init_u0', '')
+            init_piEN = request.GET.get('init_piEN', '')
+            init_piEE = request.GET.get('init_piEE', '')
             logu0 = request.GET.get('logu0', '')
             fixblending = request.GET.get('fixblending', 'on')
             auto_init = request.GET.get('auto_init', '')
@@ -638,6 +630,8 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
             'init_t0': init_t0,
             'init_te': init_te,
             'init_u0': init_u0,
+            'init_piEN': init_piEN,
+            'init_piEE': init_piEE,
             'logu0': logu0,
             'fixblending': fixblending,
             'auto_init': auto_init,
