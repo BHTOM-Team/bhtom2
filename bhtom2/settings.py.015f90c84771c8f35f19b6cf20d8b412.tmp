@@ -129,32 +129,20 @@ WSGI_APPLICATION = 'bhtom2.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'NAME': secret.get("POSTGRES_DB_NAME", 'bhtom2'),
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'USER': secret.get("POSTGRES_DB_USER", 'bhtom2'),
-#         'PASSWORD': secret.get("POSTGRES_PASSWORD", "bhtom2"),
-#         'HOST': secret.get('POSTGRES_HOST', 'localhost'),
-#         'PORT': secret.get('POSTGRES_PORT', 5432),
-#         'TEST': {
-#             'NAME': secret.get("POSTGRES_TEST_DB_NAME", 'test_bhtom2')
-#         }
-#     },
-# }
 DATABASES = {
     'default': {
         'NAME': secret.get("POSTGRES_DB_NAME", 'bhtom2'),
         'ENGINE': 'django.db.backends.postgresql',
-        'USER': secret.get("POSTGRES_DB_USER", 'bhtom'),
-        'PASSWORD': secret.get("POSTGRES_PASSWORD", ""),
-        'HOST': 'localhost',
+        'USER': secret.get("POSTGRES_DB_USER", 'bhtom2'),
+        'PASSWORD': secret.get("POSTGRES_PASSWORD", "bhtom2"),
+        'HOST': secret.get('POSTGRES_HOST', 'localhost'),
         'PORT': secret.get('POSTGRES_PORT', 5432),
         'TEST': {
             'NAME': secret.get("POSTGRES_TEST_DB_NAME", 'test_bhtom2')
         }
     },
 }
+
 
 MIGRATION_MODULES = {
     'bhtom2': 'bhtom2.migrations'

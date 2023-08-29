@@ -1,10 +1,10 @@
 function dataProductSelect() {
 
-    var data_type_photometry_sextractor = document.getElementById("id_data_product_type_0").checked;
-    var data_type_fits_file = document.getElementById("id_data_product_type_2").checked;
-    var data_type_spectrum = document.getElementById("id_data_product_type_3").checked;
-    var data_type_photometry = document.getElementById("id_data_product_type_0").checked;
-    var data_type_photometry_asas = document.getElementById("id_data_product_type_4").checked;
+    var photometry = document.getElementById("id_data_product_type_0").checked;
+    var photometry_non_detaction = document.getElementById("id_data_product_type_1").checked;
+    var fits_file = document.getElementById("id_data_product_type_2").checked;
+    var spectroscopy = document.getElementById("id_data_product_type_3").checked;
+    var image = document.getElementById("id_data_product_type_4").checked;
 
     var mjd = document.getElementById("mjd");
     var ExpTime = document.getElementById("ExpTime");
@@ -15,7 +15,27 @@ function dataProductSelect() {
     var observer = document.getElementById("id_observer");
     var facility = document.getElementById("id_facility");
 
-    if (data_type_photometry_sextractor === true) {
+    if (photometry === true) {
+
+        mjd.setAttribute("required", true);
+        ExpTime.setAttribute("required", true);
+        matchDist.setAttribute("required", true);
+        observatory.setAttribute("required", true);
+        filter.setAttribute("required", true);
+        observer.removeAttribute("required");
+        facility.removeAttribute("required");
+
+        mjd.parentElement.style.display = "block";
+        ExpTime.parentElement.style.display = "block";
+        matchDist.parentElement.style.display = "block";
+        dryRun.parentElement.style.display = "block";
+        observatory.parentElement.style.display = "block";
+        filter.parentElement.style.display = "block";
+        observer.parentElement.style.display = "none";
+        facility.parentElement.style.display = "none";
+
+    }
+    if (photometry_non_detaction === true) {
 
         mjd.setAttribute("required", true);
         ExpTime.setAttribute("required", true);
@@ -36,7 +56,7 @@ function dataProductSelect() {
 
     }
 
-    if (data_type_fits_file === true) {
+    if (fits_file === true) {
 
         mjd.removeAttribute("required");
         ExpTime.removeAttribute("required");
@@ -57,7 +77,7 @@ function dataProductSelect() {
 
     }
 
-    if (data_type_spectrum === true || data_type_photometry === true) {
+    if (spectroscopy === true) {
 
         mjd.removeAttribute("required");
         ExpTime.removeAttribute("required");
@@ -78,25 +98,25 @@ function dataProductSelect() {
 
     }
 
-    if (data_type_photometry_asas === true) {
+    // if (data_type_photometry_asas === true) {
 
-        mjd.removeAttribute("required");
-        ExpTime.removeAttribute("required");
-        matchDist.removeAttribute("required");
-        observatory.removeAttribute("required");
-        filter.removeAttribute("required");
-        observer.removeAttribute("required");
-        facility.removeAttribute("required");
+    //     mjd.removeAttribute("required");
+    //     ExpTime.removeAttribute("required");
+    //     matchDist.removeAttribute("required");
+    //     observatory.removeAttribute("required");
+    //     filter.removeAttribute("required");
+    //     observer.removeAttribute("required");
+    //     facility.removeAttribute("required");
 
-        mjd.parentElement.style.display = "none";
-        ExpTime.parentElement.style.display = "none";
-        matchDist.parentElement.style.display = "none";
-        dryRun.parentElement.style.display = "none";
-        observatory.parentElement.style.display = "none";
-        filter.parentElement.style.display = "none";
-        observer.parentElement.style.display = "none";
-        facility.parentElement.style.display = "none";
+    //     mjd.parentElement.style.display = "none";
+    //     ExpTime.parentElement.style.display = "none";
+    //     matchDist.parentElement.style.display = "none";
+    //     dryRun.parentElement.style.display = "none";
+    //     observatory.parentElement.style.display = "none";
+    //     filter.parentElement.style.display = "none";
+    //     observer.parentElement.style.display = "none";
+    //     facility.parentElement.style.display = "none";
 
-    }
+    // }
 
 }
