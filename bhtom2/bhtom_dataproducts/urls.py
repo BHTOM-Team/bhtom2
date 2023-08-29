@@ -7,7 +7,6 @@ app_name = 'bhtom2.bhtom_dataproducts'
 urlpatterns = [
     path('upload/', FitsUploadAPIView.as_view(), name='upload'),
     path("upload-data-ui/", DataProductUploadView.as_view(), name="upload_data_ui"),
-    # path("dataUpload/", DataProductUploadView.as_view(), name="upload_data")
     path('data/', DataProductListView.as_view(), name='list'),
     path('data/group/list/', DataProductGroupListView.as_view(), name='group-list'),
     path('data/group/create/', DataProductGroupCreateView.as_view(), name='group-create'),

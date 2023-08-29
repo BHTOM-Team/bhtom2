@@ -20,39 +20,96 @@ from bhtom_base.bhtom_targets.models import Target
 from .forms import DataProductUploadForm
 from ..bhtom_calibration.models import calibration_data
 from ..bhtom_observatory.models import ObservatoryMatrix, Observatory
+from bhtom2.bhtom_observatory.models import Observatory
+from rest_framework.views import APIView
+
+import requests
+import os
+from django.http import HttpResponse
+from django.shortcuts import redirect
+from django.contrib import messages
+from rest_framework.authtoken.models import Token
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 logger = BHTOMLogger(__name__, '[BHTOM2 views]')
 
-
-class DataProductUploadView(LoginRequiredMixin, FormView):
+class DataProductUploadView(LoginRequiredMixin,FormView):
     """
     View that handles manual upload of DataProducts. Requires authentication.
     """
     form_class = DataProductUploadForm
+    
+    def get_form_kwargs(self):
+        kwargs = super(DataProductUploadView, self).get_form_kwargs()
+        kwargs['initial'] = {'user': self.request.user}
+        return kwargs
 
     def get_form(self, *args, **kwargs):
-        form = super().get_form(self, *args, **kwargs)
-        if self.request.user.is_superuser:
-            groups = DataProductGroup.objects.all()
-        else:
-            groups = DataProductGroup_user.objects.filter(user=self.request.user, active_flg=True).order_by('created'),
-        print(groups)
-        form.fields['group'].choices = [g.name for g in groups]
+        form = super().get_form(*args, **kwargs)
         return form
-
+    
     def form_valid(self, form):
-        """
-        Runs after ``DataProductUploadForm`` is validated. Saves each ``DataProduct`` and calls ``run_data_processor``
-        on each saved file. Redirects to the previous page.
-        """
-        # ... (remaining unchanged)
+        target = form.cleaned_data['target']
+        if not target:
+            observation_record = form.cleaned_data['observation_record']
+            target = observation_record.target
+        else:
+            observation_record = None
+        dp_type = form.cleaned_data['data_product_type']
+        data_product_files = self.request.FILES
+        observatory = form.cleaned_data['observatory']
+        observation_filter = form.cleaned_data['filter']
+        mjd = form.cleaned_data['MJD']
+        exp_time = form.cleaned_data['ExpTime']
+        match_dist = form.cleaned_data['matchDist']
+        dry_run = form.cleaned_data['dryRun']
+        comment = form.cleaned_data['comment']
+        facility = form.cleaned_data['facility']
+        observer = form.cleaned_data['observer']
+        group = form.cleaned_data['group']
+        user = self.request.user
+
+        if dp_type == 'fits_file' and observatory.calibration_flg == True:
+            logger.error('observatory without ObsInfo: %s %s' % (str(f[0].name), str(target)))
+            messages.error(self.request, 'Used Observatory without ObsInfo')
+            return redirect(form.cleaned_data.get('referrer', '/'))
+
+        post_data = {
+            'filter': observation_filter,
+            'target': target.name,
+            'data_product_type': dp_type,
+            'match_dist': match_dist,
+            'comment': comment,
+            'dry_tun': dry_run,
+            'observatory': observatory,
+            'mjd':mjd,
+            'exp_time': exp_time,
+            'group': group.group.name,
+            'observer': observer,
+            'facility': facility
+        }
+        token = Token.objects.get(user_id=user.id).key
+
+        headers = {
+            'Authorization': 'Token ' + token
+        }
+
+        # Make a POST request to upload-service with the extracted data
+        response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/', data=post_data, files=data_product_files, headers=headers)
+
+        if response.status_code == 201:
+            messages.success(self.request, 'Successfully uploaded:' + response.content)
+        else:
+            messages.error(self.request, 'There was a problem uploading your file:' + str(response.content))
+        return redirect(form.cleaned_data.get('referrer', '/'))
 
     def form_invalid(self, form):
         """
         Adds errors to Django messaging framework in the case of an invalid form and redirects to the previous page.
         """
-        # ... (remaining unchanged)
-
+        # TODO: Format error messages in a more human-readable way
+        messages.error(self.request, 'There was a problem uploading your file: {}'.format(form.errors.as_json()))
+        return redirect(form.cleaned_data.get('referrer', '/'))
 
 class FitsUploadAPIView(APIView):
 
@@ -123,7 +180,7 @@ class DataProductGroupListView(ListView):
     """
     model = DataProductGroup
     ordering = ['-created']
-
+    
     def get_context_data(self, *args, **kwargs):
         """
         Adds the set of ``DataProductGroup`` objects to the context dictionary.

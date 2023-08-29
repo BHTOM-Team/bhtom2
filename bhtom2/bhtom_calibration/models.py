@@ -24,6 +24,7 @@ class calibration_data(models.Model):
     status = models.CharField(max_length=1, choices=STATUS, default='C')
     status_message = models.TextField(null=True, blank=True)
     mjd = models.FloatField(null=True, blank=True)
+    exp_time = models.FloatField(null=True, blank=True)
     mag = models.FloatField(null=True, blank=True)
     mag_error = models.FloatField(null=True, blank=True)
     ra = models.FloatField(null=True, blank=True)

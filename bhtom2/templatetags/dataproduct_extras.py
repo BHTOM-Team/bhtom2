@@ -135,12 +135,9 @@ def upload_dataproduct(context, obj):
     elif isinstance(obj, ObservationRecord):
         initial['observation_record'] = obj
         initial['referrer'] = reverse('bhtom_base.bhtom_observations:detail', args=(obj.id,))
+    initial['user'] = user
     form = DataProductUploadForm(initial=initial)
-    if not settings.TARGET_PERMISSIONS_ONLY:
-        if user.is_superuser:
-            form.fields['groups'].queryset = Group.objects.all()
-        else:
-            form.fields['groups'].queryset = user.groups.all()
+
     return {'data_product_form_from_user': form}
 
 
