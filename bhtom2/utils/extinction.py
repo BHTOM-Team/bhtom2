@@ -18,9 +18,9 @@ def ogle_extinction(target: Target) -> Optional[float]:
     coordinates: SkyCoord = SkyCoord(target.galactic_lng * u.deg,
                                      target.galactic_lat * u.deg,
                                      frame='galactic')
-    query_result = Ogle.query_region(coord=coordinates)
 
     try:
+        query_result = Ogle.query_region(coord=coordinates)
         extinction: float = query_result['E(V-I)'][0]
         if extinction == -9.999:
             return None

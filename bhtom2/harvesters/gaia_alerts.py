@@ -60,13 +60,13 @@ def search_term_in_gaia_data(term: str) -> pd.DataFrame:
             return target_data
 
     # Term is not found or the CSV file doesn't exist, so CSV needs to be updated
-    new_gaia_data = pd.read_csv(StringIO(fetch_alerts_csv()))
 
     try:
+        new_gaia_data = pd.read_csv(StringIO(fetch_alerts_csv()))
         term_data: pd.DataFrame = new_gaia_data.loc[new_gaia_data['#Name'].str.lower() == term.lower()]
     except KeyError:
-        os.remove(GAIA_ALERTS_CACHE_PATH)
-        raise InvalidExternalServiceResponseException(f'Gaia Alerts didn\'t return a valid csv file!')
+#        os.remove(GAIA_ALERTS_CACHE_PATH)
+        raise InvalidExternalServiceResponseException(f'Nothing found in Gaia Alerts.')
 
 
     if len(term_data.index) > 0:
