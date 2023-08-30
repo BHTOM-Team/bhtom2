@@ -2,8 +2,8 @@ version: "3.7"
 
 services:
 
-  bhtomDB:
-    container_name: bhtomDB
+  bhtom_db:
+    container_name: bhtom_db
     restart: always
     build:
       context: .
@@ -17,6 +17,7 @@ services:
       - POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
     ports:
       - "${POSTGRES_PORT}:5432"
+
   bhtom:
     container_name: bhtom
     build:
@@ -26,11 +27,12 @@ services:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
     restart: always
     volumes:
-      - ./data:/bhtom2/data
+      - data_store:/data
     ports:
-      - "8000:8000"
+      - "8010:8000"
     depends_on:
-      - bhtomDB
+      - bhtom_db
+
 
   zookeeper1:
     image: 'confluentinc/cp-zookeeper:6.0.14'
@@ -43,6 +45,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
+
     restart: always
 
   zookeeper2:
@@ -56,7 +59,9 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2182:2182"
+
     restart: always
+
   zookeeper3:
     image: confluentinc/cp-zookeeper:6.0.14
     container_name: zookeeper3
@@ -68,7 +73,9 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2183:2183"
+
     restart: always
+
   kafka1:
     image: 'confluentinc/cp-kafka:6.0.14'
     container_name: kafka1
@@ -85,10 +92,12 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_REPLICA_LAG_TIME_MAX_MS: 4000
       KAFKA_SOCKET_TIMEOUT_MS: 4000
+
     depends_on:
       - zookeeper1
       - zookeeper2
       - zookeeper3
+
   kafka2:
     image: 'confluentinc/cp-kafka:6.0.14'
     container_name: kafka2
@@ -104,11 +113,13 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_REPLICA_LAG_TIME_MAX_MS: 4000
       KAFKA_SOCKET_TIMEOUT_MS: 4000
+
     depends_on:
       - zookeeper1
       - zookeeper2
       - zookeeper3
     restart: always
+
   kafka3:
     image: 'confluentinc/cp-kafka:6.0.14'
     container_name: kafka3
@@ -124,11 +135,13 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_REPLICA_LAG_TIME_MAX_MS: 4000
       KAFKA_SOCKET_TIMEOUT_MS: 4000
+
     depends_on:
       - zookeeper1
       - zookeeper2
-       - zookeeper3
+      - zookeeper3
     restart: always
+
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
@@ -139,15 +152,16 @@ services:
       KAFKA_CLUSTERS_0_NAME: bhtom2
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'kafka1:19092,kafka2:19093,kafka3:19094'
       KAFKA_CLUSTERS_0_ZOOKEEPER: "zookeeper1:2181,zookeeper2:2182,zookeeper3:2183"
+
     depends_on:
       - kafka1
       - kafka2
       - kafka3
 
-networks:
-  graylog:
-    driver: bridge
-
 volumes:
   data_store:
     driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: 'path'
