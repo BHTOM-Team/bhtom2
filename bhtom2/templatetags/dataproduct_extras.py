@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from urllib.parse import urlencode
+from django.template import Context, loader
 from bhtom2.external_service.data_source_information import DataSource
 
 import numpy as np
@@ -306,285 +307,38 @@ def upload_dataproduct(context, obj):
     elif isinstance(obj, ObservationRecord):
         initial['observation_record'] = obj
         initial['referrer'] = reverse('bhtom_base.bhtom_observations:detail', args=(obj.id,))
+    initial['user'] = user
     form = DataProductUploadForm(initial=initial)
-    if not settings.TARGET_PERMISSIONS_ONLY:
-        if user.is_superuser:
-            form.fields['groups'].queryset = Group.objects.all()
-        else:
-            form.fields['groups'].queryset = user.groups.all()
+
     return {'data_product_form_from_user': form}
 
 
 @register.inclusion_tag('bhtom_dataproducts/partials/photometry_for_target.html', takes_context=True)
 def photometry_for_target(context, target, width=1000, height=600, background=None, label_color=None, grid=True):
-    """
-    Renders a photometric plot for a target.
 
-    This templatetag requires all ``ReducedDatum`` objects with a data_type of ``photometry`` to be structured with the
-    following keys in the JSON representation: magnitude, error, filter
-
-    :param width: Width of generated plot
-    :type width: int
-
-    :param height: Height of generated plot
-    :type width: int
-
-    :param background: Color of the background of generated plot. Can be rgba or hex string.
-    :type background: str
-
-    :param label_color: Color of labels/tick labels. Can be rgba or hex string.
-    :type label_color: str
-
-    :param grid: Whether to show grid lines.
-    :type grid: bool
-    """
-
-
-    photometry_data = {}
-    radio_data = {}
-
-    if settings.TARGET_PERMISSIONS_ONLY:
-        datums = ReducedDatum.objects.filter(target=target,
-                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
-                                             value_unit=ReducedDatumUnit.MAGNITUDE)
-
-        radio_datums = ReducedDatum.objects.filter(target=target,
-                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
-                                             value_unit=ReducedDatumUnit.MILLIJANSKY)
+    fig = None
+    if (target.photometry_plot != None and target.photometry_plot != ''):
+        fig = loader.get_template(target.photometry_plot)
     else:
-        datums = get_objects_for_user(context['request'].user,
-                                      'bhtom_dataproducts.view_reduceddatum',
-                                      klass=ReducedDatum.objects.filter(
-                                          target=target,
-                                          data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
-                                          value_unit=ReducedDatumUnit.MAGNITUDE))
+        layout = go.Layout(
+            height=height,
+            width=width,
+            paper_bgcolor=background,
+            plot_bgcolor=background
 
-        radio_datums = get_objects_for_user(context['request'].user,
-                                      'bhtom_dataproducts.view_reduceddatum',
-                                      klass=ReducedDatum.objects.filter(
-                                        target=target,
-                                        data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
-                                        value_unit=ReducedDatumUnit.MILLIJANSKY))
-
-    # set the datum max and min the silly way, we already iterate through all the datums anyway
-    magnitude_min = -100
-    magnitude_max = 100
-
-    radio_min = 1e7
-    radio_max = -1e7
-
-    for datum in datums:
-        photometry_data.setdefault(datum.filter, {})
-
-        if datum.value:
-            photometry_data[datum.filter].setdefault('time', []).append(datum.timestamp)
-            photometry_data[datum.filter].setdefault('magnitude', []).append(around(datum.value,3))
-            photometry_data[datum.filter].setdefault('error', []).append(around(datum.error,3))
-            photometry_data[datum.filter].setdefault('facility', []).append(datum.facility)
-
-            magnitude_min = (datum.value+datum.error) if (datum.value+datum.error) > magnitude_min else magnitude_min
-            magnitude_max = (datum.value-datum.error) if (datum.value-datum.error) < magnitude_max else magnitude_max
-
-    for radio_datum in radio_datums:
-        radio_data.setdefault(radio_datum.filter, {})
-
-        if radio_datum.value:
-            radio_data[radio_datum.filter].setdefault('time', []).append(radio_datum.timestamp)
-            radio_data[radio_datum.filter].setdefault('magnitude', []).append(around(radio_datum.value,3))
-            radio_data[radio_datum.filter].setdefault('error', []).append(around(radio_datum.error,3))
-
-            radio_min = (radio_datum.value-radio_datum.error) if (radio_datum.value-radio_datum.error) < radio_min else radio_min
-            radio_max = (radio_datum.value+radio_datum.error) if (radio_datum.value+radio_datum.error) > radio_max else radio_max
-
-        # TODO: handle limits
-        # photometry_data[datum.filter].setdefault('limit', []).append(datum.value.get('limit'))
-
-    # Calculate min/max values for ranges and ticks
-    magnitude_range = magnitude_min-magnitude_max
-    radio_range = radio_max-radio_min
-
-    try:
-#        magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
-        magnitude_range = 10
-    except:
-        magnitude_dtick_digit = 1
-        radio_range = 10
-    
-    try:
-        if (radio_range>0):
-            radio_dtick_digit = (round(np.log10(radio_range)) - 1)
-        else:
-                    radio_dtick_digit = 1
-    except:
-        radio_dtick_digit = 1
-
-    plot_data = []
-
-##MAG:
-    mjds_to_plot = {}
-    mjds_lim_to_plot = {}
-    for filter_name, filter_values in photometry_data.items():
-        if filter_values['magnitude']:
-            mjds_to_plot[filter_name]=Time(filter_values['time'], format="datetime").mjd
-        if filter_values.get('limit'):
-            mjds_lim_to_plot[filter_name]=Time(filter_values['time'], format="datetime").mjd
-
-    for filter_name, filter_values in photometry_data.items():
-        if (filter_name == "G(GAIA_ALERTS)"): continue #for older targets, which still have G(GAIA_ALERTS) instead of GSA(G)
-        if (filter_name == "SDSSDR(u)" or filter_name =="SDSSDR(g)" or filter_name=="SDSSDR(r)" or filter_name=="SDSSDR(i)" or filter_name=="SDSS(z)"): continue
-        if (filter_name == "SDSS_DR14(u)" or filter_name =="SDSS_DR14(g)" or filter_name=="SDSS_DR14(r)" or filter_name=="SDSS_DR14(i)" or filter_name=="SDSS_DR14(z)"): continue
-        if filter_values['magnitude']:
-            series = go.Scatter(
-                x=filter_values['time'],
-                y=filter_values['magnitude'],
-                mode='markers',
-                opacity=0.75,
-                marker=dict(
-                    color=color_map.get(filter_name, ['gray', 'circle', 4])[0], #default ['gray', 'circle', 6]
-                    symbol=color_map.get(filter_name, ['gray', 'circle', 4])[1],
-                    size=1.2*color_map.get(filter_name, ['gray', 'circle', 4])[2]
-                    ),
-                name=filter_name,
-                error_y=dict(
-                    type='data',
-                    array=filter_values['error'],
-                    visible=True,
-                    thickness=0.5
-                ),
-                text=mjds_to_plot[filter_name], 
-                customdata=filter_values['facility'],
-#                customdata = filter_values['error'],
-            # hovertemplate='<br>'.join([
-            # "%{x}",
-            # "%{y:.2f}",
-            # "%{customdata}",
-            # ]),
-            hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
-                <br>MJD= %{text:.6f}\
-            <br>mag= %{y:.3f}&#177;%{error_y.array:3f}\
-            <br>%{customdata}'
-            )     
-            plot_data.append(series)
-        elif filter_values.get('limit'):  #limit in MAG
-            series = go.Scatter(
-                x=filter_values['time'],
-                y=filter_values['limit'],
-                mode='markers',
-                opacity=0.5,
-                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol=6),  # upside down triangle
-                name=filter_name+" limit",
-                text=mjds_lim_to_plot[filter_name],
-                hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
-                <br>MJD= %{text:.6f}\
-            <br>limit mag= (%{y:.3f})'
-            )
-            plot_data.append(series)
-
-
-##RADIO:
-    mjds_radio_to_plot = {}
-    mjds_radio_lim_to_plot = {}
-    for filter_name, filter_values in radio_data.items():
-        if filter_values['magnitude']:
-            mjds_radio_to_plot[filter_name]=Time(filter_values['time'], format="datetime").mjd
-        if filter_values.get('limit'):
-            mjds_radio_lim_to_plot[filter_name]=Time(filter_values['time'], format="datetime").mjd
-
-    for filter_name, filter_values in radio_data.items():
-        if filter_values['magnitude']:
-            series2 = go.Scatter(
-                x=filter_values['time'],
-                y=filter_values['magnitude'],
-                mode='markers',
-                opacity=0.75,
-                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol='diamond', line_color='black', line_width=2),
-                name=filter_name,
-                error_y=dict(
-                    type='data',
-                    array=filter_values['error'],
-                    visible=True
-                ),
-            text=mjds_radio_to_plot[filter_name],
-            hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
-                <br>MJD= %{text:.6f}\
-            <br>flux= %{y:.3f}&#177;%{error_y.array:3f}',
-
-                yaxis="y2"
-            )
-            plot_data.append(series2)
-        elif filter_values.get('limit'):
-            series2 = go.Scatter(
-                x=filter_values['time'],
-                y=filter_values['limit'],
-                mode='markers',
-                opacity=0.5,
-                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol=6),  # upside down triangle
-                name=filter_name+" limit",
-                text=mjds_radio_lim_to_plot[filter_name],
-                hovertemplate='%{x|%Y/%m/%d %H:%M:%S.%L}\
-                <br>MJD= %{text:.6f}\
-            <br>limit flux= (%{y:.3f})'
-            )
-            plot_data.append(series2)
-
-    layout = go.Layout(
-        height=height,
-        width=width,
-        paper_bgcolor=background,
-        plot_bgcolor=background
-
-    )
-    layout.update(showlegend=True)
-    layout.legend.font.color = label_color
-    fig = go.Figure(data=plot_data, layout=layout)
-
-    fig.update_layout(
-        margin=dict(t= 40, r= 20, b= 40, l= 80),
-        xaxis=dict(
-            autorange=True,
-            title="date",
-            titlefont=dict(
-                color="#1f77b4"
-            ),
-            tickfont=dict(
-                color="#1f77b4"
-            ),
-        ),
-        yaxis=dict(
-            autorange=False,
-            range=[np.ceil(magnitude_min), np.floor(magnitude_max)],
-            title="magnitude",
-            titlefont=dict(
-                color="#1f77b4"
-            ),
-            tickfont=dict(
-                color="#1f77b4"
-            ),
-        ),
-        yaxis2=dict(
-            autorange=False,
-            range=[np.floor(radio_min), np.ceil(radio_max)],
-            title="mJy",
-            titlefont=dict(
-                color="#1f77b4"
-            ),
-            tickfont=dict(
-                color="#1f77b4"
-            ),
-            overlaying="y",
-            side="right",
-            showgrid=False,# Turn off the grid for the secondary y-axis
-        ),
-        legend=dict(
-            yanchor="top",
-            y=-0.15,
-            xanchor="left",
-            x=0.0,
-            orientation="h"
         )
-    )
+        layout.legend.font.color = label_color
+        fig = go.Figure(data=[], layout=layout)
+    
+    layout = go.Layout(
+            height=height,
+            width=width,
+            paper_bgcolor=background,
+            plot_bgcolor=background
 
-
+        )
+    layout.legend.font.color = label_color    
+    
     return {
         'target': target,
         'plot': offline.plot(fig, output_type='div', show_link=False)
@@ -593,308 +347,48 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
 ### static and simpler version of the plot for massive list table
 @register.inclusion_tag('bhtom_dataproducts/partials/photometry_for_target_icon.html', takes_context=True)
 def photometry_for_target_icon(context, target, width=800, height=400, background=None, label_color=None, grid=True):
-    """
-    Renders a photometric plot for a target.
 
-    This templatetag requires all ``ReducedDatum`` objects with a data_type of ``photometry`` to be structured with the
-    following keys in the JSON representation: magnitude, error, filter
-
-    :param width: Width of generated plot
-    :type width: int
-
-    :param height: Height of generated plot
-    :type width: int
-
-    :param background: Color of the background of generated plot. Can be rgba or hex string.
-    :type background: str
-
-    :param label_color: Color of labels/tick labels. Can be rgba or hex string.
-    :type label_color: str
-
-    :param grid: Whether to show grid lines.
-    :type grid: bool
-    """
-
-
-
-    photometry_data = {}
-    radio_data = {}
-
-    if settings.TARGET_PERMISSIONS_ONLY:
-        datums = ReducedDatum.objects.filter(target=target,
-                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
-                                             value_unit=ReducedDatumUnit.MAGNITUDE)
-
-        radio_datums = ReducedDatum.objects.filter(target=target,
-                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
-                                             value_unit=ReducedDatumUnit.MILLIJANSKY)
+    fig = None
+    if (target.photometry_plot != None and target.photometry_plot != ''):
+        fig = loader.get_template(target.photometry_plot)
     else:
-        datums = get_objects_for_user(context['request'].user,
-                                      'bhtom_dataproducts.view_reduceddatum',
-                                      klass=ReducedDatum.objects.filter(
-                                          target=target,
-                                          data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
-                                          value_unit=ReducedDatumUnit.MAGNITUDE))
+        layout = go.Layout(
+            height=height,
+            width=width,
+            paper_bgcolor=background,
+            plot_bgcolor=background
 
-        radio_datums = get_objects_for_user(context['request'].user,
-                                      'bhtom_dataproducts.view_reduceddatum',
-                                      klass=ReducedDatum.objects.filter(
-                                        target=target,
-                                        data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
-                                        value_unit=ReducedDatumUnit.MILLIJANSKY))
-
-    # set the datum max and min the silly way, we already iterate through all the datums anyway
-    magnitude_min = -100
-    magnitude_max = 100
-
-    radio_min = 1e7
-    radio_max = -1e7
-
-    for datum in datums:
-        photometry_data.setdefault(datum.filter, {})
-
-        if datum.value:
-            photometry_data[datum.filter].setdefault('time', []).append(datum.timestamp)
-            photometry_data[datum.filter].setdefault('magnitude', []).append(datum.value)
-            photometry_data[datum.filter].setdefault('error', []).append(datum.error)
-
-            magnitude_min = (datum.value+datum.error) if (datum.value+datum.error) > magnitude_min else magnitude_min
-            magnitude_max = (datum.value-datum.error) if (datum.value-datum.error) < magnitude_max else magnitude_max
-
-    for radio_datum in radio_datums:
-        radio_data.setdefault(radio_datum.filter, {})
-
-        if radio_datum.value:
-            radio_data[radio_datum.filter].setdefault('time', []).append(radio_datum.timestamp)
-            radio_data[radio_datum.filter].setdefault('magnitude', []).append(radio_datum.value)
-            radio_data[radio_datum.filter].setdefault('error', []).append(radio_datum.error)
-
-            radio_min = (radio_datum.value-radio_datum.error) if (radio_datum.value-radio_datum.error) < radio_min else radio_min
-            radio_max = (radio_datum.value+radio_datum.error) if (radio_datum.value+radio_datum.error) > radio_max else radio_max
-
-        # TODO: handle limits
-        # photometry_data[datum.filter].setdefault('limit', []).append(datum.value.get('limit'))
-
-    # Calculate min/max values for ranges and ticks
-    magnitude_range = magnitude_min-magnitude_max
-    radio_range = radio_max-radio_min
-
-    try:
-#        magnitude_dtick_digit = (round(np.log10(magnitude_range))-1)
-        magnitude_range = 10
-    except:
-        magnitude_dtick_digit = 1
-        radio_range = 10
-    
-    try:
-        if (radio_range>0):
-            radio_dtick_digit = (round(np.log10(radio_range)) - 1)
-        else:
-            radio_dtick_digit = 1
-    except:
-        radio_dtick_digit = 1
-
-    plot_data = []
-    for filter_name, filter_values in photometry_data.items():
-        if (filter_name == "G(GAIA_ALERTS)"): continue #for older targets, which still have G(GAIA_ALERTS) instead of GSA(G)
-        if (filter_name == "SDSSDR(u)" or filter_name =="SDSSDR(g)" or filter_name=="SDSSDR(r)" or filter_name=="SDSSDR(i)" or filter_name=="SDSS(z)"): continue
-        if (filter_name == "SDSS_DR14(u)" or filter_name =="SDSS_DR14(g)" or filter_name=="SDSS_DR14(r)" or filter_name=="SDSS_DR14(i)" or filter_name=="SDSS_DR14(z)"): continue
-        if filter_values['magnitude']:
-            series = go.Scatter(
-                x=filter_values['time'],
-                y=filter_values['magnitude'],
-                mode='markers',
-                marker=dict(
-                    color=color_map.get(filter_name, ['gray', 'circle', 4])[0], #default ['gray', 'circle', 6]
-                    symbol=color_map.get(filter_name, ['gray', 'circle', 4])[1],
-                    size=1.2*color_map.get(filter_name, ['gray', 'circle', 4])[2]
-                    ),
-                name=filter_name,
-                error_y=dict(
-                    type='data',
-                    array=filter_values['error'],
-                    visible=True,
-                    thickness=1.5,
-                    width=0
-                ),
-            )
-            plot_data.append(series)
-
-    for filter_name, filter_values in radio_data.items():
-        if filter_values['magnitude']:
-            series2 = go.Scatter(
-                x=filter_values['time'],
-                y=filter_values['magnitude'],
-                mode='markers',
-                                marker=dict(
-                    color=color_map.get(filter_name, ['black', 'circle', 4])[0], #default ['gray', 'circle', 6]
-                    symbol=color_map.get(filter_name, ['black', 'circle', 4])[1],
-                    size=color_map.get(filter_name, ['black', 'circle', 4])[2],
-                    line_color='black',line_width=2
-                    ),
-#                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol='diamond', line_color='black', line_width=2),
-                name=filter_name,
-                error_y=dict(
-                    type='data',
-                    array=filter_values['error'],
-                    visible=True                    
-                ),
-                yaxis="y2"
-            )
-            plot_data.append(series2)
-        elif filter_values.get('limit'):
-            series2 = go.Scatter(
-                x=filter_values['time'],
-                y=filter_values['limit'],
-                mode='markers',
-                opacity=0.5,
-                marker=dict(color=color_map.get(filter_name, ['gray', 'circle', 4])[0], symbol=6),  # upside down triangle
-                name=filter_name + ' non-detection',
-            )
-            plot_data.append(series2)
-
-    layout = go.Layout(
-        height=height + (len(photometry_data.items())//5)*10,
-        width=width,
-        # paper_bgcolor=background,
-        # plot_bgcolor=background
-        paper_bgcolor='white',  # Change the background color to white
-        plot_bgcolor='white',  # Change the plot area background color to white
-        shapes=[
-        dict( #vertical line for y2, will be used for radio axis
-            type='line',
-            yref='paper', y0=0, y1=1,
-            xref='paper', x0=1, x1=1,
-            line=dict(
-                color='black',
-                width=1,
-            )
-        ),
-                dict( #horizonal line at the top, closing the plot
-            type='line',
-            yref='paper', y0=1, y1=1,
-            xref='paper', x0=0, x1=1,
-            line=dict(
-                color='#1f77b4',
-                width=1,
-            )
         )
-
-    ]
-    )
-
-    layout.legend.font.color = label_color
-    #no legend shown in icon view
-    layout.update(showlegend=True)
-    
-    fig = go.Figure(data=plot_data, layout=layout)
-    fig.update_layout(
-    title=target.name,
-    margin=dict(t=40, r=20, b=40, l=80),
-    xaxis=dict(
-        autorange=True,
-        title="date",
-        titlefont=dict(
-            color="#1f77b4"
-        ),
-        tickfont=dict(
-            color="#1f77b4"
-        ),
-        showgrid=False,  # Do not show grid lines on the x-axis
-        showticklabels=True,
-        ticks="inside",
-        showline=True, linewidth=2, linecolor='#1f77b4'
-    ),
-    yaxis=dict(
-        autorange=False,
-        range=[np.ceil(magnitude_min), np.floor(magnitude_max)],
-        title="magnitude",
-        titlefont=dict(
-            color="#1f77b4"
-        ),
-        tickfont=dict(
-            color="#1f77b4"  # Change the tick color to black
-        ),
-        showgrid=False,  # Do not show grid lines on the y-axis
-        showticklabels=True,  # Show tick labels on the y-axis
-        ticks="inside",   # Place the tick marks inside the plot area
-        showline=True, linewidth=2, linecolor='#1f77b4'
-    ),
-    yaxis2=dict(
-        autorange=False,
-        range=[np.floor(radio_min), np.ceil(radio_max)],
-        title="mJy",
-        titlefont=dict(
-            color="black"
-        ),
-        tickfont=dict(
-            color="black"
-        ),
-        overlaying="y",
-        side="right",
-        showgrid=False,  # Do not show grid lines on the yaxis2
-        showticklabels=True,  # Display the tick labels
-        ticks='inside',
-    ),
-    legend_tracegroupgap=1,
-    legend=dict(
-#        yanchor="top",
-        y=-0.20,
-#        xanchor="right",
-        x=0.00,
-#        font=dict(size=8)
-    orientation="h",
-    yanchor="top",
-    xanchor="left",
-    )
-    )
+        layout.legend.font.color = label_color
+        fig = go.Figure(data=[], layout=layout)
     return {
         'target': target,
-        'plot': offline.plot(fig, output_type='div', show_link=True, config=dict({'staticPlot':True}))
+        'plot': offline.plot(fig, output_type='div', show_link=False)
     }
 
 
 @register.inclusion_tag('bhtom_dataproducts/partials/spectroscopy_for_target.html', takes_context=True)
 def spectroscopy_for_target(context, target, dataproduct=None):
-    """
-    Renders a spectroscopic plot for a ``Target``. If a ``DataProduct`` is specified, it will only render a plot with
-    that spectrum.
-    """
-    spectral_dataproducts = DataProduct.objects.filter(target=target,
-                                                       data_product_type=settings.DATA_PRODUCT_TYPES['spectroscopy'][0])
-    if dataproduct:
-        spectral_dataproducts = DataProduct.objects.get(data_product=dataproduct)
-
-    plot_data = []
-    if settings.TARGET_PERMISSIONS_ONLY:
-        datums = ReducedDatum.objects.filter(data_product__in=spectral_dataproducts)
+    
+    fig = None
+    if (target.spectroscopy_plot != None and target.spectroscopy_plot != '' ):
+        fig = loader.get_template(target.spectroscopy_plot)
     else:
-        datums = get_objects_for_user(context['request'].user,
-                                      'bhtom_dataproducts.view_reduceddatum',
-                                      klass=ReducedDatum.objects.filter(data_product__in=spectral_dataproducts))
-    for datum in datums:
-        deserialized = SpectrumSerializer().deserialize(datum.value)
-        plot_data.append(go.Scatter(
-            x=deserialized.wavelength.value,
-            y=deserialized.flux.value,
-            name=datetime.strftime(datum.timestamp, '%Y%m%d-%H:%M:%s')
-        ))
-
-    layout = go.Layout(
-        height=600,
-        width=700,
-        xaxis=dict(
-            tickformat="d"
-        ),
-        yaxis=dict(
-            tickformat=".1eg"
+        layout = go.Layout(
+            height=600,
+            width=700,
+            xaxis=dict(
+                tickformat="d"
+            ),
+            yaxis=dict(
+                tickformat=".1eg"
+            )
         )
-    )
+        fig = go.Figure(data=[], layout=layout)
     return {
         'target': target,
-        'plot': offline.plot(go.Figure(data=plot_data, layout=layout), output_type='div', show_link=False)
+        'plot': offline.plot(fig, output_type='div', show_link=False)
     }
-
 
 @register.inclusion_tag('bhtom_dataproducts/partials/update_broker_data_button.html', takes_context=True)
 def update_broker_data_button(context):

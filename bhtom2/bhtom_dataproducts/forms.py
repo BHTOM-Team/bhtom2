@@ -1,14 +1,10 @@
 from django import forms
-from django.contrib.auth.models import Group
 from django.conf import settings
-
-from bhtom_base.bhtom_dataproducts.models import DataProductGroup, DataProduct
 from bhtom_base.bhtom_observations.models import ObservationRecord
 from bhtom_base.bhtom_targets.models import Target
 from bhtom2.bhtom_observatory.models import Observatory
-from django.contrib.auth.models import User
 from bhtom2.bhtom_calibration.models import catalogs as Catalogs
-
+from bhtom_base.bhtom_dataproducts.models import DataProductGroup_user
 
 class ObservatoryChoiceField(forms.ModelChoiceField):
 
@@ -19,6 +15,9 @@ class ObservatoryChoiceField(forms.ModelChoiceField):
         else:
             return '{name} ({prefix})'.format(name=obj.name, prefix=obj.prefix)
 
+class GroupChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return obj.group.name
 
 class DataProductUploadForm(forms.Form):
     MATCHING_RADIUS = [
@@ -88,7 +87,9 @@ class DataProductUploadForm(forms.Form):
         required=False
     )
 
+   
     def __init__(self, *args, **kwargs):
+        user = kwargs['initial']['user']
         filter = {}
         filter['no'] = 'Auto'
         catalogs = Catalogs.objects.all()
@@ -101,12 +102,8 @@ class DataProductUploadForm(forms.Form):
 
         for f in ['U', 'B', 'V', 'R', 'I', 'u', 'g', 'r', 'i', 'z']:
             filter['any/%s' % f] = 'any/%s' % f
-
-        if not settings.TARGET_PERMISSIONS_ONLY:
-            self.fields['groups'] = forms.ModelMultipleChoiceField(Group.objects.none(),
-                                                                   required=False,
-                                                                   widget=forms.CheckboxSelectMultiple)
-            
+        
+      
         super(DataProductUploadForm, self).__init__(*args, **kwargs)    
         self.fields['observatory'] = ObservatoryChoiceField(
             queryset= Observatory.objects.filter(active_flg=True).order_by('name'),
@@ -126,3 +123,12 @@ class DataProductUploadForm(forms.Form):
             required=False,
             label='Comment',
         )
+        self.fields['group'] =  GroupChoiceField(
+            queryset = DataProductGroup_user.objects.filter(user_id=user.id, active_flg=True).order_by('created'),
+            widget=forms.Select(),
+            required=False,
+            label="Group",
+        )
+
+
+     

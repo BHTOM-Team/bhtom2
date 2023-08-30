@@ -196,13 +196,13 @@ services:
       - kafka3
 
 networks:
-    graylog:
-      driver: bridge
+  graylog:
+    driver: bridge
 
 volumes:
-    mongo_data:
-      driver: local
-    es_data:
-      driver: local
-    graylog_data:
-      driver: local
+  mongo_data:
+    driver: local
+  es_data:
+    driver: local
+  graylog_data:
+    driver: local
