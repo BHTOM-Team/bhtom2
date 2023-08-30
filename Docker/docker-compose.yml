@@ -1,64 +1,9 @@
 version: "3.7"
 
 services:
-  mongo:
-    image: mongo:4.4
-    container_name: mongo
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - graylog
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
-    container_name: elasticsearch
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
-    environment:
-      - http.host=0.0.0.0
-      - discovery.type=single-node
-      - transport.host=localhost
-      - network.host=0.0.0.0
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    networks:
-      - graylog
-
-  graylog:
-    image: graylog/graylog:4.0
-    container_name: graylog
-    volumes:
-      - graylog_data:/usr/share/graylog/data
-    environment:
-      - GRAYLOG_PASSWORD_SECRET=somepasswordpepper
-      # Password: admin
-      - GRAYLOG_ROOT_PASSWORD_SHA2=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
-      - GRAYLOG_HTTP_EXTERNAL_URI=http://localhost:9000/
-      - DISABLE_TELEMETRY=1
-    networks:
-      - graylog
-    links:
-      - mongo
-      - elasticsearch
-    depends_on:
-      - mongo
-      - elasticsearch
-    ports:
-      # Containers should only listen on 127.0.0.1, Apache is our TLS proxy
-      # Graylog web interface and REST API
-      - 9000:9000
-      # Syslog TCP
-      - 1514:1514
-      # Syslog UDP
-      # - 1514:1514/udp
-      # GELF TCP
-      - 12201:12201
-    entrypoint: /usr/bin/tini -- wait-for-it elasticsearch:9200 --  /docker-entrypoint.sh
-
-  db:
+  bhtomDB:
+    container_name: bhtomDB
     restart: always
     build:
       context: .
@@ -67,22 +12,25 @@ services:
       - ./data/db:/docker-entrypoint-initdb.d/
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
-      - POSTGRES_DB=bhtom2
-      - POSTGRES_USER=bhtom
+      - POSTGRES_DB=${POSTGRES_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
     ports:
-      - "35432:5432"
-  web:
+      - "${POSTGRES_PORT}:5432"
+  bhtom:
+    container_name: bhtom
     build:
       context: ..
       dockerfile: Docker/web_Dockerfile
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
     restart: always
+    volumes:
+      - ./data:/bhtom2/data
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      - bhtomDB
 
   zookeeper1:
     image: 'confluentinc/cp-zookeeper:6.0.14'
@@ -96,6 +44,7 @@ services:
     ports:
       - "2181:2181"
     restart: always
+
   zookeeper2:
     image: confluentinc/cp-zookeeper:6.0.14
     container_name: zookeeper2
@@ -178,13 +127,13 @@ services:
     depends_on:
       - zookeeper1
       - zookeeper2
-      - zookeeper3
+       - zookeeper3
     restart: always
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
     ports:
-      - 8080:8080
+      - "8080:8080"
     environment:
       DYNAMIC_CONFIG_ENABLED: 'true'
       KAFKA_CLUSTERS_0_NAME: bhtom2
@@ -200,9 +149,5 @@ networks:
     driver: bridge
 
 volumes:
-  mongo_data:
-    driver: local
-  es_data:
-    driver: local
-  graylog_data:
+  data_store:
     driver: local

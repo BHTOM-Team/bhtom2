@@ -88,6 +88,7 @@ INSTALLED_APPS = [
     'bhtom2.bhtom_calibration.apps.BhtomCalibrationConfig',
     'crispy_bootstrap4',
     'drf_yasg',
+    'django_guid',
 ]
 
 MIDDLEWARE = [
@@ -98,6 +99,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_guid.middleware.guid_middleware',
     'bhtom_base.bhtom_common.middleware.Raise403Middleware',
     'bhtom_base.bhtom_common.middleware.ExternalServiceMiddleware',
     'bhtom_base.bhtom_common.middleware.AuthStrategyMiddleware',
@@ -131,9 +133,9 @@ WSGI_APPLICATION = 'bhtom2.wsgi.application'
 
 DATABASES = {
     'default': {
-        'NAME': secret.get("POSTGRES_DB_NAME", 'bhtom2'),
+        'NAME': secret.get("POSTGRES_NAME", 'bhtom2'),
         'ENGINE': 'django.db.backends.postgresql',
-        'USER': secret.get("POSTGRES_DB_USER", 'bhtom2'),
+        'USER': secret.get("POSTGRES_USER", 'bhtom2'),
         'PASSWORD': secret.get("POSTGRES_PASSWORD", "bhtom2"),
         'HOST': secret.get('POSTGRES_HOST', 'localhost'),
         'PORT': secret.get('POSTGRES_PORT', 5432),
@@ -237,6 +239,10 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': os.path.join(BASE_DIR, 'bhtom2/cache')
+    },
+    'targetList': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'bhtom2/cache/targetList')
     }
 }
 

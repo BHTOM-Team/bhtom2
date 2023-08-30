@@ -13,7 +13,7 @@ from bhtom2 import settings
 secret = dotenv_values(os.path.join(settings.BASE_DIR, 'bhtom2/.bhtom.env'))
 
 
-class TargetCreateEventProducer:
+class ReducedDatumEventProducer:
     def __init__(self):
         self.producer = None
 
@@ -26,17 +26,15 @@ class TargetCreateEventProducer:
         except KafkaError as e:
             logging.error("Kafka Procucer error: " + str(e))
 
-    def send_message(self, topic, target):
+    def send_message(self, topic, target, broker, isNew=False):
         if self.producer is None:
             self.initialize_producer()
 
         value = {
-            "id": target.id,
             "name": target.name,
-            "ra": target.ra,
-            "dec": target.dec
+            "broker": broker,
+            "isNew": isNew
         }
-
         key = "correlation_id"
         message_headers = get_guid()
 
