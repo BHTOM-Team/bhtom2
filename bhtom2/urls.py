@@ -15,8 +15,7 @@ Including another URLconf
 """
 from django.urls import path, include
 
-from bhtom2.views import BrokerQueryListView
-from bhtom_base.bhtom_common.api_router import SharedAPIRootRouter
+from bhtom2.views import BrokerQueryListView, CleanTemplateCache
 
 urlpatterns = [
     path('targets/', include('bhtom2.bhtom_targets.urls', namespace='bhtom_targets')),
@@ -31,5 +30,6 @@ urlpatterns = [
     path('alerts/query/list/', BrokerQueryListView.as_view(template_name='bhtom_alerts/brokerquery_list.html'),
          name='alerts:list'),
 
+    path('cleanTargetCache/', CleanTemplateCache.as_view(), name='clean_target_cache')
 ]
 
