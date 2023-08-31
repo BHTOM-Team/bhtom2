@@ -135,7 +135,7 @@ DATABASES = {
     'default': {
         'NAME': secret.get("POSTGRES_NAME", 'bhtom2'),
         'ENGINE': 'django.db.backends.postgresql',
-        'USER': secret.get("POSTGRES_USER", 'bhtom2'),
+        'USER': secret.get("POSTGRES_USER", 'bhtom'),
         'PASSWORD': secret.get("POSTGRES_PASSWORD", "bhtom2"),
         'HOST': secret.get('POSTGRES_HOST', 'localhost'),
         'PORT': secret.get('POSTGRES_PORT', 5432),
