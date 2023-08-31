@@ -38,8 +38,7 @@ services:
       - bhtom_db
 
   zookeeper1:
-    platform: "linux/arm64"
-    image: 'confluentinc/cp-zookeeper:6.0.14'
+    image: 'confluentinc/cp-zookeeper:latest'
     container_name: zookeeper1
     hostname: zookeeper1
     networks:
@@ -53,8 +52,9 @@ services:
       - "2181:2181"
     restart: always
 
+
   kafka1:
-    image: 'confluentinc/cp-kafka:6.0.14.arm64'
+    image: 'confluentinc/cp-kafka:latest'
     container_name: kafka1
     restart: always
     networks:
