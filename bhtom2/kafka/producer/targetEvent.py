@@ -43,7 +43,7 @@ class TargetCreateEventProducer:
         message_json = json.dumps(value)
         self.producer.produce(topic,
                               value=message_json,
-                              kay=key,
+                              key=key,
                               headers=message_headers
                               )
         self.producer.poll()
