@@ -38,7 +38,7 @@ services:
       - bhtom_db
 
   zookeeper1:
-    image: 'confluentinc/cp-zookeeper:6.0.14'
+    image: 'confluentinc/cp-zookeeper:latest'
     container_name: zookeeper1
     hostname: zookeeper1
     networks:
@@ -52,8 +52,9 @@ services:
       - "2181:2181"
     restart: always
 
+
   kafka1:
-    image: 'confluentinc/cp-kafka:6.0.14'
+    image: 'confluentinc/cp-kafka:latest'
     container_name: kafka1
     restart: always
     networks:
@@ -74,21 +75,24 @@ services:
     depends_on:
       - zookeeper1
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
-    networks:
-      - bhtom_network
-    ports:
-      - "8080:8080"
-    environment:
-      DYNAMIC_CONFIG_ENABLED: 'true'
-      KAFKA_CLUSTERS_0_NAME: bhtom2
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'kafka1:19092'
-      KAFKA_CLUSTERS_0_ZOOKEEPER: "zookeeper1:2181"
 
-    depends_on:
-      - kafka1
+
+  # kafka-ui:
+  #   image: provectuslabs/kafka-ui:latest
+  #   container_name: kafka-ui
+  #   networks:
+  #     - bhtom_network
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     DYNAMIC_CONFIG_ENABLED: 'true'
+  #     KAFKA_CLUSTERS_0_NAME: bhtom2
+  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'kafka1:19092'
+  #     KAFKA_CLUSTERS_0_ZOOKEEPER: "zookeeper1:2181"
+
+  #   depends_on:
+  #     - kafka1
+
 
 volumes:
   data_store:
