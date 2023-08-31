@@ -264,7 +264,7 @@ def coords_to_degrees(value, c_type):
 
 
 def update_template_cache():
-    cachePath = os.path.join(settings.BASE_DIR, "bhtom2/cache/")
+    cachePath = os.path.join(settings.BASE_DIR, "bhtom2/cache/templateList")
     for file in os.listdir(cachePath):
         f = os.path.join(cachePath, file)
         if file.endswith('.djcache') and os.path.isfile(f):

@@ -1,17 +1,24 @@
-from bhtom2.kafka.producer.targetEvent import KafkaProducer
+from bhtom2.kafka.producer.reducedDatumEvent import ReducedDatumEventProducer
+from bhtom2.kafka.producer.targetEvent import TargetCreateEventProducer
+
 from bhtom2.kafka.topic import kafkaTopic
 from bhtom2.utils.bhtom_logger import BHTOMLogger
-
+from bhtom_base.bhtom_alerts import alerts
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[Hooks]')
 
 
 # actions done just after saving the target (in creation or update)
-def target_post_save(target, created, **kwargs):
+def target_post_save(target, created):
 
     if created:
         try:
-            KafkaProducer().send_message(kafkaTopic.targetEvent, target)
-            logger.info("Send targetEvent, %s" % str(target.name))
+            TargetCreateEventProducer().send_message(kafkaTopic.createTarget, target)
+
+            brokers = alerts.get_service_classes()
+            for broker in brokers:
+                ReducedDatumEventProducer().send_message(kafkaTopic.updateReducedDatum, target, broker, isNew=True)
+
+            logger.info("Send Create target Event, %s" % str(target.name))
         except Exception as e:
-            logger.error("Erro targetEvent, %s" % str(e))
+            logger.error("Error targetEvent, %s" % str(e))

@@ -1,208 +1,103 @@
 version: "3.7"
 
 services:
-  mongo:
-    image: mongo:4.4
-    container_name: mongo
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - graylog
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
-    container_name: elasticsearch
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
-    environment:
-      - http.host=0.0.0.0
-      - discovery.type=single-node
-      - transport.host=localhost
-      - network.host=0.0.0.0
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    networks:
-      - graylog
-
-  graylog:
-    image: graylog/graylog:4.0
-    container_name: graylog
-    volumes:
-      - graylog_data:/usr/share/graylog/data
-    environment:
-      - GRAYLOG_PASSWORD_SECRET=somepasswordpepper
-      # Password: admin
-      - GRAYLOG_ROOT_PASSWORD_SHA2=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
-      - GRAYLOG_HTTP_EXTERNAL_URI=http://localhost:9000/
-      - DISABLE_TELEMETRY=1
-    networks:
-      - graylog
-    links:
-      - mongo
-      - elasticsearch
-    depends_on:
-      - mongo
-      - elasticsearch
-    ports:
-      # Containers should only listen on 127.0.0.1, Apache is our TLS proxy
-      # Graylog web interface and REST API
-      - 9000:9000
-      # Syslog TCP
-      - 1514:1514
-      # Syslog UDP
-      # - 1514:1514/udp
-      # GELF TCP
-      - 12201:12201
-    entrypoint: /usr/bin/tini -- wait-for-it elasticsearch:9200 --  /docker-entrypoint.sh
-
-  db:
+  bhtom_db:
+    container_name: bhtom_db
     restart: always
     build:
       context: .
       dockerfile: db_Dockerfile
     volumes:
       - ./data/db:/docker-entrypoint-initdb.d/
+    networks:
+      - bhtom_network
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
-      - POSTGRES_DB=bhtom2
-      - POSTGRES_USER=bhtom
+      - POSTGRES_DB=${POSTGRES_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
     ports:
-      - "35432:5432"
-  web:
+      - "${POSTGRES_PORT}:5432"
+
+  bhtom:
+    container_name: bhtom
     build:
       context: ..
       dockerfile: Docker/web_Dockerfile
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
     restart: always
+    networks:
+      - bhtom_network
+    volumes:
+      - data_store:/data
     ports:
-      - "8000:8000"
+      - "8010:8000"
     depends_on:
-      - db
+      - bhtom_db
 
   zookeeper1:
     image: 'confluentinc/cp-zookeeper:6.0.14'
     container_name: zookeeper1
     hostname: zookeeper1
+    networks:
+      - bhtom_network
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_SERVERS: 0.0.0.0:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
+      ZOOKEEPER_SERVERS: 0.0.0.0:2888:3888
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
     restart: always
-  zookeeper2:
-    image: confluentinc/cp-zookeeper:6.0.14
-    container_name: zookeeper2
-    hostname: zookeeper2
-    environment:
-      ZOOKEEPER_SERVER_ID: 2
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;0.0.0.0:2888:3888;zookeeper3:2888:3888
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2182:2182"
-    restart: always
-  zookeeper3:
-    image: confluentinc/cp-zookeeper:6.0.14
-    container_name: zookeeper3
-    hostname: zookeeper3
-    environment:
-      ZOOKEEPER_SERVER_ID: 3
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;0.0.0.0:2888:3888
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2183:2183"
-    restart: always
+
   kafka1:
     image: 'confluentinc/cp-kafka:6.0.14'
     container_name: kafka1
     restart: always
+    networks:
+      - bhtom_network
     ports:
       - "9092:9092"
       - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181,zookeeper2:2181,zookeeper3:2181"
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181"
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:19092,PLAINTEXT_HOST://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_REPLICA_LAG_TIME_MAX_MS: 4000
       KAFKA_SOCKET_TIMEOUT_MS: 4000
+
     depends_on:
       - zookeeper1
-      - zookeeper2
-      - zookeeper3
-  kafka2:
-    image: 'confluentinc/cp-kafka:6.0.14'
-    container_name: kafka2
-    ports:
-      - "9093:9093"
-      - "29093:29093"
-    environment:
-      KAFKA_BROKER_ID: 2
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181,zookeeper2:2182,zookeeper3:2183"
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:19093,PLAINTEXT_HOST://localhost:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_REPLICA_LAG_TIME_MAX_MS: 4000
-      KAFKA_SOCKET_TIMEOUT_MS: 4000
-    depends_on:
-      - zookeeper1
-      - zookeeper2
-      - zookeeper3
-    restart: always
-  kafka3:
-    image: 'confluentinc/cp-kafka:6.0.14'
-    container_name: kafka3
-    ports:
-      - "9094:9094"
-      - "29094:29094"
-    environment:
-      KAFKA_BROKER_ID: 3
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181,zookeeper2:2182,zookeeper3:2183"
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:19094,PLAINTEXT_HOST://localhost:9094
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_REPLICA_LAG_TIME_MAX_MS: 4000
-      KAFKA_SOCKET_TIMEOUT_MS: 4000
-    depends_on:
-      - zookeeper1
-      - zookeeper2
-      - zookeeper3
-    restart: always
+
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
+    networks:
+      - bhtom_network
     ports:
-      - 8080:8080
+      - "8080:8080"
     environment:
       DYNAMIC_CONFIG_ENABLED: 'true'
       KAFKA_CLUSTERS_0_NAME: bhtom2
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'kafka1:19092,kafka2:19093,kafka3:19094'
-      KAFKA_CLUSTERS_0_ZOOKEEPER: "zookeeper1:2181,zookeeper2:2182,zookeeper3:2183"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'kafka1:19092'
+      KAFKA_CLUSTERS_0_ZOOKEEPER: "zookeeper1:2181"
+
     depends_on:
       - kafka1
-      - kafka2
-      - kafka3
-
-networks:
-  graylog:
-    driver: bridge
 
 volumes:
-  mongo_data:
+  data_store:
     driver: local
-  es_data:
-    driver: local
-  graylog_data:
-    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}
+
+networks:
+  bhtom_network:
+    driver: bridge

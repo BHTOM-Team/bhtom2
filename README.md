@@ -84,6 +84,10 @@ In the Docker directory:
 
 ``COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose up -d --build``
 
+Add superuser:
+
+``docker-compose run web python manage.py createsuperuser``
+
 ## Environment
 
 Environment settings are defined in Docker/.bhtom.env file.

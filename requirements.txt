@@ -27,7 +27,7 @@ psycopg2-binary==2.9.3
 sentry-sdk==1.5.10
 typing-extensions>=4.2.0
 ztfquery==1.18.2
-astropy>=5.3.2
+astropy>=5.2.1
 astroquery>=0.4.4
 numpy>=1.22.3
 requests>=2.27.1
@@ -43,5 +43,8 @@ lxml==4.9.1
 crispy-bootstrap4>=2022.1
 openai>=0.27.3
 drf_yasg==1.21.6 #swagger
-#MulensModel>=2.15.0 #todo
+MulensModel>=2.15.0 #todo
 aiokafka==0.8.1
+django_guid==3.3.1
+
+

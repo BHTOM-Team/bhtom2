@@ -14,10 +14,23 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
 
 from bhtom2.views import BrokerQueryListView, CleanTemplateCache
 
+schema_view = get_schema_view(
+    openapi.Info(
+        title="CPCS",
+        default_version='v2',
+        description="Calibration server",
+        contact=openapi.Contact(email="akrawczyk@akond.com"),
+    ),
+    public=True,
+)
 urlpatterns = [
+    path('swagger/', schema_view.with_ui(cache_timeout=0), name='schema-json'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('targets/', include('bhtom2.bhtom_targets.urls', namespace='bhtom_targets')),
     path('calibration/', include('bhtom2.bhtom_calibration.urls', namespace='bhtom_calibration')),
     path('catalogs/', include('bhtom2.bhtom_catalogs.urls', namespace='bhtom_catalogs')),

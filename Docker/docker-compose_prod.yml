@@ -1,0 +1,189 @@
+version: "3.7"
+
+services:
+
+  bhtom_db:
+    container_name: bhtom_db
+    networks:
+      - bhtom_network
+    restart: always
+    build:
+      context: .
+      dockerfile: db_Dockerfile
+    volumes:
+      - ./data/db:/docker-entrypoint-initdb.d/
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+      - POSTGRES_DB=${POSTGRES_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
+    ports:
+      - "${POSTGRES_PORT}:5432"
+
+  bhtom:
+    container_name: bhtom
+    networks:
+      - bhtom_network
+    build:
+      context: ..
+      dockerfile: Docker/web_Dockerfile
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+    restart: always
+    volumes:
+      - data_store:/data
+    ports:
+      - "8010:8000"
+    depends_on:
+      - bhtom_db
+
+
+  zookeeper1:
+    image: 'confluentinc/cp-zookeeper:6.0.14'
+    container_name: zookeeper1
+    networks:
+      - bhtom_network
+    hostname: zookeeper1
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVERS: 0.0.0.0:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+    restart: always
+
+  zookeeper2:
+    image: confluentinc/cp-zookeeper:6.0.14
+    container_name: zookeeper2
+    networks:
+      - bhtom_network
+    hostname: zookeeper2
+    environment:
+      ZOOKEEPER_SERVER_ID: 2
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;0.0.0.0:2888:3888;zookeeper3:2888:3888
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2182:2182"
+
+    restart: always
+
+  zookeeper3:
+    image: confluentinc/cp-zookeeper:6.0.14
+    container_name: zookeeper3
+    networks:
+      - bhtom_network
+    hostname: zookeeper3
+    environment:
+      ZOOKEEPER_SERVER_ID: 3
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;0.0.0.0:2888:3888
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2183:2183"
+
+    restart: always
+
+  kafka1:
+    image: 'confluentinc/cp-kafka:6.0.14'
+    container_name: kafka1
+    networks:
+      - bhtom_network
+    restart: always
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181,zookeeper2:2181,zookeeper3:2181"
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:19092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_REPLICA_LAG_TIME_MAX_MS: 4000
+      KAFKA_SOCKET_TIMEOUT_MS: 4000
+
+    depends_on:
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
+
+  kafka2:
+    image: 'confluentinc/cp-kafka:6.0.14'
+    container_name: kafka2
+    networks:
+      - bhtom_network
+    ports:
+      - "9093:9093"
+      - "29093:29093"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181,zookeeper2:2182,zookeeper3:2183"
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:19093,PLAINTEXT_HOST://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_REPLICA_LAG_TIME_MAX_MS: 4000
+      KAFKA_SOCKET_TIMEOUT_MS: 4000
+
+    depends_on:
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
+    restart: always
+
+  kafka3:
+    image: 'confluentinc/cp-kafka:6.0.14'
+    container_name: kafka3
+    networks:
+      - bhtom_network
+    ports:
+      - "9094:9094"
+      - "29094:29094"
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181,zookeeper2:2182,zookeeper3:2183"
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:19094,PLAINTEXT_HOST://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_REPLICA_LAG_TIME_MAX_MS: 4000
+      KAFKA_SOCKET_TIMEOUT_MS: 4000
+
+    depends_on:
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
+    restart: always
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    networks:
+      - bhtom_network
+    ports:
+      - "8080:8080"
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      KAFKA_CLUSTERS_0_NAME: bhtom2
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'kafka1:19092'
+      KAFKA_CLUSTERS_0_ZOOKEEPER: "zookeeper1:2181"
+
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+
+volumes:
+  data_store:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}
+
+networks:
+  bhtom_network:
+    driver: bridge
