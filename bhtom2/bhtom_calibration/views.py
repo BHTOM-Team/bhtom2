@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
@@ -6,7 +5,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from bhtom2.bhtom_calibration.models import calibration_data
 from django.core import serializers
-from bhtom2.bhtom_calibration.models import catalogs as Calibration_catalog
+from bhtom2.bhtom_calibration.models import catalogs as calibration_catalog
+from bhtom2.utils.bhtom_logger import BHTOMLogger
+
+logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_calibration: views]')
+
 
 class CalibrationResultsApiView(APIView):
     authentication_classes = [TokenAuthentication]
@@ -17,9 +20,9 @@ class CalibrationResultsApiView(APIView):
         file_id = request.data['file_id']
         try:
             instance = calibration_data.objects.get(dataproduct_id=file_id)
-            results = serializers.serialize('json', [ instance ])
+            results = serializers.serialize('json', [instance])
         except calibration_data.DoesNotExist:
-            return Response({"Error":'File does not exist in the database'},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Error": 'File does not exist in the database'}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"Result": results}, status=status.HTTP_200_OK)
 
@@ -27,12 +30,14 @@ class CalibrationResultsApiView(APIView):
         ret = super().list(request, *args, **kwargs)
         return ret
 
+
 class GetCatalogsApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
         try:
-            instance = Calibration_catalog.objects.all().values('filters')
+            instance = calibration_catalog.objects.all().values('filters')
         except Exception as e:
             return Response({"Error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response({"Catalogs": instance}, status=status.HTTP_200_OK)

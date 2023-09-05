@@ -1,143 +1,143 @@
 {% load bhtom_common_extras bhtom_targets_extras %}
 <dl class="row">
-  {% for target_name in target.names %}
-    {% if forloop.first %}
-      <dt class="col-sm-6">Name</dt>
-      <dd class="col-sm-6">{{ target_name }}</dd>
-    {% endif %}
-  {% endfor %}
+    {% for target_name in target.names %}
+        {% if forloop.first %}
+            <dt class="col-sm-6">Name</dt>
+            <dd class="col-sm-6">{{ target_name }}</dd>
+        {% endif %}
+    {% endfor %}
 
-  <!-- <dt class="col-sm-6">{{  target.as_dict }}</dt>
-   -->
-  
-  {% for key, value in target.as_dict.items %}
-  {% if value and key != 'name' and key != 'type' %}
-  <dt class="col-sm-6">{% verbose_name target key %}</dt>
-  <dd class="col-sm-6">{{ value }}</dd>
-  {% endif %}
-  {% if key == 'ra' %}
-    <dt class="col-sm-6">&nbsp;</dt>
-    <dd class="col-sm-6">{{ value|deg_to_sexigesimal:"hms" }}</dd>
-  {% endif%}
-  {% if key == 'dec' %}
-    <dt class="col-sm-6">&nbsp;</dt>
-    <dd class="col-sm-6">{{ value|deg_to_sexigesimal:"dms" }}</dd>
-  {% endif%}
-  {% endfor %}
+    <!-- <dt class="col-sm-6">{{ target.as_dict }}</dt>-->
+
+    {% for key, value in target.as_dict.items %}
+        {% if value and key != 'name' and key != 'type' %}
+            <dt class="col-sm-6">{% verbose_name target key %}</dt>
+            <dd class="col-sm-6">{{ value }}</dd>
+        {% endif %}
+        {% if key == 'ra' %}
+            <dt class="col-sm-6">&nbsp;</dt>
+            <dd class="col-sm-6">{{ value|deg_to_sexigesimal:"hms" }}</dd>
+        {% endif %}
+        {% if key == 'dec' %}
+            <dt class="col-sm-6">&nbsp;</dt>
+            <dd class="col-sm-6">{{ value|deg_to_sexigesimal:"dms" }}</dd>
+        {% endif %}
+    {% endfor %}
 </dl>
 <dl class="row">
-{% for key, value in extras.items %}
+    {% for key, value in extras.items %}
 
-  {% if key == 'constellation' %}
-  <dt class="col-sm-6">{{ "Constellation" }}</dt>
-  <dd class="col-sm-6">{{ value }}</dd>
-  {% endif %}
+        {% if key == 'constellation' %}
+            <dt class="col-sm-6">{{ "Constellation" }}</dt>
+            <dd class="col-sm-6">{{ value }}</dd>
+        {% endif %}
 
-  {% if key == 'discovery_date' %}
-  <dt class="col-sm-6">{{ "Discovered" }}</dt>
-  <dd class="col-sm-6">{{ value }}</dd>
-  {% endif %}
+        {% if key == 'discovery_date' %}
+            <dt class="col-sm-6">{{ "Discovered" }}</dt>
+            <dd class="col-sm-6">{{ value }}</dd>
+        {% endif %}
 
-  {% if key == 'classification' %}
- <dt class="col-sm-6">{{ "Class" }}</dt>
- <dd class="col-sm-6">{{ value }}</dd>
- {% endif %}
+        {% if key == 'classification' %}
+            <dt class="col-sm-6">{{ "Class" }}</dt>
+            <dd class="col-sm-6">{{ value }}</dd>
+        {% endif %}
 
-  {% if key == 'phot_class' %}
- <dt class="col-sm-6">{{ "Phot.Class" }}</dt>
- <dd class="col-sm-6">{{ value }}</dd>
- {% endif %}
+        {% if key == 'phot_class' %}
+            <dt class="col-sm-6">{{ "Phot.Class" }}</dt>
+            <dd class="col-sm-6">{{ value }}</dd>
+        {% endif %}
 
-  {% if key == 'mjd_last' %}
- <dt class="col-sm-6">{{ "Last MJD" }}</dt>
- <dd class="col-sm-6">{{ value }}</dd>
- {% endif %}
+        {% if key == 'mjd_last' %}
+            <dt class="col-sm-6">{{ "Last MJD" }}</dt>
+            <dd class="col-sm-6">{{ value }}</dd>
+        {% endif %}
 
-  {% if key == 'mag_last' %}
- <dt class="col-sm-6">{{ "Last G Mag" }}</dt>
- <dd class="col-sm-6">{{ value }}</dd>
- {% endif %}
+        {% if key == 'mag_last' %}
+            <dt class="col-sm-6">{{ "Last G Mag" }}</dt>
+            <dd class="col-sm-6">{{ value }}</dd>
+        {% endif %}
 
-  {% if key == 'importance' %}
- <dt class="col-sm-6">{{ "Target importance (0-10)" }}</dt>
- <dd class="col-sm-6">{{ value }}</dd>
- {% endif %}
+        {% if key == 'importance' %}
+            <dt class="col-sm-6">{{ "Target importance (0-10)" }}</dt>
+            <dd class="col-sm-6">{{ value }}</dd>
+        {% endif %}
 
-  {% if key == 'cadence' %}
-  <dt class="col-sm-6">{{ "Cadence requested (d)" }}</dt>
-  <dd class="col-sm-6">{{ value }}</dd>
-  {% endif %}
+        {% if key == 'cadence' %}
+            <dt class="col-sm-6">{{ "Cadence requested (d)" }}</dt>
+            <dd class="col-sm-6">{{ value }}</dd>
+        {% endif %}
 
-  {% if key == 'priority' %}
-  <dt class="col-sm-6">{{ "Observing priority" }}</dt>
-  <dd class="col-sm-6">{{ value }}</dd>
-  {% endif %}
+        {% if key == 'priority' %}
+            <dt class="col-sm-6">{{ "Observing priority" }}</dt>
+            <dd class="col-sm-6">{{ value }}</dd>
+        {% endif %}
 
-  {% if key == 'sun_separation' %}
-  <dt class="col-sm-6">{{ "Sun Separation (deg)" }}</dt>
-  <dd class="col-sm-6">{{ value }}</dd>
-  {% endif %}
+        {% if key == 'sun_separation' %}
+            <dt class="col-sm-6">{{ "Sun Separation (deg)" }}</dt>
+            <dd class="col-sm-6">{{ value }}</dd>
+        {% endif %}
 
-  {% if key == 'creation_date' %}
-  <dt class="col-sm-6">{{ "Target created" }}</dt>
-  <dd class="col-sm-6">{{ value }}</dd>
-  {% endif %}
+        {% if key == 'creation_date' %}
+            <dt class="col-sm-6">{{ "Target created" }}</dt>
+            <dd class="col-sm-6">{{ value }}</dd>
+        {% endif %}
 
-{% endfor %}
+    {% endfor %}
 </dl>
 
 <p>Other names:
 </p>
 <!-- <dl class="row"> -->
-  <!-- the link to the source could be also stored in DATASOURCE -->
-  {% for value in target.aliases.all %}
+<!-- the link to the source could be also stored in DATASOURCE -->
+{% for value in target.aliases.all %}
     <dt class="col-sm-6">{{ value.source_name }}</dt>
     {% if value.source_name == "GAIA_ALERTS" %}
-    <dd class="col-sm-6">
-      <a href='https://gsaweb.ast.cam.ac.uk/alerts/alert/{{ value }}' target="_blank"> 
-        {{ value }}
-      </a>
-    </dd>
+        <dd class="col-sm-6">
+            <a href='https://gsaweb.ast.cam.ac.uk/alerts/alert/{{ value }}' target="_blank">
+                {{ value }}
+            </a>
+        </dd>
     {% elif value.source_name == "ZTF" %}
-    <dd class="col-sm-6">
-      <a href='https://alerce.online/object/{{ value }}' target="_blank"> 
-        {{ value }}
-      </a>
-    </dd>
+        <dd class="col-sm-6">
+            <a href='https://alerce.online/object/{{ value }}' target="_blank">
+                {{ value }}
+            </a>
+        </dd>
     {% elif value.source_name == "ANTARES" %}
-    <dd class="col-sm-6">
-      <a href='https://antares.noirlab.edu/loci/{{ value }}' target="_blank"> 
-        {{ value }}
-      </a>
-    </dd>
+        <dd class="col-sm-6">
+            <a href='https://antares.noirlab.edu/loci/{{ value }}' target="_blank">
+                {{ value }}
+            </a>
+        </dd>
     {% elif value.source_name == "GAIA_DR3" %}
-    <dd class="col-sm-6">
-      <a href='https://gaia.ari.uni-heidelberg.de/singlesource.html#id={{ value }}' target="_blank">        {{ value }}
-      </a>
-    </dd>
+        <dd class="col-sm-6">
+            <a href='https://gaia.ari.uni-heidelberg.de/singlesource.html#id={{ value }}'
+               target="_blank">        {{ value }}
+            </a>
+        </dd>
     {% elif value.source_name == "ASASSN" %}
-    <dd class="col-sm-6">
-      <a href='{{ value }}' target="_blank">        {{ value }}
-      </a>
-    </dd>
+        <dd class="col-sm-6">
+            <a href='{{ value }}' target="_blank">        {{ value }}
+            </a>
+        </dd>
     {% elif value.source_name == "TNS" %}
-    <dd class="col-sm-6">
-      <a href='https://www.wis-tns.org/object/{{ value }}' target="_blank">{{ value }}</a> <!-- TODO -->
-<<!-- value|trim_chars:2
+        <dd class="col-sm-6">
+        <a href='https://www.wis-tns.org/object/{{ value|truncatechars:2 }}' target="_blank">{{ value }}</a> <!-- TODO -->
+        <!-- value|trim_chars:2 -->
     </dd>
     {% else %}
     <dd class="col-sm-6">{{ value }}</dd>
     {% endif %}
 {% endfor %}
-<!-- </dl> -->
+ <!-- </dl> -->
 
 
 {% if target.tags %}
-<!-- <p>Tags</p> -->
-<!-- <dl class="row"> -->
-{% for key, value in target.tags.items %}
-  <dt class="col-sm-6">{{ key }}</dt>
-  <dd class="col-sm-6">{{ value }}</dd>
-{% endfor %}
-<!-- </dl> -->
+    <!-- <p>Tags</p> -->
+    <!-- <dl class="row"> -->
+    {% for key, value in target.tags.items %}
+        <dt class="col-sm-6">{{ key }}</dt>
+        <dd class="col-sm-6">{{ value }}</dd>
+    {% endfor %}
+    <!-- </dl> -->
 {% endif %}

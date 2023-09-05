@@ -1,5 +1,5 @@
 from rest_framework.response import Response
-from rest_framework import generics
+from rest_framework import generics, views
 
 import logging
 from django.db.models import Q
@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 logger = logging.getLogger(__name__)
 
 
-class GetObservatory(generics.ListCreateAPIView):
+class GetObservatory(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
   
@@ -48,7 +48,7 @@ class GetObservatory(generics.ListCreateAPIView):
         return queryset
 
 
-class CreateObservatory(generics.ListCreateAPIView):
+class CreateObservatory(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -60,7 +60,7 @@ class CreateObservatory(generics.ListCreateAPIView):
         return Response(serializer.errors, status=404)
 
 
-class UpdateObservatory(generics.RetrieveUpdateDestroyAPIView):
+class UpdateObservatory(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -76,7 +76,7 @@ class UpdateObservatory(generics.RetrieveUpdateDestroyAPIView):
         return Response(serializer.errors, status=404)
 
 
-class DeleteObservatory(generics.RetrieveUpdateDestroyAPIView):
+class DeleteObservatory(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
@@ -88,7 +88,7 @@ class DeleteObservatory(generics.RetrieveUpdateDestroyAPIView):
         return Response("OK", status=202)
 
 
-class GetObservatoryMatrix(generics.ListCreateAPIView):
+class GetObservatoryMatrix(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
@@ -119,7 +119,7 @@ class GetObservatoryMatrix(generics.ListCreateAPIView):
         return queryset
 
 
-class CreateObservatoryMatrix(generics.ListCreateAPIView):
+class CreateObservatoryMatrix(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -131,7 +131,7 @@ class CreateObservatoryMatrix(generics.ListCreateAPIView):
         return Response(serializer.errors, status=404)
 
 
-class UpdateObservatoryMatrix(generics.RetrieveUpdateDestroyAPIView):
+class UpdateObservatoryMatrix(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
@@ -147,7 +147,7 @@ class UpdateObservatoryMatrix(generics.RetrieveUpdateDestroyAPIView):
         return Response(serializer.errors, status=404)
 
 
-class DeleteObservatoryMatrix(generics.RetrieveUpdateDestroyAPIView):
+class DeleteObservatoryMatrix(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     

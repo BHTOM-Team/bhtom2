@@ -31,19 +31,18 @@ class TargetCreateEventProducer:
             self.initialize_producer()
 
         value = {
-            "id": target.id,
+            "targetId": target.id,
             "name": target.name,
             "ra": target.ra,
-            "dec": target.dec
+            "dec": target.dec,
+            "radius": 0.5
         }
 
-        key = "correlation_id"
-        message_headers = get_guid()
+        guid = get_guid()
 
         message_json = json.dumps(value)
         self.producer.produce(topic,
                               value=message_json,
-                              key=key,
-                              headers=message_headers
+                              headers={"correlation_id": guid}
                               )
         self.producer.poll()

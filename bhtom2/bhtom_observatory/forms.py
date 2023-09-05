@@ -1,6 +1,9 @@
 from django import forms
 
 from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix
+from bhtom2.utils.bhtom_logger import BHTOMLogger
+
+logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_observatory: forms]')
 
 
 class ObservatoryChoiceField(forms.ModelChoiceField):
@@ -74,7 +77,7 @@ class ObservatoryCreationForm(forms.ModelForm):
                   'gain', 'readout_noise', 'binning', 'saturation_level',
                   'pixel_scale', 'readout_speed', 'pixel_size',
                   'approx_lim_mag', 'filters', 'altitude',
-                  'comment' )
+                  'comment')
 
 
 class ObservatoryUpdateForm(forms.ModelForm):
@@ -130,7 +133,7 @@ class ObservatoryUpdateForm(forms.ModelForm):
         model = Observatory
         fields = ('name', 'lon', 'lat',
                   'calibration_flg', 'example_file',
-                  'gain','readout_noise', 'binning', 'saturation_level',
+                  'gain', 'readout_noise', 'binning', 'saturation_level',
                   'pixel_scale', 'readout_speed', 'pixel_size',
                   'approx_lim_mag', 'filters', 'altitude',
                   'comment')

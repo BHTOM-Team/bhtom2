@@ -1,5 +1,5 @@
 {% load bootstrap4 targets_extras bhtom_targets_extras dataproduct_extras cache%}
-{% cache 86400 targets_list_cache object_list %}
+{% cache 86400 targets_list_cache object_list using="targetList" %}
 <table class="table table-hover sortable">
     <thead>
     <tr>
@@ -26,8 +26,7 @@
                        onClick="single_select()"/>
             </label></td>
             <td>
-                <a href="{% url 'targets:detail' target.name %}"
-                   title="{{ target.name }}">{{ target.names|join:", " }}</a>
+                <a href="{% url 'targets:detail' target.name %}" title="{{ target.name }}">{{ target.name }}</a>
             </td>
 
             <td>{{ target.ra|deg_to_sexigesimal:"hms" }}</td>

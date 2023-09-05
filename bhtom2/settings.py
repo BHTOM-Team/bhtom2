@@ -50,6 +50,9 @@ ADMIN_USERNAME = secret.get('ADMIN_USERNAME')
 ADMIN_PASSWORD = secret.get('ADMIN_PASSWORD')
 ADMIN_EMAIL = secret.get('ADMIN_EMAIL', '')
 
+GRAYLOG_HOST = secret.get('GRAYLOG_HOST', '')
+GRAYLOG_PORT = int(secret.get('GRAYLOG_PORT', 12201))
+
 PROPOSALS_API_KEYS = {
     'LCO': secret.get('LCO_API_KEY', '')
 }
@@ -100,6 +103,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_guid.middleware.guid_middleware',
+    'bhtom2.middleware.RequestLogMiddleware',
     'bhtom_base.bhtom_common.middleware.Raise403Middleware',
     'bhtom_base.bhtom_common.middleware.ExternalServiceMiddleware',
     'bhtom_base.bhtom_common.middleware.AuthStrategyMiddleware',
@@ -135,7 +139,7 @@ DATABASES = {
     'default': {
         'NAME': secret.get("POSTGRES_NAME", 'bhtom2'),
         'ENGINE': 'django.db.backends.postgresql',
-        'USER': secret.get("POSTGRES_USER", 'bhtom'),
+        'USER': secret.get("POSTGRES_USER", 'bhtom2'),
         'PASSWORD': secret.get("POSTGRES_PASSWORD", "bhtom2"),
         'HOST': secret.get('POSTGRES_HOST', 'localhost'),
         'PORT': secret.get('POSTGRES_PORT', 5432),
@@ -210,24 +214,66 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'bhtom2/static')]
 MEDIA_ROOT = os.path.join(BASE_DIR, 'data')
 MEDIA_URL = '/data/'
 
+# LOG
+logFolder = secret.get("LOG_FOLDER")
+logWhen = secret.get("LOG_CADENCE")
+logInterval = int(secret.get("LOG_INTERVAL"))
+logBackupCount = int(secret.get("LOG_BACKUP_COUNT"))
+logLevel = secret.get("LOG_LEVEL")
+
+
+
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+
+    'formatters': {
+        'console': {
+            'format': '%(name)-12s - %(levelname)-8s %(message)s'
+        },
+        'default': {
+            'format': '[%(asctime)s - %(correlation_id)s - %(filename)s:%(lineno)d - %(levelname)-2s]: %(message)s'
+        },
+    },
+
+    'filters': {
+        'correlation_id': {
+            '()': 'django_guid.log_filters.CorrelationId'
+        }
+    },
+
     'handlers': {
         'graypy': {
-            'level': 'INFO',
+            'level': logLevel,
             'class': 'graypy.GELFTCPHandler',
-            'host': secret.get('GRAYLOG_HOST', 'localhost'),
-            'port': secret.get('GRAYLOG_PORT', 12201),
+            'host': GRAYLOG_HOST,
+            'port': GRAYLOG_PORT,
+            'formatter': 'default',
+            'filters': ['correlation_id'],
         },
+
         'console': {
             'class': 'logging.StreamHandler',
-        }
+            'formatter': 'console'
+        },
+
+        'file': {
+            'level': logLevel,
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': logFolder + '/debug.log',
+            'formatter': 'default',
+            'when': logWhen,
+            'interval': logInterval,
+            'backupCount': logBackupCount,
+            'filters': ['correlation_id'],
+        },
+
     },
     'loggers': {
         '': {
-            'handlers': ['graypy', 'console'],
-            'level': 'DEBUG'
+            'handlers': ['file', 'graypy', 'console'],
+            'level': logLevel
         }
     },
 }
@@ -243,6 +289,10 @@ CACHES = {
     'targetList': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': os.path.join(BASE_DIR, 'bhtom2/cache/targetList')
+    },
+    'targetDetails': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'bhtom2/cache/targetDetails')
     }
 }
 
@@ -265,11 +315,11 @@ DATA_PROCESSORS = {
 }
 
 TOM_ALERT_CLASSES = [
-    'bhtom_base.bhtom_alerts.brokers.alerce.ALeRCEBroker',
-    'bhtom_base.bhtom_alerts.brokers.lasair.LasairBroker',
-    'bhtom_base.bhtom_alerts.brokers.mars.MARSBroker',
-    'bhtom_base.bhtom_alerts.brokers.scimma.SCIMMABroker',
-    'bhtom_base.bhtom_alerts.brokers.scout.ScoutBroker',
+    #'bhtom_base.bhtom_alerts.brokers.alerce.ALeRCEBroker',
+    #'bhtom_base.bhtom_alerts.brokers.lasair.LasairBroker',
+    #'bhtom_base.bhtom_alerts.brokers.mars.MARSBroker',
+    #'bhtom_base.bhtom_alerts.brokers.scimma.SCIMMABroker',
+    #'bhtom_base.bhtom_alerts.brokers.scout.ScoutBroker',
     'bhtom_base.bhtom_alerts.brokers.tns.TNSBroker',
     'bhtom_base.bhtom_alerts.brokers.fink.FinkBroker',
     'bhtom2.brokers.gaia_alerts.GaiaAlertsBroker',
@@ -410,3 +460,13 @@ TOM_FACILITY_CLASSES = [
     'bhtom2.bhtom_observations.facilities.suhora.Suhora',
     'bhtom2.bhtom_observations.facilities.loiano.Loiano',
 ]
+
+DJANGO_GUID = {
+    'GUID_HEADER_NAME': 'Correlation-ID',
+    'VALIDATE_GUID': True,
+    'RETURN_HEADER': True,
+    'EXPOSE_HEADER': True,
+    'INTEGRATIONS': [],
+    'IGNORE_URLS': [],
+    'UUID_LENGTH': 32,
+}

@@ -13,6 +13,7 @@ from django.shortcuts import render
 from bhtom2.bhtom_targets.filters import TargetFilter
 from bhtom2.harvesters.gaia_alerts import GaiaAlertsHarvester
 from bhtom2.templatetags.bhtom_targets_extras import target_table
+from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_targets.models import Target, TargetName, TargetExtra, TargetList
 from io import StringIO
 from django.db.models import ExpressionWrapper, FloatField
@@ -25,6 +26,8 @@ from astropy import units as u
 from django.db import transaction
 
 from bhtom_base.bhtom_targets.utils import cone_search_filter
+
+logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_targets: utils]')
 
 
 def import_targets(targets):
@@ -263,15 +266,25 @@ def coords_to_degrees(value, c_type):
             raise Exception('Invalid format. Please use sexigesimal or degrees')
 
 
-def update_template_cache():
-    cachePath = os.path.join(settings.BASE_DIR, "bhtom2/cache/templateList")
+def update_targetList_cache():
+    cachePath = os.path.join(settings.BASE_DIR, "bhtom2/cache/targetList")
+
     for file in os.listdir(cachePath):
         f = os.path.join(cachePath, file)
         if file.endswith('.djcache') and os.path.isfile(f):
             os.remove(f)
+
     context = {}
     target = Target.objects.all()
     context['object_list'] = target
     request = HttpRequest()
     render(request, 'bhtom_targets/partials/target_table.html', context)
 
+
+def update_targetDetails_cache():
+    cachePath = os.path.join(settings.BASE_DIR, "bhtom2/cache/targetDetails")
+
+    for file in os.listdir(cachePath):
+        f = os.path.join(cachePath, file)
+        if file.endswith('.djcache') and os.path.isfile(f):
+            os.remove(f)

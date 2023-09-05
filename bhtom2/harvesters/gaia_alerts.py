@@ -34,7 +34,7 @@ def fetch_alerts_csv() -> str:
 
     # Update Gaia alerts cache file
     try:
-        with open(GAIA_ALERTS_CACHE_PATH, 'w+') as f:
+        with open(GAIA_ALERTS_CACHE_PATH, 'w+', encoding='utf-8') as f:
             f.write(gaia_alerts_response)
     except FileNotFoundError:
         logger.error(f'File {GAIA_ALERTS_CACHE_PATH} not found! Gaia alerts harvester response wasn\'t saved')

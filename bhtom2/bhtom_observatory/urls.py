@@ -8,14 +8,14 @@ from bhtom2.bhtom_observatory.views import CreateObservatory, UpdateObservatory,
 app_name = 'bhtom2.bhtom_observatory'
 
 urlpatterns = [
-    path('getObservatory/', GetObservatory.as_view()),
-    path('createObservatory/', CreateObservatory.as_view()),
-    path('updateObservatory/<int:pk>/', UpdateObservatory.as_view()),
-    path('deleteObservatory/<int:pk>/', DeleteObservatory.as_view()),
-    path('getUserObservatory/', GetObservatoryMatrix.as_view()),
-    path('createUserObservatory/', CreateObservatoryMatrix.as_view()),
-    path('updateUserObservatory/<int:pk>/', UpdateObservatoryMatrix.as_view()),
-    path('deleteUserObservatory/<int:pk>/', DeleteObservatoryMatrix.as_view()),
+    # path('getObservatory/', GetObservatory.as_view()),
+    # path('createObservatory/', CreateObservatory.as_view()),
+    # path('updateObservatory/<int:pk>/', UpdateObservatory.as_view()),
+    # path('deleteObservatory/<int:pk>/', DeleteObservatory.as_view()),
+    # path('getUserObservatory/', GetObservatoryMatrix.as_view()),
+    # path('createUserObservatory/', CreateObservatoryMatrix.as_view()),
+    # path('updateUserObservatory/<int:pk>/', UpdateObservatoryMatrix.as_view()),
+    # path('deleteUserObservatory/<int:pk>/', DeleteObservatoryMatrix.as_view()),
 
     path('create/', CreateObservatory.as_view(), name='create'),
     path('<int:pk>/update/', UpdateObservatory.as_view(), name='update'),

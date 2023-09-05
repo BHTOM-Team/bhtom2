@@ -9,10 +9,13 @@ from astropy.coordinates import Angle
 from astropy import units as u
 from django.forms import ValidationError
 
+from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_targets.models import (
     Target, TargetExtra, TargetName, SIDEREAL_FIELDS, NON_SIDEREAL_FIELDS, REQUIRED_SIDEREAL_FIELDS,
     REQUIRED_NON_SIDEREAL_FIELDS, REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME
 )
+
+logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_targets: forms]')
 
 
 def extra_field_to_form_field(field_type):

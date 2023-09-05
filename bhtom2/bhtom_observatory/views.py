@@ -1,5 +1,3 @@
-import logging
-
 from django.db import transaction
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -11,8 +9,9 @@ from guardian.mixins import LoginRequiredMixin
 from bhtom2.bhtom_observatory.forms import ObservatoryCreationForm, ObservatoryUpdateForm, ObservatoryUserUpdateForm, \
     ObservatoryUserCreationForm
 from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix
+from bhtom2.utils.bhtom_logger import BHTOMLogger
 
-logger = logging.getLogger(__name__)
+logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_observatory: views]')
 
 
 class CreateObservatory(LoginRequiredMixin, FormView):

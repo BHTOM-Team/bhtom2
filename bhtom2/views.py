@@ -3,9 +3,8 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_alerts.alerts import get_service_classes
 from bhtom_base.bhtom_alerts.models import BrokerQuery
 from bhtom_base.bhtom_alerts.views import BrokerQueryFilter
-from rest_framework import views
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[BHTOM2 views]')
+logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom: views]')
 
 
 class BrokerQueryListView(FilterView):
@@ -29,7 +28,3 @@ class BrokerQueryListView(FilterView):
             if broker.form:
                 context['installed_brokers'][broker_name] = broker
         return context
-
-
-class CleanTemplateCache(views.APIView):
-    pass

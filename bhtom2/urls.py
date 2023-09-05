@@ -17,13 +17,13 @@ from django.urls import path, include
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 
-from bhtom2.views import BrokerQueryListView, CleanTemplateCache
+from bhtom2.views import BrokerQueryListView
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="CPCS",
+        title="BhTom",
         default_version='v2',
-        description="Calibration server",
+        description="Black Hole Tom",
         contact=openapi.Contact(email="akrawczyk@akond.com"),
     ),
     public=True,
@@ -43,6 +43,5 @@ urlpatterns = [
     path('alerts/query/list/', BrokerQueryListView.as_view(template_name='bhtom_alerts/brokerquery_list.html'),
          name='alerts:list'),
 
-    path('cleanTargetCache/', CleanTemplateCache.as_view(), name='clean_target_cache')
 ]
 
