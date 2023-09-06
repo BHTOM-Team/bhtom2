@@ -1,23 +1,42 @@
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
-from rest_framework import generics, views
+from rest_framework import views
+from django.core import serializers
 
 import logging
 from django.db.models import Q
 
 from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix
-from bhtom2.bhtom_observatory.rest.serializers import ObservatorySerializers, ObservatoryMatrixSerializers
+from bhtom2.bhtom_observatory.rest.serializers import ObservatorySerializers
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+
 logger = logging.getLogger(__name__)
 
 
-class GetObservatory(views.APIView):
+class GetObservatoryApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-  
+
     serializer_class = ObservatorySerializers
-  
-    def get_queryset(self):
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'name': openapi.Schema(type=openapi.TYPE_STRING),
+                'prefix': openapi.Schema(type=openapi.TYPE_STRING),
+                'lon': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'lat': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'active_flg': openapi.Schema(type=openapi.TYPE_BOOLEAN, format=openapi.FORMAT_INT32),
+                'created_start': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+                'created_end': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+            },
+            required=[]
+        ),
+    )
+    def post(self, request):
         query = Q()
 
         name = self.request.data.get('name', None)
@@ -44,57 +63,117 @@ class GetObservatory(views.APIView):
             query &= Q(created__lte=created_end)
 
         queryset = Observatory.objects.filter(query).order_by('created')
+        serialized_queryset = serializers.serialize('json', queryset)
+        return Response(serialized_queryset, status=200)
 
-        return queryset
 
-
-class CreateObservatory(views.APIView):
+class CreateObservatoryApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'name': openapi.Schema(type=openapi.TYPE_STRING),
+                'lon': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'lat': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'calibration_flg': openapi.Schema(type=openapi.TYPE_BOOLEAN, format=openapi.FORMAT_INT32),
+                'example_file': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+                'comment': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+                'altitude': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'gain': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'readout_noise': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'binning': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'saturation_level': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'pixel_scale': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'readout_speed': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'pixel_size': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'approx_lim_mag': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'filters': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=['name', 'lon', 'lat']
+        )
+    )
     def post(self, request, *args, **kwargs):
         serializer = ObservatorySerializers(data=request.data)
         if serializer.is_valid():
-            self.perform_create(serializer)
-            return Response(serializer.data, status=201)
+
+            calibration_flg = request.data.get('calibration_flg', False)
+            name = request.data['name']
+
+            if calibration_flg is True:
+                prefix = name + "_CalibrationOnly"
+            else:
+                prefix = name
+
+            instance = serializer.create(serializer.data)
+            instance.user = request.user
+            instance.prefix = prefix
+            instance.save()
+            return Response({'Status': 'created'}, status=201)
         return Response(serializer.errors, status=404)
 
 
-class UpdateObservatory(views.APIView):
+class UpdateObservatoryApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    queryset = Observatory.objects.all()
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'name': openapi.Schema(type=openapi.TYPE_STRING),
+                'lon': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'lat': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'calibration_flg': openapi.Schema(type=openapi.TYPE_BOOLEAN, format=openapi.FORMAT_INT32),
+                'example_file': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+                'comment': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+                'altitude': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'gain': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'readout_noise': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'binning': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'saturation_level': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'pixel_scale': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'readout_speed': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'pixel_size': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'approx_lim_mag': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'filters': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=['name']
+        )
+    )
+    def patch(self, request):
 
-    def patch(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = ObservatorySerializers(instance, data=request.data)
+        name = request.data.get('name', None)
+        instance = Observatory.objects.get(name=name)
+        serializer = ObservatorySerializers(instance, data=request.data, partial=True)
 
-        if serializer.is_valid():
-            self.perform_update(serializer)
-            return Response(serializer.data, status=201)
+        if instance is not None:
+            if request.user == instance.user and serializer.is_valid():
+                serializer.save()
+                return Response({'Status': 'updated'}, status=201)
         return Response(serializer.errors, status=404)
 
 
-class DeleteObservatory(views.APIView):
+class GetObservatoryMatrixApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    
-    queryset = Observatory.objects.all()
-    serializer_class = ObservatorySerializers
 
-    def delete(self, request, *args, **kwargs):
-        self.destroy(request, *args, **kwargs)
-        return Response("OK", status=202)
-
-
-class GetObservatoryMatrix(views.APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    
-    serializer_class = ObservatoryMatrixSerializers
-
-    def get_queryset(self):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'user': openapi.Schema(type=openapi.TYPE_STRING),
+                'active_flg': openapi.Schema(type=openapi.TYPE_BOOLEAN, format=openapi.FORMAT_INT32),
+                'observatory': openapi.Schema(type=openapi.TYPE_STRING),
+                'created_start': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+                'created_end': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+            },
+            required=[]
+        ),
+    )
+    def post(self, request):
         query = Q()
 
         user = self.request.data.get('user', None)
@@ -115,45 +194,72 @@ class GetObservatoryMatrix(views.APIView):
             query &= Q(created__lte=created_end)
 
         queryset = ObservatoryMatrix.objects.filter(query).order_by('created')
+        serialized_queryset = serializers.serialize('json', queryset)
+        return Response(serialized_queryset, status=200)
 
-        return queryset
 
-
-class CreateObservatoryMatrix(views.APIView):
+class CreateObservatoryMatrixApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'observatory': openapi.Schema(type=openapi.TYPE_STRING),
+                'comment': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=['observatory']
+        ),
+    )
     def post(self, request, *args, **kwargs):
-        serializer = ObservatoryMatrixSerializers(data=request.data)
-        if serializer.is_valid():
-            self.perform_create(serializer)
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=404)
+        observatoryName = request.data.get('observatory', None)
+
+        if observatoryName is None:
+            return Response("Observatory is required", status=404)
+
+        observatoryRow = Observatory.objects.get(name=observatoryName)
+
+        if not observatoryRow.active_flg:
+            return Response("Observatory is not active", status=404)
+
+        try:
+            observatory = ObservatoryMatrix(
+                user=request.user,
+                observatory=observatoryRow,
+                active_flg=True
+            )
+            observatory.save()
+        except Exception as e:
+            logger.error("Error in create user observatory: " + str(e))
+
+        return Response({"Status": "Created"}, status=201)
 
 
-class UpdateObservatoryMatrix(views.APIView):
+class DeleteObservatoryMatrixApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    
-    queryset = ObservatoryMatrix.objects.all()
 
-    def patch(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = ObservatoryMatrixSerializers(instance, data=request.data)
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'observatory': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=['observatory']
+        ),
+    )
+    def delete(self, request):
+        observatory = request.data.get('observatory', None)
+        user = request.user
+        observatory = Observatory.objects.get(name=observatory)
 
-        if serializer.is_valid():
-            self.perform_update(serializer)
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=404)
+        if observatory is None:
+            return Response("Observatory not found", status=404)
 
+        observatoryMatrix = ObservatoryMatrix.objects.get(observatory=observatory.id, user=user)
 
-class DeleteObservatoryMatrix(views.APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    
-    queryset = Observatory.objects.all()
-    serializer_class = ObservatoryMatrixSerializers
-    
-    def delete(self, request, *args, **kwargs):
-        self.destroy(request, *args, **kwargs)
-        return Response("OK", status=202)
+        if observatoryMatrix is not None and user == observatoryMatrix.user:
+            observatoryMatrix.delete()
+            return Response({"Status": "deleted"}, status=200)
+        return Response("Observatory not found", status=404)

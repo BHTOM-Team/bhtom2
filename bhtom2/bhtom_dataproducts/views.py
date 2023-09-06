@@ -5,6 +5,7 @@ from django.views import View
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import FormView, CreateView
 from django_filters.views import FilterView
+from django_guid import get_guid
 from guardian.shortcuts import get_objects_for_user
 from django.http import FileResponse, HttpResponseRedirect, Http404
 from bhtom2.utils.bhtom_logger import BHTOMLogger
@@ -35,6 +36,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
     View that handles manual upload of DataProducts. Requires authentication.
     """
     form_class = DataProductUploadForm
+    MAX_FILES: int = 5
 
     def get_form_kwargs(self):
         kwargs = super(DataProductUploadView, self).get_form_kwargs()
@@ -53,7 +55,9 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         else:
             observation_record = None
         dp_type = form.cleaned_data['data_product_type']
-        data_product_files = self.request.FILES
+        #data_product_files = self.request.FILES.lists('files')
+        data_product_files = self.request.FILES.dict()
+       # data_product_files = self.request.FILES.items()
         observatory = form.cleaned_data['observatory']
         observation_filter = form.cleaned_data['filter']
         mjd = form.cleaned_data['MJD']
@@ -66,9 +70,17 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         group = form.cleaned_data['group']
         user = self.request.user
 
-        if dp_type == 'fits_file' and observatory.calibration_flg is True:
-            messages.error(self.request, 'Used Observatory without ObsInfo')
+        if len(data_product_files) > self.MAX_FILES:
+            logger.error('upload max: %s %s' % (str(self.MAX_FILES), str(target)))
+            messages.error(self.request, f'You can upload max. {self.MAX_FILES} files at once')
             return redirect(form.cleaned_data.get('referrer', '/'))
+
+        if dp_type == 'fits_file' and observatory.calibration_flg is True:
+            messages.error(self.request, 'Observatory without ObsInfo')
+            return redirect(form.cleaned_data.get('referrer', '/'))
+
+        if group is not None:
+            group = group.group.name
 
         post_data = {
             'filter': observation_filter,
@@ -77,22 +89,31 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             'match_dist': match_dist,
             'comment': comment,
             'dry_tun': dry_run,
+            'no_plot': False,
             'observatory': observatory,
             'mjd': mjd,
             'exp_time': exp_time,
-            'group': group.group.name,
+            'group': group,
             'observer': observer,
             'facility': facility
         }
         token = Token.objects.get(user_id=user.id).key
 
         headers = {
-            'Authorization': 'Token ' + token
+            'Authorization': 'Token ' + token,
+            'correlation_id': get_guid()
         }
 
         # Make a POST request to upload-service with the extracted data
-        response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/', data=post_data, files=data_product_files,
-                                 headers=headers)
+        try:
+
+            response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/', data=post_data,
+                                     files=data_product_files,
+                                     headers=headers)
+        except Exception as e:
+            logger.error("Error in connect to upload service: " + str(e))
+            messages.error(self.request, 'Service is unavailable, please retry again later.')
+            return redirect(form.cleaned_data.get('referrer', '/'))
 
         if response.status_code == 201:
             messages.success(self.request, 'Successfully uploaded:' + str(response.content))
@@ -120,11 +141,16 @@ class FitsUploadAPIView(APIView):
         # Set headers for the POST request to upload-service
         headers = {
             'Authorization': authorization_header,
+            'correlation_id': get_guid()
         }
 
         # Make a POST request to upload-service with the extracted data
-        response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/', data=post_data, files=request.FILES,
+        try:
+            response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/', data=post_data, files=request.FILES,
                                  headers=headers)
+        except Exception as e:
+            logger.error("Error in connect to upload service: " + str(e))
+            return HttpResponse("Internal error", status=500)
 
         return HttpResponse(response.content, status=response.status_code)
 

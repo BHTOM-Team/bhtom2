@@ -52,6 +52,7 @@ ADMIN_EMAIL = secret.get('ADMIN_EMAIL', '')
 
 GRAYLOG_HOST = secret.get('GRAYLOG_HOST', '')
 GRAYLOG_PORT = int(secret.get('GRAYLOG_PORT', 12201))
+DATA_FILE_PATH = secret.get('DATA_FILE_PATH', './data/')
 
 PROPOSALS_API_KEYS = {
     'LCO': secret.get('LCO_API_KEY', '')
@@ -102,12 +103,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_guid.middleware.guid_middleware',
-    'bhtom2.middleware.RequestLogMiddleware',
     'bhtom_base.bhtom_common.middleware.Raise403Middleware',
     'bhtom_base.bhtom_common.middleware.ExternalServiceMiddleware',
     'bhtom_base.bhtom_common.middleware.AuthStrategyMiddleware',
     'bhtom_custom_registration.bhtom_registration.middleware.RedirectAuthenticatedUsersFromRegisterMiddleware',
+    'django_guid.middleware.guid_middleware',
+    'bhtom2.middleware.RequestLogMiddleware',
 ]
 
 ROOT_URLCONF = 'bhtom2.urls'

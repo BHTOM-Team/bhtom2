@@ -16,6 +16,7 @@ class RequestLogMiddleware:
     def __call__(self, request):
         time1 = datetime.datetime.now()
         body = "".join(request.body.decode('utf-8').replace(' ', '').splitlines())
+        body = (body[:75] + '..') if len(body) > 75 else body
 
         logger.info(f"Method: {request.method}, Path: {request.path}, IP: {request.META['REMOTE_ADDR']}, "
                     f"correlation_id: {request.correlation_id},  session_id: {request.session.session_key}, "
@@ -26,13 +27,14 @@ class RequestLogMiddleware:
 
         if hasattr(response, 'data'):
             body = response.data
+            body = (body[:75] + '..') if len(body) > 75 else body
         else:
             body = ''
         time = datetime.datetime.now()-time1
         time = time.total_seconds()
 
         logger.info(f"uuid: {request.correlation_id}, Response - Status Code: {response.status_code}, time: {str(time)}" 
-                    f"body: {body}")
+                    f" body: {body}")
 
         return response
 

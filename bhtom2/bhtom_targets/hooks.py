@@ -22,6 +22,6 @@ def target_post_save(target, created):
         brokers = alerts.get_service_classes()
         for broker in brokers:
             ReducedDatumEventProducer().send_message(kafkaTopic.updateReducedDatum, target, broker, isNew=True)
-        logger.info("Send Create target Event, %s" % str(target.name))
+        logger.info("Send Create reducedDatum Event, %s" % str(target.name))
     except Exception as e:
         logger.error("Error reducedDatum Event, %s" % str(e))

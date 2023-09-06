@@ -4,10 +4,12 @@ from bhtom_base.bhtom_targets.api_views import TargetExtraViewSet, TargetNameVie
 from bhtom_base.bhtom_targets.views import TargetAddRemoveGroupingView, TargetDeleteView, \
     TargetExportView, TargetGroupingCreateView, TargetGroupingDeleteView, TargetGroupingView, TargetNameSearchView, \
     TargetDetailView
+from .rest.views import CleanTargetListCache, GetTargetListApi, CleanTargetDetailsCache, TargetCreateApi, \
+    TargetUpdateApi, TargetDeleteApi
 
 from .views import TargetCreateView, TargetUpdateView, TargetGenerateTargetDescriptionLatexView, TargetImportView, \
     TargetDownloadPhotometryStatsLatexTableView, TargetListImagesView, TargetDownloadPhotometryDataView, \
-    TargetDownloadRadioDataView, TargetMicrolensingView, TargetListView, CleanTargetListCache, CleanTargetDetailsCache
+    TargetDownloadRadioDataView, TargetMicrolensingView, TargetListView
 
 from bhtom_base.bhtom_common.api_router import SharedAPIRootRouter
 
@@ -21,6 +23,10 @@ app_name = 'targets'
 urlpatterns = [
     path('cleanTargetListCache/', CleanTargetListCache.as_view()),
     path('cleanTargetDetailCache/', CleanTargetDetailsCache.as_view()),
+    path('getTargetList/', GetTargetListApi.as_view()),
+    path('createTarget/', TargetCreateApi.as_view()),
+    path('updateTarget/<str:name>/', TargetUpdateApi.as_view()),
+    path('deleteTarget/', TargetDeleteApi.as_view()),
 
     path('', TargetListView.as_view(), name='list'),
     path('', TargetListView.as_view(), name='targets'),

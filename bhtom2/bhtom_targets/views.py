@@ -6,11 +6,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.shortcuts import redirect
 from django.views.generic.edit import CreateView, UpdateView
-from rest_framework.response import Response
-from rest_framework import views
 
 from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm, TargetLatexDescriptionForm
-from bhtom2.bhtom_targets.utils import import_targets, update_targetList_cache, update_targetDetails_cache
+from bhtom2.bhtom_targets.utils import import_targets
 from bhtom2.external_service.data_source_information import get_pretty_survey_name
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom2.utils.openai_utils import latex_target_title_prompt, latex_text_target_prompt, \
@@ -645,24 +643,3 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
         })
         return self.render_to_response(context)
 
-
-class CleanTargetListCache(views.APIView):
-    def post(self, request):
-        try:
-            logger.info("Start clean target list cache")
-            update_targetList_cache()
-        except Exception as e:
-            logger.error("Clean cache error: " + str(e))
-            return Response("ERROR", status=500)
-        return Response("OK", status=200)
-
-
-class CleanTargetDetailsCache(views.APIView):
-    def post(self, request):
-        try:
-            logger.error("Start clean target details cache")
-            update_targetDetails_cache()
-        except Exception as e:
-            logger.error("Clean cache error: " + str(e))
-            return Response("ERROR", status=500)
-        return Response("OK", status=200)

@@ -33,7 +33,7 @@ class ReducedDatumEventProducer:
         value = {
             "name": target.name,
             "broker": broker,
-            "searchTargetName": isNew
+            "setTargetName": isNew
         }
 
         guid = get_guid()

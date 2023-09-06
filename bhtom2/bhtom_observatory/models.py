@@ -23,7 +23,7 @@ class Observatory(models.Model):
     calibration_flg = models.BooleanField(default='False', verbose_name='Only instrumental photometry file',
                                           db_index=True)
     prefix = models.CharField(max_length=100, null=True, blank=True)
-    example_file = models.FileField(upload_to=example_file_path, null=False, blank=False, verbose_name='Sample fits')
+    example_file = models.FileField(upload_to=example_file_path, null=True, blank=True, verbose_name='Sample fits')
     comment = models.TextField(null=True, blank=True,
                                verbose_name="Comments (e.g. hyperlink to the observatory website, "
                                             "camera specifications, telescope info)")

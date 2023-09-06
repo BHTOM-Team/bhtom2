@@ -7,11 +7,11 @@
 {% if object %}
 <form action="{% url 'bhtom_observatory:userObservatory_update' object.id %}" enctype="multipart/form-data" method="POST">
 {% else %}
-  <h4> Add a new Observatory/Instrument to your list.
+  <h4> Add a new Observatory to your list.
   </h4><p>
-      Here you can add a new observatory/instrument to your list in two ways. 
+      Here you can add a new observatory to your list in two ways.
       <br>
-      You can choose an observatory from the list of already registered ones. This will generate a new hashtag for CPCS with your name.
+      You can choose an observatory from the list of already registered ones.
       <br>
       If your observatory is not yet registered you can create a new entry. 
     </p>

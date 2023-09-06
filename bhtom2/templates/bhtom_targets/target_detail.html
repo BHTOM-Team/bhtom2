@@ -173,7 +173,9 @@
                         </div>
 
                         <div style="margin-top: 20px;" class="col-lg-6">
-                            {% gaia_stats object %}
+                            {% cache 86400 observation_plan object using="targetDetails" %}
+                                {% gaia_stats object %}
+                            {% endcache %}
                         </div>
                     </div>
 
