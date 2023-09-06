@@ -43,7 +43,7 @@ class DataProductUploadForm(forms.Form):
 
     data_product_type = forms.ChoiceField(
         choices=[v for k, v in settings.DATA_PRODUCT_TYPES.items()],
-        initial='photometry_cpcs',
+        initial='photometry',
         widget=forms.RadioSelect(attrs={'onclick': "dataProductSelect();"}),
         required=True
     )
