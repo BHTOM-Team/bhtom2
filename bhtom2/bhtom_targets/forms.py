@@ -15,6 +15,14 @@ from bhtom_base.bhtom_targets.models import (
     REQUIRED_NON_SIDEREAL_FIELDS, REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME
 )
 
+
+CLASSIFICATION_TYPES = [
+    ("unknown","Unknown"),('active_galactic_nucleus',"Active Galactic Nucleus"), ("bl_lac", "BL Lac"),("cataclysmic_variable","Cataclysmic Variable"),
+    ("cepheid_variable","Cepheid Variable"),("eclipsing_binary","Eclipsing Binary"),("galaxy","Galaxy"),("long_period_variable","Long Period Variable"),("luminouse_blue_variable","Luminous Blue Variable"),
+    ("m_dwarf","M-dwarf flare"),("microlensic_event","Microlensing Event"),("nova","Nova"),("peculiar_supernova","Peculiar Supernova"),("quasar","Quasar"),("r_crb_variable","R CrB Variable"),
+    ("rr_lyrae_variable","RR Lyrae Variable"),("solar_system_object","Solar System Object"),("star","Star"),("supernova","Supernova"),("supernova_imposter","Supernova imposter"),("symbiotic_star","Symbiotic star"),
+    ("tidal_disruption_event","Tidal Disruption Event"),("variable_star_other","Variable star-other"),("x_ray_binary","X-Ray Binary"),("young_stellar_object","Young Stellar Object")]
+
 logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_targets: forms]')
 
 
@@ -150,9 +158,13 @@ class SiderealTargetCreateForm(TargetForm):
 
         self.fields['epoch'].initial = 2000.0
 
-        # self.fields['classification'].required = True
-        # self.fields['classification'].help_text = 'Classification of the object (e.g. variable star, microlensing event)'
-        # self.fields['classification'].label = 'Classification*'
+        self.fields['classification']=forms.ChoiceField(
+            choices=CLASSIFICATION_TYPES,
+            widget=forms.Select(),
+            label='Classification',
+            initial='Unknown',
+            required=True
+    )
         # self.fields['classification'].widget.attrs['rows'] = 1
 
         # self.fields['discovery_date'].required = False
@@ -170,7 +182,7 @@ class SiderealTargetCreateForm(TargetForm):
         # # self.fields['aavso_name'].widget = TextInput(attrs={'maxlength': 100})
         # # self.fields['gaiadr2_id'].widget = TextInput(attrs={'maxlength': 100})
         # # self.fields['TNS_ID'].widget = TextInput(attrs={'maxlength': 100})
-        # self.fields['classification'].widget = TextInput(attrs={'maxlength': 250})
+        #self.fields['classification'].widget =  TextInput(attrs={'maxlength': 100})
 
         # self.fields['tweet'].widget = HiddenInput()
         # self.fields['jdlastobs'].widget = HiddenInput()

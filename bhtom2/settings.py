@@ -307,7 +307,7 @@ DATA_PRODUCT_TYPES = {
     'photometry_nondetection': ('photometry_nondetection', 'Photometry Non-Detections'),
     'fits_file': ('fits_file', 'FITS File'),
     'spectroscopy': ('spectroscopy', 'Spectroscopy'),
-    'image_file': ('image_file', 'Image File')
+    #'image_file': ('image_file', 'Image File')
 }
 
 DATA_PROCESSORS = {
