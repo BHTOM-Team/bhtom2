@@ -1,16 +1,12 @@
 import base64
-import os
 
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import FormView, CreateView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django_filters.views import FilterView
 from guardian.shortcuts import get_objects_for_user
-from rest_framework.views import APIView
-from django.http import HttpResponse, FileResponse, HttpResponseRedirect, Http404
-import requests
+from django.http import FileResponse, HttpResponseRedirect, Http404
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from django.conf import settings
 
@@ -19,7 +15,7 @@ from bhtom_base.bhtom_dataproducts.models import DataProduct, DataProductGroup, 
 from bhtom_base.bhtom_targets.models import Target
 from .forms import DataProductUploadForm
 from ..bhtom_calibration.models import calibration_data
-from ..bhtom_observatory.models import ObservatoryMatrix, Observatory
+from ..bhtom_observatory.models import ObservatoryMatrix
 from bhtom2.bhtom_observatory.models import Observatory
 from rest_framework.views import APIView
 
@@ -31,14 +27,15 @@ from django.contrib import messages
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-logger = BHTOMLogger(__name__, '[BHTOM2 views]')
+logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_dataproducts: views]')
 
-class DataProductUploadView(LoginRequiredMixin,FormView):
+
+class DataProductUploadView(LoginRequiredMixin, FormView):
     """
     View that handles manual upload of DataProducts. Requires authentication.
     """
     form_class = DataProductUploadForm
-    
+
     def get_form_kwargs(self):
         kwargs = super(DataProductUploadView, self).get_form_kwargs()
         kwargs['initial'] = {'user': self.request.user}
@@ -47,7 +44,7 @@ class DataProductUploadView(LoginRequiredMixin,FormView):
     def get_form(self, *args, **kwargs):
         form = super().get_form(*args, **kwargs)
         return form
-    
+
     def form_valid(self, form):
         target = form.cleaned_data['target']
         if not target:
@@ -69,8 +66,7 @@ class DataProductUploadView(LoginRequiredMixin,FormView):
         group = form.cleaned_data['group']
         user = self.request.user
 
-        if dp_type == 'fits_file' and observatory.calibration_flg == True:
-            logger.error('observatory without ObsInfo: %s %s' % (str(f[0].name), str(target)))
+        if dp_type == 'fits_file' and observatory.calibration_flg is True:
             messages.error(self.request, 'Used Observatory without ObsInfo')
             return redirect(form.cleaned_data.get('referrer', '/'))
 
@@ -82,7 +78,7 @@ class DataProductUploadView(LoginRequiredMixin,FormView):
             'comment': comment,
             'dry_tun': dry_run,
             'observatory': observatory,
-            'mjd':mjd,
+            'mjd': mjd,
             'exp_time': exp_time,
             'group': group.group.name,
             'observer': observer,
@@ -95,10 +91,11 @@ class DataProductUploadView(LoginRequiredMixin,FormView):
         }
 
         # Make a POST request to upload-service with the extracted data
-        response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/', data=post_data, files=data_product_files, headers=headers)
+        response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/', data=post_data, files=data_product_files,
+                                 headers=headers)
 
         if response.status_code == 201:
-            messages.success(self.request, 'Successfully uploaded:' + response.content)
+            messages.success(self.request, 'Successfully uploaded:' + str(response.content))
         else:
             messages.error(self.request, 'There was a problem uploading your file:' + str(response.content))
         return redirect(form.cleaned_data.get('referrer', '/'))
@@ -110,6 +107,7 @@ class DataProductUploadView(LoginRequiredMixin,FormView):
         # TODO: Format error messages in a more human-readable way
         messages.error(self.request, 'There was a problem uploading your file: {}'.format(form.errors.as_json()))
         return redirect(form.cleaned_data.get('referrer', '/'))
+
 
 class FitsUploadAPIView(APIView):
 
@@ -180,7 +178,7 @@ class DataProductGroupListView(ListView):
     """
     model = DataProductGroup
     ordering = ['-created']
-    
+
     def get_context_data(self, *args, **kwargs):
         """
         Adds the set of ``DataProductGroup`` objects to the context dictionary.

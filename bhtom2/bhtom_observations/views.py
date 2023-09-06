@@ -3,7 +3,10 @@ from django.http import HttpResponseForbidden
 from django.views.generic import ListView, DetailView
 from guardian.shortcuts import get_objects_for_user
 
+from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_observations.models import Proposal
+
+logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_observation: views]')
 
 
 class ProposalListView(LoginRequiredMixin, ListView):

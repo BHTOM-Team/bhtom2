@@ -1,5 +1,4 @@
 from io import StringIO
-import logging
 
 from django.conf import settings
 from django.contrib import messages
@@ -7,10 +6,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.shortcuts import redirect
 from django.views.generic.edit import CreateView, UpdateView
+from rest_framework.response import Response
+from rest_framework import views
 
 from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm, TargetLatexDescriptionForm
-from bhtom2.bhtom_targets.utils import import_targets
+from bhtom2.bhtom_targets.utils import import_targets, update_targetList_cache, update_targetDetails_cache
 from bhtom2.external_service.data_source_information import get_pretty_survey_name
+from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom2.utils.openai_utils import latex_target_title_prompt, latex_text_target_prompt, \
     get_response
 from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_stats_latex
@@ -40,7 +42,7 @@ from bhtom2.utils.reduced_data_utils import save_photometry_data_for_target_to_c
 from bhtom_base.bhtom_targets.models import Target, TargetList
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
 
-logger = logging.getLogger(__name__)
+logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_targets: views]')
 
 
 class TargetCreateView(LoginRequiredMixin, CreateView):
@@ -145,6 +147,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
 
         cleaned_data = form.cleaned_data
         stored = Target.objects.all()
+
         try:
             ra = coords_to_degrees(cleaned_data['ra'], 'ra')
             dec = coords_to_degrees(cleaned_data['dec'], 'dec')
@@ -161,6 +164,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         #            raise ValidationError(f'Coordinates beyond range error')
 
         coords_names = check_for_existing_coords(ra, dec, 3. / 3600., stored)
+
         if len(coords_names) != 0:
             ccnames = ' '.join(coords_names)
             logger.error("There is a source found already at these coordinates (rad 3 arcsec)")
@@ -190,7 +194,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
 
         messages.success(self.request, 'Target Create success, now grabbing all the data for it.')
 
-        logger.info('Target post save hook: %s created: %s', self.object, True)
+        logger.info('Target post save hook: %s created: %s' % (self.object, True))
         run_hook('target_post_save', target=self.object, created=True)
 
         return redirect(self.get_success_url())
@@ -310,6 +314,8 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
                 messages.INFO,
                 f'Deleted alias {to_delete.name} for {get_pretty_survey_name(to_delete.source_name)}'
             )
+
+        run_hook('target_post_save', target=self.object, created=False)
 
         return redirect(self.get_success_url())
 
@@ -638,3 +644,25 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
             'filter_counts': filter_counts
         })
         return self.render_to_response(context)
+
+
+class CleanTargetListCache(views.APIView):
+    def post(self, request):
+        try:
+            logger.info("Start clean target list cache")
+            update_targetList_cache()
+        except Exception as e:
+            logger.error("Clean cache error: " + str(e))
+            return Response("ERROR", status=500)
+        return Response("OK", status=200)
+
+
+class CleanTargetDetailsCache(views.APIView):
+    def post(self, request):
+        try:
+            logger.error("Start clean target details cache")
+            update_targetDetails_cache()
+        except Exception as e:
+            logger.error("Clean cache error: " + str(e))
+            return Response("ERROR", status=500)
+        return Response("OK", status=200)

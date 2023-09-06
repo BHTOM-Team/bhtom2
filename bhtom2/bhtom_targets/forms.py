@@ -9,18 +9,11 @@ from astropy.coordinates import Angle
 from astropy import units as u
 from django.forms import ValidationError
 
+from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_targets.models import (
     Target, TargetExtra, TargetName, SIDEREAL_FIELDS, NON_SIDEREAL_FIELDS, REQUIRED_SIDEREAL_FIELDS,
     REQUIRED_NON_SIDEREAL_FIELDS, REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME
 )
-
-# CLASSIFICATION_TYPES = [
-#     ("unknown": "Unknown"),('active_galactic_nucleus':"Active Galactic Nucleus"), ("bl_lac": "BL Lac"),("cataclysmic_variable":"Cataclysmic Variable"),
-#     ("cepheid_variable":"Cepheid Variable"),("eclipsing_binary":"Eclipsing Binary"),("galaxy":"Galaxy"),("long_period_variable":"Long Period Variable"),("luminouse_blue_variable":"Luminous Blue Variable"),
-#     ("m_dwarf":"M-dwarf flare"),("microlensic_event":"Microlensing Event"),("Nova","Peculiar Supernova","Quasar","R CrB Variable",
-#     "RR Lyrae Variable","Solar System Object","Star","Supernova","Supernova imposter","Symbiotic star",
-#     "Tidal Disruption Event","Variable star-other","X-Ray Binary","Young Stellar Object"]
-
 
 
 CLASSIFICATION_TYPES = [
@@ -30,6 +23,7 @@ CLASSIFICATION_TYPES = [
     ("rr_lyrae_variable","RR Lyrae Variable"),("solar_system_object","Solar System Object"),("star","Star"),("supernova","Supernova"),("supernova_imposter","Supernova imposter"),("symbiotic_star","Symbiotic star"),
     ("tidal_disruption_event","Tidal Disruption Event"),("variable_star_other","Variable star-other"),("x_ray_binary","X-Ray Binary"),("young_stellar_object","Young Stellar Object")]
 
+logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_targets: forms]')
 
 
 def extra_field_to_form_field(field_type):

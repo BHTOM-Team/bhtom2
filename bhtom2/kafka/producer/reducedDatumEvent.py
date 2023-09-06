@@ -33,15 +33,14 @@ class ReducedDatumEventProducer:
         value = {
             "name": target.name,
             "broker": broker,
-            "isNew": isNew
+            "searchTargetName": isNew
         }
-        key = "correlation_id"
-        message_headers = get_guid()
+
+        guid = get_guid()
 
         message_json = json.dumps(value)
         self.producer.produce(topic,
                               value=message_json,
-                              key=key,
-                              headers=message_headers
+                              headers={"correlation_id": guid}
                               )
         self.producer.poll()

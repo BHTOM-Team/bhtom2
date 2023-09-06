@@ -5,6 +5,10 @@ from django.core.exceptions import ValidationError
 
 from .forms import CatalogQueryForm
 from bhtom_base.bhtom_catalogs.harvester import MissingDataException
+from ..utils.bhtom_logger import BHTOMLogger
+
+logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_catalogs: views]')
+
 
 class CatalogQueryView(FormView):
     """
@@ -22,9 +26,9 @@ class CatalogQueryView(FormView):
         :type form: CatalogQueryForm
         """
         try:
-            #harvester might return a dictionary of extras
+            # harvester might return a dictionary of extras
             self.target, self.ex = form.get_target()
-#            print("extras from harvester: ",self.ex)  
+        #            print("extras from harvester: ",self.ex)
 
         except MissingDataException:
             form.add_error('term', ValidationError('Object not found'))
@@ -38,4 +42,4 @@ class CatalogQueryView(FormView):
         """
         target_params = self.target.as_dict()
         target_params['names'] = ','.join(getattr(self.target, 'extra_names', []))
-        return reverse('targets:create') + '?' + urlencode(target_params)+'&'+urlencode(self.ex)
+        return reverse('targets:create') + '?' + urlencode(target_params) + '&' + urlencode(self.ex)
