@@ -38,7 +38,7 @@ from bhtom2.utils.reduced_data_utils import save_photometry_data_for_target_to_c
     save_radio_data_for_target_to_csv_file
 
 from bhtom_base.bhtom_targets.models import Target, TargetList
-from bhtom_base.bhtom_dataproducts.models import ReducedDatum
+from bhtom_base.bhtom_dataproducts.models import ReducedDatum, BrokerCadence
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_targets: views]')
 
@@ -129,7 +129,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         """
         Runs after form validation. Checks for existence of the target, also under different alias name
-        
+
         Creates the ``Target``, and creates any ``TargetName`` or ``TargetExtra`` objects,
         then runs the ``target_post_save`` hook and redirects to the success URL.
 
@@ -138,7 +138,6 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         """
 
         names = TargetNamesFormset(self.request.POST)
-
         target_names = get_nonempty_names_from_queryset(names.data)
         duplicate_names = check_duplicate_source_names(target_names)
         existing_names = check_for_existing_alias(target_names)
@@ -189,6 +188,8 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             to_add, _ = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
             to_add.name = name
             to_add.save()
+
+            BrokerCadence.objects.update_or_create(target=self.object, broker_name=source_name, last_update=None)
 
         messages.success(self.request, 'Target Create success, now grabbing all the data for it.')
 
