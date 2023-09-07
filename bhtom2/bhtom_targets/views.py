@@ -188,14 +188,12 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             to_add, _ = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
             to_add.name = name
             to_add.save()
-
-            BrokerCadence.objects.update_or_create(target=self.object, broker_name=source_name, last_update=None)
+            run_hook('update_alias', target=self.object, broker=name)
 
         messages.success(self.request, 'Target Create success, now grabbing all the data for it.')
 
         logger.info('Target post save hook: %s created: %s' % (self.object, True))
-        run_hook('target_post_save', target=self.object, created=True)
-
+        run_hook('target_post_save', target=self, created=True)
         return redirect(self.get_success_url())
 
     def get_form(self, *args, **kwargs):
@@ -315,8 +313,6 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
                 messages.INFO,
                 f'Deleted alias {to_delete.name} for {get_pretty_survey_name(to_delete.source_name)}'
             )
-
-        run_hook('target_post_save', target=self.object, created=False)
 
         return redirect(self.get_success_url())
 
