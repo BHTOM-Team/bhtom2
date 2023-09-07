@@ -296,6 +296,8 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
             to_update, created = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
             to_update.name = name
             to_update.save(update_fields=['name'])
+            run_hook('update_alias', target=self.object, broker=source_name)
+
             messages.add_message(
                 self.request,
                 messages.INFO,
