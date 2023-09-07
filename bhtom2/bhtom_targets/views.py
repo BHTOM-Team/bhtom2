@@ -193,7 +193,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, 'Target Create success, now grabbing all the data for it.')
 
         logger.info('Target post save hook: %s created: %s' % (self.object, True))
-        run_hook('target_post_save', target=self, created=True)
+        run_hook('target_post_save', target=self.object, created=True)
         return redirect(self.get_success_url())
 
     def get_form(self, *args, **kwargs):
