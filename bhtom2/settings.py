@@ -30,10 +30,10 @@ secret = dotenv_values(os.path.join(BASE_DIR, 'bhtom2/.bhtom.env'))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'jkg5zb*xutcc+93y!00$7z409yrh%6#i@f)+h!$lyr3vqo9c)e'
+SECRET_KEY = secret.get("SECRET_KEY", '')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = secret.get("DEBUG", False)
 
 ALLOWED_HOSTS = [] + list(secret.get("ALLOWED_HOSTS", 'localhost').split(','))
 SITE_ID = int(secret.get("SITE_ID", 1))

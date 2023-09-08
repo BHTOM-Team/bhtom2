@@ -61,7 +61,7 @@ class ObservatoryCreationForm(forms.ModelForm):
                                       label='Approx. limit magnitude in V band* [mag]',
                                       widget=forms.NumberInput(attrs={'placeholder': '18.0'}))
 
-    altitude = forms.FloatField(required=False,
+    altitude = forms.FloatField(required=True,
                                 initial=None,
                                 label='Altitude [m]',
                                 widget=forms.NumberInput(attrs={'placeholder': '0.0'}))

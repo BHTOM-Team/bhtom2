@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime
 from urllib.parse import urlencode
 
@@ -18,6 +17,7 @@ from plotly import offline
 from astropy.time import Time
 
 from bhtom2.bhtom_dataproducts.forms import DataProductUploadForm
+from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, ReducedDatumUnit
 from bhtom_base.bhtom_dataproducts.processors.data_serializers import SpectrumSerializer
 from bhtom_base.bhtom_observations.models import ObservationRecord
@@ -28,6 +28,7 @@ from numpy import around
 from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_stats
 
 register = template.Library()
+logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_dataproducts: extras]')
 
 color_map = {
     'GSA(G)': ['black', 'hexagon', 8],
@@ -321,18 +322,24 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
     fig = None
     if target.photometry_plot is not None and target.photometry_plot != '':
         base_path = settings.DATA_FILE_PATH
-        fig = plotly.io.read_json(base_path + str(target.photometry_plot)) #TODO if file not exist?
+        try:
+            fig = plotly.io.read_json(base_path + str(target.photometry_plot))
+            return {
+                'target': target,
+                'plot': offline.plot(fig, output_type='div', show_link=False)
+            }
+        except:
+            logger.warning("Plot not exist")
 
-    else:
-        layout = go.Layout(
+    layout = go.Layout(
             height=height,
             width=width,
             paper_bgcolor=background,
             plot_bgcolor=background
 
-        )
-        layout.legend.font.color = label_color
-        fig = go.Figure(data=[], layout=layout)
+    )
+    layout.legend.font.color = label_color
+    fig = go.Figure(data=[], layout=layout)
 
     return {
         'target': target,
@@ -367,9 +374,16 @@ def spectroscopy_for_target(context, target, dataproduct=None):
     fig = None
     if target.spectroscopy_plot is not None and target.spectroscopy_plot != '':
         base_path = settings.DATA_FILE_PATH
-        fig = plotly.io.read_json(base_path + str(target.spectroscopy_plot))
-    else:
-        layout = go.Layout(
+        try:
+            fig = plotly.io.read_json(base_path + str(target.spectroscopy_plot))
+            return {
+                'target': target,
+                'plot': offline.plot(fig, output_type='div', show_link=False)
+            }
+        except:
+            logger.warning("Plot not exist")
+
+    layout = go.Layout(
             height=600,
             width=700,
             xaxis=dict(
@@ -378,8 +392,8 @@ def spectroscopy_for_target(context, target, dataproduct=None):
             yaxis=dict(
                 tickformat=".1eg"
             )
-        )
-        fig = go.Figure(data=[], layout=layout)
+    )
+    fig = go.Figure(data=[], layout=layout)
     return {
         'target': target,
         'plot': offline.plot(fig, output_type='div', show_link=False)

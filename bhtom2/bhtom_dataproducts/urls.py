@@ -12,6 +12,6 @@ urlpatterns = [
     path('data/group/create/', DataProductGroupCreateView.as_view(), name='group-create'),
     path('data/group/<str:name>/', DataProductGroupDetailView.as_view(), name='group-detail'),
 
-    path('download/photometry/<str:data>/', photometry_download.as_view(), name='photometry_download'),
-    path('data/<str:data>/', DataDetailsView.as_view(), name='details'),
+    path('download/photometry/<int:id>/', photometry_download.as_view(), name='photometry_download'),
+    path('data/<int:pk>/', DataDetailsView.as_view(), name='details'),
 ]

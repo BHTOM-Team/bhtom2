@@ -4,6 +4,8 @@ services:
 
   bhtom_db:
     container_name: bhtom_db
+    env_file:
+      - .env
     networks:
       - bhtom_network
     restart: always
@@ -22,6 +24,8 @@ services:
 
   bhtom:
     container_name: bhtom
+    env_file:
+      - .env
     networks:
       - bhtom_network
     build:
@@ -40,6 +44,8 @@ services:
 
   zookeeper1:
     image: 'confluentinc/cp-zookeeper:6.0.14'
+    env_file:
+      - .env
     container_name: zookeeper1
     networks:
       - bhtom_network
@@ -56,6 +62,8 @@ services:
 
   zookeeper2:
     image: confluentinc/cp-zookeeper:6.0.14
+    env_file:
+      - .env
     container_name: zookeeper2
     networks:
       - bhtom_network
@@ -72,6 +80,8 @@ services:
 
   zookeeper3:
     image: confluentinc/cp-zookeeper:6.0.14
+    env_file:
+      - .env
     container_name: zookeeper3
     networks:
       - bhtom_network
@@ -88,6 +98,8 @@ services:
 
   kafka1:
     image: 'confluentinc/cp-kafka:6.0.14'
+    env_file:
+      - .env
     container_name: kafka1
     networks:
       - bhtom_network
@@ -113,6 +125,8 @@ services:
   kafka2:
     image: 'confluentinc/cp-kafka:6.0.14'
     container_name: kafka2
+    env_file:
+      - .env
     networks:
       - bhtom_network
     ports:
@@ -137,6 +151,8 @@ services:
   kafka3:
     image: 'confluentinc/cp-kafka:6.0.14'
     container_name: kafka3
+    env_file:
+      - .env
     networks:
       - bhtom_network
     ports:
@@ -161,6 +177,8 @@ services:
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
+    env_file:
+      - .env
     networks:
       - bhtom_network
     ports:
@@ -178,6 +196,8 @@ services:
   mongo:
     image: mongo:7.0.0
     container_name: mongo
+    env_file:
+      - .env
     volumes:
       - mongo_data:/data/db
     networks:
@@ -186,6 +206,8 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
     container_name: elasticsearch
+    env_file:
+      - .env
     volumes:
       - es_data:/usr/share/elasticsearch/data
     environment:
@@ -204,6 +226,8 @@ services:
   graylog:
     image: graylog/graylog:5.1
     container_name: graylog
+    env_file:
+      - .env
     volumes:
       - graylog_data:/usr/share/graylog/data
     environment:

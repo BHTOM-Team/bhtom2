@@ -99,7 +99,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         }
         token = Token.objects.get(user_id=user.id).key
 
-        headers = {
+        headers = { # TODO !!! trzeba dodac Token do kazdego Api albo w kazdym bez Token
             'Authorization': 'Token ' + token,
             'correlation_id': get_guid()
         }
@@ -116,9 +116,9 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             return redirect(form.cleaned_data.get('referrer', '/'))
 
         if response.status_code == 201:
-            messages.success(self.request, 'Successfully uploaded:' + str(response.content))
+            messages.success(self.request, 'Successfully uploaded')
         else:
-            messages.error(self.request, 'There was a problem uploading your file:' + str(response.content))
+            messages.error(self.request, 'There was a problem uploading your file')
         return redirect(form.cleaned_data.get('referrer', '/'))
 
     def form_invalid(self, form):
@@ -155,7 +155,7 @@ class FitsUploadAPIView(APIView):
         return HttpResponse(response.content, status=response.status_code)
 
 
-class DataProductListView(FilterView):
+class DataProductListView(LoginRequiredMixin, FilterView):
     """
     View that handles the list of ``DataProduct`` objects.
     """
@@ -198,7 +198,7 @@ class DataProductListView(FilterView):
         return context
 
 
-class DataProductGroupListView(ListView):
+class DataProductGroupListView(LoginRequiredMixin, ListView):
     """
     View that handles the display of all ``DataProductGroup`` objects.
     """
@@ -253,7 +253,7 @@ class DataProductGroupCreateView(LoginRequiredMixin, CreateView):
         dataGroupUser.save()
 
 
-class DataProductGroupDetailView(FilterView):
+class DataProductGroupDetailView(LoginRequiredMixin, FilterView):
     """
     View that handles the viewing of a specific ``DataProductGroup``.
     """
@@ -282,10 +282,10 @@ class photometry_download(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         try:
-            file = self.kwargs['data']
+            file = self.kwargs['id']
             logger.info('Download Photometry file: %s, user: %s' % (str(file), str(self.request.user)))
-            dataProduct = DataProduct.objects.get(data=file)
-            assert dataProduct.photometry_file is None
+            dataProduct = DataProduct.objects.get(id=file)
+            assert dataProduct.photometry_data is not None
         except (DataProduct.DoesNotExist, AssertionError):
             logger.error('Download Photometry error, file not exist')
 
@@ -295,8 +295,7 @@ class photometry_download(LoginRequiredMixin, View):
                 return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
         try:
-            address = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/data/' + format(
-                dataProduct.photometry_data)
+            address = settings.BASE_DIR + '/data/' + format(dataProduct.photometry_data)
 
             logger.debug('Photometry download address: ' + address)
             open(address, 'r')
