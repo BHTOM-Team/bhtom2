@@ -17,7 +17,7 @@ from bhtom_base.bhtom_targets.models import (
 
 
 CLASSIFICATION_TYPES = [
-    ("unknown","Unknown"),('active_galactic_nucleus',"Active Galactic Nucleus(AGN)"), ("bl_lac", "BL Lac"),("cataclysmic_variable","Cataclysmic Variable(CV)"),
+    ("unknown","Unknown"),('be_star','Be-star outburst'),('active_galactic_nucleus',"Active Galactic Nucleus(AGN)"), ("bl_lac", "BL Lac"),("cataclysmic_variable","Cataclysmic Variable(CV)"),
     ("cepheid_variable","Cepheid Variable(CEPH)"),("eclipsing_binary","Eclipsing Binary(EB)"),("galaxy","Galaxy"),("long_period_variable","Long Period Variable(LPV)"),("luminouse_blue_variable","Luminous Blue Variable(LBV)"),
     ("m_dwarf","M-dwarf flare"),("microlensing_event","Microlensing Event"),("nova","Nova"),("peculiar_supernova","Peculiar Supernova"),("quasar","Quasar(QSO)"),("r_crb_variable","R CrB Variable"),
     ("rr_lyrae_variable","RR Lyrae Variable"),("solar_system_object","Solar System Object(SSO)"),("star","Star"),("supernova","Supernova(SN)"),("supernova_imposter","Supernova imposter"),("symbiotic_star","Symbiotic star"),
