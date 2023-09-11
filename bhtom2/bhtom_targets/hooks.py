@@ -28,7 +28,15 @@ def target_post_save(target, created=False):
 
 
 def update_alias(target, broker):
+    try:
+        brokerCadence = BrokerCadence.objects.get(target_id=target.id, broker_name=broker)
+        brokerCadence.last_update = None
+        brokerCadence.save()
+    except Exception as e:
+        logger.error(str(e))
 
-    BrokerCadence.objects.update_or_create(target=target, broker_name=broker, last_update=None)
-    datum = ReducedDatum.objects.filter(target=target, source_name=broker)
-    datum.delete()
+    try:
+        datum = ReducedDatum.objects.filter(target=target, source_name=broker)
+        datum.delete()
+    except Exception as e:
+        logger.error(str(e))
