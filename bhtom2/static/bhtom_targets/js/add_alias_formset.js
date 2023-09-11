@@ -35,6 +35,20 @@ function addForm(e) {
 
     formNum++ //Increment the form number
 
+    let source_name = newForm.querySelectorAll('[name*="-source_name"]');
+    source_name.forEach(function(element) {
+        element.setAttribute('name', `aliases-${formNum}-source_name`);
+        let selectedOption = element.options[element.selectedIndex];
+        element.remove(selectedOption.index)
+    });
+
+    let name = newForm.querySelectorAll('[name*="-name"]');
+    name.forEach(function(element) {
+        element.setAttribute('name', `aliases-${formNum}-name`);
+        element.setAttribute('value', "")
+    });
+
+
     newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`) //Update the new form to have the correct form number
     container.insertBefore(newForm, addButton) //Insert the new form at the end of the list of forms
 

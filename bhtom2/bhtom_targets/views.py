@@ -38,7 +38,7 @@ from bhtom2.utils.reduced_data_utils import save_photometry_data_for_target_to_c
     save_radio_data_for_target_to_csv_file
 
 from bhtom_base.bhtom_targets.models import Target, TargetList
-from bhtom_base.bhtom_dataproducts.models import ReducedDatum
+from bhtom_base.bhtom_dataproducts.models import ReducedDatum, BrokerCadence
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_targets: views]')
 
@@ -129,7 +129,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         """
         Runs after form validation. Checks for existence of the target, also under different alias name
-        
+
         Creates the ``Target``, and creates any ``TargetName`` or ``TargetExtra`` objects,
         then runs the ``target_post_save`` hook and redirects to the success URL.
 
@@ -138,7 +138,6 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         """
 
         names = TargetNamesFormset(self.request.POST)
-
         target_names = get_nonempty_names_from_queryset(names.data)
         duplicate_names = check_duplicate_source_names(target_names)
         existing_names = check_for_existing_alias(target_names)
@@ -189,12 +188,12 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             to_add, _ = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
             to_add.name = name
             to_add.save()
+            run_hook('update_alias', target=self.object, broker=name)
 
         messages.success(self.request, 'Target Create success, now grabbing all the data for it.')
 
         logger.info('Target post save hook: %s created: %s' % (self.object, True))
         run_hook('target_post_save', target=self.object, created=True)
-
         return redirect(self.get_success_url())
 
     def get_form(self, *args, **kwargs):
@@ -295,6 +294,8 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
             to_update, created = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
             to_update.name = name
             to_update.save(update_fields=['name'])
+            run_hook('update_alias', target=self.object, broker=source_name)
+
             messages.add_message(
                 self.request,
                 messages.INFO,
@@ -312,8 +313,6 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
                 messages.INFO,
                 f'Deleted alias {to_delete.name} for {get_pretty_survey_name(to_delete.source_name)}'
             )
-
-        run_hook('target_post_save', target=self.object, created=False)
 
         return redirect(self.get_success_url())
 

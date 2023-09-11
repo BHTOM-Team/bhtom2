@@ -25,23 +25,15 @@
                 <tbody>
                 <tr>
                     <td>Fits</td>
-                    {% if data_stored == True %}
-                        {% if tabData.fits_id is not None %}
-                            <td><a href="{% url 'fits_download' file_id=tabData.fits_id %} ">{{ tabData.fits }}</a></td>
-                        {% else %}
-                            <td></td>
-                        {% endif %}
-                    {% else %}
-                        <td>
-                            <div title="{{ tabData.fits }}">{{ tabData.fits }}</div>
-                        </td>
-                    {% endif %}
+                    <td>
+                        <div title="{{ tabData.fits }}">{{ tabData.fits }}</div>
+                    </td>
                 </tr>
                 <tr>
                     <td>Photometry</td>
-                    {% if tabData.photometry_id is not None %}
+                    {% if object.photometry_data is not None %}
                         <td>
-                            <a href="{% url 'photometry_download' file_id=tabData.photometry_id %}"> {{ tabData.photometry }}</a>
+                            <a href="{% url 'bhtom_dataproducts:photometry_download' id=object.id %}"> {{ object.get_file_name }}</a>
                         </td>
                     {% else %}
                         <td></td>
@@ -49,20 +41,20 @@
                 </tr>
                 <tr>
                     <td>Observatory</td>
-                    <td>{{ Observatory.obsName }}</td>
+                    <td>{{ object.observatory }}</td>
                 </tr>
                 <tr>
                     <td>Time Uploaded</td>
-                    {% if fits.start_time != None %}
-                        <td>{{ fits.start_time }}</td>
+                    {% if object.created != None %}
+                        <td>{{ object.created }}</td>
                     {% else %}
                         <td></td>
                     {% endif %}
                 </tr>
                 <tr>
                     <td>Time Photometry</td>
-                    {% if fits.cpcs_time != None %}
-                        <td>{{ fits.cpcs_time }}</td>
+                    {% if calibration.modified != None %}
+                        <td>{{ calibration.modified }}</td>
                     {% else %}
                         <td></td>
                     {% endif %}
@@ -73,8 +65,8 @@
                 </tr>
                 <tr>
                     <td>MJD</td>
-                    {% if fits.mjd != None %}
-                        <td>{{ fits.mjd }}</td>
+                    {% if calibration.mjd != None %}
+                        <td>{{ calibration.mjd }}</td>
                     {% else %}
                         <td></td>
                     {% endif %}
@@ -82,8 +74,8 @@
                 </tr>
                 <tr>
                     <td>Exposure time</td>
-                    {% if fits.expTime != None %}
-                        <td>{{ fits.expTime }}</td>
+                    {% if calibration.expTime != None %}
+                        <td>{{ calibration.expTime }}</td>
                     {% else %}
                         <td></td>
                     {% endif %}
@@ -91,7 +83,7 @@
                 </tr>
                 <tr>
                     <td>Calib Filter</td>
-                    <td>{{ filter }}</td>
+                    <td>{{ calibration.best_filter }}</td>
                 </tr>
                 <tr>
                     <td>FITS Filter</td>
@@ -104,8 +96,8 @@
 
                 <tr>
                     <td>Magnitude</td>
-                    {% if fits.mag != None %}
-                        <td>{{ fits.mag|floatformat:2 }} +/- {{ fits.mag_err|floatformat:2 }} mag</td>
+                    {% if calibration.mag != None %}
+                        <td>{{ calibration.mag|floatformat:2 }} +/- {{ fits.mag_err|floatformat:2 }} mag</td>
                     {% else %}
                         <td></td>
                     {% endif %}
@@ -113,8 +105,8 @@
                 </tr>
                 <tr>
                     <td>ZP</td>
-                    {% if fits.zeropoint != None %}
-                        <td>{{ fits.zeropoint|floatformat:2 }} mag</td>
+                    {% if calibration.zeropoint != None %}
+                        <td>{{ calibration.zeropoint|floatformat:2 }} mag</td>
                     {% else %}
                         <td></td>
                     {% endif %}
@@ -122,8 +114,8 @@
                 </tr>
                 <tr>
                     <td>Scatter</td>
-                    {% if fits.scatter != None %}
-                        <td>{{ fits.scatter|floatformat:3 }} mag</td>
+                    {% if calibration.scatter != None %}
+                        <td>{{ calibration.scatter|floatformat:3 }} mag</td>
                     {% else %}
                         <td></td>
                     {% endif %}
@@ -131,8 +123,8 @@
                 </tr>
                 <tr>
                     <td>Number of datapoints used for calibration</td>
-                    {% if fits.npoints != None %}
-                        <td>{{ fits.npoints }}</td>
+                    {% if calibration.npoints != None %}
+                        <td>{{ calibration.npoints }}</td>
                     {% else %}
                         <td></td>
                     {% endif %}
@@ -140,8 +132,8 @@
                 </tr>
                 <tr>
                     <td>Outlier fraction</td>
-                    {% if fits.outlier_fraction != None %}
-                        <td>{{ fits.outlier_fraction|floatformat }}</td>
+                    {% if calibration.outlier_fraction != None %}
+                        <td>{{ calibration.outlier_fraction|floatformat }}</td>
                     {% else %}
                         <td></td>
                     {% endif %}
@@ -149,16 +141,16 @@
                 </tr>
                 <tr>
                     <td>Matching radius[arcsec]</td>
-                    <td>{{ fits.matchDist }}</td>
+                    <td>{{ calibration.matchDist }}</td>
                 </tr>
                 <tr>
                     <td>Dry Run (no data will be stored in the database)</td>
-                    <td>{{ fits.allow_upload }}</td>
+                    <td>{{ calibration.dry_run }}</td>
                 </tr>
                 <tr>
                     <td>Comment</td>
-                    {% if fits.comment != None %}
-                        <td>{{ fits.comment }}</td>
+                    {% if calibration.comment != None %}
+                        <td>{{ calibration.comment }}</td>
                     {% else %}
                         <td></td>
                     {% endif %}

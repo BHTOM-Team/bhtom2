@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.http import Http404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import views
@@ -148,11 +149,16 @@ class TargetDeleteApi(views.APIView):
         return Response({"status": "deleted"}, status=200)
 
 
-class CleanTargetListCache(views.APIView): #TODO add token
+class CleanTargetListCache(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         try:
-            logger.info("Start clean target list cache")
-            update_targetList_cache()
+            if request.user.is_superuser:
+                logger.info("Start clean target list cache")
+                update_targetList_cache()
+            else:
+                raise Http404
         except Exception as e:
             logger.error("Clean cache error: " + str(e))
             return Response("ERROR", status=500)
@@ -160,10 +166,16 @@ class CleanTargetListCache(views.APIView): #TODO add token
 
 
 class CleanTargetDetailsCache(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         try:
-            logger.error("Start clean target details cache")
-            update_targetDetails_cache()
+            if request.user.is_superuser:
+                logger.error("Start clean target details cache")
+                update_targetDetails_cache()
+            else:
+                raise Http404
         except Exception as e:
             logger.error("Clean cache error: " + str(e))
             return Response("ERROR", status=500)

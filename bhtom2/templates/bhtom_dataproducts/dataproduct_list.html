@@ -9,7 +9,7 @@
     <div class="row">
         <div class="col-md-10">
 
-            <table class="table">
+            <table class="table table-hover">
                 <thead>
                 <tr>
                     <th>File</th>
@@ -19,7 +19,6 @@
                     <th>Observatory</th>
                     <th>Owner</th>
                     <th>Type</th>
-                    <th>Thumbnail</th>
                     <th>Status</th>
                     <th>Details</th>
                 </tr>
@@ -30,13 +29,13 @@
                         <td>{{ product.get_file_name|truncatechars:40 }}</td>
                         {% if product.photometry_data is not None %}
                             <td>
-                                <a href="{% url 'bhtom_dataproducts:photometry_download' data=product.data %}"> {{ product.photometry_data|truncatechars:40 }}</a>
+                                <a href="{% url 'bhtom_dataproducts:photometry_download' id=product.id %}"> {{ product.get_file_name|truncatechars:40 }}</a>
                             </td>
                         {% else %}
                             <td></td>
                         {% endif %}
                         <td>
-                            <a href="{% url 'bhtom_targets:detail' product.target.id %}">{{ product.target.name|truncatechars:40 }}</a>
+                            <a href="{% url 'bhtom_targets:detail' product.target.name %}">{{ product.target.name|truncatechars:40 }}</a>
                         </td>
                         {% if product.observation_record.id %}
                             <td>
@@ -46,33 +45,18 @@
                             <td></td>
                         {% endif %}
                         <td>{{ product.observatory }}</td>
-                        <td>{{ product.observatory.user }}</td>
+                        <td>{{ product.user }}</td>
                         <td>
                             {% if product.data_product_type %}
                                 {{ product.get_type_display }}
                             {% endif %}
                         </td>
 
-                        {% if product.get_file_extension == '.fz' or product.get_file_extension == '.fits' %}
-                            <td>
-                                {% if product.get_preview %}
-                                    {% cache None thumbnail product.id %}
-                                        <img src="{{ product.get_preview }}" class="thumbnail"><br/>
-                                    {% endcache %}
-                                    {% include 'bhtom_dataproducts/partials/js9_button.html' with url=product.data.url only %}
-                                {% else %}
-                                    <img src="{% static 'bhtom_dataproducts/img/placeholder.png' %}" class="thumbnail">
-                                    <br/>
-                                {% endif %}
-                            </td>
-                        {% else %}
-                            <td></td>
-                        {% endif %}
                         <td>TODO</td>
 
                         {% if product.data_product_type == 'fits_file' or product.data_product_type == 'photometry' %}
                             <td>
-                                <a href="{% url 'bhtom_dataproducts:details' data=product.data %}" title="Show details"
+                                <a href="{% url 'bhtom_dataproducts:details' pk=product.id %}" title="Show details"
                                    class="btn btn-primary">Detail</a>
                             </td>
                         {% else %}
@@ -91,7 +75,7 @@
             </table>
             {% bootstrap_pagination page_obj extra=request.GET.urlencode %}
         </div>
-        <div class="col-md-2">
+        <div class="col-md-2 target-right">
             <form action="" method="get" class="form">
                 {% bootstrap_form filter.form %}
                 {% buttons %}

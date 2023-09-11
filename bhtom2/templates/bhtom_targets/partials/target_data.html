@@ -25,64 +25,63 @@
     {% endfor %}
 </dl>
 <dl class="row">
-    {% for key, value in extras.items %}
 
-        {% if key == 'constellation' %}
+
+        {% if target.constellation  %}
             <dt class="col-sm-6">{{ "Constellation" }}</dt>
-            <dd class="col-sm-6">{{ value }}</dd>
+            <dd class="col-sm-6">{{ target.constellation }}</dd>
         {% endif %}
 
-        {% if key == 'discovery_date' %}
+        {% if target.discovery_date %}
             <dt class="col-sm-6">{{ "Discovered" }}</dt>
-            <dd class="col-sm-6">{{ value }}</dd>
+            <dd class="col-sm-6">{{ target.discovery_date }}</dd>
         {% endif %}
 
-        {% if key == 'classification' %}
+        {% if target.classification %}
             <dt class="col-sm-6">{{ "Class" }}</dt>
-            <dd class="col-sm-6">{{ value }}</dd>
+            <dd class="col-sm-6">{{ target.classification }}</dd>
         {% endif %}
 
-        {% if key == 'phot_class' %}
+        {% if target.phot_class %}
             <dt class="col-sm-6">{{ "Phot.Class" }}</dt>
-            <dd class="col-sm-6">{{ value }}</dd>
+            <dd class="col-sm-6">{{ target.phot_class }}</dd>
         {% endif %}
 
-        {% if key == 'mjd_last' %}
+        {% if target.mjd_last %}
             <dt class="col-sm-6">{{ "Last MJD" }}</dt>
-            <dd class="col-sm-6">{{ value }}</dd>
+            <dd class="col-sm-6">{{ target.mjd_last }}</dd>
         {% endif %}
 
-        {% if key == 'mag_last' %}
+        {% if target.mag_last %}
             <dt class="col-sm-6">{{ "Last G Mag" }}</dt>
-            <dd class="col-sm-6">{{ value }}</dd>
+            <dd class="col-sm-6">{{ target.mag_last }}</dd>
         {% endif %}
 
-        {% if key == 'importance' %}
+        {% if target.importance %}
             <dt class="col-sm-6">{{ "Target importance (0-10)" }}</dt>
-            <dd class="col-sm-6">{{ value }}</dd>
+            <dd class="col-sm-6">{{ target.importance }}</dd>
         {% endif %}
 
-        {% if key == 'cadence' %}
+        {% if target.cadence %}
             <dt class="col-sm-6">{{ "Cadence requested (d)" }}</dt>
-            <dd class="col-sm-6">{{ value }}</dd>
+            <dd class="col-sm-6">{{ target.cadence }}</dd>
         {% endif %}
 
-        {% if key == 'priority' %}
+        {% if target.priority %}
             <dt class="col-sm-6">{{ "Observing priority" }}</dt>
-            <dd class="col-sm-6">{{ value }}</dd>
+            <dd class="col-sm-6">{{ target.priority }}</dd>
         {% endif %}
 
-        {% if key == 'sun_separation' %}
+        {% if target.sun_separation %}
             <dt class="col-sm-6">{{ "Sun Separation (deg)" }}</dt>
-            <dd class="col-sm-6">{{ value }}</dd>
+            <dd class="col-sm-6">{{ target.sun_separation }}</dd>
         {% endif %}
 
-        {% if key == 'creation_date' %}
+        {% if target.creation_date %}
             <dt class="col-sm-6">{{ "Target created" }}</dt>
-            <dd class="col-sm-6">{{ value }}</dd>
+            <dd class="col-sm-6">{{ target.creation_date }}</dd>
         {% endif %}
 
-    {% endfor %}
 </dl>
 
 <p>Other names:

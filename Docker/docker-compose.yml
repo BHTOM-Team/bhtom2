@@ -5,6 +5,8 @@ services:
   bhtom_db:
     container_name: bhtom_db
     restart: always
+    env_file:
+      - .env
     build:
       context: .
       dockerfile: db_Dockerfile
@@ -28,6 +30,8 @@ services:
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
     restart: always
+    env_file:
+      - .env
     networks:
       - bhtom_network
     volumes:
@@ -41,6 +45,8 @@ services:
     image: 'confluentinc/cp-zookeeper:latest'
     container_name: zookeeper1
     hostname: zookeeper1
+    env_file:
+      - .env
     networks:
       - bhtom_network
     environment:
@@ -57,6 +63,8 @@ services:
     image: 'confluentinc/cp-kafka:latest'
     container_name: kafka1
     restart: always
+    env_file:
+      - .env
     networks:
       - bhtom_network
     ports:
@@ -78,6 +86,8 @@ services:
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
+    env_file:
+      - .env
     networks:
       - bhtom_network
     ports:

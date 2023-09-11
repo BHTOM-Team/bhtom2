@@ -30,10 +30,10 @@ secret = dotenv_values(os.path.join(BASE_DIR, 'bhtom2/.bhtom.env'))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'jkg5zb*xutcc+93y!00$7z409yrh%6#i@f)+h!$lyr3vqo9c)e'
+SECRET_KEY = secret.get("SECRET_KEY", '')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = secret.get("DEBUG", False)
 
 ALLOWED_HOSTS = [] + list(secret.get("ALLOWED_HOSTS", 'localhost').split(','))
 SITE_ID = int(secret.get("SITE_ID", 1))
@@ -412,6 +412,7 @@ OPEN_URLS = []
 
 HOOKS = {
     'target_post_save': 'bhtom2.bhtom_targets.hooks.target_post_save',
+    'update_alias': 'bhtom2.bhtom_targets.hooks.update_alias',
     'reduced_datum_pre_save': 'bhtom_base.bhtom_dataproducts.hooks.reduced_datum_pre_save',
     'observation_change_state': 'bhtom_base.bhtom_common.hooks.observation_change_state',
     'data_product_post_upload': 'bhtom_base.bhtom_dataproducts.hooks.data_product_post_upload',

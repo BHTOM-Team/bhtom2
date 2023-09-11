@@ -16,6 +16,10 @@ COPY Docker/.env /bhtom2/.bhtom.env
 
 RUN mkdir log || exit 0
 RUN touch log/debug.log || exit 0
+RUN mkdir data || exit 0
+RUN mkdir data/plots || exit 0
+RUN mkdir data/plots/photometry || exit 0
+RUN mkdir data/plots/spectroskopy || exit 0
 RUN pwd
 RUN apt update
 RUN apt install -y libpq-dev
