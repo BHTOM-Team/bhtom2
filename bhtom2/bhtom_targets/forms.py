@@ -17,11 +17,11 @@ from bhtom_base.bhtom_targets.models import (
 
 
 CLASSIFICATION_TYPES = [
-    ("unknown","Unknown"),('active_galactic_nucleus',"Active Galactic Nucleus"), ("bl_lac", "BL Lac"),("cataclysmic_variable","Cataclysmic Variable"),
-    ("cepheid_variable","Cepheid Variable"),("eclipsing_binary","Eclipsing Binary"),("galaxy","Galaxy"),("long_period_variable","Long Period Variable"),("luminouse_blue_variable","Luminous Blue Variable"),
-    ("m_dwarf","M-dwarf flare"),("microlensic_event","Microlensing Event"),("nova","Nova"),("peculiar_supernova","Peculiar Supernova"),("quasar","Quasar"),("r_crb_variable","R CrB Variable"),
-    ("rr_lyrae_variable","RR Lyrae Variable"),("solar_system_object","Solar System Object"),("star","Star"),("supernova","Supernova"),("supernova_imposter","Supernova imposter"),("symbiotic_star","Symbiotic star"),
-    ("tidal_disruption_event","Tidal Disruption Event"),("variable_star_other","Variable star-other"),("x_ray_binary","X-Ray Binary"),("young_stellar_object","Young Stellar Object")]
+    ("unknown","Unknown"),('active_galactic_nucleus',"Active Galactic Nucleus(AGN)"), ("bl_lac", "BL Lac"),("cataclysmic_variable","Cataclysmic Variable(CV)"),
+    ("cepheid_variable","Cepheid Variable(CEPH)"),("eclipsing_binary","Eclipsing Binary(EB)"),("galaxy","Galaxy"),("long_period_variable","Long Period Variable(LPV)"),("luminouse_blue_variable","Luminous Blue Variable(LBV)"),
+    ("m_dwarf","M-dwarf flare"),("microlensing_event","Microlensing Event"),("nova","Nova"),("peculiar_supernova","Peculiar Supernova"),("quasar","Quasar(QSO)"),("r_crb_variable","R CrB Variable"),
+    ("rr_lyrae_variable","RR Lyrae Variable"),("solar_system_object","Solar System Object(SSO)"),("star","Star"),("supernova","Supernova(SN)"),("supernova_imposter","Supernova imposter"),("symbiotic_star","Symbiotic star"),
+    ("tidal_disruption_event","Tidal Disruption Event(TDE)"),("variable_star_other","Variable star-other"),("x_ray_binary","X-Ray Binary(XRB)"),("young_stellar_object","Young Stellar Object(YSO)")]
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_targets: forms]')
 
