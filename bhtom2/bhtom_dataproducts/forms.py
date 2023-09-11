@@ -27,9 +27,6 @@ class GroupChoiceField(forms.ModelChoiceField):
 
 
 class DataProductUploadForm(forms.Form):
-    MATCHING_RADIUS = [
-        ('0.5', '0.5 arcsec'),
-    ]
 
     observation_record = forms.ModelChoiceField(
         ObservationRecord.objects.all(),
@@ -64,14 +61,6 @@ class DataProductUploadForm(forms.Form):
     ExpTime = forms.IntegerField(
         label='Exposure time (sec)',
         widget=forms.NumberInput(attrs={'id': 'ExpTime'}),
-        required=False
-    )
-
-    matchDist = forms.ChoiceField(
-        choices=MATCHING_RADIUS,
-        widget=forms.Select(),
-        label='Matching radius',
-        initial='0.5',
         required=False
     )
 
@@ -128,9 +117,9 @@ class DataProductUploadForm(forms.Form):
             required=False,
             label='Comment',
         )
-        self.fields['group'] = GroupChoiceField(
-            queryset=DataProductGroup_user.objects.filter(user_id=user.id, active_flg=True).order_by('created'),
-            widget=forms.Select(),
-            required=False,
-            label="Group",
-        )
+        # self.fields['group'] = GroupChoiceField(
+        #     queryset=DataProductGroup_user.objects.filter(user_id=user.id, active_flg=True).order_by('created'),
+        #     widget=forms.Select(),
+        #     required=False,
+        #     label="Group",
+        #)
