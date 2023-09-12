@@ -64,7 +64,8 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         comment = form.cleaned_data['comment']
         facility = form.cleaned_data['facility']
         observer = form.cleaned_data['observer']
-        group = form.cleaned_data['group']
+        #group = form.cleaned_data['group']
+        group = None
         user = self.request.user
 
         files = self.request.FILES.getlist('files')
