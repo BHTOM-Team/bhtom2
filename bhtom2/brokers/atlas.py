@@ -136,7 +136,7 @@ class ATLASBroker(BHTOMBroker):
                                            error=dm,
                                            filter = fil, 
                                            observer=self.__OBSERVER_NAME,
-                                           facility=datum.Obs, #the ATLAS data file on which the measurements were made
+                                           facility=self.__FACILITY_NAME, #the ATLAS data file on which the measurements were made
                                            value_unit = ReducedDatumUnit.MAGNITUDE)
                                            
                 reduced_datums.extend([reduced_datum])

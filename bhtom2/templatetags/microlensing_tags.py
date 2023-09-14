@@ -1,7 +1,7 @@
 # importing the required module
 import logging
 from os import path
-'''
+
 import astropy
 from astropy.time import Time
 from django import template
@@ -838,4 +838,3 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
         'image':image_base64,
     }
     
-'''
