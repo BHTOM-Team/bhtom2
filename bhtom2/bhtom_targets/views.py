@@ -190,7 +190,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             to_add.save()
             run_hook('update_alias', target=self.object, broker=name)
 
-        messages.success(self.request, 'Target Create success, now grabbing all the data for it.')
+        messages.success(self.request, 'Target created, grabbing all the data for it. Please wait and refresh in about a minute...')
 
         logger.info('Target post save hook: %s created: %s' % (self.object, True))
         run_hook('target_post_save', target=self.object, created=True)
