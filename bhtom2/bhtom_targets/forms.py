@@ -342,15 +342,15 @@ class TargetLatexDescriptionForm(TargetForm):
         # self.fields['classification'].widget = TextInput(attrs={'maxlength': 250})
 
         # hidding irrelevant fields
-        self.fields['ra'].widget = HiddenInput()
-        self.fields['dec'].widget = HiddenInput()
-        self.fields['importance'].widget = HiddenInput()
-        self.fields['cadence'].widget = HiddenInput()
-        self.fields['groups'].widget = HiddenInput()
+        # self.fields['ra'].widget = HiddenInput()
+        # self.fields['dec'].widget = HiddenInput()
+        # self.fields['importance'].widget = HiddenInput()
+        # self.fields['cadence'].widget = HiddenInput()
+        # self.fields['groups'].widget = HiddenInput()
 
-        self.extra_fields['classification'].widget = HiddenInput()
-        self.extra_fields['discovery_date'].widget = HiddenInput()
-        self.extra_fields['creation_date'].widget = HiddenInput()
+        # self.extra_fields['classification'].widget = HiddenInput()
+        # self.extra_fields['discovery_date'].widget = HiddenInput()
+        # self.extra_fields['creation_date'].widget = HiddenInput()
 
         # self.fields['jdlastobs'].widget = HiddenInput()
         # self.fields['maglast'].widget = HiddenInput()

@@ -103,7 +103,7 @@ def latex_text_target_prompt(target:Target):
     #discovery date from extras
     #who found it first?
 #    discdate=target.discovery_date
-    discdate=(TargetExtra.objects.get(target=target, key='discovery_date').value)
+    discdate=str(target.discovery_date)
 
     # prompt_date=f"Rewrite datetime {discdate} UT in Month, day, year format, without time"
     # date=get_response(prompt_date)

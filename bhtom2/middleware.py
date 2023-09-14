@@ -2,6 +2,8 @@ import logging
 import datetime
 
 from bhtom2.utils.bhtom_logger import BHTOMLogger
+from bhtom2.utils.access_utils import can_access
+from django.http import HttpResponseForbidden
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[request, response]')
 logging.getLogger("paramiko").setLevel(logging.WARNING)
@@ -38,3 +40,13 @@ class RequestLogMiddleware:
 
         return response
 
+
+class AccessControlMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if not can_access(request):
+            return HttpResponseForbidden("Access denied")
+        response = self.get_response(request)
+        return response

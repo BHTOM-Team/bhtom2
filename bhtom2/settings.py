@@ -109,6 +109,7 @@ MIDDLEWARE = [
     'bhtom_custom_registration.bhtom_registration.middleware.RedirectAuthenticatedUsersFromRegisterMiddleware',
     'django_guid.middleware.guid_middleware',
     'bhtom2.middleware.RequestLogMiddleware',
+    'bhtom2.middleware.AccessControlMiddleware'
 ]
 
 ROOT_URLCONF = 'bhtom2.urls'
