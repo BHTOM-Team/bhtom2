@@ -55,9 +55,11 @@
                     <a class="nav-link" id="spectroscopy-tab" href="#spectroscopy" role="tab"
                        data-toggle="tab">Spectroscopy</a>
                 </li>
+                {% if request.user.is_superuser or request.user.is_staff %}
                 <li class="nav-item">
                     <a class="nav-link" id="observe-tab" href="#observe" role="tab" data-toggle="tab">Observe</a>
                 </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" id="observations-tab" href="#observations" role="tab"
                        data-toggle="tab">Observations</a>
