@@ -2,29 +2,28 @@
 {% cache 86400 targets_list_cache object_list using="targetList" %}
 <table class="table table-hover sortable">
     <thead>
-    <tr>
-        <th><label><input type="checkbox" id="selectPage"
-                          onClick="select_page(this, {{ target_count }})"/></label></th>
-        <th>Names</th>
-        <th>RA</th>
-        <th>Dec</th>
-        <th>Nobs</th>
-        <th>Last Gmag</th>
-        <th>Last Filter</th>
-        <th>Importance</th>
-        <th>Created</th>
-        <th>Priority</th>
-        <th>Sun</th>
-        <th>Class</th>
-    </tr>
+        <tr>
+            <th><label><input type="checkbox" id="selectPage" onClick="select_page(this, {{ target_count }})" /></label>
+            </th>
+            <th>Names</th>
+            <th>RA</th>
+            <th>Dec</th>
+            <th>Nobs</th>
+            <th>Last Gmag</th>
+            <th>Last Filter</th>
+            <th>Importance</th>
+            <th>Created</th>
+            <th>Priority</th>
+            <th>Sun</th>
+            <th>Class</th>
+        </tr>
     </thead>
     <tbody>
-    {% for target in object_list %}
+        {% for target in object_list %}
         <tr>
             <td><label>
-                <input type="checkbox" name="selected-target" value="{{ target.id }}"
-                       onClick="single_select()"/>
-            </label></td>
+                    <input type="checkbox" name="selected-target" value="{{ target.id }}" onClick="single_select()" />
+                </label></td>
             <td>
                 <a href="{% url 'targets:detail' target.name %}" title="{{ target.name }}">{{ target.name }}</a>
             </td>
@@ -38,27 +37,27 @@
             <td>{{ target.created }}</td>
             <td>
                 {% if target.cadencepriority >= 10 %}
-                    <div class="red">
-                {% else %}
+                <div class="red">
+                    {% else %}
                     <div>
-                {% endif %}
-                {{ target.priority|floatformat:1 }}
-                </div>
+                        {% endif %}
+                        {{ target.priority|floatformat:1 }}
+                    </div>
             </td>
             <td>{{ target.sun_separation|floatformat:0 }}</td>
             <td>{{ target.classification }}</td>
         </tr>
-    {% empty %}
+        {% empty %}
         <tr>
             <td colspan="5">
                 {% if target_count == 0 %}
-                    No targets yet.
+                No targets yet.
                 {% else %}
-                    No targets match those filters.
+                No targets match those filters.
                 {% endif %}
             </td>
         </tr>
-    {% endfor %}
+        {% endfor %}
     </tbody>
 </table>
 {% endcache %}
