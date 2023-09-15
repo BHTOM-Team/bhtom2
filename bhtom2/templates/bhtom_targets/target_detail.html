@@ -3,229 +3,238 @@
 {% load comments bootstrap4 bhtom_common_extras targets_extras observation_extras dataproduct_extras static cache %}
 {% block title %}Target {{ object.name }}{% endblock %}
 {% block additional_css %}
-    <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
-    <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}">
+<link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
+<link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}">
 {% endblock %}
 {% block content %}
-    <script>
-        // This script maintains the selected tab upon reload
-        $(document).ready(function () {
-            // This is required due to the apparent redefinition of $ in another library: https://api.jquery.com/jquery.noconflict/
-            // Based on trial and error, the offending script appears to be JS9, which is used in dataproduct_list_for_target
-            $.noConflict();
-            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                localStorage.setItem('activeTab', $(e.target).attr('href'));
-            });
-
-            var activeTab = localStorage.getItem('activeTab');
-            if (activeTab) {
-                $('#tabs a[href="' + activeTab + '"]').tab('show');
-            }
+<script>
+    // This script maintains the selected tab upon reload
+    $(document).ready(function () {
+        // This is required due to the apparent redefinition of $ in another library: https://api.jquery.com/jquery.noconflict/
+        // Based on trial and error, the offending script appears to be JS9, which is used in dataproduct_list_for_target
+        $.noConflict();
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            localStorage.setItem('activeTab', $(e.target).attr('href'));
         });
-    </script>
 
-    <div class="row">
-        <div class="col-lg-4">
-            <div id="target-info">
-                {% target_feature object %}
-                {% if object.future_observations %}
-                    <div class="alert alert-success">
-                        {{ object.future_observations|length }} upcoming
-                        observation{{ object.future_observations|pluralize }}
-                    </div>
-                {% endif %}
-                {% target_unknown_statuses object %}
-                {% target_buttons object %}
-                {% target_data object %}
-                {% if object.type == 'SIDEREAL' %}
-                    {% aladin object %}
-                {% endif %}
+        var activeTab = localStorage.getItem('activeTab');
+        if (activeTab) {
+            $('#tabs a[href="' + activeTab + '"]').tab('show');
+        }
+    });
+</script>
+
+<div class="row">
+    <div class="col-lg-4">
+        <div id="target-info">
+            {% target_feature object %}
+            {% if object.future_observations %}
+            <div class="alert alert-success">
+                {{ object.future_observations|length }} upcoming
+                observation{{ object.future_observations|pluralize }}
             </div>
-        </div>
-        <div class="col-lg-8 target-right">
-            <ul class="nav nav-tabs" role="tablist" id="tabs">
-                <li class="nav-item">
-                    <a class="nav-link active" id="photometry-tab" href="#photometry" role="tab"
-                       data-toggle="tab">Photometry</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="phot-models-tab" href="#phot-models" role="tab" data-toggle="tab">Models</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="spectroscopy-tab" href="#spectroscopy" role="tab"
-                       data-toggle="tab">Spectroscopy</a>
-                </li>
-                {% if request.user.is_superuser or request.user.is_staff %}
-                <li class="nav-item">
-                    <a class="nav-link" id="observe-tab" href="#observe" role="tab" data-toggle="tab">Observe</a>
-                </li>
-                {% endif %}
-                <li class="nav-item">
-                    <a class="nav-link" id="observations-tab" href="#observations" role="tab"
-                       data-toggle="tab">Observations</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="publication-tab" href="#publication" role="tab"
-                       data-toggle="tab">Publication</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="manage-data-tab" href="#manage-data" role="tab" data-toggle="tab">Manage
-                        Data</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="manage-groups-tab" href="#manage-groups" role="tab" data-toggle="tab">Manage
-                        Groups</a>
-                </li>
-            </ul>
-
-            <div class="tab-content">
-                <div class="tab-pane active" id="photometry">
-
-                    {% photometry_for_target target %}
-
-                    <div class="row menu-row">
-                        <div class="col-lg-6">
-                            <button onclick="download_photometry()" class="btn btn-primary" role="button">Download
-                                photometry data
-                            </button>
-                        </div>
-                        <div class="col-lg-6 text-right">
-                            <button onclick="download_radio()" class="btn btn-primary" role="button">Download radio
-                                data
-                            </button>
-                        </div>
-                    </div>
-
-                    {% recent_photometry object limit=5 %}
-
-                </div>
-                <div class="tab-pane" id="phot-models">
-                    <h6>
-                        <button onclick="open_microlensing_model()" class="btn btn-info" role="button">Microlensing
-                            model standard
-                        </button>
-                        The simplest microlensing model, single lens, single source, no parallax
-                    </h6>
-                    <h6>
-                        <button onclick="open_microlensing_parallax_model()" class="btn btn-info" role="button">
-                            Microlensing model parallax
-                        </button>
-                        Microlensing model, single lens, single source, with parallax
-                    </h6>
-                    <br>
-                </div>
-                <div class="tab-pane" id="spectroscopy">
-
-                    {% spectroscopy_for_target target %}
-
-                </div>
-
-                <div class="tab-pane" id="observe">
-                    <h4>Observe</h4>
-                    {% observing_buttons object user %}
-                    <hr/>
-                    {% cache 86400 observation_plan object using="targetDetails" %}
-                        {% observation_plan target form.facility.value %}
-                    {% endcache %}
-
-                    <hr/>
-                    <hr/>
-                    {% if object.type == 'SIDEREAL' %}
-                        {% cache 86400 moon_distance object using="targetDetails" %}
-                            {% moon_distance object %}
-                        {% endcache %}
-                    {% elif target.type == 'NON_SIDEREAL' %}
-                        <p>Airmass plotting for non-sidereal targets is not currently supported. If you would like to
-                            add this functionality, please check out the <a
-                                    href="https://github.com/TOMToolkit/tom_nonsidereal_airmass" target="_blank">non-sidereal
-                                airmass plugin.</a></p>
-                    {% endif %}
-                </div>
-
-                <div class="tab-pane" id="observations">
-                    {% existing_observation_form object %}
-                    <h4>Observations</h4>
-                    <a href="{% url 'targets:detail' pk=target.id %}?update_status=True"
-                       title="Update status of observations for target" class="btn btn-primary">Update Observations
-                        Status</a>
-                    {% observation_list object %}
-                </div>
-
-                {% if perms.tom_targets.view_target %}
-                    <div class="tab-pane" id="publication">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <a href="{% url 'targets:generate_target_description_latex' pk=target.id %}"
-                                   role="button"
-                                   title="Generate LaTeX" class="btn btn-info" style="background-color: red;">Generate
-                                    LaTeX
-                                    target description</a>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 20px;">
-                            {% photometry_stats object %}
-                        </div>
-
-
-                        <div>
-                            <button onclick="download_photometry_stats_latex()" class="btn btn-info" role="button">
-                                Download photometry stats as LaTeX table
-                            </button>
-                        </div>
-
-                        <div style="margin-top: 20px;" class="col-lg-6">
-                            {% cache 86400 observation_plan object using="targetDetails" %}
-                                {% gaia_stats object %}
-                            {% endcache %}
-                        </div>
-                    </div>
-
-                {% endif %}
-
-                <div class="tab-pane" id="manage-data">
-                    {% if user.is_authenticated %}
-                        {% upload_dataproduct object %}
-                    {% endif %}
-
-                    {% dataproduct_list_for_target object %}
-                    }
-                </div>
-                <div class="tab-pane" id="manage-groups">
-
-                    {% target_groups target %}
-
-                </div>
-            </div>
+            {% endif %}
+            {% target_unknown_statuses object %}
+            {% target_buttons object %}
+            {% target_data object %}
+            {% if object.type == 'SIDEREAL' %}
+            {% aladin object %}
+            {% endif %}
         </div>
     </div>
+    <div class="col-lg-8 target-right">
+        <ul class="nav nav-tabs" role="tablist" id="tabs">
+            <li class="nav-item">
+                <a class="nav-link active" id="photometry-tab" href="#photometry" role="tab"
+                    data-toggle="tab">Photometry</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="phot-models-tab" href="#phot-models" role="tab" data-toggle="tab">Models</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="spectroscopy-tab" href="#spectroscopy" role="tab"
+                    data-toggle="tab">Spectroscopy</a>
+            </li>
+            {% if request.user.is_superuser or request.user.is_staff %}
+            <li class="nav-item">
+                <a class="nav-link" id="observe-tab" href="#observe" role="tab" data-toggle="tab">Observe</a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link" id="observations-tab" href="#observations" role="tab"
+                    data-toggle="tab">Observations</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="publication-tab" href="#publication" role="tab"
+                    data-toggle="tab">Publication</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="manage-data-tab" href="#manage-data" role="tab" data-toggle="tab">Manage
+                    Data</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="manage-groups-tab" href="#manage-groups" role="tab" data-toggle="tab">Manage
+                    Groups</a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane active" id="photometry">
+
+                {% photometry_for_target target %}
+
+                <div class="row menu-row">
+                    <div class="col-lg-6">
+                        <button onclick="download_photometry()" class="btn btn-primary" role="button">Download
+                            photometry data
+                        </button>
+                    </div>
+                    <div class="col-lg-6 text-right">
+                        <button onclick="download_radio()" class="btn btn-primary" role="button">Download radio
+                            data
+                        </button>
+                    </div>
+                </div>
+
+                {% recent_photometry object limit=5 %}
+
+            </div>
+            <div class="tab-pane" id="phot-models">
+                <h6>
+                    <button onclick="open_microlensing_model()" class="btn btn-info" role="button">Microlensing
+                        model standard
+                    </button>
+                    The simplest microlensing model, single lens, single source, no parallax
+                </h6>
+                <h6>
+                    <button onclick="open_microlensing_parallax_model()" class="btn btn-info" role="button">
+                        Microlensing model parallax
+                    </button>
+                    Microlensing model, single lens, single source, with parallax
+                </h6>
+                <br>
+            </div>
+            <div class="tab-pane" id="spectroscopy">
+
+                {% spectroscopy_for_target target %}
+
+            </div>
+
+            <div class="tab-pane" id="observe">
+                <h4>Observe</h4>
+                {% observing_buttons object user %}
+                <hr />
+                {% cache 86400 observation_plan object using="targetDetails" %}
+                {% observation_plan target form.facility.value %}
+                {% endcache %}
+
+                <hr />
+                <hr />
+                {% if object.type == 'SIDEREAL' %}
+                {% cache 86400 moon_distance object using="targetDetails" %}
+                {% moon_distance object %}
+                {% endcache %}
+                {% elif target.type == 'NON_SIDEREAL' %}
+                <p>Airmass plotting for non-sidereal targets is not currently supported. If you would like to
+                    add this functionality, please check out the <a
+                        href="https://github.com/TOMToolkit/tom_nonsidereal_airmass" target="_blank">non-sidereal
+                        airmass plugin.</a></p>
+                {% endif %}
+            </div>
+
+            <div class="tab-pane" id="observations">
+                {% existing_observation_form object %}
+                <h4>Observations</h4>
+                <a href="{% url 'targets:detail' pk=target.id %}?update_status=True"
+                    title="Update status of observations for target" class="btn btn-primary">Update Observations
+                    Status</a>
+                {% observation_list object %}
+            </div>
+
+            {% if perms.tom_targets.view_target %}
+            <div class="tab-pane" id="publication">
+                <div class="row">
+                    <div class="col-md-12">
+                        <a href="{% url 'targets:generate_target_description_latex' pk=target.id %}" role="button"
+                            title="Generate LaTeX" class="btn btn-info" style="background-color: red;">Generate
+                            LaTeX
+                            target description</a>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    {% photometry_stats object %}
+                </div>
+
+
+                <div>
+                    <button onclick="download_photometry_stats_latex()" class="btn btn-info" role="button">
+                        Download photometry stats as LaTeX table
+                    </button>
+                </div>
+
+                <div style="margin-top: 20px;" class="col-lg-6">
+                    {% cache 86400 observation_plan object using="targetDetails" %}
+                    {% gaia_stats object %}
+                    {% endcache %}
+                </div>
+            </div>
+
+            {% endif %}
+
+            <div class="tab-pane" id="manage-data">
+                {% if user.is_authenticated %}
+                {% upload_dataproduct object %}
+                {% endif %}
+
+                {% dataproduct_list_for_target object %}
+                }
+            </div>
+            <div class="tab-pane" id="manage-groups">
+
+                {% target_groups target %}
+
+            </div>
+            {% comments_enabled as comments_are_enabled %}
+            <hr />
+            <h5>Comments</h5>
+            {% if comments_are_enabled %}
+            {% render_comment_list for object %}
+            {% url 'targets:detail' object.id as next %}
+            {% if user.is_authenticated %}
+            {% render_comment_form for object %}
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_javascript %}
-    <script type="text/javascript">
-        function download_photometry() {
-            window.open('{% url "targets:download_photometry_data" target.id %}')
-        }
+<script type="text/javascript">
+    function download_photometry() {
+        window.open('{% url "targets:download_photometry_data" target.id %}')
+    }
 
-        function download_radio() {
-            window.open('{% url "targets:download_radio_data" target.id %}')
-        }
+    function download_radio() {
+        window.open('{% url "targets:download_radio_data" target.id %}')
+    }
 
-        function open_microlensing_model() {
-            window.open('{% url "targets:microlensing_model" target.id %}', 'newwindow', 'width=1000,height=900');
-        }
+    function open_microlensing_model() {
+        window.open('{% url "targets:microlensing_model" target.id %}', 'newwindow', 'width=1000,height=900');
+    }
 
-        function open_microlensing_parallax_model() {
-            window.open('{% url "targets:microlensing_parallax_model" target.id %}', 'newwindow', 'width=1000,height=900');
-        }
+    function open_microlensing_parallax_model() {
+        window.open('{% url "targets:microlensing_parallax_model" target.id %}', 'newwindow', 'width=1000,height=900');
+    }
 
-        function generate_target_description_latex() {
-            window.open('{% url "targets:generate_target_description_latex" target.id %}')
-        }
+    function generate_target_description_latex() {
+        window.open('{% url "targets:generate_target_description_latex" target.id %}')
+    }
 
-        function download_photometry_stats_latex() {
-            window.open('{% url "targets:download_photometry_stats_latex" target.id %}')
-        }
+    function download_photometry_stats_latex() {
+        window.open('{% url "targets:download_photometry_stats_latex" target.id %}')
+    }
 
-    </script>
+</script>
 {% endblock %}
