@@ -48,11 +48,11 @@ class ObservatoryCreationForm(forms.ModelForm):
                                    initial='',
                                    label='Pixel scale* [arcsec/pixel]',
                                    widget=forms.NumberInput(attrs={'placeholder': '0.8'}))
-    readout_speed = forms.FloatField(required=False,
+    readout_speed = forms.FloatField(required=True,
                                      initial=None,
                                      label='Readout speed [ms/pixel] (if not known, pass 9999)',
                                      widget=forms.NumberInput(attrs={'placeholder': '3'}))
-    pixel_size = forms.FloatField(required=False,
+    pixel_size = forms.FloatField(required=True,
                                   initial=None,
                                   label='Pixel size [um]',
                                   widget=forms.NumberInput(attrs={'placeholder': '13.5'}))
@@ -112,16 +112,16 @@ class ObservatoryUpdateForm(forms.ModelForm):
                                    initial='',
                                    label='Pixel scale* [arcsec/pixel]',
                                    widget=forms.NumberInput(attrs={'placeholder': '0.8'}))
-    readout_speed = forms.FloatField(required=False,
+    readout_speed = forms.FloatField(required=True,
                                      label='Readout speed [ms/pixel] (if not known, pass 9999)',
                                      widget=forms.NumberInput(attrs={'placeholder': '3'}))
-    pixel_size = forms.FloatField(required=False,
+    pixel_size = forms.FloatField(required=True,
                                   label='Pixel size [um]',
                                   widget=forms.NumberInput(attrs={'placeholder': '13.5'}))
     approx_lim_mag = forms.FloatField(required=True,
                                       label='Approx. limit magnitude in V band* [mag]',
                                       widget=forms.NumberInput(attrs={'placeholder': '18.0'}))
-    altitude = forms.FloatField(required=False,
+    altitude = forms.FloatField(required=True,
                                 label='Altitude [m]',
                                 widget=forms.NumberInput(attrs={'placeholder': '0.0'}))
     filters = forms.CharField(required=True,

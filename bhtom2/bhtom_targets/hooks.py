@@ -40,3 +40,9 @@ def update_alias(target, broker):
         datum.delete()
     except Exception as e:
         logger.error(str(e))
+
+    try:
+        ReducedDatumEventProducer().send_message(kafkaTopic.updateReducedDatum, target, broker, isNew=False)
+    except Exception as e:
+        logger.error(str(e))
+

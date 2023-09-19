@@ -121,6 +121,7 @@ class TargetUpdateApi(views.APIView):
         if instance is not None:
             if serializer.is_valid():
                 serializer.save()
+                #run_hook('update_alias', target=target, created=True) TODO UPDATE TARGET NAME
                 return Response({'Status': 'updated'}, status=201)
         return Response(serializer.errors, status=404)
 
