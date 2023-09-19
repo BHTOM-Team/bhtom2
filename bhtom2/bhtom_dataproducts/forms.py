@@ -4,7 +4,7 @@ from django.conf import settings
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_observations.models import ObservationRecord
 from bhtom_base.bhtom_targets.models import Target
-from bhtom2.bhtom_observatory.models import Observatory
+from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix
 from bhtom2.bhtom_calibration.models import catalogs as Catalogs
 from bhtom_base.bhtom_dataproducts.models import DataProductGroup_user
 
@@ -14,11 +14,11 @@ logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_dataproducts: forms]')
 class ObservatoryChoiceField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj):
-        if obj.calibration_flg:
-            return '{name} ({prefix}) (Only Instrumental photometry file)'.format(name=obj.name,
-                                                                                  prefix=obj.prefix)
+        if obj.observatory.calibration_flg:
+            return '{name} ({prefix}) (Only Instrumental photometry file)'.format(name=obj.observatory.name,
+                                                                                  prefix=obj.observatory.prefix)
         else:
-            return '{name} ({prefix})'.format(name=obj.name, prefix=obj.prefix)
+            return '{name} ({prefix})'.format(name=obj.observatory.name, prefix=obj.observatory.prefix)
 
 
 class GroupChoiceField(forms.ModelChoiceField):
@@ -53,15 +53,9 @@ class DataProductUploadForm(forms.Form):
     )
 
     MJD = forms.DecimalField(
-        label="MJD OBS",
+        label="MJD OBS *",
         widget=forms.NumberInput(attrs={'id': 'mjd', 'disable': 'none'}),
-        required=False
-    )
-
-    ExpTime = forms.IntegerField(
-        label='Exposure time (sec)',
-        widget=forms.NumberInput(attrs={'id': 'ExpTime'}),
-        required=False
+        required=True
     )
 
     dryRun = forms.BooleanField(
@@ -73,15 +67,7 @@ class DataProductUploadForm(forms.Form):
         widget=forms.HiddenInput()
     )
 
-    observer = forms.CharField(
-        label='Observer\'s Name',
-        required=False
-    )
-
-    facility = forms.CharField(
-        label='Facility Name',
-        required=False
-    )
+ 
 
     def __init__(self, *args, **kwargs):
         user = kwargs['initial']['user']
@@ -99,14 +85,21 @@ class DataProductUploadForm(forms.Form):
             filter['any/%s' % f] = 'any/%s' % f
 
         super(DataProductUploadForm, self).__init__(*args, **kwargs)
-        self.fields['observatory'] = ObservatoryChoiceField(
-            queryset=Observatory.objects.filter(active_flg=True).order_by('name'),
-            widget=forms.Select(),
-            required=False
-        )
 
+        self.fields['observer'] = forms.CharField(
+            initial=user,
+            required=True,
+            label='Observer\'s Name *',
+        )
+        
+        self.fields['observatory'] = ObservatoryChoiceField(
+            queryset=ObservatoryMatrix.objects.filter(user=user,active_flg=True).order_by('observatory'),
+            widget=forms.Select(),
+            required=True
+        )
         self.fields['filter'] = forms.ChoiceField(
             choices=[v for v in filter.items()],
+            initial="GaiaSP/Any",
             widget=forms.Select(),
             required=False,
             label='Force filter'

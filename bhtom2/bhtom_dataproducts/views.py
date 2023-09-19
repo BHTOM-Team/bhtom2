@@ -58,16 +58,13 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         observatory = form.cleaned_data['observatory']
         observation_filter = form.cleaned_data['filter']
         mjd = form.cleaned_data['MJD']
-        exp_time = form.cleaned_data['ExpTime']
         match_dist = 0.5
         dry_run = form.cleaned_data['dryRun']
         comment = form.cleaned_data['comment']
-        facility = form.cleaned_data['facility']
         observer = form.cleaned_data['observer']
         #group = form.cleaned_data['group']
         group = None
         user = self.request.user
-
         files = self.request.FILES.getlist('files')
         data_product_files = {}
         for index, file_obj in enumerate(files):
@@ -96,10 +93,8 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             'no_plot': False,
             'observatory': observatory,
             'mjd': mjd,
-            'exp_time': exp_time,
             'group': group,
             'observer': observer,
-            'facility': facility,
         }
         token = Token.objects.get(user_id=user.id).key
 
@@ -109,9 +104,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         }
         # Make a POST request to upload-service with the extracted data
         try:
-            files_list ={'files': [f for f in data_product_files]}
-            print(files_list)
-            response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/',data=post_data, files=data_product_files,headers=headers)
+            response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/',data=post_data, files=data_product_files ,headers=headers)
         except Exception as e:
             logger.error("Error in connect to upload service: " + str(e))
             messages.error(self.request, 'Service is unavailable, please retry again later.')
