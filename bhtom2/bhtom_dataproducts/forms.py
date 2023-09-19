@@ -73,12 +73,11 @@ class DataProductUploadForm(forms.Form):
         user = kwargs['initial']['user']
         filter = {}
         filter['no'] = 'Auto'
-        catalogs = Catalogs.objects.all()
+        catalogs = Catalogs.objects.filter(isActive=True)
         for curval in catalogs:
             curname = curval.survey
             filters = curval.filters
-            for i, f in enumerate(filters):
-                filter[curname + '/' + f] = curname + '/' + f
+            filter[curname + '/' + filters] = curname + '/' + filters
             filter['%s/any' % (curname)] = '%s/any' % (curname)
 
         for f in ['U', 'B', 'V', 'R', 'I', 'u', 'g', 'r', 'i', 'z']:
@@ -99,9 +98,9 @@ class DataProductUploadForm(forms.Form):
         )
         self.fields['filter'] = forms.ChoiceField(
             choices=[v for v in filter.items()],
-            initial="GaiaSP/Any",
+            initial="GaiaSP/any",
             widget=forms.Select(),
-            required=False,
+            required=True,
             label='Force filter'
         )
 

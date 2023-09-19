@@ -29,20 +29,20 @@
                     <td>{{ product.get_file_name|truncatechars:40 }}</td>
                     {% if product.photometry_data is not None %}
                     <td>
-                        <a href="{% url 'bhtom_dataproducts:photometry_download' id=product.id %}"> {{
-                            product.get_file_name|truncatechars:40 }}</a>
+                        <a href="{% url 'bhtom_dataproducts:photometry_download' id=product.id %}">
+                            {{product.get_file_name|truncatechars:40 }}</a>
                     </td>
                     {% else %}
                     <td></td>
                     {% endif %}
                     <td>
-                        <a href="{% url 'bhtom_targets:detail' product.target.name %}">{{
-                            product.target.name|truncatechars:40 }}</a>
+                        <a href="{% url 'bhtom_targets:detail' product.target.name %}">
+                            {{product.target.name|truncatechars:40 }}</a>
                     </td>
                     {% if product.observation_record.id %}
                     <td>
-                        <a href="{% url 'bhtom_base.bhtom_observations:detail' product.observation_record.id %}">{{
-                            product.observation_record|truncatechars:40 }}</a>
+                        <a href="{% url 'bhtom_base.bhtom_observations:detail' product.observation_record.id %}">
+                            {{product.observation_record|truncatechars:40 }}</a>
                     </td>
                     {% else %}
                     <td></td>
@@ -55,7 +55,7 @@
                         {% endif %}
                     </td>
 
-                    <td>TODO</td>
+                    <td>{{ product.status }}</td>
 
                     {% if product.data_product_type == 'fits_file' or product.data_product_type == 'photometry' %}
                     <td>
