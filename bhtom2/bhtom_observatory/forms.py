@@ -60,7 +60,7 @@ class ObservatoryCreationForm(forms.ModelForm):
                                      initial=None,
                                      label='Readout speed [ms/pixel] (if not known, pass 9999)*',
                                      widget=forms.NumberInput(attrs={'placeholder': '3'}))
-    pixel_size = forms.FloatField(required=False,
+    pixel_size = forms.FloatField(required=True,
                                   initial=None,
                                   label='Pixel size [um]',
                                   widget=forms.NumberInput(attrs={'placeholder': '13.5'}))
@@ -125,17 +125,14 @@ class ObservatoryUpdateForm(forms.ModelForm):
                                      initial=None,
                                      label='Readout speed [ms/pixel] (if not known, pass 9999)*',
                                      widget=forms.NumberInput(attrs={'placeholder': '3'}))
-    pixel_size = forms.FloatField(required=False,
-                                  initial=None,
+    pixel_size = forms.FloatField(required=True,
                                   label='Pixel size [um]',
                                   widget=forms.NumberInput(attrs={'placeholder': '13.5'}))
     approx_lim_mag = forms.FloatField(required=True,
                                       initial=None,
                                       label='Approx. limit magnitude in V band* [mag]',
                                       widget=forms.NumberInput(attrs={'placeholder': '18.0'}))
-
     altitude = forms.FloatField(required=True,
-                                initial=None,
                                 label='Altitude [m]*',
                                 widget=forms.NumberInput(attrs={'placeholder': '0.0'}))
     

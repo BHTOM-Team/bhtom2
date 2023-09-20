@@ -1,3 +1,4 @@
+from datetime import datetime
 from io import StringIO
 
 from django.conf import settings
@@ -292,16 +293,19 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
             # Not clearing ASASSN, as it can have different prefixes
 
             to_update, created = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
-            to_update.name = name
-            to_update.save(update_fields=['name'])
-            run_hook('update_alias', target=self.object, broker=source_name)
 
-            messages.add_message(
-                self.request,
-                messages.INFO,
-                f'{"Added" if created else "Updated"} alias {to_update.name} for '
-                f'{get_pretty_survey_name(to_update.source_name)}'
-            )
+            if to_update.name != name:
+                to_update.name = name
+                to_update.modified = datetime.now()
+                to_update.save()
+                run_hook('update_alias', target=self.object, broker=source_name)
+
+                messages.add_message(
+                    self.request,
+                    messages.INFO,
+                    f'{"Added" if created else "Updated"} alias {to_update.name} for '
+                    f'{get_pretty_survey_name(to_update.source_name)}'
+                )
 
         target_source_names = [s for s, _ in target_names]
 
