@@ -47,6 +47,18 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 lon = form.cleaned_data['lon']
                 lat = form.cleaned_data['lat']
                 calibration_flg = form.cleaned_data['calibration_flg']
+                example_file = None
+                altitude = None
+                gain = None
+                readout_noise = None
+                binning = None
+                saturation_level = None
+                pixel_scale = None
+                readout_speed = None
+                pixel_size = None
+                approx_lim_mag = None
+                filters = None
+                comment = None
                 active_flag = True
                 
             if calibration_flg is True:
