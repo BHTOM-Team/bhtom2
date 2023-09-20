@@ -5,7 +5,7 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_observations.models import ObservationRecord
 from bhtom_base.bhtom_targets.models import Target
 from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix
-from bhtom2.bhtom_calibration.models import catalogs as Catalogs
+from bhtom2.bhtom_calibration.models import Catalogs
 from bhtom_base.bhtom_dataproducts.models import DataProductGroup_user
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_dataproducts: forms]')

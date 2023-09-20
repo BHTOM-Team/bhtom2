@@ -15,7 +15,7 @@ from bhtom_base.bhtom_dataproducts.filters import DataProductFilter
 from bhtom_base.bhtom_dataproducts.models import DataProduct, DataProductGroup, DataProductGroup_user
 from bhtom_base.bhtom_targets.models import Target
 from .forms import DataProductUploadForm
-from ..bhtom_calibration.models import calibration_data
+from ..bhtom_calibration.models import Calibration_data
 from ..bhtom_observatory.models import ObservatoryMatrix
 from bhtom2.bhtom_observatory.models import Observatory
 from rest_framework.views import APIView
@@ -335,7 +335,7 @@ class DataDetailsView(LoginRequiredMixin, DetailView):
                 raise Http404
 
             try:
-                calibration = calibration_data.objects.get(dataproduct=dataProduct)
+                calibration = Calibration_data.objects.get(dataproduct=dataProduct)
                 context['calibration'] = calibration
 
                 if calibration.calibration_plot is not None:
@@ -344,7 +344,7 @@ class DataDetailsView(LoginRequiredMixin, DetailView):
                         context['calibration_plot'] = str(encoded_string, "utf-8")
                     except IOError as e:
                         logger.error('plot error')
-            except calibration_data.DoesNotExist:
+            except Calibration_data.DoesNotExist:
                 context['calibration'] = None
 
         context['target'] = target
