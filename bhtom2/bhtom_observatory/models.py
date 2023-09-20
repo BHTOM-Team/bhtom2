@@ -28,19 +28,19 @@ class Observatory(models.Model):
                                verbose_name="Comments (e.g. hyperlink to the observatory website, "
                                             "camera specifications, telescope info)")
     active_flg = models.BooleanField(default='False', db_index=True)
-    altitude = models.FloatField(null=False, blank=False, default=0.0, verbose_name="Altitude [m]")
-    gain = models.FloatField(null=False, blank=False, verbose_name='Gain [e/ADU]', default=2)
-    readout_noise = models.FloatField(null=False, blank=False, verbose_name='Readout Noise [e]', default=2)
-    binning = models.IntegerField(null=False, blank=False, default=1)
-    saturation_level = models.FloatField(null=False, blank=False, verbose_name='Saturation Level [ADU]', default=63000)
-    pixel_scale = models.FloatField(null=False, blank=False, verbose_name='Pixel Scale [arcseconds/pixel]', default=0.8)
+    altitude = models.FloatField(null=True, blank=False, default=0.0, verbose_name="Altitude [m]")
+    gain = models.FloatField(null=True, blank=False, verbose_name='Gain [e/ADU]', default=2)
+    readout_noise = models.FloatField(null=True, blank=False, verbose_name='Readout Noise [e]', default=2)
+    binning = models.IntegerField(null=True, blank=False, default=1)
+    saturation_level = models.FloatField(null=True, blank=False, verbose_name='Saturation Level [ADU]', default=63000)
+    pixel_scale = models.FloatField(null=True, blank=False, verbose_name='Pixel Scale [arcseconds/pixel]', default=0.8)
     readout_speed = models.FloatField(verbose_name='Readout Speed [microseconds/pixel]', default=9999.0)
     pixel_size = models.FloatField(verbose_name='Pixel size [micrometers]', default=13.5)
     approx_lim_mag = models.FloatField(verbose_name="Approximate limit magnitude [mag]", default=18.0)
     filters = models.CharField(max_length=100, blank=True,
                                verbose_name="Filters (comma-separated list, as they are visible in " "FITS)",
                                default="V,R,I")
-    created = models.DateTimeField(null=False, blank=False, editable=False, auto_now_add=True, db_index=True)
+    created = models.DateTimeField(null=True, blank=False, editable=False, auto_now_add=True, db_index=True)
     modified = models.DateTimeField(null=True, blank=True, editable=True, auto_now_add=True)
 
     def __str__(self):

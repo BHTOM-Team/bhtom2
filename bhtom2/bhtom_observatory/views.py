@@ -22,24 +22,33 @@ class CreateObservatory(LoginRequiredMixin, FormView):
     def form_valid(self, form):
 
         try:
-            user = self.request.user
-            name = form.cleaned_data['name']
-            lon = form.cleaned_data['lon']
-            lat = form.cleaned_data['lat']
-            calibration_flg = form.cleaned_data['calibration_flg']
-            example_file = self.request.FILES.get('fits')
-            altitude = form.cleaned_data['altitude']
-            gain = form.cleaned_data['gain']
-            readout_noise = form.cleaned_data['readout_noise']
-            binning = form.cleaned_data['binning']
-            saturation_level = form.cleaned_data['saturation_level']
-            pixel_scale = form.cleaned_data['pixel_scale']
-            readout_speed = form.cleaned_data['readout_speed']
-            pixel_size = form.cleaned_data['pixel_size']
-            approx_lim_mag = form.cleaned_data['approx_lim_mag']
-            filters = form.cleaned_data['filters']
-            comment = form.cleaned_data['comment']
-
+            active_flag = False
+            if form.cleaned_data['calibration_flg'] != True:
+                user = self.request.user
+                name = form.cleaned_data['name']
+                lon = form.cleaned_data['lon']
+                lat = form.cleaned_data['lat']
+                calibration_flg = form.cleaned_data['calibration_flg']
+                example_file = self.request.FILES.get('fits')
+                altitude = form.cleaned_data['altitude']
+                gain = form.cleaned_data['gain']
+                readout_noise = form.cleaned_data['readout_noise']
+                binning = form.cleaned_data['binning']
+                saturation_level = form.cleaned_data['saturation_level']
+                pixel_scale = form.cleaned_data['pixel_scale']
+                readout_speed = form.cleaned_data['readout_speed']
+                pixel_size = form.cleaned_data['pixel_size']
+                approx_lim_mag = form.cleaned_data['approx_lim_mag']
+                filters = form.cleaned_data['filters']
+                comment = form.cleaned_data['comment']
+            else:
+                user = self.request.user
+                name = form.cleaned_data['name']
+                lon = form.cleaned_data['lon']
+                lat = form.cleaned_data['lat']
+                calibration_flg = form.cleaned_data['calibration_flg']
+                active_flag = True
+                
             if calibration_flg is True:
                 prefix = name + "_CalibrationOnly"
             else:
@@ -54,7 +63,7 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 name=name,
                 lon=lon,
                 lat=lat,
-                active_flg=False,
+                active_flg=active_flag,
                 prefix=prefix,
                 calibration_flg=calibration_flg,
                 example_file=example_file,
