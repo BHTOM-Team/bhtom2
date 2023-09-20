@@ -42,7 +42,7 @@ def update_alias(target, broker):
         logger.error(str(e))
 
     try:
-        ReducedDatumEventProducer().send_message(kafkaTopic.updateReducedDatum, target, broker, isNew=False)
+        ReducedDatumEventProducer().send_message(kafkaTopic.updateReducedDatum, target, broker, isNew=False,
+                                                 plotForce=True)
     except Exception as e:
         logger.error(str(e))
-

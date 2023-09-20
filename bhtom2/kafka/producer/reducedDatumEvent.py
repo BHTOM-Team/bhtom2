@@ -26,14 +26,15 @@ class ReducedDatumEventProducer:
         except KafkaError as e:
             logging.error("Kafka Procucer error: " + str(e))
 
-    def send_message(self, topic, target, broker, isNew=False):
+    def send_message(self, topic, target, broker, isNew=False, plotForce=False):
         if self.producer is None:
             self.initialize_producer()
 
         value = {
             "name": target.name,
             "broker": broker,
-            "setTargetName": isNew
+            "setTargetName": isNew,
+            "plotForce": plotForce
         }
 
         guid = get_guid()
