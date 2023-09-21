@@ -92,8 +92,7 @@ INSTALLED_APPS = [
     'bhtom2.bhtom_calibration.apps.BhtomCalibrationConfig',
     'crispy_bootstrap4',
     'drf_yasg',
-    'django_guid',
-    'django_cron'
+    'django_guid'
 ]
 
 MIDDLEWARE = [

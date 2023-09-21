@@ -34,10 +34,10 @@ class Observatory(models.Model):
     binning = models.IntegerField(null=True, blank=False, default=1)
     saturation_level = models.FloatField(null=True, blank=False, verbose_name='Saturation Level [ADU]', default=63000)
     pixel_scale = models.FloatField(null=True, blank=False, verbose_name='Pixel Scale [arcseconds/pixel]', default=0.8)
-    readout_speed = models.FloatField(null=True,verbose_name='Readout Speed [microseconds/pixel]', default=9999.0)
-    pixel_size = models.FloatField(null=True,verbose_name='Pixel size [micrometers]', default=13.5)
-    approx_lim_mag = models.FloatField(null=True,verbose_name="Approximate limit magnitude [mag]", default=18.0)
-    filters = models.CharField(null=True,max_length=100, blank=True,
+    readout_speed = models.FloatField(null=True, verbose_name='Readout Speed [microseconds/pixel]', default=9999.0)
+    pixel_size = models.FloatField(null=True, verbose_name='Pixel size [micrometers]', default=13.5)
+    approx_lim_mag = models.FloatField(null=True, verbose_name="Approximate limit magnitude [mag]", default=18.0)
+    filters = models.CharField(null=True, max_length=100, blank=True,
                                verbose_name="Filters (comma-separated list, as they are visible in " "FITS)",
                                default="V,R,I")
     created = models.DateTimeField(null=True, blank=False, editable=False, auto_now_add=True, db_index=True)
