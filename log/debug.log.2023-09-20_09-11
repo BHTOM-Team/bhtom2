@@ -1,0 +1,498 @@
+[2023-09-20 08:51:44,200 - None - autoreload.py:677 - INFO]: Watching for file changes with StatReloader
+[2023-09-20 08:51:51,691 - None - __init__.py:307 - DEBUG]: matplotlib data path: /Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/matplotlib/mpl-data
+[2023-09-20 08:51:51,713 - None - __init__.py:307 - DEBUG]: CONFIGDIR=/Users/yurii/.matplotlib
+[2023-09-20 08:51:51,718 - None - __init__.py:1475 - DEBUG]: interactive is False
+[2023-09-20 08:51:51,719 - None - __init__.py:1476 - DEBUG]: platform is darwin
+[2023-09-20 08:51:52,329 - None - __init__.py:307 - DEBUG]: CACHEDIR=/Users/yurii/.matplotlib
+[2023-09-20 08:51:52,338 - None - font_manager.py:1540 - DEBUG]: Using fontManager instance from /Users/yurii/.matplotlib/fontlist-v330.json
+[2023-09-20 08:51:57,020 - None - registers.py:105 - DEBUG]: Successfully loaded reader "HST/STIS".
+[2023-09-20 08:51:57,025 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "HST/STIS".
+[2023-09-20 08:51:57,035 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Data Central Single-Split".
+[2023-09-20 08:51:57,039 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Data Central Multiline-Single".
+[2023-09-20 08:51:57,152 - None - registers.py:105 - DEBUG]: Successfully loaded reader "WiggleZ".
+[2023-09-20 08:51:57,165 - None - registers.py:105 - DEBUG]: Successfully loaded reader "ASCII".
+[2023-09-20 08:51:57,169 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "ASCII".
+[2023-09-20 08:51:57,192 - None - registers.py:105 - DEBUG]: Successfully loaded reader "IPAC".
+[2023-09-20 08:51:57,201 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "IPAC".
+[2023-09-20 08:51:57,207 - None - registers.py:105 - DEBUG]: Successfully loaded reader "2SLAQ-LRG".
+[2023-09-20 08:51:57,236 - None - registers.py:105 - DEBUG]: Successfully loaded reader "MUSCLES SED".
+[2023-09-20 08:51:57,241 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "MUSCLES SED".
+[2023-09-20 08:51:57,248 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-2QZ".
+[2023-09-20 08:51:57,252 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-2SLAQ-QSO".
+[2023-09-20 08:51:57,257 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA".
+[2023-09-20 08:51:57,349 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-LT".
+[2023-09-20 08:51:57,353 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-MGC".
+[2023-09-20 08:51:57,410 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-WiggleZ".
+[2023-09-20 08:51:57,418 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-2dFGRS".
+[2023-09-20 08:51:57,424 - None - registers.py:105 - DEBUG]: Successfully loaded reader "tabular-fits".
+[2023-09-20 08:51:57,429 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "tabular-fits".
+[2023-09-20 08:51:57,442 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Subaru-pfsObject".
+[2023-09-20 08:51:57,493 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "Subaru-pfsObject".
+[2023-09-20 08:51:57,500 - None - registers.py:105 - DEBUG]: Successfully loaded reader "ECSV".
+[2023-09-20 08:51:57,505 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "ECSV".
+[2023-09-20 08:51:57,606 - None - registers.py:105 - DEBUG]: Successfully loaded reader "6dFGS-tabular".
+[2023-09-20 08:51:57,618 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "6dFGS-tabular".
+[2023-09-20 08:51:57,704 - None - registers.py:105 - DEBUG]: Successfully loaded reader "6dFGS-split".
+[2023-09-20 08:51:57,711 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "6dFGS-split".
+[2023-09-20 08:51:57,772 - None - registers.py:105 - DEBUG]: Successfully loaded reader "6dFGS-combined".
+[2023-09-20 08:51:57,802 - None - registers.py:105 - DEBUG]: Successfully loaded reader "MaNGA cube".
+[2023-09-20 08:51:57,808 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "MaNGA cube".
+[2023-09-20 08:51:57,827 - None - registers.py:105 - DEBUG]: Successfully loaded reader "MaNGA rss".
+[2023-09-20 08:51:57,834 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "MaNGA rss".
+[2023-09-20 08:51:57,842 - None - registers.py:105 - DEBUG]: Successfully loaded reader "HST/COS".
+[2023-09-20 08:51:57,848 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "HST/COS".
+[2023-09-20 08:51:57,856 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GALAH".
+[2023-09-20 08:51:57,863 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST c1d".
+[2023-09-20 08:51:57,868 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST c1d".
+[2023-09-20 08:51:57,874 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST c1d multi".
+[2023-09-20 08:51:57,879 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST x1d".
+[2023-09-20 08:51:57,885 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST x1d".
+[2023-09-20 08:51:57,890 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST x1d multi".
+[2023-09-20 08:51:58,019 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST x1d MIRI MRS".
+[2023-09-20 08:51:58,024 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST s2d".
+[2023-09-20 08:51:58,107 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST s2d".
+[2023-09-20 08:51:58,121 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST s2d multi".
+[2023-09-20 08:51:58,127 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST s3d".
+[2023-09-20 08:51:58,141 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST s3d".
+[2023-09-20 08:51:58,150 - None - registers.py:105 - DEBUG]: Successfully loaded reader "OzDES".
+[2023-09-20 08:51:58,156 - None - registers.py:105 - DEBUG]: Successfully loaded reader "wcs1d-fits".
+[2023-09-20 08:51:58,162 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "wcs1d-fits".
+[2023-09-20 08:51:58,172 - None - registers.py:105 - DEBUG]: Successfully loaded reader "iraf".
+[2023-09-20 08:51:58,306 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "iraf".
+[2023-09-20 08:51:58,350 - None - registers.py:105 - DEBUG]: Successfully loaded reader "iraf".
+[2023-09-20 08:51:58,368 - None - registers.py:105 - DEBUG]: Successfully loaded reader "APOGEE apVisit".
+[2023-09-20 08:51:58,412 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "APOGEE apVisit".
+[2023-09-20 08:51:58,421 - None - registers.py:105 - DEBUG]: Successfully loaded reader "APOGEE apStar".
+[2023-09-20 08:51:58,460 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "APOGEE apStar".
+[2023-09-20 08:51:58,470 - None - registers.py:105 - DEBUG]: Successfully loaded reader "APOGEE aspcapStar".
+[2023-09-20 08:51:58,505 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "APOGEE aspcapStar".
+[2023-09-20 08:51:58,514 - None - registers.py:105 - DEBUG]: Successfully loaded reader "SDSS-III/IV spec".
+[2023-09-20 08:51:58,579 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "SDSS-III/IV spec".
+[2023-09-20 08:51:58,604 - None - registers.py:105 - DEBUG]: Successfully loaded reader "SDSS-I/II spSpec".
+[2023-09-20 08:51:58,636 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "SDSS-I/II spSpec".
+[2023-09-20 08:51:58,651 - None - registers.py:105 - DEBUG]: Successfully loaded reader "SDSS spPlate".
+[2023-09-20 08:51:58,681 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "SDSS spPlate".
+[2023-09-20 08:51:58,698 - None - registers.py:105 - DEBUG]: Successfully loaded reader "2dFGRS".
+[2023-09-20 08:51:58,710 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Data Central AAOmega".
+[2023-09-20 08:51:58,863 - None - api_router.py:13 - INFO]: registering new views: args: ('targets', <class 'bhtom_base.bhtom_targets.api_views.TargetViewSet'>, 'targets'), kwargs: {}
+[2023-09-20 08:51:58,864 - None - api_router.py:13 - INFO]: registering new views: args: ('targetextra', <class 'bhtom_base.bhtom_targets.api_views.TargetExtraViewSet'>, 'targetextra'), kwargs: {}
+[2023-09-20 08:51:58,866 - None - api_router.py:13 - INFO]: registering new views: args: ('targetname', <class 'bhtom_base.bhtom_targets.api_views.TargetNameViewSet'>, 'targetname'), kwargs: {}
+[2023-09-20 08:51:58,934 - None - api_router.py:13 - INFO]: registering new views: args: ('groups', <class 'bhtom_base.bhtom_common.api_views.GroupViewSet'>, 'groups'), kwargs: {}
+[2023-09-20 08:51:58,936 - None - api_router.py:13 - INFO]: registering new views: args: ('targets', <class 'bhtom_base.bhtom_targets.api_views.TargetViewSet'>, 'targets'), kwargs: {}
+[2023-09-20 08:51:58,937 - None - api_router.py:13 - INFO]: registering new views: args: ('targetextra', <class 'bhtom_base.bhtom_targets.api_views.TargetExtraViewSet'>, 'targetextra'), kwargs: {}
+[2023-09-20 08:51:58,938 - None - api_router.py:13 - INFO]: registering new views: args: ('targetname', <class 'bhtom_base.bhtom_targets.api_views.TargetNameViewSet'>, 'targetname'), kwargs: {}
+[2023-09-20 08:51:59,119 - None - api_router.py:13 - INFO]: registering new views: args: ('observations', <class 'bhtom_base.bhtom_observations.api_views.ObservationRecordViewSet'>, 'observations'), kwargs: {}
+[2023-09-20 08:51:59,140 - None - api_router.py:13 - INFO]: registering new views: args: ('dataproducts', <class 'bhtom_base.bhtom_dataproducts.api_views.DataProductViewSet'>, 'dataproducts'), kwargs: {}
+[2023-09-20 08:52:02,713 - None - pyplot.py:339 - DEBUG]: Loaded backend agg version v2.2.
+[2023-09-20 08:54:00,450 - c5f2fdcbb93040fb956f28cf20dca390 - bhtom_logger.py:21 - INFO]: [request, response] Method: GET, Path: /observatory/, IP: 127.0.0.1, correlation_id: c5f2fdcbb93040fb956f28cf20dca390,  session_id: pvrmujlkoigv0j1tj3a7hhk26kdo0plc, user: admin, host: 127.0.0.1:8000, body: 
+[2023-09-20 08:54:00,821 - c5f2fdcbb93040fb956f28cf20dca390 - bhtom_logger.py:21 - INFO]: [request, response] uuid: c5f2fdcbb93040fb956f28cf20dca390, Response - Status Code: 200, time: 0.371202 body: 
+[2023-09-20 08:54:10,212 - c9efe87ecfa1483db78d49af592e6b96 - bhtom_logger.py:21 - INFO]: [request, response] Method: GET, Path: /observatory/instrument/create/, IP: 127.0.0.1, correlation_id: c9efe87ecfa1483db78d49af592e6b96,  session_id: pvrmujlkoigv0j1tj3a7hhk26kdo0plc, user: admin, host: 127.0.0.1:8000, body: 
+[2023-09-20 08:54:10,929 - c9efe87ecfa1483db78d49af592e6b96 - bhtom_logger.py:21 - INFO]: [request, response] uuid: c9efe87ecfa1483db78d49af592e6b96, Response - Status Code: 200, time: 0.716291 body: 
+[2023-09-20 08:54:12,663 - 91d7b436f38f4f30b98e856024e22baa - bhtom_logger.py:21 - INFO]: [request, response] Method: GET, Path: /observatory/create/, IP: 127.0.0.1, correlation_id: 91d7b436f38f4f30b98e856024e22baa,  session_id: pvrmujlkoigv0j1tj3a7hhk26kdo0plc, user: admin, host: 127.0.0.1:8000, body: 
+[2023-09-20 08:54:12,950 - 91d7b436f38f4f30b98e856024e22baa - log.py:241 - ERROR]: Internal Server Error: /observatory/create/
+Traceback (most recent call last):
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/template/base.py", line 505, in parse
+    compile_func = self.tags[command]
+KeyError: 'static'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/core/handlers/base.py", line 222, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/core/handlers/base.py", line 365, in process_exception_by_middleware
+    response = middleware_method(request, exception)
+  File "/Users/yurii/AkondLab/bh-tom/bhtom2/bhtom_base/bhtom_common/middleware.py", line 29, in process_exception
+    raise exception
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/core/handlers/base.py", line 220, in _get_response
+    response = response.render()
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/template/backends/django.py", line 34, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/template/engine.py", line 176, in get_template
+    template, origin = self.find_template(template_name)
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/template/engine.py", line 158, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/template/loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/template/base.py", line 507, in parse
+    self.invalid_block_tag(token, command, parse_until)
+  File "/Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/django/template/base.py", line 568, in invalid_block_tag
+    raise self.error(
+django.template.exceptions.TemplateSyntaxError: Invalid block tag on line 4: 'static'. Did you forget to register or load this tag?
+[2023-09-20 08:54:13,164 - 91d7b436f38f4f30b98e856024e22baa - bhtom_logger.py:21 - INFO]: [request, response] uuid: 91d7b436f38f4f30b98e856024e22baa, Response - Status Code: 500, time: 0.497272 body: 
+[2023-09-20 08:55:53,897 - bc81267c12e248e3b8854b13ebf9c2d0 - bhtom_logger.py:21 - INFO]: [request, response] Method: GET, Path: /observatory/create/, IP: 127.0.0.1, correlation_id: bc81267c12e248e3b8854b13ebf9c2d0,  session_id: pvrmujlkoigv0j1tj3a7hhk26kdo0plc, user: admin, host: 127.0.0.1:8000, body: 
+[2023-09-20 08:55:54,160 - bc81267c12e248e3b8854b13ebf9c2d0 - bhtom_logger.py:21 - INFO]: [request, response] uuid: bc81267c12e248e3b8854b13ebf9c2d0, Response - Status Code: 200, time: 0.263347 body: 
+[2023-09-20 08:57:53,351 - 525d602322bd4f499d7712119eadf1e8 - bhtom_logger.py:21 - INFO]: [request, response] Method: GET, Path: /observatory/create/, IP: 127.0.0.1, correlation_id: 525d602322bd4f499d7712119eadf1e8,  session_id: pvrmujlkoigv0j1tj3a7hhk26kdo0plc, user: admin, host: 127.0.0.1:8000, body: 
+[2023-09-20 08:57:53,649 - 525d602322bd4f499d7712119eadf1e8 - bhtom_logger.py:21 - INFO]: [request, response] uuid: 525d602322bd4f499d7712119eadf1e8, Response - Status Code: 200, time: 0.298601 body: 
+[2023-09-20 09:01:49,194 - None - autoreload.py:266 - INFO]: /Users/yurii/AkondLab/bh-tom/bhtom2/bhtom2/bhtom_observatory/forms.py changed, reloading.
+[2023-09-20 09:02:07,152 - None - autoreload.py:677 - INFO]: Watching for file changes with StatReloader
+[2023-09-20 09:02:13,985 - None - __init__.py:307 - DEBUG]: matplotlib data path: /Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/matplotlib/mpl-data
+[2023-09-20 09:02:14,009 - None - __init__.py:307 - DEBUG]: CONFIGDIR=/Users/yurii/.matplotlib
+[2023-09-20 09:02:14,069 - None - __init__.py:1475 - DEBUG]: interactive is False
+[2023-09-20 09:02:14,070 - None - __init__.py:1476 - DEBUG]: platform is darwin
+[2023-09-20 09:02:14,639 - None - __init__.py:307 - DEBUG]: CACHEDIR=/Users/yurii/.matplotlib
+[2023-09-20 09:02:14,656 - None - font_manager.py:1540 - DEBUG]: Using fontManager instance from /Users/yurii/.matplotlib/fontlist-v330.json
+[2023-09-20 09:02:19,328 - None - registers.py:105 - DEBUG]: Successfully loaded reader "HST/STIS".
+[2023-09-20 09:02:19,367 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "HST/STIS".
+[2023-09-20 09:02:19,373 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Data Central Single-Split".
+[2023-09-20 09:02:19,377 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Data Central Multiline-Single".
+[2023-09-20 09:02:19,383 - None - registers.py:105 - DEBUG]: Successfully loaded reader "WiggleZ".
+[2023-09-20 09:02:19,391 - None - registers.py:105 - DEBUG]: Successfully loaded reader "ASCII".
+[2023-09-20 09:02:19,395 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "ASCII".
+[2023-09-20 09:02:19,405 - None - registers.py:105 - DEBUG]: Successfully loaded reader "IPAC".
+[2023-09-20 09:02:19,499 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "IPAC".
+[2023-09-20 09:02:19,505 - None - registers.py:105 - DEBUG]: Successfully loaded reader "2SLAQ-LRG".
+[2023-09-20 09:02:19,510 - None - registers.py:105 - DEBUG]: Successfully loaded reader "MUSCLES SED".
+[2023-09-20 09:02:19,514 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "MUSCLES SED".
+[2023-09-20 09:02:19,520 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-2QZ".
+[2023-09-20 09:02:19,526 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-2SLAQ-QSO".
+[2023-09-20 09:02:19,589 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA".
+[2023-09-20 09:02:19,594 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-LT".
+[2023-09-20 09:02:19,651 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-MGC".
+[2023-09-20 09:02:19,660 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-WiggleZ".
+[2023-09-20 09:02:19,672 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-2dFGRS".
+[2023-09-20 09:02:19,685 - None - registers.py:105 - DEBUG]: Successfully loaded reader "tabular-fits".
+[2023-09-20 09:02:19,695 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "tabular-fits".
+[2023-09-20 09:02:19,757 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Subaru-pfsObject".
+[2023-09-20 09:02:19,767 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "Subaru-pfsObject".
+[2023-09-20 09:02:19,774 - None - registers.py:105 - DEBUG]: Successfully loaded reader "ECSV".
+[2023-09-20 09:02:19,780 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "ECSV".
+[2023-09-20 09:02:19,808 - None - registers.py:105 - DEBUG]: Successfully loaded reader "6dFGS-tabular".
+[2023-09-20 09:02:19,816 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "6dFGS-tabular".
+[2023-09-20 09:02:19,824 - None - registers.py:105 - DEBUG]: Successfully loaded reader "6dFGS-split".
+[2023-09-20 09:02:19,935 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "6dFGS-split".
+[2023-09-20 09:02:19,941 - None - registers.py:105 - DEBUG]: Successfully loaded reader "6dFGS-combined".
+[2023-09-20 09:02:19,948 - None - registers.py:105 - DEBUG]: Successfully loaded reader "MaNGA cube".
+[2023-09-20 09:02:19,978 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "MaNGA cube".
+[2023-09-20 09:02:20,004 - None - registers.py:105 - DEBUG]: Successfully loaded reader "MaNGA rss".
+[2023-09-20 09:02:20,090 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "MaNGA rss".
+[2023-09-20 09:02:20,116 - None - registers.py:105 - DEBUG]: Successfully loaded reader "HST/COS".
+[2023-09-20 09:02:20,177 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "HST/COS".
+[2023-09-20 09:02:20,186 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GALAH".
+[2023-09-20 09:02:20,193 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST c1d".
+[2023-09-20 09:02:20,212 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST c1d".
+[2023-09-20 09:02:20,223 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST c1d multi".
+[2023-09-20 09:02:20,231 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST x1d".
+[2023-09-20 09:02:20,290 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST x1d".
+[2023-09-20 09:02:20,303 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST x1d multi".
+[2023-09-20 09:02:20,328 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST x1d MIRI MRS".
+[2023-09-20 09:02:20,334 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST s2d".
+[2023-09-20 09:02:20,377 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST s2d".
+[2023-09-20 09:02:20,402 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST s2d multi".
+[2023-09-20 09:02:20,458 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST s3d".
+[2023-09-20 09:02:20,465 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST s3d".
+[2023-09-20 09:02:20,473 - None - registers.py:105 - DEBUG]: Successfully loaded reader "OzDES".
+[2023-09-20 09:02:20,480 - None - registers.py:105 - DEBUG]: Successfully loaded reader "wcs1d-fits".
+[2023-09-20 09:02:20,486 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "wcs1d-fits".
+[2023-09-20 09:02:20,593 - None - registers.py:105 - DEBUG]: Successfully loaded reader "iraf".
+[2023-09-20 09:02:20,624 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "iraf".
+[2023-09-20 09:02:20,629 - None - registers.py:105 - DEBUG]: Successfully loaded reader "iraf".
+[2023-09-20 09:02:20,645 - None - registers.py:105 - DEBUG]: Successfully loaded reader "APOGEE apVisit".
+[2023-09-20 09:02:20,672 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "APOGEE apVisit".
+[2023-09-20 09:02:20,710 - None - registers.py:105 - DEBUG]: Successfully loaded reader "APOGEE apStar".
+[2023-09-20 09:02:20,727 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "APOGEE apStar".
+[2023-09-20 09:02:20,746 - None - registers.py:105 - DEBUG]: Successfully loaded reader "APOGEE aspcapStar".
+[2023-09-20 09:02:20,753 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "APOGEE aspcapStar".
+[2023-09-20 09:02:20,761 - None - registers.py:105 - DEBUG]: Successfully loaded reader "SDSS-III/IV spec".
+[2023-09-20 09:02:20,859 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "SDSS-III/IV spec".
+[2023-09-20 09:02:20,922 - None - registers.py:105 - DEBUG]: Successfully loaded reader "SDSS-I/II spSpec".
+[2023-09-20 09:02:20,979 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "SDSS-I/II spSpec".
+[2023-09-20 09:02:20,986 - None - registers.py:105 - DEBUG]: Successfully loaded reader "SDSS spPlate".
+[2023-09-20 09:02:21,005 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "SDSS spPlate".
+[2023-09-20 09:02:21,020 - None - registers.py:105 - DEBUG]: Successfully loaded reader "2dFGRS".
+[2023-09-20 09:02:21,030 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Data Central AAOmega".
+[2023-09-20 09:02:21,045 - None - api_router.py:13 - INFO]: registering new views: args: ('targets', <class 'bhtom_base.bhtom_targets.api_views.TargetViewSet'>, 'targets'), kwargs: {}
+[2023-09-20 09:02:21,045 - None - api_router.py:13 - INFO]: registering new views: args: ('targetextra', <class 'bhtom_base.bhtom_targets.api_views.TargetExtraViewSet'>, 'targetextra'), kwargs: {}
+[2023-09-20 09:02:21,047 - None - api_router.py:13 - INFO]: registering new views: args: ('targetname', <class 'bhtom_base.bhtom_targets.api_views.TargetNameViewSet'>, 'targetname'), kwargs: {}
+[2023-09-20 09:02:24,058 - None - pyplot.py:339 - DEBUG]: Loaded backend agg version v2.2.
+[2023-09-20 09:03:38,013 - None - autoreload.py:266 - INFO]: /Users/yurii/AkondLab/bh-tom/bhtom2/bhtom2/bhtom_observatory/forms.py changed, reloading.
+[2023-09-20 09:04:00,735 - None - autoreload.py:677 - INFO]: Watching for file changes with StatReloader
+[2023-09-20 09:04:10,451 - None - __init__.py:307 - DEBUG]: matplotlib data path: /Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/matplotlib/mpl-data
+[2023-09-20 09:04:10,552 - None - __init__.py:307 - DEBUG]: CONFIGDIR=/Users/yurii/.matplotlib
+[2023-09-20 09:04:10,558 - None - __init__.py:1475 - DEBUG]: interactive is False
+[2023-09-20 09:04:10,559 - None - __init__.py:1476 - DEBUG]: platform is darwin
+[2023-09-20 09:04:11,315 - None - __init__.py:307 - DEBUG]: CACHEDIR=/Users/yurii/.matplotlib
+[2023-09-20 09:04:11,330 - None - font_manager.py:1540 - DEBUG]: Using fontManager instance from /Users/yurii/.matplotlib/fontlist-v330.json
+[2023-09-20 09:04:17,445 - None - registers.py:105 - DEBUG]: Successfully loaded reader "HST/STIS".
+[2023-09-20 09:04:17,497 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "HST/STIS".
+[2023-09-20 09:04:17,506 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Data Central Single-Split".
+[2023-09-20 09:04:17,526 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Data Central Multiline-Single".
+[2023-09-20 09:04:17,531 - None - registers.py:105 - DEBUG]: Successfully loaded reader "WiggleZ".
+[2023-09-20 09:04:17,579 - None - registers.py:105 - DEBUG]: Successfully loaded reader "ASCII".
+[2023-09-20 09:04:17,584 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "ASCII".
+[2023-09-20 09:04:17,641 - None - registers.py:105 - DEBUG]: Successfully loaded reader "IPAC".
+[2023-09-20 09:04:17,647 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "IPAC".
+[2023-09-20 09:04:17,677 - None - registers.py:105 - DEBUG]: Successfully loaded reader "2SLAQ-LRG".
+[2023-09-20 09:04:17,684 - None - registers.py:105 - DEBUG]: Successfully loaded reader "MUSCLES SED".
+[2023-09-20 09:04:17,766 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "MUSCLES SED".
+[2023-09-20 09:04:17,779 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-2QZ".
+[2023-09-20 09:04:17,816 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-2SLAQ-QSO".
+[2023-09-20 09:04:17,845 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA".
+[2023-09-20 09:04:17,851 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-LT".
+[2023-09-20 09:04:17,857 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-MGC".
+[2023-09-20 09:04:17,868 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-WiggleZ".
+[2023-09-20 09:04:17,875 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-2dFGRS".
+[2023-09-20 09:04:17,899 - None - registers.py:105 - DEBUG]: Successfully loaded reader "tabular-fits".
+[2023-09-20 09:04:17,905 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "tabular-fits".
+[2023-09-20 09:04:18,036 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Subaru-pfsObject".
+[2023-09-20 09:04:18,049 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "Subaru-pfsObject".
+[2023-09-20 09:04:18,061 - None - registers.py:105 - DEBUG]: Successfully loaded reader "ECSV".
+[2023-09-20 09:04:18,067 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "ECSV".
+[2023-09-20 09:04:18,186 - None - registers.py:105 - DEBUG]: Successfully loaded reader "6dFGS-tabular".
+[2023-09-20 09:04:18,196 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "6dFGS-tabular".
+[2023-09-20 09:04:18,218 - None - registers.py:105 - DEBUG]: Successfully loaded reader "6dFGS-split".
+[2023-09-20 09:04:18,234 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "6dFGS-split".
+[2023-09-20 09:04:18,330 - None - registers.py:105 - DEBUG]: Successfully loaded reader "6dFGS-combined".
+[2023-09-20 09:04:18,337 - None - registers.py:105 - DEBUG]: Successfully loaded reader "MaNGA cube".
+[2023-09-20 09:04:18,343 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "MaNGA cube".
+[2023-09-20 09:04:18,349 - None - registers.py:105 - DEBUG]: Successfully loaded reader "MaNGA rss".
+[2023-09-20 09:04:18,355 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "MaNGA rss".
+[2023-09-20 09:04:18,459 - None - registers.py:105 - DEBUG]: Successfully loaded reader "HST/COS".
+[2023-09-20 09:04:18,466 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "HST/COS".
+[2023-09-20 09:04:18,499 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GALAH".
+[2023-09-20 09:04:18,510 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST c1d".
+[2023-09-20 09:04:18,580 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST c1d".
+[2023-09-20 09:04:18,591 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST c1d multi".
+[2023-09-20 09:04:18,600 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST x1d".
+[2023-09-20 09:04:18,696 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST x1d".
+[2023-09-20 09:04:18,706 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST x1d multi".
+[2023-09-20 09:04:18,736 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST x1d MIRI MRS".
+[2023-09-20 09:04:18,757 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST s2d".
+[2023-09-20 09:04:18,831 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST s2d".
+[2023-09-20 09:04:18,888 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST s2d multi".
+[2023-09-20 09:04:18,894 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST s3d".
+[2023-09-20 09:04:18,910 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST s3d".
+[2023-09-20 09:04:18,920 - None - registers.py:105 - DEBUG]: Successfully loaded reader "OzDES".
+[2023-09-20 09:04:19,080 - None - registers.py:105 - DEBUG]: Successfully loaded reader "wcs1d-fits".
+[2023-09-20 09:04:19,117 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "wcs1d-fits".
+[2023-09-20 09:04:19,200 - None - registers.py:105 - DEBUG]: Successfully loaded reader "iraf".
+[2023-09-20 09:04:19,209 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "iraf".
+[2023-09-20 09:04:19,225 - None - registers.py:105 - DEBUG]: Successfully loaded reader "iraf".
+[2023-09-20 09:04:19,240 - None - registers.py:105 - DEBUG]: Successfully loaded reader "APOGEE apVisit".
+[2023-09-20 09:04:19,330 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "APOGEE apVisit".
+[2023-09-20 09:04:19,337 - None - registers.py:105 - DEBUG]: Successfully loaded reader "APOGEE apStar".
+[2023-09-20 09:04:19,378 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "APOGEE apStar".
+[2023-09-20 09:04:19,384 - None - registers.py:105 - DEBUG]: Successfully loaded reader "APOGEE aspcapStar".
+[2023-09-20 09:04:19,424 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "APOGEE aspcapStar".
+[2023-09-20 09:04:19,472 - None - registers.py:105 - DEBUG]: Successfully loaded reader "SDSS-III/IV spec".
+[2023-09-20 09:04:19,481 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "SDSS-III/IV spec".
+[2023-09-20 09:04:19,514 - None - registers.py:105 - DEBUG]: Successfully loaded reader "SDSS-I/II spSpec".
+[2023-09-20 09:04:19,591 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "SDSS-I/II spSpec".
+[2023-09-20 09:04:19,611 - None - registers.py:105 - DEBUG]: Successfully loaded reader "SDSS spPlate".
+[2023-09-20 09:04:19,679 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "SDSS spPlate".
+[2023-09-20 09:04:19,695 - None - registers.py:105 - DEBUG]: Successfully loaded reader "2dFGRS".
+[2023-09-20 09:04:19,705 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Data Central AAOmega".
+[2023-09-20 09:04:19,747 - None - api_router.py:13 - INFO]: registering new views: args: ('targets', <class 'bhtom_base.bhtom_targets.api_views.TargetViewSet'>, 'targets'), kwargs: {}
+[2023-09-20 09:04:19,748 - None - api_router.py:13 - INFO]: registering new views: args: ('targetextra', <class 'bhtom_base.bhtom_targets.api_views.TargetExtraViewSet'>, 'targetextra'), kwargs: {}
+[2023-09-20 09:04:19,749 - None - api_router.py:13 - INFO]: registering new views: args: ('targetname', <class 'bhtom_base.bhtom_targets.api_views.TargetNameViewSet'>, 'targetname'), kwargs: {}
+[2023-09-20 09:04:25,533 - None - pyplot.py:339 - DEBUG]: Loaded backend agg version v2.2.
+[2023-09-20 09:04:48,272 - None - autoreload.py:266 - INFO]: /Users/yurii/AkondLab/bh-tom/bhtom2/bhtom2/bhtom_observatory/forms.py changed, reloading.
+[2023-09-20 09:05:17,759 - None - autoreload.py:677 - INFO]: Watching for file changes with StatReloader
+[2023-09-20 09:05:26,834 - None - __init__.py:307 - DEBUG]: matplotlib data path: /Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/matplotlib/mpl-data
+[2023-09-20 09:05:26,859 - None - __init__.py:307 - DEBUG]: CONFIGDIR=/Users/yurii/.matplotlib
+[2023-09-20 09:05:26,865 - None - __init__.py:1475 - DEBUG]: interactive is False
+[2023-09-20 09:05:26,874 - None - __init__.py:1476 - DEBUG]: platform is darwin
+[2023-09-20 09:05:27,580 - None - __init__.py:307 - DEBUG]: CACHEDIR=/Users/yurii/.matplotlib
+[2023-09-20 09:05:27,633 - None - font_manager.py:1540 - DEBUG]: Using fontManager instance from /Users/yurii/.matplotlib/fontlist-v330.json
+[2023-09-20 09:05:33,861 - None - registers.py:105 - DEBUG]: Successfully loaded reader "HST/STIS".
+[2023-09-20 09:05:33,866 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "HST/STIS".
+[2023-09-20 09:05:33,875 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Data Central Single-Split".
+[2023-09-20 09:05:33,880 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Data Central Multiline-Single".
+[2023-09-20 09:05:33,940 - None - registers.py:105 - DEBUG]: Successfully loaded reader "WiggleZ".
+[2023-09-20 09:05:33,958 - None - registers.py:105 - DEBUG]: Successfully loaded reader "ASCII".
+[2023-09-20 09:05:33,968 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "ASCII".
+[2023-09-20 09:05:33,976 - None - registers.py:105 - DEBUG]: Successfully loaded reader "IPAC".
+[2023-09-20 09:05:33,982 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "IPAC".
+[2023-09-20 09:05:34,075 - None - registers.py:105 - DEBUG]: Successfully loaded reader "2SLAQ-LRG".
+[2023-09-20 09:05:34,088 - None - registers.py:105 - DEBUG]: Successfully loaded reader "MUSCLES SED".
+[2023-09-20 09:05:34,098 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "MUSCLES SED".
+[2023-09-20 09:05:34,145 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-2QZ".
+[2023-09-20 09:05:34,365 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-2SLAQ-QSO".
+[2023-09-20 09:05:34,370 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA".
+[2023-09-20 09:05:34,377 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-LT".
+[2023-09-20 09:05:34,382 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-MGC".
+[2023-09-20 09:05:34,499 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-WiggleZ".
+[2023-09-20 09:05:34,506 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-2dFGRS".
+[2023-09-20 09:05:34,541 - None - registers.py:105 - DEBUG]: Successfully loaded reader "tabular-fits".
+[2023-09-20 09:05:34,556 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "tabular-fits".
+[2023-09-20 09:05:34,567 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Subaru-pfsObject".
+[2023-09-20 09:05:34,672 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "Subaru-pfsObject".
+[2023-09-20 09:05:34,681 - None - registers.py:105 - DEBUG]: Successfully loaded reader "ECSV".
+[2023-09-20 09:05:34,772 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "ECSV".
+[2023-09-20 09:05:34,899 - None - registers.py:105 - DEBUG]: Successfully loaded reader "6dFGS-tabular".
+[2023-09-20 09:05:35,018 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "6dFGS-tabular".
+[2023-09-20 09:05:35,025 - None - registers.py:105 - DEBUG]: Successfully loaded reader "6dFGS-split".
+[2023-09-20 09:05:35,059 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "6dFGS-split".
+[2023-09-20 09:05:35,067 - None - registers.py:105 - DEBUG]: Successfully loaded reader "6dFGS-combined".
+[2023-09-20 09:05:35,153 - None - registers.py:105 - DEBUG]: Successfully loaded reader "MaNGA cube".
+[2023-09-20 09:05:35,214 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "MaNGA cube".
+[2023-09-20 09:05:35,225 - None - registers.py:105 - DEBUG]: Successfully loaded reader "MaNGA rss".
+[2023-09-20 09:05:35,232 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "MaNGA rss".
+[2023-09-20 09:05:35,247 - None - registers.py:105 - DEBUG]: Successfully loaded reader "HST/COS".
+[2023-09-20 09:05:35,262 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "HST/COS".
+[2023-09-20 09:05:35,395 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GALAH".
+[2023-09-20 09:05:35,402 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST c1d".
+[2023-09-20 09:05:35,408 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST c1d".
+[2023-09-20 09:05:35,414 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST c1d multi".
+[2023-09-20 09:05:35,526 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST x1d".
+[2023-09-20 09:05:35,578 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST x1d".
+[2023-09-20 09:05:35,598 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST x1d multi".
+[2023-09-20 09:05:35,622 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST x1d MIRI MRS".
+[2023-09-20 09:05:35,628 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST s2d".
+[2023-09-20 09:05:35,651 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST s2d".
+[2023-09-20 09:05:35,735 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST s2d multi".
+[2023-09-20 09:05:35,744 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST s3d".
+[2023-09-20 09:05:35,770 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST s3d".
+[2023-09-20 09:05:35,833 - None - registers.py:105 - DEBUG]: Successfully loaded reader "OzDES".
+[2023-09-20 09:05:35,849 - None - registers.py:105 - DEBUG]: Successfully loaded reader "wcs1d-fits".
+[2023-09-20 09:05:35,902 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "wcs1d-fits".
+[2023-09-20 09:05:35,968 - None - registers.py:105 - DEBUG]: Successfully loaded reader "iraf".
+[2023-09-20 09:05:35,980 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "iraf".
+[2023-09-20 09:05:35,985 - None - registers.py:105 - DEBUG]: Successfully loaded reader "iraf".
+[2023-09-20 09:05:36,073 - None - registers.py:105 - DEBUG]: Successfully loaded reader "APOGEE apVisit".
+[2023-09-20 09:05:36,082 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "APOGEE apVisit".
+[2023-09-20 09:05:36,101 - None - registers.py:105 - DEBUG]: Successfully loaded reader "APOGEE apStar".
+[2023-09-20 09:05:36,208 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "APOGEE apStar".
+[2023-09-20 09:05:36,244 - None - registers.py:105 - DEBUG]: Successfully loaded reader "APOGEE aspcapStar".
+[2023-09-20 09:05:36,298 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "APOGEE aspcapStar".
+[2023-09-20 09:05:36,307 - None - registers.py:105 - DEBUG]: Successfully loaded reader "SDSS-III/IV spec".
+[2023-09-20 09:05:36,397 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "SDSS-III/IV spec".
+[2023-09-20 09:05:36,450 - None - registers.py:105 - DEBUG]: Successfully loaded reader "SDSS-I/II spSpec".
+[2023-09-20 09:05:36,461 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "SDSS-I/II spSpec".
+[2023-09-20 09:05:36,525 - None - registers.py:105 - DEBUG]: Successfully loaded reader "SDSS spPlate".
+[2023-09-20 09:05:36,594 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "SDSS spPlate".
+[2023-09-20 09:05:36,772 - None - registers.py:105 - DEBUG]: Successfully loaded reader "2dFGRS".
+[2023-09-20 09:05:36,795 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Data Central AAOmega".
+[2023-09-20 09:05:36,814 - None - api_router.py:13 - INFO]: registering new views: args: ('targets', <class 'bhtom_base.bhtom_targets.api_views.TargetViewSet'>, 'targets'), kwargs: {}
+[2023-09-20 09:05:36,818 - None - api_router.py:13 - INFO]: registering new views: args: ('targetextra', <class 'bhtom_base.bhtom_targets.api_views.TargetExtraViewSet'>, 'targetextra'), kwargs: {}
+[2023-09-20 09:05:36,819 - None - api_router.py:13 - INFO]: registering new views: args: ('targetname', <class 'bhtom_base.bhtom_targets.api_views.TargetNameViewSet'>, 'targetname'), kwargs: {}
+[2023-09-20 09:05:42,899 - None - pyplot.py:339 - DEBUG]: Loaded backend agg version v2.2.
+[2023-09-20 09:10:51,904 - None - autoreload.py:266 - INFO]: /Users/yurii/AkondLab/bh-tom/bhtom2/bhtom2/bhtom_observatory/forms.py changed, reloading.
+[2023-09-20 09:11:13,043 - None - autoreload.py:677 - INFO]: Watching for file changes with StatReloader
+[2023-09-20 09:11:22,747 - None - __init__.py:307 - DEBUG]: matplotlib data path: /Users/yurii/anaconda3/envs/bh-tom-env-2/lib/python3.9/site-packages/matplotlib/mpl-data
+[2023-09-20 09:11:22,865 - None - __init__.py:307 - DEBUG]: CONFIGDIR=/Users/yurii/.matplotlib
+[2023-09-20 09:11:22,875 - None - __init__.py:1475 - DEBUG]: interactive is False
+[2023-09-20 09:11:22,877 - None - __init__.py:1476 - DEBUG]: platform is darwin
+[2023-09-20 09:11:23,707 - None - __init__.py:307 - DEBUG]: CACHEDIR=/Users/yurii/.matplotlib
+[2023-09-20 09:11:23,745 - None - font_manager.py:1540 - DEBUG]: Using fontManager instance from /Users/yurii/.matplotlib/fontlist-v330.json
+[2023-09-20 09:11:30,121 - None - registers.py:105 - DEBUG]: Successfully loaded reader "HST/STIS".
+[2023-09-20 09:11:30,128 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "HST/STIS".
+[2023-09-20 09:11:30,135 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Data Central Single-Split".
+[2023-09-20 09:11:30,139 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Data Central Multiline-Single".
+[2023-09-20 09:11:30,145 - None - registers.py:105 - DEBUG]: Successfully loaded reader "WiggleZ".
+[2023-09-20 09:11:30,229 - None - registers.py:105 - DEBUG]: Successfully loaded reader "ASCII".
+[2023-09-20 09:11:30,234 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "ASCII".
+[2023-09-20 09:11:30,240 - None - registers.py:105 - DEBUG]: Successfully loaded reader "IPAC".
+[2023-09-20 09:11:30,275 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "IPAC".
+[2023-09-20 09:11:30,285 - None - registers.py:105 - DEBUG]: Successfully loaded reader "2SLAQ-LRG".
+[2023-09-20 09:11:30,347 - None - registers.py:105 - DEBUG]: Successfully loaded reader "MUSCLES SED".
+[2023-09-20 09:11:30,361 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "MUSCLES SED".
+[2023-09-20 09:11:30,397 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-2QZ".
+[2023-09-20 09:11:30,402 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-2SLAQ-QSO".
+[2023-09-20 09:11:30,409 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA".
+[2023-09-20 09:11:30,415 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-LT".
+[2023-09-20 09:11:30,420 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-MGC".
+[2023-09-20 09:11:30,526 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-WiggleZ".
+[2023-09-20 09:11:30,612 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GAMA-2dFGRS".
+[2023-09-20 09:11:30,659 - None - registers.py:105 - DEBUG]: Successfully loaded reader "tabular-fits".
+[2023-09-20 09:11:30,665 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "tabular-fits".
+[2023-09-20 09:11:30,753 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Subaru-pfsObject".
+[2023-09-20 09:11:30,793 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "Subaru-pfsObject".
+[2023-09-20 09:11:30,798 - None - registers.py:105 - DEBUG]: Successfully loaded reader "ECSV".
+[2023-09-20 09:11:30,841 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "ECSV".
+[2023-09-20 09:11:30,967 - None - registers.py:105 - DEBUG]: Successfully loaded reader "6dFGS-tabular".
+[2023-09-20 09:11:30,975 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "6dFGS-tabular".
+[2023-09-20 09:11:31,024 - None - registers.py:105 - DEBUG]: Successfully loaded reader "6dFGS-split".
+[2023-09-20 09:11:31,032 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "6dFGS-split".
+[2023-09-20 09:11:31,039 - None - registers.py:105 - DEBUG]: Successfully loaded reader "6dFGS-combined".
+[2023-09-20 09:11:31,045 - None - registers.py:105 - DEBUG]: Successfully loaded reader "MaNGA cube".
+[2023-09-20 09:11:31,134 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "MaNGA cube".
+[2023-09-20 09:11:31,147 - None - registers.py:105 - DEBUG]: Successfully loaded reader "MaNGA rss".
+[2023-09-20 09:11:31,181 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "MaNGA rss".
+[2023-09-20 09:11:31,201 - None - registers.py:105 - DEBUG]: Successfully loaded reader "HST/COS".
+[2023-09-20 09:11:31,287 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "HST/COS".
+[2023-09-20 09:11:31,399 - None - registers.py:105 - DEBUG]: Successfully loaded reader "GALAH".
+[2023-09-20 09:11:31,404 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST c1d".
+[2023-09-20 09:11:31,469 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST c1d".
+[2023-09-20 09:11:31,480 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST c1d multi".
+[2023-09-20 09:11:31,518 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST x1d".
+[2023-09-20 09:11:31,526 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST x1d".
+[2023-09-20 09:11:31,552 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST x1d multi".
+[2023-09-20 09:11:31,564 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST x1d MIRI MRS".
+[2023-09-20 09:11:31,629 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST s2d".
+[2023-09-20 09:11:31,635 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST s2d".
+[2023-09-20 09:11:31,653 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST s2d multi".
+[2023-09-20 09:11:31,660 - None - registers.py:105 - DEBUG]: Successfully loaded reader "JWST s3d".
+[2023-09-20 09:11:31,731 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "JWST s3d".
+[2023-09-20 09:11:31,762 - None - registers.py:105 - DEBUG]: Successfully loaded reader "OzDES".
+[2023-09-20 09:11:31,767 - None - registers.py:105 - DEBUG]: Successfully loaded reader "wcs1d-fits".
+[2023-09-20 09:11:31,854 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "wcs1d-fits".
+[2023-09-20 09:11:31,878 - None - registers.py:105 - DEBUG]: Successfully loaded reader "iraf".
+[2023-09-20 09:11:31,902 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "iraf".
+[2023-09-20 09:11:31,937 - None - registers.py:105 - DEBUG]: Successfully loaded reader "iraf".
+[2023-09-20 09:11:31,947 - None - registers.py:105 - DEBUG]: Successfully loaded reader "APOGEE apVisit".
+[2023-09-20 09:11:31,953 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "APOGEE apVisit".
+[2023-09-20 09:11:31,978 - None - registers.py:105 - DEBUG]: Successfully loaded reader "APOGEE apStar".
+[2023-09-20 09:11:32,051 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "APOGEE apStar".
+[2023-09-20 09:11:32,064 - None - registers.py:105 - DEBUG]: Successfully loaded reader "APOGEE aspcapStar".
+[2023-09-20 09:11:32,083 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "APOGEE aspcapStar".
+[2023-09-20 09:11:32,092 - None - registers.py:105 - DEBUG]: Successfully loaded reader "SDSS-III/IV spec".
+[2023-09-20 09:11:32,204 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "SDSS-III/IV spec".
+[2023-09-20 09:11:32,219 - None - registers.py:105 - DEBUG]: Successfully loaded reader "SDSS-I/II spSpec".
+[2023-09-20 09:11:32,235 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "SDSS-I/II spSpec".
+[2023-09-20 09:11:32,261 - None - registers.py:105 - DEBUG]: Successfully loaded reader "SDSS spPlate".
+[2023-09-20 09:11:32,279 - None - registers.py:130 - DEBUG]: Created SpectrumList reader for "SDSS spPlate".
+[2023-09-20 09:11:32,380 - None - registers.py:105 - DEBUG]: Successfully loaded reader "2dFGRS".
+[2023-09-20 09:11:32,404 - None - registers.py:105 - DEBUG]: Successfully loaded reader "Data Central AAOmega".
+[2023-09-20 09:11:32,416 - None - api_router.py:13 - INFO]: registering new views: args: ('targets', <class 'bhtom_base.bhtom_targets.api_views.TargetViewSet'>, 'targets'), kwargs: {}
+[2023-09-20 09:11:32,417 - None - api_router.py:13 - INFO]: registering new views: args: ('targetextra', <class 'bhtom_base.bhtom_targets.api_views.TargetExtraViewSet'>, 'targetextra'), kwargs: {}
+[2023-09-20 09:11:32,418 - None - api_router.py:13 - INFO]: registering new views: args: ('targetname', <class 'bhtom_base.bhtom_targets.api_views.TargetNameViewSet'>, 'targetname'), kwargs: {}
+[2023-09-20 09:11:32,605 - None - api_router.py:13 - INFO]: registering new views: args: ('groups', <class 'bhtom_base.bhtom_common.api_views.GroupViewSet'>, 'groups'), kwargs: {}
+[2023-09-20 09:11:32,607 - None - api_router.py:13 - INFO]: registering new views: args: ('targets', <class 'bhtom_base.bhtom_targets.api_views.TargetViewSet'>, 'targets'), kwargs: {}
+[2023-09-20 09:11:32,608 - None - api_router.py:13 - INFO]: registering new views: args: ('targetextra', <class 'bhtom_base.bhtom_targets.api_views.TargetExtraViewSet'>, 'targetextra'), kwargs: {}
+[2023-09-20 09:11:32,610 - None - api_router.py:13 - INFO]: registering new views: args: ('targetname', <class 'bhtom_base.bhtom_targets.api_views.TargetNameViewSet'>, 'targetname'), kwargs: {}
+[2023-09-20 09:11:32,771 - None - api_router.py:13 - INFO]: registering new views: args: ('observations', <class 'bhtom_base.bhtom_observations.api_views.ObservationRecordViewSet'>, 'observations'), kwargs: {}
+[2023-09-20 09:11:32,833 - None - api_router.py:13 - INFO]: registering new views: args: ('dataproducts', <class 'bhtom_base.bhtom_dataproducts.api_views.DataProductViewSet'>, 'dataproducts'), kwargs: {}
+[2023-09-20 09:11:37,626 - None - pyplot.py:339 - DEBUG]: Loaded backend agg version v2.2.
+[2023-09-20 09:11:46,961 - 4779d8953d76454ca803c65c14a97dfa - bhtom_logger.py:21 - INFO]: [request, response] Method: GET, Path: /proposals/, IP: 127.0.0.1, correlation_id: 4779d8953d76454ca803c65c14a97dfa,  session_id: pvrmujlkoigv0j1tj3a7hhk26kdo0plc, user: admin, host: 127.0.0.1:8000, body: 
+[2023-09-20 09:11:47,221 - 4779d8953d76454ca803c65c14a97dfa - bhtom_logger.py:21 - INFO]: [request, response] uuid: 4779d8953d76454ca803c65c14a97dfa, Response - Status Code: 200, time: 0.259489 body: 
+[2023-09-20 09:11:51,327 - 880ca796482b48d2a3e90d85dfa412cf - bhtom_logger.py:21 - INFO]: [request, response] Method: GET, Path: /observatory/, IP: 127.0.0.1, correlation_id: 880ca796482b48d2a3e90d85dfa412cf,  session_id: pvrmujlkoigv0j1tj3a7hhk26kdo0plc, user: admin, host: 127.0.0.1:8000, body: 
+[2023-09-20 09:11:51,390 - 880ca796482b48d2a3e90d85dfa412cf - bhtom_logger.py:21 - INFO]: [request, response] uuid: 880ca796482b48d2a3e90d85dfa412cf, Response - Status Code: 200, time: 0.063345 body: 
+[2023-09-20 09:11:54,733 - 5406b90122774de98cf2ebd37c431e99 - bhtom_logger.py:21 - INFO]: [request, response] Method: GET, Path: /observatory/instrument/create/, IP: 127.0.0.1, correlation_id: 5406b90122774de98cf2ebd37c431e99,  session_id: pvrmujlkoigv0j1tj3a7hhk26kdo0plc, user: admin, host: 127.0.0.1:8000, body: 
+[2023-09-20 09:11:54,815 - 5406b90122774de98cf2ebd37c431e99 - bhtom_logger.py:21 - INFO]: [request, response] uuid: 5406b90122774de98cf2ebd37c431e99, Response - Status Code: 200, time: 0.082001 body: 
+[2023-09-20 09:11:56,325 - 3677de078b014735b8e0eccdb7a276a3 - bhtom_logger.py:21 - INFO]: [request, response] Method: GET, Path: /observatory/create/, IP: 127.0.0.1, correlation_id: 3677de078b014735b8e0eccdb7a276a3,  session_id: pvrmujlkoigv0j1tj3a7hhk26kdo0plc, user: admin, host: 127.0.0.1:8000, body: 
+[2023-09-20 09:11:56,706 - 3677de078b014735b8e0eccdb7a276a3 - bhtom_logger.py:21 - INFO]: [request, response] uuid: 3677de078b014735b8e0eccdb7a276a3, Response - Status Code: 200, time: 0.380748 body: 
+[2023-09-20 09:13:20,969 - 3e4516398d8444479fb7cb44049bc711 - bhtom_logger.py:21 - INFO]: [request, response] Method: GET, Path: /observatory/create/, IP: 127.0.0.1, correlation_id: 3e4516398d8444479fb7cb44049bc711,  session_id: pvrmujlkoigv0j1tj3a7hhk26kdo0plc, user: admin, host: 127.0.0.1:8000, body: 
+[2023-09-20 09:13:21,177 - 3e4516398d8444479fb7cb44049bc711 - bhtom_logger.py:21 - INFO]: [request, response] uuid: 3e4516398d8444479fb7cb44049bc711, Response - Status Code: 200, time: 0.208215 body: 
+[2023-09-20 09:14:02,239 - 170229abee65483fbacad80f5f15c1d9 - bhtom_logger.py:21 - INFO]: [request, response] Method: GET, Path: /observatory/create/, IP: 127.0.0.1, correlation_id: 170229abee65483fbacad80f5f15c1d9,  session_id: pvrmujlkoigv0j1tj3a7hhk26kdo0plc, user: admin, host: 127.0.0.1:8000, body: 
+[2023-09-20 09:14:02,418 - 170229abee65483fbacad80f5f15c1d9 - bhtom_logger.py:21 - INFO]: [request, response] uuid: 170229abee65483fbacad80f5f15c1d9, Response - Status Code: 200, time: 0.179713 body: 
+[2023-09-20 09:14:06,302 - 76244863529d47e69db855d469a11f45 - bhtom_logger.py:21 - INFO]: [request, response] Method: GET, Path: /observatory/create/, IP: 127.0.0.1, correlation_id: 76244863529d47e69db855d469a11f45,  session_id: pvrmujlkoigv0j1tj3a7hhk26kdo0plc, user: admin, host: 127.0.0.1:8000, body: 
+[2023-09-20 09:14:06,404 - 76244863529d47e69db855d469a11f45 - bhtom_logger.py:21 - INFO]: [request, response] uuid: 76244863529d47e69db855d469a11f45, Response - Status Code: 200, time: 0.101973 body: 
+[2023-09-20 09:20:19,119 - d97b90e2d7304ebd9b2ec286ebc72856 - bhtom_logger.py:21 - INFO]: [request, response] Method: GET, Path: /observatory/create/, IP: 127.0.0.1, correlation_id: d97b90e2d7304ebd9b2ec286ebc72856,  session_id: pvrmujlkoigv0j1tj3a7hhk26kdo0plc, user: admin, host: 127.0.0.1:8000, body: 
+[2023-09-20 09:20:19,579 - d97b90e2d7304ebd9b2ec286ebc72856 - bhtom_logger.py:21 - INFO]: [request, response] uuid: d97b90e2d7304ebd9b2ec286ebc72856, Response - Status Code: 200, time: 0.460918 body: 
+[2023-09-20 09:20:33,943 - 55989d830a3e486794146f42b858dfa3 - bhtom_logger.py:21 - INFO]: [request, response] Method: GET, Path: /observatory/, IP: 127.0.0.1, correlation_id: 55989d830a3e486794146f42b858dfa3,  session_id: pvrmujlkoigv0j1tj3a7hhk26kdo0plc, user: admin, host: 127.0.0.1:8000, body: 
+[2023-09-20 09:20:34,122 - 55989d830a3e486794146f42b858dfa3 - bhtom_logger.py:21 - INFO]: [request, response] uuid: 55989d830a3e486794146f42b858dfa3, Response - Status Code: 200, time: 0.179298 body: 
+[2023-09-20 09:20:38,108 - 4b20603c94374d7b8ba85feca456195e - bhtom_logger.py:21 - INFO]: [request, response] Method: GET, Path: /observatory/instrument/create/, IP: 127.0.0.1, correlation_id: 4b20603c94374d7b8ba85feca456195e,  session_id: pvrmujlkoigv0j1tj3a7hhk26kdo0plc, user: admin, host: 127.0.0.1:8000, body: 
+[2023-09-20 09:20:38,165 - 4b20603c94374d7b8ba85feca456195e - bhtom_logger.py:21 - INFO]: [request, response] uuid: 4b20603c94374d7b8ba85feca456195e, Response - Status Code: 200, time: 0.056799 body: 
+[2023-09-20 09:20:39,492 - 0bbe658cad0a442fbb36a64d0a4b318b - bhtom_logger.py:21 - INFO]: [request, response] Method: GET, Path: /observatory/create/, IP: 127.0.0.1, correlation_id: 0bbe658cad0a442fbb36a64d0a4b318b,  session_id: pvrmujlkoigv0j1tj3a7hhk26kdo0plc, user: admin, host: 127.0.0.1:8000, body: 
+[2023-09-20 09:20:39,641 - 0bbe658cad0a442fbb36a64d0a4b318b - bhtom_logger.py:21 - INFO]: [request, response] uuid: 0bbe658cad0a442fbb36a64d0a4b318b, Response - Status Code: 200, time: 0.149738 body: 

@@ -1,34 +1,35 @@
 {% extends 'bhtom_common/base.html' %}
-{% load bootstrap4 %}
+{% load bootstrap4 static %}
 {% block title %}Create observatory{% endblock %}
+<script src="{% static 'bhtom_observatory/create_observatory.js' %}"></script>
 {% block content %}
+<script src="{% static 'bhtom_observatory/create_observatory.js' %}"></script>
 {{ users }}
-
 {% if object %}
 <form action="{% url 'bhtom_observatory:update' object.id %}" enctype="multipart/form-data" method="POST">
-{% else %}
+  {% else %}
   <h4> Create a new Observatory. </h4>
   <br>
-    <p>
+  <p>
     Please fill the form below, check BHTOM manual for details.
-    Your entry has to be then activated by the Administrator. 
-    </p>
-    <p>
-      The sample fits file is necessary for new observatories for verification of the automatic photometric processing.
-      Please refer to the BHTOM Manual or get in touch.
-    </p>
-<form action="{% url 'bhtom_observatory:create' %}" enctype="multipart/form-data" method="POST">
-{% endif %}
-{% csrf_token %}
-{% bootstrap_form form %}
-{% buttons %}
-  <button type="submit" class="btn btn-primary">
-    {% if object %}
-    Update
-    {% else %}
-    Create Observatory
+    Your entry has to be then activated by the Administrator.
+  </p>
+  <p>
+    The sample fits file is necessary for new observatories for verification of the automatic photometric processing.
+    Please refer to the BHTOM Manual or get in touch.
+  </p>
+  <form action="{% url 'bhtom_observatory:create' %}" enctype="multipart/form-data" method="POST">
     {% endif %}
-  </button>
-{% endbuttons %}
-</form>
-{% endblock %}
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    {% buttons %}
+    <button type="submit" class="btn btn-primary">
+      {% if object %}
+      Update
+      {% else %}
+      Create Observatory
+      {% endif %}
+    </button>
+    {% endbuttons %}
+  </form>
+  {% endblock %}
