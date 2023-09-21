@@ -43,8 +43,12 @@ done
 echo "Add admin if not yet created..."
 python3 manage.py add_admin
 
+echo "Add catalogs if not yet created..."
+python3 manage.py add_catalogs
+
 echo "Django docker is fully configured."
 echo "Running server..."
+
 
 python3 manage.py runserver 0.0.0.0:8000
 

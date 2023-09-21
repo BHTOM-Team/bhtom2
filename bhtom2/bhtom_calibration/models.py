@@ -2,14 +2,14 @@ from django.db import models
 from bhtom_base.bhtom_dataproducts.models import DataProduct
 
 
-class catalogs(models.Model):
+class Catalogs(models.Model):
     id = models.IntegerField(primary_key=True)
     survey = models.TextField(blank=False, editable=False)
     filters = models.TextField(blank=False, editable=False)
     isActive = models.BooleanField(default=True)
 
 
-class calibration_data(models.Model):
+class Calibration_data(models.Model):
 
     STATUS = [
         ('C', 'TO DO'),
@@ -20,7 +20,7 @@ class calibration_data(models.Model):
 
     id = models.AutoField(db_index=True, primary_key=True)
     dataproduct = models.ForeignKey(DataProduct, on_delete=models.CASCADE)
-    use_catalog = models.ForeignKey(catalogs, on_delete=models.CASCADE, null=True)
+    use_catalog = models.ForeignKey(Catalogs, on_delete=models.CASCADE, null=True)
     status = models.CharField(max_length=1, choices=STATUS, default='C', db_index=True)
     status_message = models.TextField(null=True, blank=True)
     mjd = models.FloatField(null=False, blank=False)

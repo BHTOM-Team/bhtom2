@@ -3,9 +3,9 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from bhtom2.bhtom_calibration.models import calibration_data
+from bhtom2.bhtom_calibration.models import Calibration_data
 from django.core import serializers
-from bhtom2.bhtom_calibration.models import catalogs as calibration_catalog
+from bhtom2.bhtom_calibration.models import Catalogs as calibration_catalog
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
 logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_calibration: views]')
@@ -19,9 +19,9 @@ class CalibrationResultsApiView(APIView):
 
         file_id = request.data['file_id']
         try:
-            instance = calibration_data.objects.get(dataproduct_id=file_id)
+            instance = Calibration_data.objects.get(dataproduct_id=file_id)
             results = serializers.serialize('json', [instance])
-        except calibration_data.DoesNotExist:
+        except Calibration_data.DoesNotExist:
             return Response({"Error": 'File does not exist in the database'}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"Result": results}, status=status.HTTP_200_OK)
