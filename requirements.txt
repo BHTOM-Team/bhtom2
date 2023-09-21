@@ -46,5 +46,6 @@ drf_yasg==1.21.6 #swagger
 MulensModel>=2.15.0
 aiokafka==0.8.1
 django_guid==3.3.1
+django_cron==0.6.0
 
 

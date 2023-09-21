@@ -27,7 +27,6 @@ class GroupChoiceField(forms.ModelChoiceField):
 
 
 class DataProductUploadForm(forms.Form):
-
     observation_record = forms.ModelChoiceField(
         ObservationRecord.objects.all(),
         widget=forms.HiddenInput(),
@@ -67,8 +66,6 @@ class DataProductUploadForm(forms.Form):
         widget=forms.HiddenInput()
     )
 
- 
-
     def __init__(self, *args, **kwargs):
         user = kwargs['initial']['user']
         filter = {}
@@ -78,10 +75,6 @@ class DataProductUploadForm(forms.Form):
             curname = curval.survey
             filters = curval.filters
             filter[curname + '/' + filters] = curname + '/' + filters
-            filter['%s/any' % (curname)] = '%s/any' % (curname)
-
-        for f in ['U', 'B', 'V', 'R', 'I', 'u', 'g', 'r', 'i', 'z']:
-            filter['any/%s' % f] = 'any/%s' % f
 
         super(DataProductUploadForm, self).__init__(*args, **kwargs)
 
@@ -90,9 +83,9 @@ class DataProductUploadForm(forms.Form):
             required=True,
             label='Observer\'s Name *',
         )
-        
+
         self.fields['observatory'] = ObservatoryChoiceField(
-            queryset=ObservatoryMatrix.objects.filter(user=user,active_flg=True).order_by('observatory'),
+            queryset=ObservatoryMatrix.objects.filter(user=user, active_flg=True).order_by('observatory'),
             widget=forms.Select(),
             required=True
         )
@@ -114,4 +107,4 @@ class DataProductUploadForm(forms.Form):
         #     widget=forms.Select(),
         #     required=False,
         #     label="Group",
-        #)
+        # )
