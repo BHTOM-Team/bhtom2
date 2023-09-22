@@ -41,7 +41,7 @@ from bhtom2.utils.reduced_data_utils import save_photometry_data_for_target_to_c
 from bhtom_base.bhtom_targets.models import Target, TargetList
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum, BrokerCadence
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_targets: views]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.views')
 
 
 class TargetCreateView(LoginRequiredMixin, CreateView):
@@ -478,7 +478,7 @@ class TargetImportView(LoginRequiredMixin, TemplateView):
         )
         for error in result['errors']:
             messages.warning(request, error)
-        return redirect(reverse('bhtom2.bhtom_targets:list'))
+        return redirect(reverse('bhtom_targets:list'))
 
 
 class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):

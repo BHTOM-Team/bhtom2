@@ -8,7 +8,7 @@ from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix
 from bhtom2.bhtom_calibration.models import Catalogs
 from bhtom_base.bhtom_dataproducts.models import DataProductGroup_user
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_dataproducts: forms]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_dataproducts.forms')
 
 
 class ObservatoryChoiceField(forms.ModelChoiceField):

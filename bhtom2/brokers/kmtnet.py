@@ -26,7 +26,7 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 
 from astropy.coordinates import SkyCoord
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[KMT_NET Broker]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: KMT_NET Broker')
 
 import io
 

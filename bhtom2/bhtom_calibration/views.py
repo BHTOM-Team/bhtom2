@@ -8,7 +8,7 @@ from django.core import serializers
 from bhtom2.bhtom_calibration.models import Catalogs as calibration_catalog
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_calibration: views]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_calibration.views')
 
 
 class CalibrationResultsApiView(APIView):

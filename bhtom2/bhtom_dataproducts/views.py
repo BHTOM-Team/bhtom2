@@ -12,7 +12,7 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 from django.conf import settings
 
 from bhtom_base.bhtom_dataproducts.filters import DataProductFilter
-from bhtom_base.bhtom_dataproducts.models import DataProduct, DataProductGroup, DataProductGroup_user
+from bhtom_base.bhtom_dataproducts.models import DataProduct, DataProductGroup, DataProductGroup_user, CCDPhotJob
 from bhtom_base.bhtom_targets.models import Target
 from .forms import DataProductUploadForm
 from ..bhtom_calibration.models import Calibration_data
@@ -28,7 +28,7 @@ from django.contrib import messages
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_dataproducts: views]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_dataproducts.views')
 
 
 class DataProductUploadView(LoginRequiredMixin, FormView):
@@ -323,8 +323,14 @@ class DataDetailsView(LoginRequiredMixin, DetailView):
             target = Target.objects.get(id=dataProduct.target.id)
         except Exception as e:
             raise Http404
+        if dataProduct.fits_data:
+            ccdphot = CCDPhotJob.objects.get(dataProduct=dataProduct.id)
+            context['fits_data'] = dataProduct.data.split('/')[-1]
+            context['ccdphot'] = ccdphot
 
-        if dataProduct.fits_data is not None or dataProduct.photometry_data is not None:
+        if dataProduct.photometry_data:
+            context['photometry_data'] = dataProduct.photometry_data.split('/')[-1]
+
             try:
                 observatoryMatrix = ObservatoryMatrix.objects.get(id=dataProduct.observatory.id)
                 observatory = Observatory.objects.get(id=observatoryMatrix.observatory.id)
@@ -340,8 +346,12 @@ class DataDetailsView(LoginRequiredMixin, DetailView):
 
                 if calibration.calibration_plot is not None:
                     try:
-                        encoded_string = base64.b64encode(calibration.calibration_plot.read())
-                        context['calibration_plot'] = str(encoded_string, "utf-8")
+                        with open(settings.DATA_FILE_PATH + calibration.calibration_plot, "rb") as image_file:
+
+                            encoded_string = base64.b64encode(image_file.read())
+                            context['cpcs_plot'] = str(encoded_string, "utf-8")
+
+
                     except IOError as e:
                         logger.error('plot error')
             except Calibration_data.DoesNotExist:

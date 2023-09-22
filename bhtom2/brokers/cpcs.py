@@ -22,7 +22,7 @@ from bhtom_base.bhtom_targets.models import  TargetExtra, TargetName
 from bhtom2 import settings
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[CPCS Broker]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: CPCS Broker')
 
 def mag_error_with_calib_error(magerr: float, caliberr: float) -> float:
     return np.sqrt(magerr * magerr + caliberr * caliberr)

@@ -22,7 +22,7 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 ALERT_SOURCE: DataSource = DataSource.OGLE_EWS
 OGLE_EWS_CACHE_FILE: str = os.path.join(settings.BASE_DIR, "bhtom2/cache/ogle_lenses.txt")
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[OGLE EWS Harvester]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: OGLE EWS Harvester')
 
 
 # Fetch CSV containing all alerts and save it to file (so that it doesn't have to be fetched every single request)

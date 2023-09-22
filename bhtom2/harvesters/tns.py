@@ -13,7 +13,7 @@ from bhtom_base.bhtom_common.exceptions import ImproperCredentialsException
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_targets.models import Target
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[Transient Name Server Harvester]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: Transient Name Server Harvester')
 
 TNS_URL = 'https://www.wis-tns.org'
 

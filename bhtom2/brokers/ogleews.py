@@ -28,7 +28,7 @@ from astropy.coordinates import SkyCoord
 
 from dateutil.parser import parse
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[OGLE_EWS Broker]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: OGLE_EWS Broker')
 
 import io
 

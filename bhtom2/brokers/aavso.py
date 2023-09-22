@@ -17,7 +17,7 @@ from bhtom_base.bhtom_dataproducts.models import ReducedDatum, DatumValue
 from bhtom_base.bhtom_targets.models import Target, TargetExtra
 import astropy.units as u
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[AAVSO data fetch]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: AAVSO data fetch')
 
 DATA_SOURCE: DataSource = DataSource.AAVSO
 

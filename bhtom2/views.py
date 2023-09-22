@@ -4,7 +4,7 @@ from bhtom_base.bhtom_alerts.alerts import get_service_classes
 from bhtom_base.bhtom_alerts.models import BrokerQuery
 from bhtom_base.bhtom_alerts.views import BrokerQueryFilter
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom: views]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'bhtom: views')
 
 
 class BrokerQueryListView(FilterView):

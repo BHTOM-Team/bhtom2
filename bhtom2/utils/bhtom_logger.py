@@ -1,7 +1,7 @@
-import logging
 from logging import Logger, getLogger
 from django.conf import settings
 import graypy
+import logging
 
 
 class BHTOMLogger:
@@ -18,13 +18,22 @@ class BHTOMLogger:
         self.__logger.addHandler(graypy.GELFTCPHandler(self.__graylog_host))
 
     def info(self, message: str):
-        self.__logger.info(f'{self.__log_prefix} {message}')
+        frame = logging.currentframe().f_back
+        lineno = frame.f_lineno
+
+        self.__logger.info(f'[{self.__log_prefix}:{lineno}] - {message}')
 
     def debug(self, message: str):
-        self.__logger.debug(f'{self.__log_prefix} {message}')
+        frame = logging.currentframe().f_back
+        lineno = frame.f_lineno
+        self.__logger.debug(f'[{self.__log_prefix}:{lineno}] - {message}')
 
     def warning(self, message: str):
-        self.__logger.warning(f'{self.__log_prefix} {message}')
+        frame = logging.currentframe().f_back
+        lineno = frame.f_lineno
+        self.__logger.warning(f'[{self.__log_prefix}:{lineno}] - {message}')
 
     def error(self, message: str):
-        self.__logger.error(f'{self.__log_prefix} {message}')
+        frame = logging.currentframe().f_back
+        lineno = frame.f_lineno
+        self.__logger.error(f'[{self.__log_prefix}:{lineno}] - {message}')

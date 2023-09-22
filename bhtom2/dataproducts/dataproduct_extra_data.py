@@ -5,7 +5,7 @@ from bhtom_base.bhtom_dataproducts.models import DataProduct
 
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[Dataproduct Extra Data Serializer]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: Dataproduct Extra Data Serializer')
 
 # Extra Data fields
 OBSERVER_KEY: str = 'observer'

@@ -151,7 +151,6 @@ DATABASES = {
     },
 }
 
-
 MIGRATION_MODULES = {
     'bhtom2': 'bhtom2.migrations'
 }
@@ -223,9 +222,6 @@ logInterval = int(secret.get("LOG_INTERVAL"))
 logBackupCount = int(secret.get("LOG_BACKUP_COUNT"))
 logLevel = secret.get("LOG_LEVEL")
 
-
-
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -235,7 +231,7 @@ LOGGING = {
             'format': '%(name)-12s - %(levelname)-8s %(message)s'
         },
         'default': {
-            'format': '[%(asctime)s - %(correlation_id)s - %(filename)s:%(lineno)d - %(levelname)-2s]: %(message)s'
+            'format': '[%(asctime)s - %(correlation_id)s - %(levelname)-2s] : %(message)s'
         },
     },
 
@@ -308,19 +304,24 @@ DATA_PRODUCT_TYPES = {
     'photometry_nondetection': ('photometry_nondetection', 'Photometry Non-Detections'),
     'fits_file': ('fits_file', 'FITS File'),
     'spectroscopy': ('spectroscopy', 'Spectroscopy'),
-    #'image_file': ('image_file', 'Image File')
+    # 'image_file': ('image_file', 'Image File')
 }
 CLASSIFICATION_TYPES = [
-    ("Unknown","Unknown"),('Be-star outburst','Be-star outburst'),('Active Galactic Nucleus(AGN)',"Active Galactic Nucleus(AGN)"), ("BL Lac", "BL Lac"),
-    ("Cataclysmic Variable(CV)","Cataclysmic Variable(CV)"),("Cepheid Variable(CEPH)","Cepheid Variable(CEPH)"),("Eclipsing Binary(EB)","Eclipsing Binary(EB)"),
-    ("Galaxy","Galaxy"),("Long Period Variable(LPV)","Long Period Variable(LPV)"),("Luminous Blue Variable(LBV)","Luminous Blue Variable(LBV)"),
-    ("M-dwarf flare","M-dwarf flare"),("Microlensing Event","Microlensing Event"),("Nova","Nova"),("Peculiar Supernova","Peculiar Supernova"),
-    ("Quasar(QSO","Quasar(QSO)"),("R CrB Variable","R CrB Variable"),("RR Lyrae Variable","RR Lyrae Variable"),("Solar System Object(SSO)","Solar System Object(SSO)"),
-    ("Star","Star"),("Supernova(SN)","Supernova(SN)"),("Supernova imposter","Supernova imposter"),("Symbiotic star","Symbiotic star"),
-    ("Tidal Disruption Event(TDE)","Tidal Disruption Event(TDE)"),("Variable star-other","Variable star-other"),("X-Ray Binary(XRB)","X-Ray Binary(XRB)"),
-    ("Young Stellar Object(YSO)","Young Stellar Object(YSO)")]
-
-
+    ("Unknown", "Unknown"), ('Be-star outburst', 'Be-star outburst'),
+    ('Active Galactic Nucleus(AGN)', "Active Galactic Nucleus(AGN)"), ("BL Lac", "BL Lac"),
+    ("Cataclysmic Variable(CV)", "Cataclysmic Variable(CV)"), ("Cepheid Variable(CEPH)", "Cepheid Variable(CEPH)"),
+    ("Eclipsing Binary(EB)", "Eclipsing Binary(EB)"),
+    ("Galaxy", "Galaxy"), ("Long Period Variable(LPV)", "Long Period Variable(LPV)"),
+    ("Luminous Blue Variable(LBV)", "Luminous Blue Variable(LBV)"),
+    ("M-dwarf flare", "M-dwarf flare"), ("Microlensing Event", "Microlensing Event"), ("Nova", "Nova"),
+    ("Peculiar Supernova", "Peculiar Supernova"),
+    ("Quasar(QSO", "Quasar(QSO)"), ("R CrB Variable", "R CrB Variable"), ("RR Lyrae Variable", "RR Lyrae Variable"),
+    ("Solar System Object(SSO)", "Solar System Object(SSO)"),
+    ("Star", "Star"), ("Supernova(SN)", "Supernova(SN)"), ("Supernova imposter", "Supernova imposter"),
+    ("Symbiotic star", "Symbiotic star"),
+    ("Tidal Disruption Event(TDE)", "Tidal Disruption Event(TDE)"), ("Variable star-other", "Variable star-other"),
+    ("X-Ray Binary(XRB)", "X-Ray Binary(XRB)"),
+    ("Young Stellar Object(YSO)", "Young Stellar Object(YSO)")]
 
 DATA_PROCESSORS = {
     'photometry': 'bhtom_base.bhtom_dataproducts.processors.photometry_processor.PhotometryProcessor',
@@ -328,15 +329,15 @@ DATA_PROCESSORS = {
 }
 
 TOM_ALERT_CLASSES = [
-    #'bhtom_base.bhtom_alerts.brokers.alerce.ALeRCEBroker',
-    #'bhtom_base.bhtom_alerts.brokers.lasair.LasairBroker',
-    #'bhtom_base.bhtom_alerts.brokers.mars.MARSBroker',
-    #'bhtom_base.bhtom_alerts.brokers.scimma.SCIMMABroker',
-    #'bhtom_base.bhtom_alerts.brokers.scout.ScoutBroker',
-    'bhtom_base.bhtom_alerts.brokers.tns.TNSBroker',
-    'bhtom_base.bhtom_alerts.brokers.fink.FinkBroker',
+    # 'bhtom_base.bhtom_alerts.brokers.alerce.ALeRCEBroker',
+    # 'bhtom_base.bhtom_alerts.brokers.lasair.LasairBroker',
+    # 'bhtom_base.bhtom_alerts.brokers.mars.MARSBroker',
+    # 'bhtom_base.bhtom_alerts.brokers.scimma.SCIMMABroker',
+    # 'bhtom_base.bhtom_alerts.brokers.scout.ScoutBroker',
+    # 'bhtom_base.bhtom_alerts.brokers.tns.TNSBroker',
+    # 'bhtom_base.bhtom_alerts.brokers.fink.FinkBroker',
     'bhtom2.brokers.gaia_alerts.GaiaAlertsBroker',
-    'bhtom2.brokers.cpcs.CPCSBroker',
+    # 'bhtom2.brokers.cpcs.CPCSBroker',
     'bhtom2.brokers.aavso.AAVSOBroker',
     'bhtom2.brokers.ztf.ZTFBroker',
     'bhtom2.brokers.gaia.GaiaBroker',

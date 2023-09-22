@@ -26,18 +26,22 @@
                 <tr>
                     <td>Fits</td>
                     <td>
-                        <div title="{{ tabData.fits }}">{{ tabData.fits }}</div>
+                        <div title="{{ fits_data }}">{{ fits_data }}</div>
                     </td>
                 </tr>
                 <tr>
                     <td>Photometry</td>
-                    {% if object.photometry_data is not None %}
+                    {% if photometry_data is not None %}
                         <td>
-                            <a href="{% url 'bhtom_dataproducts:photometry_download' id=object.id %}"> {{ object.get_file_name }}</a>
+                            <a href="{% url 'bhtom_dataproducts:photometry_download' id=object.id %}"> {{ photometry_data }}</a>
                         </td>
                     {% else %}
                         <td></td>
                     {% endif %}
+                </tr>
+                 <tr>
+                    <td>Owner</td>
+                    <td>{{ owner }}</td>
                 </tr>
                 <tr>
                     <td>Observatory</td>
@@ -61,7 +65,7 @@
                 </tr>
                 <tr>
                     <td>Status</td>
-                    <td>{{ fits.status_message }}</td>
+                    <td>{{ calibration.status_message }}</td>
                 </tr>
                 <tr>
                     <td>MJD</td>
@@ -85,19 +89,11 @@
                     <td>Calib Filter</td>
                     <td>{{ calibration.best_filter }}</td>
                 </tr>
-                <tr>
-                    <td>FITS Filter</td>
-                    {% if fits.ccdphot_filter != None %}
-                        <td>{{ fits.ccdphot_filter }}</td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-                </tr>
 
                 <tr>
                     <td>Magnitude</td>
                     {% if calibration.mag != None %}
-                        <td>{{ calibration.mag|floatformat:2 }} +/- {{ fits.mag_err|floatformat:2 }} mag</td>
+                        <td>{{ calibration.mag|floatformat:2 }} +/- {{ calibration.mag_error|floatformat:2 }} mag</td>
                     {% else %}
                         <td></td>
                     {% endif %}
@@ -141,16 +137,16 @@
                 </tr>
                 <tr>
                     <td>Matching radius[arcsec]</td>
-                    <td>{{ calibration.matchDist }}</td>
+                    <td>{{ calibration.match_distans }}</td>
                 </tr>
                 <tr>
                     <td>Dry Run (no data will be stored in the database)</td>
-                    <td>{{ calibration.dry_run }}</td>
+                    <td>{{ object.dryRun }}</td>
                 </tr>
                 <tr>
                     <td>Comment</td>
-                    {% if calibration.comment != None %}
-                        <td>{{ calibration.comment }}</td>
+                    {% if object.comment != None %}
+                        <td>{{ object.comment }}</td>
                     {% else %}
                         <td></td>
                     {% endif %}
@@ -162,8 +158,10 @@
             </table>
         </div>
 
-        {% if fits.cpcs_plot != None %}
+        {% if cpcs_plot != None %}
+
             <div class="col-md-2">
+
                 <img src="data:image/png;base64,{{ cpcs_plot }}"/>
             </div>
         {% endif %}

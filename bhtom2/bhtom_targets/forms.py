@@ -17,7 +17,7 @@ from bhtom_base.bhtom_targets.models import (
 
 
 CLASSIFICATION_TYPES = settings.CLASSIFICATION_TYPES
-logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_targets: forms]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.forms')
 
 
 def extra_field_to_form_field(field_type):

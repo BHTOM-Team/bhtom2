@@ -8,7 +8,7 @@ from bhtom_base.bhtom_targets.models import Target
 
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[Sun Separation Update for Target]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: Sun Separation Update for Target')
 
 
 def update_sun_separation(target: Target) -> Optional[float]:

@@ -27,7 +27,7 @@ from django.db import transaction
 
 from bhtom_base.bhtom_targets.utils import cone_search_filter
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_targets: utils]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.utils')
 
 
 def import_targets(targets):
@@ -74,8 +74,6 @@ def import_targets(targets):
                 target_extra_fields.append((k, row_k_value))
             else:
                 target_fields[k] = row_k_value
-        for extra in target_extra_fields:
-            row.pop(extra[0])
 
         # if "ra" not in target_fields :
         #     raise ValueError("Error: 'ra' not found in import field names")
@@ -89,54 +87,9 @@ def import_targets(targets):
         try:
             # special case when Gaia Alerts name is provided, then not using Ra,Dec from the file
             # TODO: should be generalised for any special source name, e.g. ZTF, for which we have a harvester
-            if "GAIA_ALERTS_name" in row:
-                gaia_alerts_name = ""
-                harvester = GaiaAlertsHarvester()
-                for name in target_names.items():
-                    source_name = name[0].upper().replace('_NAME', '')
-                    if source_name == "GAIA_ALERTS":
-                        gaia_alerts_name = name[1].lower().replace("gaia",
-                                                                   "Gaia")  # to be sure of the correct format, at least first letters
-                        catalog_data = harvester.query(gaia_alerts_name)
-                        ra: str = catalog_data["ra"]
-                        dec: str = catalog_data["dec"]
-                        disc: str = catalog_data["disc"]
-                        classif: str = catalog_data["classif"]
-
-                        # extras : Dict[str] = {}
-                        # extras["classification"] = classif
-                        # extras["importance"] = str(9.99)
-                        # extras["discovery_date"] = disc
-                        # extras["cadence"] = str(1.0)
-
-                        t0: Target = harvester.to_target()
-                        ex0: TargetExtra = harvester.to_extras()
-                        # #extracting fields:
-                        gaia_fields = {}
-                        gaia_extras = {}
-                        gaia_extras.update(ex0)
-                        # copying all from Gaia target to gaia fields
-                        for attr, value in t0.__dict__.items():
-                            if not attr.startswith('_'):
-                                gaia_fields[attr] = value
-                        # preserving extra fields from the csv file:
-                        # Iterate over the items in gaia_extras
-                        for k, v in gaia_extras.items():
-                            # Check if the key already exists in target_extra_fields
-                            if k not in [key for key, value in target_extra_fields]:
-                                # If the key is not already in target_extra_fields, append a new tuple with the key-value pair
-                                target_extra_fields.append((k, v))
-                        # overwriting all classical fields:
-                        target_fields.update(gaia_fields)
-                        print("Import: Gaia Alerts harvester used to fill the target info as ", gaia_alerts_name)
-            #                        ra = t0.ra
-            #                        dec = t0.dec
-            #                        target_fields = {"ra": ra, "dec": dec}
 
             target = Target.objects.create(**target_fields)
 
-            for extra in target_extra_fields:
-                TargetExtra.objects.create(target=target, key=extra[0], value=extra[1])
             for name in target_names.items():
                 if name:
                     source_name = name[0].upper().replace('_NAME', '')

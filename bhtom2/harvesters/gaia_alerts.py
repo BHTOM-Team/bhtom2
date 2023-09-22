@@ -20,7 +20,7 @@ from astropy.coordinates import Angle, SkyCoord
 ALERT_SOURCE: DataSource = DataSource.GAIA_ALERTS
 GAIA_ALERTS_CACHE_PATH: str = os.path.join(settings.BASE_DIR, "bhtom2/cache/gaia_alerts.csv")
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[Gaia Alerts Harvester]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: Gaia Alerts Harvester')
 
 try:
     base_url = settings.GAIA_ALERTS_PATH

@@ -16,7 +16,7 @@ from bhtom2.harvesters import ogleews, tns, gaia_alerts
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_targets.models import Target
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[Catalog name lookup]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: Catalog name lookup')
 alerce: Alerce = Alerce()
 
 TNS_SEARCH_URL_SLUG: str = "search"

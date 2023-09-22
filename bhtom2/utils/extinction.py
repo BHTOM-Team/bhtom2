@@ -7,7 +7,7 @@ from bhtom_base.bhtom_targets.models import Target
 
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[Extinction calculator]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: Extinction calculator')
 
 
 def ogle_extinction(target: Target) -> Optional[float]:

@@ -11,7 +11,7 @@ from tempfile import NamedTemporaryFile
 import pandas as pd
 
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[Reduced Datum utils]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: Reduced Datum utils')
 
 
 def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str]]:

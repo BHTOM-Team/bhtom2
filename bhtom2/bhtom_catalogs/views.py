@@ -7,7 +7,7 @@ from .forms import CatalogQueryForm
 from bhtom_base.bhtom_catalogs.harvester import MissingDataException
 from ..utils.bhtom_logger import BHTOMLogger
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_catalogs: views]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_catalogs.views')
 
 
 class CatalogQueryView(FormView):

@@ -11,7 +11,7 @@ from bhtom2.bhtom_observatory.forms import ObservatoryCreationForm, ObservatoryU
 from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_observatory: views]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_observatory.views')
 
 
 class CreateObservatory(LoginRequiredMixin, FormView):

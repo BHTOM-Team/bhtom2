@@ -4,7 +4,7 @@ from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from django.forms.widgets import CheckboxInput
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_observatory: forms]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_observatory-forms')
 
 
 class CustomCheckboxInput(CheckboxInput):

@@ -15,7 +15,7 @@ from bhtom_base.bhtom_targets.models import Target
 
 from django.core import serializers
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_targets: rest-view]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.rest-view')
 
 
 class GetTargetListApi(views.APIView):

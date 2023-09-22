@@ -11,7 +11,7 @@ from astropy.coordinates import SkyCoord, get_constellation
 from astropy.time import Time
 from numpy import around
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[OpenAI]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: OpenAI')
 
 API_KEY = settings.OPENAI_API_KEY
 

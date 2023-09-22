@@ -28,7 +28,7 @@ from numpy import around
 from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_stats
 
 register = template.Library()
-logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_dataproducts: extras]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_dataproducts: extras')
 
 color_map = {
     'GSA(G)': ['black', 'hexagon', 8],

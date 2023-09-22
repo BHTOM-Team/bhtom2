@@ -5,7 +5,7 @@ from bhtom_base.bhtom_targets.models import Target
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom2.utils.coordinate_utils import fill_galactic_coordinates
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[Signals]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: Signals')
 
 
 @receiver(pre_save, sender=Target)

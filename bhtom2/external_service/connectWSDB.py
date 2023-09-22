@@ -9,7 +9,7 @@ from bhtom2.exceptions.external_service import InvalidExternalServiceStatusExcep
 
 class WSDBConnection():
     def __init__(self):
-        self.__logger = BHTOMLogger(__name__, '[WSDB Connection]')
+        self.__logger = BHTOMLogger(__name__, 'Bhtom: WSDB Connection')
     
     @property
     def logger(self):

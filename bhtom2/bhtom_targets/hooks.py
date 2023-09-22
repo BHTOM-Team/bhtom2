@@ -6,7 +6,7 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_alerts import alerts
 from bhtom_base.bhtom_dataproducts.models import BrokerCadence, ReducedDatum
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[bhtom_targets: hooks]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.hooks')
 
 
 # actions done just after saving the target (in creation or update)

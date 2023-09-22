@@ -19,6 +19,7 @@ from numpy import around
 SPECTROSCOPY: str = "spectroscopy"
 FACILITY_KEY = "facility"
 
+
 def load_datum_json(json_values):
     if json_values:
         if type(json_values) is dict:
@@ -27,8 +28,6 @@ def load_datum_json(json_values):
             return json.loads(json_values.replace("\'", "\""))
     else:
         return {}
-
-
 
 
 def decode_owner(extra_data_json_str: str) -> Optional[str]:
@@ -58,20 +57,19 @@ def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str
     from astropy.time import Time
 
     datums = ReducedDatum.objects.filter(target=target,
-                                             data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
-                                             )
-    
+                                         data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
+                                         )
+
     columns: List[str] = ['MJD', 'Magnitude', 'Error', 'Facility', 'Filter', 'Owner']
     data: List[List[Any]] = []
 
-    for datum in datums:        
-
+    for datum in datums:
         data.append([Time(datum.timestamp).mjd,
                      datum.value,
                      datum.error,
                      datum.facility,
                      datum.filter,
-                     datum.user])
+                     datum.observer])
 
     return data, columns
 
@@ -95,16 +93,16 @@ def get_photometry_stats(target: Target) -> Tuple[List[List[str]], List[str]]:
 
     facilities = df['Facility'].unique()
 
-    columns: List[str] = ['Facility', 'Filters', 'Data_points', 'Earliest_time','Latest_time']
+    columns: List[str] = ['Facility', 'Filters', 'Data_points', 'Earliest_time', 'Latest_time']
     stats: List[List[Any]] = []
 
     for facility in facilities:
         datapoints = len(df[df['Facility'] == facility].index)
         filters = df[df['Facility'] == facility]['Filter'].unique()
-        earliest_time = around(df[df['Facility'] == facility]['MJD'].min(),2)
-        latest_time = around(df[df['Facility'] == facility]['MJD'].max(),2)
+        earliest_time = around(df[df['Facility'] == facility]['MJD'].min(), 2)
+        latest_time = around(df[df['Facility'] == facility]['MJD'].max(), 2)
 
-        stats.append([facility, ", ".join(filters), datapoints, earliest_time,latest_time])
+        stats.append([facility, ", ".join(filters), datapoints, earliest_time, latest_time])
 
     stats = sorted(stats, key=operator.itemgetter(2), reverse=True)
 
@@ -124,11 +122,12 @@ def save_data_to_temporary_file(data: List[List[Any]],
                                                  prefix=filename,
                                                  delete=False)
 
-
     with open(tmp.name, 'a') as f:
         f.write("#By downloading the data you agree to use this acknowledgment:\n")
-        f.write("#The data was obtained via BHTOM (https://bhtom.space), which has received funding from the European\n")
-        f.write("#Union's Horizon 2020 research and innovation program under grant agreement No. 101004719 (OPTICON-RadioNet Pilot).\n")
+        f.write(
+            "#The data was obtained via BHTOM (https://bhtom.space), which has received funding from the European\n")
+        f.write(
+            "#Union's Horizon 2020 research and innovation program under grant agreement No. 101004719 (OPTICON-RadioNet Pilot).\n")
         f.write("#For more information about acknowledgement and data policy please visit https://about.bhtom.space\n")
     df.to_csv(tmp.name, index=False, sep=';', mode='a')
 
@@ -164,7 +163,6 @@ def get_photometry_stats_latex(target_id: int) -> Tuple[NamedTemporaryFile, str]
 
 
 def get_photometry_data_stats(target: Target) -> Tuple[NamedTemporaryFile, str]:
-
     stats, columns = get_photometry_stats(target)
 
     filename: str = "target_%s_photometry_stats.csv" % target.name
@@ -173,7 +171,6 @@ def get_photometry_data_stats(target: Target) -> Tuple[NamedTemporaryFile, str]:
 
 
 def save_photometry_data_for_target_to_csv_file(target: Target) -> Tuple[NamedTemporaryFile, str]:
-
     data, columns = get_photometry_data_table(target)
 
     filename: str = "target_%s_photometry.csv" % target.name

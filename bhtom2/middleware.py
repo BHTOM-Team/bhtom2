@@ -5,7 +5,7 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom2.utils.access_utils import can_access
 from django.http import HttpResponseForbidden
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[request, response]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: request, response')
 logging.getLogger("paramiko").setLevel(logging.WARNING)
 logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
 logging.getLogger('django_guid').setLevel(logging.WARNING)

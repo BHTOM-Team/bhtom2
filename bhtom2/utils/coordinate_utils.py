@@ -10,7 +10,7 @@ from datetime import datetime
 from astropy.time import Time
 from astroquery.gaia import Gaia
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[Coordinate Utils]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: Coordinate Utils')
 
 
 def fill_galactic_coordinates(target: Target) -> Target:

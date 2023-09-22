@@ -12,7 +12,7 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 
 ALERT_SOURCE: DataSource = DataSource.ANTARES
 
-logger: BHTOMLogger = BHTOMLogger(__name__, '[ANTARES Harvester]')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: ANTARES Harvester')
 
 
 class ANTARESHarvester(AbstractHarvester):
