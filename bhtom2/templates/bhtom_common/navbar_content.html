@@ -51,7 +51,10 @@ For customization instructions, see bhtom_common/base.html
     </ul>
 </li>
 {% endif %}
-<li class="nav-item dropdown">
+<li class="nav-item">
+    <a class="nav-link {% if request.resolver_match.namespace == 'dataproducts' %}active{% endif %}" href="{% url 'bhtom_dataproducts:list' %}">Data</a>
+</li>
+{% comment %} <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle" data-toggle="dropdown">Data</a>
     <ul class="dropdown-menu">
         <li class="nav-item {% if request.resolver_match.namespace == 'dataproducts' %}active{% endif %}">
@@ -61,7 +64,7 @@ For customization instructions, see bhtom_common/base.html
             <a class="nav-link" href="{% url 'bhtom_dataproducts:group-list' %}" style="color:black">Data group</a>
         </li> -->
     </ul>
-</li>
+</li> {% endcomment %}
 {% if request.user.is_superuser or request.user.is_staff %}
 <li class="nav-item {% if request.resolver_match.namespace == 'proposals' %}active{% endif %}">
     <a class="nav-link" href="{% url 'bhtom_proposals:list' %}">Proposals</a>
