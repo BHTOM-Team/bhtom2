@@ -20,7 +20,7 @@ For customization instructions, see bhtom_common/base.html
         <a class="dropdown-item" href="{% url 'bhtom_catalogs:query' %}">Catalog Search</a>
     </div>
 </li>
-<li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
+<li class="nav-item {% if 'targetgrouping' in request.resolver_match.url_name %}active{% endif %}">
     <a class="nav-link" href="{% url 'bhtom_targets:targetgrouping' %}">Target Grouping</a>
 </li>
 {% if request.user.is_superuser or request.user.is_staff %}
