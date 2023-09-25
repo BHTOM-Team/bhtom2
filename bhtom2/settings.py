@@ -300,8 +300,8 @@ TARGET_TYPE = 'SIDEREAL'
 # Define the valid data product types for your TOM. Be careful when removing items, as previously valid types will no
 # longer be valid, and may cause issues unless the offending records are modified.
 DATA_PRODUCT_TYPES = {
-    'photometry': ('photometry', ' Photometry file in SExtractor'),
-    'photometry_nondetection': ('photometry_nondetection', 'Photometry Non-Detections'),
+    'photometry': ('photometry', ' Photometry - SExtractor format'),
+    'photometry_nondetection': ('photometry_nondetection', 'Photometry - Non-Detections'),
     'fits_file': ('fits_file', 'FITS File'),
     'spectroscopy': ('spectroscopy', 'Spectroscopy'),
     # 'image_file': ('image_file', 'Image File')

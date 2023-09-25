@@ -7,7 +7,18 @@
 {% block content %}
 {% include 'bhtom_dataproducts/partials/js9_scripts.html' %}
 <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-4">
+        <form action="" method="get" class="form">
+            {% bootstrap_form filter.form %}
+            {% buttons %}
+            <button type="submit" class="btn btn-primary">
+                Filter
+            </button>
+            <a href="{% url 'bhtom_base.bhtom_dataproducts:list' %}" class="btn btn-secondary" title="Reset">Reset</a>
+            {% endbuttons %}
+        </form>
+    </div>
+    <div class="col-md-8">
 
         <table class="table table-hover">
             <thead>
@@ -68,7 +79,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7">
+                    <td colspan="9">
                         No data yet. You might want to save some data products from your
                         <a href="{% url 'bhtom_base.bhtom_observations:list' %}">completed observations</a>.
                     </td>
@@ -77,17 +88,6 @@
             </tbody>
         </table>
         {% bootstrap_pagination page_obj extra=request.GET.urlencode %}
-    </div>
-    <div class="col-md-2">
-        <form action="" method="get" class="form">
-            {% bootstrap_form filter.form %}
-            {% buttons %}
-            <button type="submit" class="btn btn-primary">
-                Filter
-            </button>
-            <a href="{% url 'bhtom_base.bhtom_dataproducts:list' %}" class="btn btn-secondary" title="Reset">Reset</a>
-            {% endbuttons %}
-        </form>
     </div>
 </div>
 {% endblock %}
