@@ -1,4 +1,4 @@
-{% load bhtom_common_extras bhtom_targets_extras %}
+{% load bhtom_common_extras bhtom_targets_extras tz %}
 <dl class="row">
     {% for target_name in target.names %}
         {% if forloop.first %}
@@ -34,7 +34,7 @@
 
         {% if target.discovery_date %}
             <dt class="col-sm-6">{{ "Discovered" }}</dt>
-            <dd class="col-sm-6">{{ target.discovery_date }}</dd>
+            <dd class="col-sm-6">{{ target.discovery_date|utc }}</dd>
         {% endif %}
 
         {% if target.classification %}
@@ -79,7 +79,7 @@
 
         {% if target.creation_date %}
             <dt class="col-sm-6">{{ "Target created" }}</dt>
-            <dd class="col-sm-6">{{ target.creation_date }}</dd>
+            <dd class="col-sm-6">{{ target.creation_date|utc }}</dd>
         {% endif %}
 
 </dl>
