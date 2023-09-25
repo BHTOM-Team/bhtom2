@@ -45,7 +45,7 @@
                     </div>
             </td>
             <td>{{ target.sun_separation|floatformat:0 }}</td>
-            <td>{{ target.classification }}</td>
+            <td>{{ target.get_classification_type_display }}</td>
         </tr>
         {% empty %}
         <tr>

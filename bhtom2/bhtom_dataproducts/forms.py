@@ -39,11 +39,11 @@ class DataProductUploadForm(forms.Form):
     )
 
     files = forms.FileField(
+        label="Choose a Files",
         widget=forms.ClearableFileInput(
-            attrs={'multiple': True}
+            attrs={'multiple': True,'class': 'custom-label'}
         ),
     )
-
     data_product_type = forms.ChoiceField(
         choices=[v for k, v in settings.DATA_PRODUCT_TYPES.items()],
         initial='photometry',

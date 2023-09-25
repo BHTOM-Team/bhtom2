@@ -20,6 +20,17 @@ CLASSIFICATION_TYPES = settings.CLASSIFICATION_TYPES
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.forms')
 
 
+class CustomClassificationChoiceField(forms.ChoiceField):
+    def validate(self, value):
+        # Check if the value exists in the choices list
+        if value in dict(CLASSIFICATION_TYPES):
+            super().validate(value)  # If it's a valid choice, use it as-is
+        else:
+           if value in ["SN Ic-BL", "SN Ia","SN II","SN IIb", "SLSN"]:
+            self.choices = [("SN", dict(CLASSIFICATION_TYPES)["SN"])]  # Set the choices to the mapped value
+            super().validate("SN")
+
+
 def extra_field_to_form_field(field_type):
     if field_type == 'number':
         return forms.FloatField(required=False)
@@ -146,13 +157,20 @@ class SiderealTargetCreateForm(TargetForm):
                                     'supported sexagesimal inputs.')
 
     def __init__(self, *args, **kwargs):
+        if kwargs['initial']['classification']:
+            obj_classification_type = kwargs['initial']['classification']
+            if obj_classification_type  in ["SN Ic-BL", "SN Ia","SN II","SN IIb", "SLSN"]:
+                mapped_value = 'SN'
+            else:
+                mapped_value = obj_classification_type
+            kwargs['initial']['classification']= mapped_value
+
         super().__init__(*args, **kwargs)
         for field in REQUIRED_SIDEREAL_FIELDS:
             self.fields[field].required = True
-
         self.fields['epoch'].initial = 2000.0
 
-        self.fields['classification']=forms.ChoiceField(
+        self.fields['classification']=CustomClassificationChoiceField(
             choices=CLASSIFICATION_TYPES,
             widget=forms.Select(),
             label='Classification',

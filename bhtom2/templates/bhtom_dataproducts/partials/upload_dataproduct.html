@@ -2,27 +2,34 @@
 <script src="{% static 'bhtom_targets/js/upload_data.js' %}"></script>
 <h4>Upload a data product</h4>
 <p>
-        Here you can upload your photometric and spectroscopic observations for this target. Please refer to the BHTOM
-        manual for details.
-        <br>Example CSV formats for <a href="{% static 'bhtom/photometry_sample.csv' %}">photometry</a>
-        and
-        <a href="{% static 'bhtom/spectrum_sample.csv' %}">spectroscopy</a>. Note, we require MJD (Modified Julian Date = JD-240000.5) in the photometry file!
-        <br>SExtractor format is required for instrumental photometry.
-        FITS is not supported for spectra yet.
-        <br>
-        Non-detections are marked with error >= 99.0 (e.g. 99.0, 99.9 etc.)
-        <br>
-        For photometric FITS processing choose the observatory from the list.
-        You can add a new observatory <a href="{% url 'bhtom_observatory:create' %}">here.</a>
-        <br>
-        <b>You can upload up to 5 files at once.</b>
-        <br>
-        <p>You can also use a python script for external fits upload: <a href="{% static 'bhtom_common/send_fits_to_bhtom.py' %}">data upload script</a></p>
-    </p>
+    Here you can upload your photometric and spectroscopic observations for this target. Please refer to the BHTOM
+    manual for details.
+    <br>Example CSV formats for <a href="{% static 'bhtom/photometry_sample.csv' %}">photometry</a>
+    and
+    <a href="{% static 'bhtom/spectrum_sample.csv' %}">spectroscopy</a>. Note, we require MJD (Modified Julian Date =
+    JD-240000.5) in the photometry file!
+    <br>SExtractor format is required for instrumental photometry.
+    FITS is not supported for spectra yet.
+    <br>
+    Non-detections are marked with error >= 99.0 (e.g. 99.0, 99.9 etc.)
+    <br>
+    For photometric FITS processing choose the observatory from the list.
+    You can add a new observatory <a href="{% url 'bhtom_observatory:create' %}">here.</a>
+    <br>
+    <b>You can upload up to 5 files at once.</b>
+    <br>
+<p>You can also use a python script for external fits upload: <a
+        href="{% static 'bhtom_common/send_fits_to_bhtom.py' %}">data upload script</a></p>
+</p>
 <form method="POST" action="{% url 'bhtom_dataproducts:upload_data_ui'%}" enctype="multipart/form-data">
     {% csrf_token %}
     {% bootstrap_form data_product_form_from_user %}
     {% buttons %}
+    <style>
+        .custom-label {
+            color: white;
+        }
+    </style>
     <input type="submit" class="btn btn-primary" value="Upload" name="data_product_form_from_user">
     {% endbuttons %}
 </form>

@@ -173,3 +173,5 @@ __pycache__/
 .DS_Store
 bhtom2/.DS_Store
 *.env
+
+/data

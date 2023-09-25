@@ -306,22 +306,22 @@ DATA_PRODUCT_TYPES = {
     'spectroscopy': ('spectroscopy', 'Spectroscopy'),
     # 'image_file': ('image_file', 'Image File')
 }
-CLASSIFICATION_TYPES = [
-    ("Unknown", "Unknown"), ('Be-star outburst', 'Be-star outburst'),
-    ('Active Galactic Nucleus(AGN)', "Active Galactic Nucleus(AGN)"), ("BL Lac", "BL Lac"),
-    ("Cataclysmic Variable(CV)", "Cataclysmic Variable(CV)"), ("Cepheid Variable(CEPH)", "Cepheid Variable(CEPH)"),
-    ("Eclipsing Binary(EB)", "Eclipsing Binary(EB)"),
-    ("Galaxy", "Galaxy"), ("Long Period Variable(LPV)", "Long Period Variable(LPV)"),
-    ("Luminous Blue Variable(LBV)", "Luminous Blue Variable(LBV)"),
+CLASSIFICATION_TYPES= [
+    ("unknown", "Unknown"), ('Be-star outburst', 'Be-star outburst'),
+    ('AGN', "Active Galactic Nucleus(AGN)"), ("BL Lac", "BL Lac"),
+    ("CV", "Cataclysmic Variable(CV)"), ("CEPH", "Cepheid Variable(CEPH)"),
+    ("EB", "Eclipsing Binary(EB)"),
+    ("Galaxy", "Galaxy"), ("LPV", "Long Period Variable(LPV)"),
+    ("LBV", "Luminous Blue Variable(LBV)"),
     ("M-dwarf flare", "M-dwarf flare"), ("Microlensing Event", "Microlensing Event"), ("Nova", "Nova"),
     ("Peculiar Supernova", "Peculiar Supernova"),
-    ("Quasar(QSO", "Quasar(QSO)"), ("R CrB Variable", "R CrB Variable"), ("RR Lyrae Variable", "RR Lyrae Variable"),
-    ("Solar System Object(SSO)", "Solar System Object(SSO)"),
-    ("Star", "Star"), ("Supernova(SN)", "Supernova(SN)"), ("Supernova imposter", "Supernova imposter"),
+    ("QSO", "Quasar(QSO)"), ("RCrB", "R CrB Variable"), ("RR Lyrae Variable", "RR Lyrae Variable"),
+    ("SSO", "Solar System Object(SSO)"),
+    ("Star", "Star"), ("SN", "Supernova(SN)"), ("Supernova imposter", "Supernova imposter"),
     ("Symbiotic star", "Symbiotic star"),
-    ("Tidal Disruption Event(TDE)", "Tidal Disruption Event(TDE)"), ("Variable star-other", "Variable star-other"),
-    ("X-Ray Binary(XRB)", "X-Ray Binary(XRB)"),
-    ("Young Stellar Object(YSO)", "Young Stellar Object(YSO)")]
+    ("TDE", "Tidal Disruption Event(TDE)"), ("Variable star-other", "Variable star-other"),
+    ("XRB", "X-Ray Binary(XRB)"),
+    ("YSO", "Young Stellar Object(YSO)")]
 
 DATA_PROCESSORS = {
     'photometry': 'bhtom_base.bhtom_dataproducts.processors.photometry_processor.PhotometryProcessor',
