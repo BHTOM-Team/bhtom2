@@ -4,6 +4,8 @@ from django.urls import reverse_lazy
 from django.views.generic import FormView, ListView, UpdateView, DeleteView, DetailView
 from django.contrib import messages
 
+from django.conf import settings
+from django.core.mail import send_mail
 from guardian.mixins import LoginRequiredMixin
 
 from bhtom2.bhtom_observatory.forms import ObservatoryCreationForm, ObservatoryUpdateForm, ObservatoryUserUpdateForm, \
@@ -100,6 +102,13 @@ class CreateObservatory(LoginRequiredMixin, FormView):
             logger.error('CreateObservatory error: ' + str(e))
             messages.error(self.request, 'Error with creating the observatory')
             return redirect(self.get_success_url())
+
+        logger.info('Send mail, %s, %s' % (observatory.name, str(user)))
+        send_mail(settings.EMAILTEXT_CREATE_OBSERVATORY_ADMIN,settings.EMAILTEXT_CREATE_OBSERVATORY, 
+                  settings.EMAIL_HOST_USER, user.email, fail_silently=False)
+
+        send_mail(settings.EMAILTEXT_CREATE_OBSERVATORY_ADMIN,settings.EMAILTEXT_CREATE_OBSERVATORY_ADMIN + str(user) + ', ' + observatory.name, 
+                  settings.EMAIL_HOST_USER, settings.RECIPIENTEMAIL, fail_silently=False)
 
         messages.success(self.request, '%s successfully created, observatory requires administrator approval' % str(name))
         return redirect(self.get_success_url())

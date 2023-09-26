@@ -65,8 +65,20 @@
                         {{ product.get_type_display }}
                         {% endif %}
                     </td>
-
-                    <td>{{ product.status }}</td>
+                    <td>
+                        {% if product.status == "C" %}
+                        TO DO
+                        {% endif %}
+                        {% if product.status == "P" %}
+                        IN PROGRESS
+                        {% endif %}
+                        {% if product.status == "S" %}
+                        SUCCESS
+                        {% endif %}
+                        {% if product.status == "E" %}
+                        ERROR
+                        {% endif %}
+                    </td>
 
                     {% if product.data_product_type == 'fits_file' or product.data_product_type == 'photometry' %}
                     <td>

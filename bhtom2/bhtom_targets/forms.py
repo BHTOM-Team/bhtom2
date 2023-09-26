@@ -157,15 +157,18 @@ class SiderealTargetCreateForm(TargetForm):
                                     'supported sexagesimal inputs.')
 
     def __init__(self, *args, **kwargs):
-        if kwargs['initial']['classification']:
-            obj_classification_type = kwargs['initial']['classification']
-            if obj_classification_type  in ["SN Ic-BL", "SN Ia","SN II","SN IIb", "SLSN"]:
-                mapped_value = 'SN'
-            else:
-                mapped_value = obj_classification_type
-            kwargs['initial']['classification']= mapped_value
+        try:
+            if kwargs['initial']['classification']:
+                obj_classification_type = kwargs['initial']['classification']
+                if obj_classification_type  in ["SN Ic-BL", "SN Ia","SN II","SN IIb", "SLSN"]:
+                    mapped_value = 'SN'
+                else:
+                    mapped_value = obj_classification_type
+                kwargs['initial']['classification']= mapped_value
+                super().__init__(*args, **kwargs)
+        except Exception as e:
+               super().__init__(*args, **kwargs)
 
-        super().__init__(*args, **kwargs)
         for field in REQUIRED_SIDEREAL_FIELDS:
             self.fields[field].required = True
         self.fields['epoch'].initial = 2000.0
