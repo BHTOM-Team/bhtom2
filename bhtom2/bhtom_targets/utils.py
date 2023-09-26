@@ -42,15 +42,18 @@ def import_targets(targets):
     :returns: dictionary of successfully imported targets, as well errors
     :rtype: dict
     """
+
+    logger.debug("Beginning the IMPORT from a file.")
     # TODO: Replace this with an in memory iterator
     targetreader = csv.DictReader(targets, dialect=csv.excel)
     targets = []
     errors = []
     base_target_fields = [field.name for field in Target._meta.get_fields()]
     for index, row in enumerate(targetreader):
+        logger.debug(f"import: {index} {row}")
         if not any(row.values()):
             # If all values in the row are empty, then it is considered empty
-            print(f"Row {index} is empty")
+#            print(f"Row {index} is empty")
             continue
         # filter out empty values in base fields, otherwise converting empty string to float will throw error
         row = {k.strip(): v.strip() for (k, v) in row.items() if
@@ -87,6 +90,26 @@ def import_targets(targets):
         try:
             # special case when Gaia Alerts name is provided, then not using Ra,Dec from the file
             # TODO: should be generalised for any special source name, e.g. ZTF, for which we have a harvester
+            if "GAIA_ALERTS_name" in row:
+                gaia_alerts_name = ""
+                harvester = GaiaAlertsHarvester()
+                for name in target_names.items():
+                    source_name = name[0].upper().replace('_NAME', '')
+                    if source_name == "GAIA_ALERTS":
+                        gaia_alerts_name = name[1].lower().replace("gaia", "Gaia") #to be sure of the correct format, at least first letters
+                        catalog_data=harvester.query(gaia_alerts_name)
+                        ra: str = catalog_data["ra"]
+                        dec: str = catalog_data["dec"]
+                        disc: str = catalog_data["disc"]
+                        #
+                        #description: str = catalog_data["classif"]
+                        importance = str(9.99) #by default importing from Gaia Alerts gets 9.99
+                        cadence = str(1.0) #default cadence
+
+                        target_fields = {"name":gaia_alerts_name,"ra": ra, "dec": dec, "epoch": 2000.0, "discovery_date":disc, "importance":importance, "cadence":cadence}
+#after adding description to the model:
+#                        target_fields = {"name":gaia_alerts_name,"ra": ra, "dec": dec, "epoch": 2000.0, "discovery_date":disc, "importance":importance, "cadence":cadence, "description":description}
+                        logger.info(f"Import: Gaia Alerts harvester used to fill the target info as {gaia_alerts_name}")
 
             target = Target.objects.create(**target_fields)
 
@@ -94,22 +117,26 @@ def import_targets(targets):
                 if name:
                     source_name = name[0].upper().replace('_NAME', '')
                     TargetName.objects.create(target=target, source_name=source_name, name=name[1])
+                    logger.debug(f"Target {name} added to names for {source_name}")
 
             # if type field not present, setting SIDERAL as default
             if "type" not in row:
                 target.type = Target.SIDEREAL
+                logger.debug(f"Target {row} set by default to SIDEREAL.")
 
             try:
                 run_hook('target_post_save', target=target, created=True)
             except Exception as e:
-                print("Error in import hook:", e)
+                logger.error(f"Error in import hook: {e}")
                 pass
 
-            print("IMPORT: target to append:", target)
+            logger.debug(f"IMPORT: target to append {target}")
             targets.append(target)
         except Exception as e:
             error = 'Error on line {0}: {1}'.format(index + 2, str(e))
             errors.append(error)
+        logger.debug(f"Imported targets: {targets}")
+        logger.debug(f"Import errors: {errors}")
 
     return {'targets': targets, 'errors': errors}
 
