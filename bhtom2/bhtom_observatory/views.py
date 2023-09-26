@@ -104,11 +104,11 @@ class CreateObservatory(LoginRequiredMixin, FormView):
             return redirect(self.get_success_url())
 
         logger.info('Send mail, %s, %s' % (observatory.name, str(user)))
-        send_mail(settings.EMAILTEXT_CREATE_OBSERVATORY_ADMIN,settings.EMAILTEXT_CREATE_OBSERVATORY, 
-                  settings.EMAIL_HOST_USER, user.email, fail_silently=False)
+        send_mail(settings.EMAILTEXT_CREATE_OBSERVATORY_TITLE,settings.EMAILTEXT_CREATE_OBSERVATORY, 
+                  settings.EMAIL_HOST_USER, [user.email])
 
-        send_mail(settings.EMAILTEXT_CREATE_OBSERVATORY_ADMIN,settings.EMAILTEXT_CREATE_OBSERVATORY_ADMIN + str(user) + ', ' + observatory.name, 
-                  settings.EMAIL_HOST_USER, settings.RECIPIENTEMAIL, fail_silently=False)
+        send_mail(settings.EMAILTEXT_CREATE_OBSERVATORY_TITLE,settings.EMAILTEXT_CREATE_OBSERVATORY_ADMIN + str(user) + ', ' + observatory.name, 
+                  settings.EMAIL_HOST_USER, settings.RECIPIENTEMAIL)
 
         messages.success(self.request, '%s successfully created, observatory requires administrator approval' % str(name))
         return redirect(self.get_success_url())
