@@ -14,7 +14,7 @@
 </div>
 {% else %}
 <div class="row obs-details-container">
-    <div class="col-md-6">
+    <div class="col-md-12">
         <h2>Observatory details</h2>
         <table class="table">
             <thead>
@@ -118,6 +118,15 @@
                     </td>
                     <td>
                         {{ observatory.readout_noise }} e
+                    </td>
+                </tr>
+                <tr style="width: 50px;">
+                    <td>
+                        Comment
+                    </td>
+                    <td><div class="multiline-text">
+                        {{ observatory.comment }}
+                    </div>
                     </td>
                 </tr>
             </tbody>

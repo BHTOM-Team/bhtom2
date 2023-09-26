@@ -7,7 +7,7 @@
 {% block content %}
 {% include 'bhtom_dataproducts/partials/js9_scripts.html' %}
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-2">
         <form action="" method="get" class="form">
             {% bootstrap_form filter.form %}
             {% buttons %}
@@ -18,15 +18,13 @@
             {% endbuttons %}
         </form>
     </div>
-    <div class="col-md-8">
-
+    <div class="col-md-8 ">
         <table class="table table-hover">
             <thead>
                 <tr>
                     <th>File</th>
                     <th>Photometry</th>
                     <th>Target</th>
-                    <th>Observation</th>
                     <th>Observatory</th>
                     <th>Owner</th>
                     <th>Type</th>
@@ -50,14 +48,6 @@
                         <a href="{% url 'bhtom_targets:detail' product.target.name %}">
                             {{product.target.name|truncatechars:40 }}</a>
                     </td>
-                    {% if product.observation_record.id %}
-                    <td>
-                        <a href="{% url 'bhtom_base.bhtom_observations:detail' product.observation_record.id %}">
-                            {{product.observation_record|truncatechars:40 }}</a>
-                    </td>
-                    {% else %}
-                    <td></td>
-                    {% endif %}
                     <td>{{ product.observatory }}</td>
                     <td>{{ product.user }}</td>
                     <td>

@@ -49,7 +49,9 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
               <td>{{ observatory.lon }}</td>
               <td>{{ observatory.lat }}</td>
               <td>{{ observatory.prefix }}</td>
-              <td>{{ observatory.comment }}</td>
+              <td>
+                {{ observatory.comment|truncatechars:30  }}
+              </td>
               <td>{{ observatory.calibration_flg }}</td>
               <td>
                 <a href="{% url 'bhtom_observatory:detail' pk=observatory.id %}" title="Observatory details" class="btn  btn-primary">Details</a>
@@ -82,7 +84,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
               <td>{{ observatory.lon }}</td>
               <td>{{ observatory.lat }}</td>
               <td>{% if active_flg %} True {%else%} False{% endif %}</td>
-              <td><div title="{{comment}}">{{ comment|truncatechars:15 }}</div></td>
+              <td>{{ observatory.comment|truncatechars:30  }}</td>
               <td>
                 <a href="{% url 'bhtom_observatory:detail' pk=observatory.id %}" title="Observatory details" class="btn  btn-primary">Details</a>
               </td>
