@@ -150,8 +150,9 @@ def import_targets(targets):
             # if type field not present, setting SIDERAL as default
             if 'type' not in target_fields:
                 target.type = Target.SIDEREAL
-                target.save()
                 logger.debug(f"Target {row} set by default to SIDEREAL.")
+
+            target.save()
 
             try:
                 run_hook('target_post_save', target=target, created=True)
