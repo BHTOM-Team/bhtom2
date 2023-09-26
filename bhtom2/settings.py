@@ -363,7 +363,7 @@ TOM_ALERT_CLASSES = [
     # 'bhtom_base.bhtom_alerts.brokers.tns.TNSBroker',
     # 'bhtom_base.bhtom_alerts.brokers.fink.FinkBroker',
     'bhtom2.brokers.gaia_alerts.GaiaAlertsBroker',
-    # 'bhtom2.brokers.cpcs.CPCSBroker',
+    'bhtom2.brokers.cpcs.CPCSBroker',
     'bhtom2.brokers.aavso.AAVSOBroker',
     'bhtom2.brokers.ztf.ZTFBroker',
     'bhtom2.brokers.gaia.GaiaBroker',

@@ -42,15 +42,18 @@ def import_targets(targets):
     :returns: dictionary of successfully imported targets, as well errors
     :rtype: dict
     """
+
+    logger.debug("Beginning the IMPORT from a file.")
     # TODO: Replace this with an in memory iterator
     targetreader = csv.DictReader(targets, dialect=csv.excel)
     targets = []
     errors = []
     base_target_fields = [field.name for field in Target._meta.get_fields()]
     for index, row in enumerate(targetreader):
+        logger.debug(f"import: {index} {row}")
         if not any(row.values()):
             # If all values in the row are empty, then it is considered empty
-            print(f"Row {index} is empty")
+            #            print(f"Row {index} is empty")
             continue
         # filter out empty values in base fields, otherwise converting empty string to float will throw error
         row = {k.strip(): v.strip() for (k, v) in row.items() if
@@ -68,12 +71,25 @@ def import_targets(targets):
             # Fields with <source_name>_name (e.g. Gaia_name, ZTF_name, where <source_name> is a valid
             # catalog) will be added as a name corresponding to this catalog
             k_source_name = k.upper().replace('_NAME', '')
-            if k != 'name' and k.endswith('name') and k_source_name in uppercase_source_names:
-                target_names[k_source_name] = row_k_value
-            elif k not in base_target_fields:
-                target_extra_fields.append((k, row_k_value))
-            else:
-                target_fields[k] = row_k_value
+            if row_k_value:  # delete null value
+                if k != 'name' and k.endswith('name') and k_source_name in uppercase_source_names:
+                    target_names[k_source_name] = row_k_value
+                elif k_source_name == 'CALIB_SERVER':
+                    target_names['CPCS'] = row_k_value
+                elif k_source_name == 'GAIA_ALERT':
+                    target_names['GAIA_ALERTS'] = row_k_value
+                elif k == 'classification':
+                    target_fields['description'] = row_k_value
+                elif k == 'priority':
+                    target_fields['importance'] = row_k_value
+                elif k == 'maglast':
+                    target_fields['mag_last'] = row_k_value
+                elif k == 'Sun_separation':
+                    target_fields['sun_separation'] = row_k_value
+                elif k not in base_target_fields:
+                    target_extra_fields.append((k, row_k_value))
+                else:
+                    target_fields[k] = row_k_value
 
         # if "ra" not in target_fields :
         #     raise ValueError("Error: 'ra' not found in import field names")
@@ -87,31 +103,88 @@ def import_targets(targets):
         try:
             # special case when Gaia Alerts name is provided, then not using Ra,Dec from the file
             # TODO: should be generalised for any special source name, e.g. ZTF, for which we have a harvester
+            if "GAIA_ALERTS" in target_names:
+                harvester = GaiaAlertsHarvester()
 
+                for name in target_names.items():
+                    source_name = name[0].upper().replace('_NAME', '')
+                    description = targetType = None
+
+                    if source_name == "GAIA_ALERTS":
+                        gaia_alerts_name = name[1].lower().replace("gaia",
+                                                                   "Gaia")  # to be sure of the correct format, at least first letters
+                        catalog_data = harvester.query(gaia_alerts_name)
+                        ra: str = catalog_data["ra"]
+                        dec: str = catalog_data["dec"]
+                        disc: str = catalog_data["disc"]
+                        #
+                        # description: str = catalog_data["classif"]
+                        importance = str(9.99)  # by default importing from Gaia Alerts gets 9.99
+                        cadence = str(1.0)  # default cadence
+
+                        if 'description' in target_fields:
+                            description = target_fields['description']
+                        if 'type' in target_fields:
+                            targetType = target_fields['type']
+
+                        target_fields = {"name": gaia_alerts_name, "ra": ra, "dec": dec, "epoch": 2000.0,
+                                         "discovery_date": disc, "importance": importance, "cadence": cadence,
+                                         "description": description, "type": targetType
+                                         }
+                        # after adding description to the model:
+                        # target_fields = {"name":gaia_alerts_name,"ra": ra, "dec": dec, "epoch": 2000.0, "discovery_date":disc, "importance":importance, "cadence":cadence, "description":description}
+                        logger.info(f"Import: Gaia Alerts harvester used to fill the target info as {gaia_alerts_name}")
+
+            check_target_value(target_fields)
             target = Target.objects.create(**target_fields)
 
             for name in target_names.items():
                 if name:
                     source_name = name[0].upper().replace('_NAME', '')
                     TargetName.objects.create(target=target, source_name=source_name, name=name[1])
+                    logger.debug(f"Target {name} added to names for {source_name}")
+
+            for extra in target_extra_fields:
+                TargetExtra.objects.create(target=target, key=extra[0], value=extra[1])
 
             # if type field not present, setting SIDERAL as default
-            if "type" not in row:
+            if 'type' not in target_fields:
                 target.type = Target.SIDEREAL
+                target.save()
+                logger.debug(f"Target {row} set by default to SIDEREAL.")
 
             try:
                 run_hook('target_post_save', target=target, created=True)
             except Exception as e:
-                print("Error in import hook:", e)
+                logger.error(f"Error in import hook: {e}")
                 pass
 
-            print("IMPORT: target to append:", target)
+            logger.debug(f"IMPORT: target to append {target}")
             targets.append(target)
         except Exception as e:
-            error = 'Error on line {0}: {1}'.format(index + 2, str(e))
+            error = 'Error: %s' % str(e)
             errors.append(error)
+        logger.debug(f"Imported targets: {targets}")
+        logger.debug(f"Import errors: {errors}")
 
     return {'targets': targets, 'errors': errors}
+
+
+def check_target_value(target_fields):
+    ra = target_fields['ra']
+    dec = target_fields['dec']
+
+    if ra < 0 or ra > 360 or dec < -90 or dec > 90:
+        logger.error("Coordinates beyond range")
+        raise ValueError("Coordinates beyond range")
+
+    stored = Target.objects.all()
+    coords_names = check_for_existing_coords(ra, dec, 3. / 3600., stored)
+
+    if len(coords_names) != 0:
+        ccnames = ' '.join(coords_names)
+        logger.error("There is a source found already at these coordinates (rad 3 arcsec)")
+        raise IntegrityError(f"Source found already at these coordinates (rad 3 arcsec): {ccnames}")
 
 
 def get_aliases_from_queryset(queryset: Dict[str, Any]) -> Tuple[List, List]:
