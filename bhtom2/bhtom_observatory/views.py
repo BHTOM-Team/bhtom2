@@ -110,7 +110,7 @@ class CreateObservatory(LoginRequiredMixin, FormView):
 
             send_mail(settings.EMAILTEXT_CREATE_OBSERVATORY_TITLE,settings.EMAILTEXT_CREATE_OBSERVATORY_ADMIN + str(user) + ', ' + observatory.name, 
                   settings.EMAIL_HOST_USER, settings.RECIPIENTEMAIL)
-              logger.info('Send mail, %s, %s' % (observatory.name, str(user)))
+            logger.info('Send mail, %s, %s' % (observatory.name, str(user)))
         except Exception as e:
               logger.info('Error while sending mail, %s, %s' % (observatory.name, str(user)))
 
