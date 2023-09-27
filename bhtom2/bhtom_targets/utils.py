@@ -118,7 +118,7 @@ def import_targets(targets):
                         dec: str = catalog_data["dec"]
                         disc: str = catalog_data["disc"]
                         #
-                        # description: str = catalog_data["classif"]
+                        description: str = catalog_data["classif"]
                         importance = str(9.99)  # by default importing from Gaia Alerts gets 9.99
                         cadence = str(1.0)  # default cadence
 
@@ -150,8 +150,9 @@ def import_targets(targets):
             # if type field not present, setting SIDERAL as default
             if 'type' not in target_fields:
                 target.type = Target.SIDEREAL
-                target.save()
                 logger.debug(f"Target {row} set by default to SIDEREAL.")
+
+            target.save()
 
             try:
                 run_hook('target_post_save', target=target, created=True)
@@ -171,8 +172,8 @@ def import_targets(targets):
 
 
 def check_target_value(target_fields):
-    ra = target_fields['ra']
-    dec = target_fields['dec']
+    ra = float(target_fields['ra'])
+    dec = float(target_fields['dec'])
 
     if ra < 0 or ra > 360 or dec < -90 or dec > 90:
         logger.error("Coordinates beyond range")
