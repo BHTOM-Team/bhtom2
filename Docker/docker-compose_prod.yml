@@ -14,7 +14,7 @@ services:
       dockerfile: db_Dockerfile
     volumes:
       - ./data/db:/docker-entrypoint-initdb.d/
-      - data_db:/var/lib/postgresql/data
+      - bhtom_db:/var/lib/postgresql/data
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
       - POSTGRES_DB=${POSTGRES_NAME}
@@ -41,7 +41,6 @@ services:
       - "8010:8000"
     depends_on:
       - bhtom_db
-
 
   zookeeper1:
     image: 'confluentinc/cp-zookeeper:6.0.14'
@@ -200,7 +199,7 @@ services:
     env_file:
       - .env
     volumes:
-      - mongo_data:/data/db
+      - mongo_db:/data/db
     networks:
       - graylog
 
@@ -259,7 +258,7 @@ services:
     entrypoint: /usr/bin/tini -- wait-for-it elasticsearch:9200 --  /docker-entrypoint.sh
 
 volumes:
-  data_db:
+  bhtom_db:
     driver: local
     driver_opts:
       type: none
@@ -271,7 +270,7 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}
-  mongo_data:
+  mongo_db:
     driver: local
     driver_opts:
       type: none

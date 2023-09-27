@@ -3,5 +3,4 @@ FROM postgres:15.3
 
 EXPOSE 5432
 
-RUN chown -R postgres:postgres /var/lib/postgresql/data
 RUN chmod 0750 /var/lib/postgresql/data
