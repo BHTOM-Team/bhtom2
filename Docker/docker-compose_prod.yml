@@ -14,6 +14,7 @@ services:
       dockerfile: db_Dockerfile
     volumes:
       - ./data/db:/docker-entrypoint-initdb.d/
+      - data_db:/var/lib/postgresql/data
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
       - POSTGRES_DB=${POSTGRES_NAME}
@@ -258,6 +259,12 @@ services:
     entrypoint: /usr/bin/tini -- wait-for-it elasticsearch:9200 --  /docker-entrypoint.sh
 
 volumes:
+  data_db:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/bhtom_db
   data_store:
     driver: local
     driver_opts:
@@ -266,10 +273,22 @@ volumes:
       device: ${DATA_STORE_PATH}
   mongo_data:
     driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/mongo
   es_data:
     driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/es_data
   graylog_data:
     driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/graylog
 
 networks:
   bhtom_network:

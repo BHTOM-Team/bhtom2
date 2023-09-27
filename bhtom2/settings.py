@@ -285,7 +285,7 @@ LOGGING = {
         'file': {
             'level': logLevel,
             'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': logFolder + '/debug.log',
+            'filename': logFolder,
             'formatter': 'default',
             'when': logWhen,
             'interval': logInterval,
