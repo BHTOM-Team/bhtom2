@@ -24,8 +24,9 @@ def send_activation_email(sender, instance, **kwargs):
         try:
             send_mail(settings.EMAILTET_ACTIVATEUSER_TITLE, settings.EMAILTET_ACTIVATEUSER, settings.EMAIL_HOST_USER,
                       [instance.email], fail_silently=False)
+            logger.info('Ativate observatory' + instance.name + ', Send mail: ' + user.email)
         except:
-            pass
+            logger.info('Ativate observatory error: ' + str(e))
 
 
 @receiver(pre_save, sender=Observatory)
