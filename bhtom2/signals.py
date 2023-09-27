@@ -20,9 +20,13 @@ def target_pre_save(sender, instance, *args, **kwargs):
 @receiver(pre_save, sender=User)
 def send_activation_email(sender, instance, **kwargs):
     user_old = User.objects.get(id=instance.id)
-    if instance.is_active and  not(user_old.is_active) :
-        send_mail(settings.EMAILTET_ACTIVATEUSER_TITLE, settings.EMAILTET_ACTIVATEUSER, settings.EMAIL_HOST_USER,
+    if instance.is_active and not user_old.is_active:
+        try:
+            send_mail(settings.EMAILTET_ACTIVATEUSER_TITLE, settings.EMAILTET_ACTIVATEUSER, settings.EMAIL_HOST_USER,
                       [instance.email], fail_silently=False)
+        except:
+            pass
+
 
 @receiver(pre_save, sender=Observatory)
 def Observatory_pre_save(sender, instance, **kwargs):
@@ -32,13 +36,12 @@ def Observatory_pre_save(sender, instance, **kwargs):
         observatory_old = None
 
     if observatory_old is not None:
-        if observatory_old.active_flg == False and instance.active_flg == True and observatory_old.user_id is not None:
+        if observatory_old.active_flg is False and instance.active_flg is True and observatory_old.user_id is not None:
             try:
                 user = User.objects.get(id=observatory_old.user_id)
-            except Exception as e:
-                if user is not None:
-                    send_mail(settings.EMAILTEXT_ACTIVATEOBSERVATORY_TITLE, settings.EMAILTEXT_ACTIVATEOBSERVATORY, settings.EMAIL_HOST_USER,
-                        [user.email], fail_silently=False)
+                send_mail(settings.EMAILTEXT_ACTIVATEOBSERVATORY_TITLE, settings.EMAILTEXT_ACTIVATEOBSERVATORY,
+                          settings.EMAIL_HOST_USER,
+                          [user.email], fail_silently=False)
                 logger.info('Ativate observatory' + instance.name + ', Send mail: ' + user.email)
-
-
+            except Exception as e:
+                logger.info('Ativate observatory error: ' + str(e))
