@@ -7,6 +7,9 @@ from bhtom2.bhtom_calibration.models import Calibration_data
 from django.core import serializers
 from bhtom2.bhtom_calibration.models import Catalogs as calibration_catalog
 from bhtom2.utils.bhtom_logger import BHTOMLogger
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+import json
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_calibration.views')
 
@@ -14,13 +17,37 @@ logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_calibration.views')
 class CalibrationResultsApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+    
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'fileId': openapi.Schema(type=openapi.TYPE_ARRAY,
+                items=openapi.Schema(type=openapi.TYPE_INTEGER),),
+            },
+            required=['fileId']
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
+    )
 
     def post(self, request):
-
-        file_id = request.data['file_id']
+        files_id = request.data['fileId']
+        results = {}
         try:
-            instance = Calibration_data.objects.get(dataproduct_id=file_id)
-            results = serializers.serialize('json', [instance])
+            for file in files_id:
+                instance = Calibration_data.objects.get(dataproduct_id=file)
+                serialized_data = serializers.serialize('json', [instance])
+                data = json.loads(serialized_data)[0] 
+                results[instance.id] = data["fields"]
+
         except Calibration_data.DoesNotExist:
             return Response({"Error": 'File does not exist in the database'}, status=status.HTTP_400_BAD_REQUEST)
 

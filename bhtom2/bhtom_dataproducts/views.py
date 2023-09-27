@@ -19,6 +19,7 @@ from ..bhtom_calibration.models import Calibration_data
 from ..bhtom_observatory.models import ObservatoryMatrix
 from bhtom2.bhtom_observatory.models import Observatory
 from rest_framework.views import APIView
+from django.urls import reverse
 
 import requests
 import os
@@ -27,6 +28,7 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_dataproducts.views')
 
@@ -309,54 +311,64 @@ class photometry_download(LoginRequiredMixin, View):
                 return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
 
-class DataDetailsView(LoginRequiredMixin, DetailView):
+
+class DataDetailsView(DetailView):
     template_name = 'bhtom_dataproducts/dataproduct_details.html'
     model = DataProduct
-    slug_field = 'data'
-    slug_url_kwarg = 'data'
 
-    def get_context_data(self, *args, **kwargs):
-
+    def get_context_data(self, **kwargs):
         try:
-            context = super().get_context_data(**kwargs)
-            dataProduct = context['object']
-            target = Target.objects.get(id=dataProduct.target.id)
-        except Exception as e:
-            raise Http404
-        if dataProduct.fits_data:
-            ccdphot = CCDPhotJob.objects.get(dataProduct=dataProduct.id)
-            context['fits_data'] = dataProduct.data.split('/')[-1]
-            context['ccdphot'] = ccdphot
+            context = {}
+            data_product = DataProduct.objects.get(id=kwargs['pk'])
+            context['object']= data_product
+            logger.error(data_product.target.id)
+            target = Target.objects.get(id=data_product.target.id)
+            context['target'] = target
 
-        if dataProduct.photometry_data:
-            context['photometry_data'] = dataProduct.photometry_data.split('/')[-1]
+            if data_product.fits_data:
+                ccdphot = CCDPhotJob.objects.get(dataProduct=data_product.id)
+                context['fits_data'] = data_product.data.split('/')[-1]
+                context['ccdphot'] = ccdphot
 
-            try:
-                observatoryMatrix = ObservatoryMatrix.objects.get(id=dataProduct.observatory.id)
-                observatory = Observatory.objects.get(id=observatoryMatrix.observatory.id)
+            if data_product.photometry_data:
+                context['photometry_data'] = data_product.photometry_data.split('/')[-1]
+
+                observatory_matrix = ObservatoryMatrix.objects.get(id=data_product.observatory.id)
+                observatory = Observatory.objects.get(id=observatory_matrix.observatory.id)
 
                 context['observatory'] = observatory
-                context['owner'] = observatoryMatrix.user
-            except Exception as e:
-                raise Http404
+                context['owner'] = observatory_matrix.user
 
-            try:
-                calibration = Calibration_data.objects.get(dataproduct=dataProduct)
-                context['calibration'] = calibration
+                try:
+                    calibration = Calibration_data.objects.get(dataproduct=data_product)
+                    context['calibration'] = calibration
 
-                if calibration.calibration_plot is not None:
-                    try:
-                        with open(settings.DATA_FILE_PATH + calibration.calibration_plot, "rb") as image_file:
+                    if calibration.calibration_plot:
+                        try:
+                            with open(settings.DATA_FILE_PATH + calibration.calibration_plot, "rb") as image_file:
+                                encoded_string = base64.b64encode(image_file.read())
+                                context['cpcs_plot'] = encoded_string.decode("utf-8")
+                        except IOError as e:
+                            logger.error('plot error')
+                except Calibration_data.DoesNotExist:
+                    context['calibration'] = None
 
-                            encoded_string = base64.b64encode(image_file.read())
-                            context['cpcs_plot'] = str(encoded_string, "utf-8")
-
-
-                    except IOError as e:
-                        logger.error('plot error')
-            except Calibration_data.DoesNotExist:
-                context['calibration'] = None
-
-        context['target'] = target
+        except Target.DoesNotExist:
+            messages.error(self.request, 'Target not found')
+            raise Http404
+        except (ObservatoryMatrix.DoesNotExist, Observatory.DoesNotExist) as e:
+            messages.error(self.request, 'Observatory not found: ' + str(e))
+            raise Http404
+        except Exception as e:
+            messages.error(self.request, 'There was a problem: ' + str(e))
+            logger.error(str(e))
+            raise Http404
 
         return context
+
+    def get(self, request, *args, **kwargs):
+        try:
+            context = self.get_context_data(**kwargs)
+        except Exception as e:
+            return HttpResponseRedirect(reverse('bhtom_dataproducts:list'))  # Replace with your desired URL
+        return self.render_to_response(context)
