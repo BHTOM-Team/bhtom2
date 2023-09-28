@@ -72,7 +72,7 @@
 
                     {% if product.data_product_type == 'fits_file' or product.data_product_type == 'photometry' %}
                     <td>
-                        <a href="{% url 'bhtom_dataproducts:details' pk=product.id %}" title="Show details"
+                        <a href="{% url 'bhtom_dataproducts:dataproduct-details' pk=product.id %}" title="Show details"
                             class="btn btn-primary">Detail</a>
                     </td>
                     {% else %}
