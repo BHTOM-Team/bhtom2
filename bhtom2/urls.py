@@ -16,7 +16,9 @@ Including another URLconf
 from django.urls import path, include
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
+from django.conf.urls.static import static
 
+from bhtom2 import settings
 from bhtom2.views import BrokerQueryListView
 
 schema_view = get_schema_view(
@@ -43,5 +45,5 @@ urlpatterns = [
     path('alerts/query/list/', BrokerQueryListView.as_view(template_name='bhtom_alerts/brokerquery_list.html'),
          name='alerts:list'),
 
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
