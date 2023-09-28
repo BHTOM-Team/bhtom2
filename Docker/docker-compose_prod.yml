@@ -8,7 +8,7 @@ services:
       - .env
     networks:
       - bhtom_network
-    restart: always
+    restart: on-failure
     build:
       context: .
       dockerfile: db_Dockerfile
@@ -34,7 +34,7 @@ services:
       dockerfile: Docker/web_Dockerfile
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
-    restart: always
+    restart: on-failure
     volumes:
       - data_store:/data
     ports:
@@ -199,7 +199,7 @@ services:
     env_file:
       - .env
     volumes:
-      - mongo_db:/data/db
+      - mongo_data:/data/db
     networks:
       - graylog
 
@@ -270,7 +270,7 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}
-  mongo_db:
+  mongo_data:
     driver: local
     driver_opts:
       type: none

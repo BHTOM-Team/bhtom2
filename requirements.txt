@@ -15,7 +15,6 @@ django-pgviews==0.5.7
 django-tables2==2.4.1
 factory_boy==3.2.1
 fits2image==0.4.4
-gunicorn==20.1.0
 graypy==2.1.0
 importlib-metadata==4.11.3
 Markdown==3.3.4
@@ -46,5 +45,5 @@ drf_yasg==1.21.6 #swagger
 MulensModel>=2.15.0
 aiokafka==0.8.1
 django_guid==3.3.1
-
-
+gunicorn==21.2.0
+gevent==23.9.1

@@ -2,5 +2,3 @@ FROM postgres:15.3
 
 
 EXPOSE 5432
-
-RUN chmod 0750 /var/lib/postgresql/data
