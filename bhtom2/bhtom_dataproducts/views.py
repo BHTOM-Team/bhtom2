@@ -57,7 +57,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         else:
             observation_record = None
         dp_type = form.cleaned_data['data_product_type']
-        observatory = form.cleaned_data['observatory']
+        observatoryMatrix = form.cleaned_data['observatory']
         observation_filter = form.cleaned_data['filter']
         mjd = form.cleaned_data['MJD']
         match_dist = 0.5
@@ -69,6 +69,12 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         user = self.request.user
         files = self.request.FILES.getlist('files')
         data_product_files = {}
+        try:
+            observatory = Observatory.objects.get(id=observatoryMatrix.observatory_id)
+        except Exception as e:
+            messages.error(self.request, f"Observatory doesn't exist")
+            return redirect(form.cleaned_data.get('referrer', '/'))
+
         for index, file_obj in enumerate(files):
             # Add each file to the dictionary with a unique key
             data_product_files[f'file_{index}'] = (file_obj.name, file_obj)
@@ -93,7 +99,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             'comment': comment,
             'dry_tun': dry_run,
             'no_plot': False,
-            'observatory': observatory,
+            'observatory': observatoryMatrix,
             'mjd': mjd,
             'group': group,
             'observer': observer,

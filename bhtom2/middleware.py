@@ -17,29 +17,44 @@ class RequestLogMiddleware:
 
     def __call__(self, request):
         time1 = datetime.datetime.now()
-        body = "".join(request.body.decode('utf-8').replace(' ', '').splitlines())
-        body = (body[:75] + '..') if len(body) > 75 else body
+        body = self.extract_request_body(request)
 
         logger.info(f"Method: {request.method}, Path: {request.path}, IP: {request.META['REMOTE_ADDR']}, "
-                    f"correlation_id: {request.correlation_id},  session_id: {request.session.session_key}, "
+                    f"correlation_id: {request.correlation_id}, session_id: {request.session.session_key}, "
                     f"user: {request.user}, host: {request.META['HTTP_HOST']}, "
                     f"body: {body}")
 
         response = self.get_response(request)
 
-        if hasattr(response, 'data'):
-            body = response.data
-            body = (body[:75] + '..') if len(body) > 75 else body
-        else:
-            body = ''
-        time = datetime.datetime.now()-time1
+        body = self.extract_response_body(response)
+
+        time = datetime.datetime.now() - time1
         time = time.total_seconds()
 
-        logger.info(f"uuid: {request.correlation_id}, Response - Status Code: {response.status_code}, time: {str(time)}" 
-                    f" body: {body}")
+        logger.info(f"uuid: {request.correlation_id}, Response - Status Code: {response.status_code}, "
+                    f"time: {str(time)} body: {body}")
 
         return response
 
+    def extract_request_body(self, request):
+        # Extract and log the request body, excluding files
+        if request.method in ['POST', 'PUT']:
+            body = {}
+            for key, value in request.POST.items():
+                if not isinstance(value, list):
+                    body[key] = value
+                else:
+                    body[key] = value[0]  # If multiple values, just use the first one
+            return body
+        else:
+            return ''
+
+    def extract_response_body(self, response):
+        # Extract and log the response body
+        if hasattr(response, 'data'):
+            return response.data
+        else:
+            return ''
 
 class AccessControlMiddleware:
     def __init__(self, get_response):

@@ -510,3 +510,5 @@ DJANGO_GUID = {
     'IGNORE_URLS': [],
     'UUID_LENGTH': 32,
 }
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB (adjust as needed)
