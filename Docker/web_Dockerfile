@@ -7,20 +7,15 @@ ENV PYTHONBUFFERED 1
 
 COPY requirements.txt /requirements.txt
 COPY manage.py /manage.py
-COPY /entrypoint.sh /entrypoint.sh
+COPY Docker/entrypoint.sh /entrypoint.sh
+RUN touch bhtom-access.log
+RUN touch bhtom-error.log
 
 COPY bhtom2 /bhtom2
 COPY bhtom_base /bhtom_base
 COPY bhtom_custom_registration /bhtom_custom_registration
 COPY Docker/.env /bhtom2/.bhtom.env
 
-RUN mkdir log || exit 0
-RUN touch log/debug.log || exit 0
-RUN mkdir data || exit 0
-RUN mkdir data/plots || exit 0
-RUN mkdir data/plots/photometry || exit 0
-RUN mkdir data/plots/spectroskopy || exit 0
-RUN mkdir data/plots/calibrations || exit 0
 RUN pwd
 RUN apt update
 RUN apt install -y libpq-dev

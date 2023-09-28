@@ -350,22 +350,52 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
 ### static and simpler version of the plot for massive list table
 @register.inclusion_tag('bhtom_dataproducts/partials/photometry_for_target_icon.html', takes_context=True)
 def photometry_for_target_icon(context, target, width=800, height=400, background=None, label_color=None, grid=True):
+    """
+    Renders a photometric plot for a target.
+
+    This templatetag requires all ``ReducedDatum`` objects with a data_type of ``photometry`` to be structured with the
+    following keys in the JSON representation: magnitude, error, filter
+
+    :param width: Width of generated plot
+    :type width: int
+
+    :param height: Height of generated plot
+    :type width: int
+
+    :param background: Color of the background of generated plot. Can be rgba or hex string.
+    :type background: str
+
+    :param label_color: Color of labels/tick labels. Can be rgba or hex string.
+    :type label_color: str
+
+    :param grid: Whether to show grid lines.
+    :type grid: bool
+    """
     fig = None
-    if (target.photometry_plot != None and target.photometry_plot != ''):
-        fig = open(target.photometry_plot, 'r')
-    else:
-        layout = go.Layout(
+    if target.photometry_icon_plot is not None and target.photometry_icon_plot != '':
+        base_path = settings.DATA_FILE_PATH
+        try:
+            fig = plotly.io.read_json(base_path + str(target.photometry_icon_plot))
+            return {
+                'target': target,
+                'plot': offline.plot(fig, output_type='div', show_link=False)
+            }
+        except:
+            logger.warning("Plot not exist")
+
+    layout = go.Layout(
             height=height,
             width=width,
             paper_bgcolor=background,
             plot_bgcolor=background
 
-        )
-        layout.legend.font.color = label_color
-        fig = go.Figure(data=[], layout=layout)
+    )
+    layout.legend.font.color = label_color
+    fig = go.Figure(data=[], layout=layout)
+
     return {
         'target': target,
-        'plot': offline.plot(fig, output_type='div', show_link=False)
+        'plot': offline.plot(fig, output_type='div', show_link=False, config=dict({'staticPlot': True}))
     }
 
 

@@ -8,12 +8,13 @@ services:
       - .env
     networks:
       - bhtom_network
-    restart: always
+    restart: on-failure
     build:
       context: .
       dockerfile: db_Dockerfile
     volumes:
       - ./data/db:/docker-entrypoint-initdb.d/
+      - bhtom_db:/var/lib/postgresql/data
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
       - POSTGRES_DB=${POSTGRES_NAME}
@@ -33,14 +34,13 @@ services:
       dockerfile: Docker/web_Dockerfile
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
-    restart: always
+    restart: on-failure
     volumes:
       - data_store:/data
     ports:
       - "8010:8000"
     depends_on:
       - bhtom_db
-
 
   zookeeper1:
     image: 'confluentinc/cp-zookeeper:6.0.14'
@@ -258,6 +258,12 @@ services:
     entrypoint: /usr/bin/tini -- wait-for-it elasticsearch:9200 --  /docker-entrypoint.sh
 
 volumes:
+  bhtom_db:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/bhtom_db
   data_store:
     driver: local
     driver_opts:
@@ -266,10 +272,22 @@ volumes:
       device: ${DATA_STORE_PATH}
   mongo_data:
     driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/mongo
   es_data:
     driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/es_data
   graylog_data:
     driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/graylog
 
 networks:
   bhtom_network:
