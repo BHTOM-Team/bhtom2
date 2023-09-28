@@ -12,7 +12,9 @@ from bhtom2.bhtom_targets.utils import update_targetList_cache, update_targetDet
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_common.hooks import run_hook
 from bhtom_base.bhtom_targets.models import Target
-
+from rest_framework import status
+import json
+from django.conf import settings
 from django.core import serializers
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.rest-view')
@@ -181,3 +183,49 @@ class CleanTargetDetailsCache(views.APIView):
             logger.error("Clean cache error: " + str(e))
             return Response("ERROR", status=500)
         return Response("OK", status=200)
+
+
+class GetPlotsApiView(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'targetNames': openapi.Schema(type=openapi.TYPE_ARRAY,
+                items=openapi.Schema(type=openapi.TYPE_STRING),),
+            },
+            required=['targetNames']
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
+    )
+
+    def post(self, request):
+        targetNames = request.data['targetNames']
+        results = {}
+        try:
+            base_path = settings.DATA_FILE_PATH
+            for target_name in targetNames:
+                
+                target = Target.objects.get(name=target_name)
+                if target.photometry_plot:
+                    with open(base_path + str(target.data), 'r') as json_file:
+                        plot = json.load(json_file)
+                    results[target.name] = plot
+                else:
+                    results[target.name] = "None"
+
+        except Target.DoesNotExist:
+            return Response({"Error": 'Target does not exist in the database'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"Error": 'Something went wrong' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"Plots": results}, status=status.HTTP_200_OK)

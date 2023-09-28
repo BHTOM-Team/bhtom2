@@ -6,11 +6,13 @@ from rest_framework import status
 from bhtom2.bhtom_calibration.models import Calibration_data
 from django.core import serializers
 from bhtom2.bhtom_calibration.models import Catalogs as calibration_catalog
+from bhtom_base.bhtom_dataproducts.models import DataProduct
+from bhtom_base.bhtom_targets.models import Target
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 import json
-
+from django.conf import settings
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_calibration.views')
 
 
@@ -24,8 +26,9 @@ class CalibrationResultsApiView(APIView):
             properties={
                 'fileId': openapi.Schema(type=openapi.TYPE_ARRAY,
                 items=openapi.Schema(type=openapi.TYPE_INTEGER),),
+                'getPlot': openapi.Schema(type=openapi.TYPE_BOOLEAN),
             },
-            required=['fileId']
+            required=['fileId', 'getPlot']
         ),
         manual_parameters=[
             openapi.Parameter(
@@ -40,16 +43,29 @@ class CalibrationResultsApiView(APIView):
 
     def post(self, request):
         files_id = request.data['fileId']
+        getPlot = request.data['getPlot']
         results = {}
+        base_path = settings.DATA_FILE_PATH
         try:
             for file in files_id:
                 instance = Calibration_data.objects.get(dataproduct_id=file)
                 serialized_data = serializers.serialize('json', [instance])
                 data = json.loads(serialized_data)[0] 
                 results[instance.id] = data["fields"]
+                if getPlot:
+                    dp = DataProduct.objects.get(id=file)
+                    target = dp.target
+                    if target.photometry_plot:
+                        with open(base_path + str(target.data), 'r') as json_file:
+                            plot = json.load(json_file)
+                            results[instance.id] = {"calib-res":  data["fields"] ,"plot": plot}
+                    else:
+                        results[instance.id] ={"calib-res":  data["fields"] ,"plot": None}
 
         except Calibration_data.DoesNotExist:
             return Response({"Error": 'File does not exist in the database'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"Error": 'something went wrong' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"Result": results}, status=status.HTTP_200_OK)
 
