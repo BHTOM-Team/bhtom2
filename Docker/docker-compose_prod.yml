@@ -12,6 +12,7 @@ services:
     build:
       context: .
       dockerfile: db_Dockerfile
+    user: $(id -u):$(id -g)
     volumes:
       - ./data/db:/docker-entrypoint-initdb.d/
       - bhtom_db:/var/lib/postgresql/data
@@ -35,6 +36,7 @@ services:
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
     restart: on-failure
+    user: $(id -u):$(id -g)
     volumes:
       - data_store:/data
     ports:
@@ -201,6 +203,7 @@ services:
     container_name: mongo
     env_file:
       - .env
+    user: $(id -u):$(id -g)
     volumes:
       - mongo_data:/data/db
     networks:
@@ -211,6 +214,7 @@ services:
     container_name: elasticsearch
     env_file:
       - .env
+    user: $(id -u):$(id -g)
     volumes:
       - es_data:/usr/share/elasticsearch/data
     environment:
@@ -231,6 +235,7 @@ services:
     container_name: graylog
     env_file:
       - .env
+    user: $(id -u):$(id -g)
     volumes:
       - graylog_data:/usr/share/graylog/data
     environment:
