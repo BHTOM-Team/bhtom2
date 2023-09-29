@@ -5,15 +5,13 @@
 
 This is a simple guide for BHTOM's REST API. It lets you use BHTOM webpage features in your own programs. You can get a list of targets, add observations, download data and more. Let's get started!
 
-> **Remember!** To use API you should get your own TOKEN!
+> **Remember!** To use API you should get your own TOKEN first!
 
-# AUTHORIZATION API 
-
-# 1. /api/token-auth/
+# 1. AUTHORIZATION API: /api/token-auth/
 
 ### Description
-
-## Token-Auth API
+<!-- 
+## Token-Auth API -->
 
 The `token-auth` API provides a method for users to obtain an **authentication token** by submitting their `username` and `password`. 
 Once you have acquired this token, it allows you to access and utilize all other available APIs.
@@ -32,7 +30,7 @@ Once you have acquired this token, it allows you to access and utilize all other
 
 ```http
 curl -X 'POST' \
-  'http://127.0.0.1:8000/api/token-auth/' \
+  'https://bh-tom2.astrolabs.pl/api/token-auth/' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -H 'X-CSRFToken: uUz2fRnXhPuvD9YuuiDW9cD1LsajeaQnE4hwtEAfR00SgV9bD5HCe5i8n4m4KcOr' \
@@ -50,48 +48,48 @@ curl -X 'POST' \
     }
 
 
-# PHOTOMETRY UPLOAD API
+# 2. PHOTOMETRY UPLOAD API
 
-# 1. UPLOAD FILES
+### Description
+This API  facilitates batch file uploads to the **BHTOM system** using the `/upload` API. It offers a command-line interface for uploading files along with their associated metadata.
 
-This script allows you to upload multiple files to the BHTOM2 system using the `/upload` API. It provides a command-line interface for uploading files with associated metadata.
+The script is located in the `documentation_scripts` folder.
 
-The script is located in documentation_scripts folder
-TOKEN is requaired!
+<!-- Please note, an authentication `TOKEN` is required to use this script. -->
 
 ### Endpoint
 
 - **Method**: POST
 - **URL**: `/upload`
 
-## Usage
+### Usage
 
 ```bash
 python upload_files_script.py  <token> <target> <data_product_type> <files> [--match_dist <match_dist>] [--comment <comment>] [--dry_run] [--no_plot] [--mjd <mjd>] [--group <group>] [--observer <observer>]
 ```
 
-### Arguments
+## Arguments
 
-- `<token>`: Authentication token.
-- `<target>`: Target of the uploaded files.
-- `<data_product_type>`: Type of data product.
-- `<files>`: Comma-separated list of files to upload.
+- `<token>`: Your authentication token.
+- `<target>`: Target destination for the uploaded files.
+- `<data_product_type>`: Type of data product: `fits_file`, `photometry` (instrumental in SExtractor format), `photometry_nondetection`, `spectroscopy`
+- `<files>`: Provide a comma-separated list of files that you wish to upload.
+<!-- TODO: LW: check photometry vs SExtractor, we need both -->
+## Optional Arguments
 
-### Optional Arguments
+<!-- - `--match_dist <match_dist>`: This sets the matching distance (float) for astrometric cross-match in the standardisation procedure.  -->
+<!-- LW: I hid the match_dist as we set it fixed -->
+- `--comment <comment>`: Add any additional comments here.
+- `--dry_run`: Enable this to run the script in Dry Run (test) mode. If true, the data will not be stored in the database. The default is false.
+- `--no_plot`: Enable this to disable plot generation. The default setting is false.
+- `--mjd <mjd>`: Modified Julian Date (float) [note MJD=JD-2400000.5]
+- `--observer <observer>`: Enter the name of the observer.
 
-- `--match_dist <match_dist>`: Matching distance (float).
-- `--comment <comment>`: Additional comment.
-- `--dry_run`: Enable dry run mode (default is false).
-- `--no_plot`: Disable plot generation (default is false).
-- `--mjd <mjd>`: Modified Julian Date (float).
-- `--observer <observer>`: Observer's name.
 
-## Example Usage
-
-### Basic Usage
+### Example Usage
 
 ```bash
-python upload_files_script.py abc123 target1 type1 file1.txt,file2.jpg
+python upload_files_script.py 123token456 Gaia22bpl photometry 
 ```
 
 ### Advanced Usage
@@ -100,11 +98,11 @@ python upload_files_script.py abc123 target1 type1 file1.txt,file2.jpg
 python upload_files_script.py abc123 target2 type2 file3.txt --match_dist 0.5 --comment "Example comment" --dry_run --no_plot --mjd 2459371.5 --group "example_group" --observer "John Doe"
 ```
 
-## Response
+### Response
 
 The script will display the response from the API, In response you will get list of uploaded files with id of each file, so you can later get calibrations result by ids.
 
-## Dependencies
+### Dependencies
 
 - Python 3.x
 - The `requests` library (install with `pip install requests`)
