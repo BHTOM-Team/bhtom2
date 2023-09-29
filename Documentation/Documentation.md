@@ -562,3 +562,328 @@ You can use a Python script to delete an observatory matrix record:
 ```bash
 python delete_observatory_matrix.py --observatory "My Observatory" --token <yourToken>"
 ```
+
+
+# Targets API
+
+## 1. /targets/createTarget/
+
+  This document provides information about the Create Target API, which allows users to create a new target.
+  TOKEN is requaired!
+
+## Request
+
+- **Method**: POST
+- **URL**: `/targets/createTarget/`
+
+## Request Parameters
+
+The request to create a new target should include the following parameters in the request body:
+
+- `name` (string, required): The name or identifier of the target.
+- `ra` (number, required): The Right Ascension (RA) of the target, represented as a floating-point number.
+- `dec` (number, required): The Declination (Dec) of the target, represented as a floating-point number.
+- `epoch` (string): The epoch or reference time for the target (e.g., "J2000").
+- `classification` (string): The classification or type of the target.
+- `discovery_date` (string, datetime format): The date and time of the target's discovery.
+- `importance` (number): A numerical value representing the importance or priority of the target.
+- `cadence` (number): A numerical value representing the cadence or frequency of observations for the target.
+
+### Example Request Body
+
+```json
+{
+    "name": "My Target",
+    "ra": 123.456,
+    "dec": -45.678,
+    "epoch": "J2000",
+    "classification": "Asteroid",
+    "discovery_date": "2023-09-28T10:00:00Z",
+    "importance": 5,
+    "cadence": 24
+}
+```
+
+## Example Request
+
+You can make a POST request to create a new target using the `curl` command or a Python script.
+
+### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Token <yourToken>" \
+  -d '{
+    "name": "My Target",
+    "ra": 123.456,
+    "dec": -45.678,
+    "epoch": "J2000",
+    "classification": "Asteroid",
+    "discovery_date": "2023-09-28T10:00:00Z",
+    "importance": 5,
+    "cadence": 24
+  }' \
+  url/targets/createTarget/
+```
+### Using Python Script
+
+You can use a Python script to create a new target:
+
+```bash
+python create_target.py --name "My Target" --ra 123.456 --dec -45.678 --epoch "J2000" --classification "Asteroid" --discovery_date "2023-09-28T10:00:00Z" --importance 5 --cadence 24 --token <yourToken> 
+```
+
+
+# 2. /targets/updateTarget/{name}/
+
+This document provides information about the Update Target API, which allows users to update an existing target with new information.
+TOKEN is requaired!
+
+## Request
+
+- **Method**: PATCH
+- **URL**: `/targets/updateTarget/{name}/`
+
+Here, `{name}` is the name or identifier of the target you want to update.
+
+
+## Request Parameters
+
+The request to update a target should include the following parameters in the request body:
+
+- `name` (string): The name or identifier of the target. This parameter is part of the URL and does not need to be included in the request body.
+- `ra` (number, optional): The Right Ascension (RA) of the target, represented as a floating-point number.
+- `dec` (number, optional): The Declination (Dec) of the target, represented as a floating-point number.
+- `epoch` (string, optional): The epoch or reference time for the target (e.g., "J2000").
+- `classification` (string, optional): The classification or type of the target.
+- `discovery_date` (string, datetime format, optional): The date and time of the target's discovery.
+- `importance` (number, optional): A numerical value representing the importance or priority of the target.
+- `cadence` (number, optional): A numerical value representing the cadence or frequency of observations for the target.
+
+### Example Request Body
+
+```json
+{
+    "ra": 135.789,
+    "dec": -30.123,
+    "epoch": "J2023",
+    "classification": "Galaxy",
+    "discovery_date": "2022-12-15T08:30:00Z",
+    "importance": 3,
+    "cadence": 12
+}
+```
+
+## Example Request
+
+You can make a PATCH request to update an existing target using the `curl` command or a Python script.
+
+### Using `curl`
+
+```bash
+curl -X PATCH \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Token <yourToken>" \
+  -d '{
+    "ra": 135.789,
+    "dec": -30.123,
+    "epoch": "J2023",
+    "classification": "Galaxy",
+    "discovery_date": "2022-12-15T08:30:00Z",
+    "importance": 3,
+    "cadence": 12
+  }' \
+  url/api/targets/updateTarget/{name}/
+```
+
+Replace `<yourToken>` with your authentication token and `{name}` with the actual name or identifier of the target you want to update.
+
+### Using Python Script
+
+You can use a Python script to update an existing target with Token Authentication:
+
+```bash
+  python update_target.py "My Target" --ra 135.789 --dec -30.123 --epoch "J2023" --classification "Galaxy" --discovery_date "2022-12-15T08:30:00Z" --importance 3 --cadence 12 --token <yourToken> 
+```
+
+# 3. targets/getTargetList/
+
+This document provides information about the Get Target List API, which allows users to retrieve a list of targets based on specified criteria.  This API supports filtering targets by name, Right Ascension (RA) range, and Declination (Dec) range.
+  TOKEN is requaired!
+
+## Request
+
+- **Method**: GET
+- **URL**: `/targets/getTargetList/`
+
+## Request Parameters
+
+The request to retrieve the target list may include the following query parameters:
+
+- `name` (string): The name or identifier of the target.
+- `raMin` (number, optional): The minimum Right Ascension (RA) value, represented as a floating-point number.
+- `raMax` (number, optional): The maximum Right Ascension (RA) value, represented as a floating-point number.
+- `decMin` (number, optional): The minimum Declination (Dec) value, represented as a floating-point number.
+- `decMax` (number, optional): The maximum Declination (Dec) value, represented as a floating-point number.
+
+## Example Request
+
+You can make a GET request to retrieve a list of targets based on the specified criteria using the `curl` command or a web browser.
+
+### Using `curl`
+
+```bash
+curl -X GET \
+  -H "Authorization: Token <yourToken>" \
+  "url/targets/getTargetList/?name=MyTarget&raMin=100.0&raMax=200.0&decMin=-30.0&decMax=30.0"
+```
+
+Replace `<yourToken>` with your authentication token and adjust the URL as needed to specify your search criteria.
+
+
+# 4. targets/deleteTarget/
+
+This document provides information about the Delete Target API, which allows users to delete a target by specifying its name or identifier. This API supports deleting a target by providing its name.
+  TOKEN is requaired!
+
+## Request
+
+The endpoint for retrieving a list of targets based on criteria is:
+
+
+- **Method**: DELETE
+- **URL**: `/targets/deleteTarget/`
+
+
+## Request Parameters
+
+The request to delete a target should include the following parameters in the request body:
+
+- `name` (string, required): The name or identifier of the target that you want to delete.
+
+### Example Request Body
+
+```json
+{
+    "name": "MyTarget"
+}
+```
+
+## Example Request
+
+You can make a DELETE request to delete a target using the `curl` command or a web browser.
+
+### Using `curl`
+
+```bash
+curl -X DELETE \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Token <yourToken>" \
+  -d '{
+    "name": "MyTarget"
+  }' \
+  url/targets/deleteTarget/
+```
+
+Replace `<yourToken>` with your authentication token and `"MyTarget"` with the name or identifier of the target you want to delete.
+
+# 5. /targets/cleanTargetListCache/
+
+This document provides information about the Clean Target List Cache API, which allows authorized users to clear the cache for the target list. Caching is used to improve the performance of retrieving target lists, and this API provides a way to manually refresh the cached data.
+
+## Request
+
+The endpoint for retrieving a list of targets based on criteria is:
+
+- **Method**: POST
+- **URL**: `/targets/cleanTargetListCache/`
+
+To clear the target list cache, you should make a POST request to the above endpoint with the following requirements:
+
+- Token Authentication: You must include a valid authentication token in the request headers.
+- User Authorization: Only users with superuser privileges are authorized to clean the cache.
+
+### Example Request
+
+You can make a POST request to clean the target list cache using the `curl` command or any HTTP client that supports POST requests.
+
+#### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Authorization: Token <yourToken>" \
+  "url/targets/cleanTargetListCache/"
+```
+
+Replace `<yourToken>` with your valid authentication token.
+
+
+# 6. targets/cleanTargetDetailsCache/
+
+This document provides information about the Clean Target Details Cache API, which allows authorized users to clear the cache for target details. Caching is used to improve the performance of retrieving target details, and this API provides a way to manually refresh the cached data.
+
+## Request
+- **Method**: POST
+- **URL**: `targets/cleanTargetDetailsCache/`
+
+To clear the target details cache, you should make a POST request to the above endpoint with the following requirements:
+
+- Token Authentication: You must include a valid authentication token in the request headers.
+- User Authorization: Only users with superuser privileges are authorized to clean the cache.
+
+### Example Request
+
+You can make a POST request to clean the target details cache using the `curl` command or any HTTP client that supports POST requests.
+
+#### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Authorization: Token <yourToken>" \
+  "url/targets/cleanTargetDetailsCache/"
+```
+
+Replace `<yourToken>` with your valid authentication token.
+
+
+# 7. targets/get-plots/
+This document provides information about the Get Plots API, which allows users to retrieve plots or visual representations associated with specific targets. Plots provide visual insights into various aspects of the target, such as its position, characteristics, or observational data.
+
+## Request
+- **Method**: POST
+- **URL**: `targets/get-plots/`
+
+## Request Parameters
+
+The request to retrieve plots should include the following parameters in the request body:
+
+- `targetNames` (array of strings, required): An array of target names or identifiers for which you want to retrieve plots.
+
+### Example Request Body
+
+```json
+{
+    "targetNames": ["Target1", "Target2", "Target3"]
+}
+```
+
+## Request Headers
+
+To authorize the request, you should include Token Authentication by providing a valid authentication token in the request headers.
+
+- `Authorization: Token <yourToken>`: Authentication token for the API.
+
+### Example Request Headers
+
+```bash
+curl -X POST \
+  -H "Authorization: Token <yourToken>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "targetNames": ["Target1", "Target2", "Target3"]
+  }' \
+url/targets/get-plots/
+```
+
+Replace `<yourToken>` with your valid authentication token and adjust the target names in the request body as needed.
