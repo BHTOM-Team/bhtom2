@@ -1,11 +1,11 @@
 
-# BHTOM2 Script Documentation
+# BHTOM2 API Documentation
 
 ## Introduction
 
-This scripts allows you to use the BHTOM2 by REST API.
+This is a simple guide for BHTOM's REST API. It lets you use BHTOM webpage features in your own programs. You can get a list of targets, add observations, download data and more. Let's get started!
 
-To use API you shoud get your own TOKEN!
+> **Remember!** To use API you should get your own TOKEN!
 
 # AUTHORIZATION API 
 
@@ -13,8 +13,10 @@ To use API you shoud get your own TOKEN!
 
 ### Description
 
-The `token-auth` API allows users to obtain an authentication token by providing their username and password.
-With this token you can use all others API 
+## Token-Auth API
+
+The `token-auth` API provides a method for users to obtain an **authentication token** by submitting their `username` and `password`. 
+Once you have acquired this token, it allows you to access and utilize all other available APIs.
 
 ### Endpoint
 
