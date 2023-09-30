@@ -132,7 +132,8 @@ def get(term: str):
         "ra": (term_data[" RaDeg"]), #dropping Decimal (LW), returning string
         "dec": (term_data[" DecDeg"]), #dropping Decimal (LW), returning string
         "disc": term_data[" Date"],
-        "classif": term_data[" Class"]
+        "classif": term_data[" Class"],
+        "comment": term_data[" Comment"]
     }
 
     return catalog_data
@@ -225,11 +226,13 @@ class GaiaAlertsHarvester(AbstractHarvester):
         dec: str = self.catalog_data["dec"]
         disc: str = self.catalog_data["disc"]
         classif: str = self.catalog_data["classif"]
+        comment: str = self.catalog_data["comment"]
 
         extras : Dict[str] = {}
         extras["classification"] = classif
         extras["importance"] = str(9.99)
         extras["discovery_date"] = disc
         extras["cadence"] = str(1.0)
+        extras['description'] = comment #not sure if this is going to be set
 
         return extras
