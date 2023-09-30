@@ -41,7 +41,9 @@ class RequestLogMiddleware:
         if request.method in ['POST', 'PUT']:
             body = {}
             for key, value in request.POST.items():
-                if not isinstance(value, list):
+                if key == 'password':
+                    body[key] = '*****'
+                elif not isinstance(value, list):
                     body[key] = value
                 else:
                     body[key] = value[0]  # If multiple values, just use the first one
