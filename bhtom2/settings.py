@@ -54,6 +54,8 @@ GRAYLOG_HOST = secret.get('GRAYLOG_HOST', '')
 GRAYLOG_PORT = int(secret.get('GRAYLOG_PORT', 12201))
 DATA_FILE_PATH = secret.get('DATA_FILE_PATH', './data/')
 
+CSRF_TRUSTED_ORIGINS = [] + list(secret.get("CSRF_TRUSTED_ORIGINS", 'localhost').split(','))
+
 PROPOSALS_API_KEYS = {
     'LCO': secret.get('LCO_API_KEY', '')
 }
