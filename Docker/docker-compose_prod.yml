@@ -43,7 +43,7 @@ services:
       - bhtom_db
 
   zookeeper1:
-    image: 'confluentinc/cp-zookeeper:6.0.14'
+    image: 'confluentinc/cp-zookeeper:7.3.2'
     env_file:
       - .env
     container_name: zookeeper1
@@ -53,15 +53,15 @@ services:
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_SERVERS: 0.0.0.0:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
+      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
 
-    restart: always
+    restart: on-failure
 
   zookeeper2:
-    image: confluentinc/cp-zookeeper:6.0.14
+    image: confluentinc/cp-zookeeper:7.3.2
     env_file:
       - .env
     container_name: zookeeper2
@@ -71,15 +71,15 @@ services:
     environment:
       ZOOKEEPER_SERVER_ID: 2
       ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;0.0.0.0:2888:3888;zookeeper3:2888:3888
+      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2182:2182"
 
-    restart: always
+    restart: on-failure
 
   zookeeper3:
-    image: confluentinc/cp-zookeeper:6.0.14
+    image: confluentinc/cp-zookeeper:7.3.2
     env_file:
       - .env
     container_name: zookeeper3
@@ -89,15 +89,15 @@ services:
     environment:
       ZOOKEEPER_SERVER_ID: 3
       ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;0.0.0.0:2888:3888
+      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2183:2183"
 
-    restart: always
+    restart: on-failure
 
   kafka1:
-    image: 'confluentinc/cp-kafka:6.0.14'
+    image: 'confluentinc/cp-kafka:7.3.2'
     env_file:
       - .env
     container_name: kafka1
@@ -123,7 +123,7 @@ services:
       - zookeeper3
 
   kafka2:
-    image: 'confluentinc/cp-kafka:6.0.14'
+    image: 'confluentinc/cp-kafka:7.3.2'
     container_name: kafka2
     env_file:
       - .env
@@ -149,7 +149,7 @@ services:
     restart: always
 
   kafka3:
-    image: 'confluentinc/cp-kafka:6.0.14'
+    image: 'confluentinc/cp-kafka:7.3.2'
     container_name: kafka3
     env_file:
       - .env
@@ -185,9 +185,15 @@ services:
       - "7080:8080"
     environment:
       DYNAMIC_CONFIG_ENABLED: 'true'
-      KAFKA_CLUSTERS_0_NAME: bhtom2
+      KAFKA_CLUSTERS_0_NAME: 'broker1'
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'kafka1:19092'
-      KAFKA_CLUSTERS_0_ZOOKEEPER: "zookeeper1:2181"
+      KAFKA_CLUSTERS_0_ZOOKEEPER: 'zookeeper1:2181'
+      KAFKA_CLUSTERS_1_NAME: 'broker2'
+      KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS: 'kafka2:19093'
+      KAFKA_CLUSTERS_1_ZOOKEEPER: 'zookeeper2:2182'
+      KAFKA_CLUSTERS_2_NAME: 'broker3'
+      KAFKA_CLUSTERS_2_BOOTSTRAPSERVERS: 'kafka3:19094'
+      KAFKA_CLUSTERS_2_ZOOKEEPER: 'zookeeper3:2183'
       AUTH_TYPE: "LOGIN_FORM"
       SPRING_SECURITY_USER_NAME: ${KAFKA_UI_USER}
       SPRING_SECURITY_USER_PASSWORD: ${KAFKA_UI_PASSWORD}
