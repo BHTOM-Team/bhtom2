@@ -49,5 +49,5 @@ python3 manage.py add_catalogs
 echo "Django docker is fully configured."
 echo "Running server..."
 
-gunicorn --bind 0.0.0.0:8000 bhtom2.wsgi:application --log-level error --timeout 600 --workers 6 --threads 1 --access-logfile bhtom-access.log --error-logfile bhtom-error.log -k gevent
+gunicorn --bind 0.0.0.0:8000 bhtom2.wsgi:application --log-level error --timeout 600 --workers 10 --threads 1 --access-logfile bhtom-access.log --error-logfile bhtom-error.log -k gevent
 exec "$@"
