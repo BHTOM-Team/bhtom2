@@ -91,47 +91,52 @@ def latex_text_target_prompt(target:Target):
     tns=""
 
     aliases = ""
+    gaiaalertname = ""
+    gaianame = ""
     for alias in target.aliases.all():
         if (alias.source_name=="TNS"):
             tns=alias.name
         else:
-            aliases+=alias.name+"("+alias.source_name+") "
+            if (alias.source_name!="GAIA_DR3" and alias.source_name!="GAIA_ALERTS"):
+                aliases+=alias.name+"("+alias.source_name+") "
+        if (alias.source_name=="GAIA_ALERTS"):
+            gaiaalertname=alias.name
+        if (alias.source_name=="GAIA_DR3"):
+            gaianame=alias.name
 
 #    print(target.aliases.all())
     # aliases = target.aliases.all
 #    if aliases.source_name 
     #discovery date from extras
     #who found it first?
-#    discdate=target.discovery_date
-    discdate=str(target.discovery_date)
+    ifdiscoverydate=""
+    if (target.discovery_date):
+        discdate=str(target.discovery_date)
 
-    # prompt_date=f"Rewrite datetime {discdate} UT in Month, day, year format, without time"
-    # date=get_response(prompt_date)
+        datetime_object = datetime.strptime(discdate, "%Y-%m-%d %H:%M:%S%z")
+        date=datetime_object.strftime('%Y-%m-%d %H:%M')
 
-#    print("DATE: ",date)
-#    prompt_hjd=f"Compute full Heliocentric Julian Date (HJD) for date {discdate} and subtract 2450000.0 from the result. Output only subtracted value."
-#    hjd=get_response(prompt_hjd)
-    datetime_object = datetime.strptime(discdate, "%Y-%m-%d %H:%M:%S%z")
-    date=datetime_object.strftime('%Y-%m-%d %H:%M')
+        human_readable_create_date = target.created.strftime('%Y-%m-%d %H:%M')
 
-    human_readable_create_date = target.created.strftime('%Y-%m-%d %H:%M')
-
-    t_utc = Time(datetime_object, format='datetime', scale='utc')
-    # Convert to MJD
-    mjd = around(t_utc.mjd,5)
-
-#    print("HJD=",hjd)
+        t_utc = Time(datetime_object, format='datetime', scale='utc')
+        # Convert to MJD
+        mjd = around(t_utc.mjd,5)
+        ifdiscoverydate=f"on {date} (MJD = {mjd})"
 
     epoch = target.epoch
     prompt1=f"Rephrase and keep LaTeX: \\quad {name}"
     if (tns): prompt1+="({tns} according to the IAU transient name server)"
-    prompt1+=f" {name} was discovered by \
-            \\textit{{Gaia}} Science Alerts (GSA) on {date} (MJD = {mjd}) \
+    if (gaiaalertname!=""):
+        prompt1+=f" {name} was discovered by \
+            \\textit{{Gaia}} Science Alerts (GSA) {ifdiscoverydate} \
             and was posted on the GSA website \\footnote{{\\href{{http://gsaweb.ast.cam.ac.uk/alerts/alert/{name}/}}{{http://gsaweb.ast.cam.ac.uk/alerts/alert/{name}/}}}}."
-    if (aliases): prompt1+=f" Other surveys' names include: {aliases}. "
+    if (aliases): prompt1+=f" The target has been catalogued by other surveys under the following names: {aliases}. "
     prompt1+=f"The event was located at equatorial coordinates RA, Dec(J{epoch})= {ra}, {dec} and galactic coordinates l,b = {gall}, {galb} \
         in constellation {constel}. \
             The finding chart with the event's location on the sky is presented in Figure \\ref{{fig:fchart}}."
+    if (gaianame):
+        prompt1+=f"\\textit{{Gaia}} Data Release 3\citep{{GaiaDR3}} information on the source are listed in Table \ref{{tab:gaiadr3}}."
+
     prompt1+=f"The target was added to BHTOM2\\footnote{{\\url{{https://bhtom.space}}}} \\citep{{BHTOM2}} on {human_readable_create_date} for detailed follow-up observations."
 
 
@@ -145,8 +150,9 @@ def latex_target_title_prompt(target:Target):
     constel = get_constel(target.ra,target.dec)
 
     prompt2 = f"Suggest a catchy title about "\
-    f" a black hole candidate"\
-    f" found with microlensing"\
+    f" a time-domain astrophysical target"\
+    f" of type {str(target.classification)}"\
+    f" observed by BHTOM telescope network"\
     f" named {name}, found in the constellation {constel}."
 
     return prompt2

@@ -236,7 +236,7 @@ class SiderealTargetCreateForm(TargetForm):
         # fields = ('name', 'type', 'ra', 'dec', 'epoch', 'parallax',
         #           'pm_ra', 'pm_dec', 'galactic_lng', 'galactic_lat',
         #           'distance', 'distance_err')
-        fields = ('name', 'type', 'ra', 'dec', 'epoch', 'classification', 'discovery_date', 'importance', 'cadence')
+        fields = ('name', 'type', 'ra', 'dec', 'epoch', 'classification', 'description', 'discovery_date', 'importance', 'cadence')
     # class Meta(TargetForm.Meta):
     #     fields = SIDEREAL_FIELDS
 

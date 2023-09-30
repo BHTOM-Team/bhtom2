@@ -251,6 +251,7 @@ def query_tns_for_names(target: Target) -> Dict[DataSource,str]:
     coordinates: SkyCoord = SkyCoord(ra=target.ra, dec=target.dec, unit="deg")
     radius: Angle = Angle(3, unit="arcsec")
     
+    logger.debug("TRYING TNS")
     try:
 #        target: Optional[Any] = None
 
