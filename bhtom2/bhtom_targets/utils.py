@@ -187,55 +187,57 @@ def check_target_value(target_fields):
         raise IntegrityError(f"Source found already at these coordinates (rad 3 arcsec): {ccnames}")
 
 
-def get_aliases_from_queryset(queryset: Dict[str, Any]) -> Tuple[List, List]:
+def get_aliases_from_queryset(queryset: Dict[str, Any]) -> Tuple[List, List, List]:
     """
     Extracts the passed aliases from the form queryset.
 
     :param queryset: data extracted from form as a dictionary
     :type queryset: Dict[str, Any]
 
-    :returns: two lists- source names (e.g. survey names) and corresponding target names
-    :rtype: Tuple[List, List]
+    :returns: thre lists- source names (e.g. survey names) and corresponding target names and target urls
+    :rtype: Tuple[List, List, List]
 
     """
     target_source_names = [v for k, v in queryset.items() if
                            k.startswith('alias') and k.endswith('-source_name')]
     target_name_values = [v for k, v in queryset.items() if
                           k.startswith('alias') and k.endswith('-name')]
-    return target_source_names, target_name_values
+    target_urls = [v for k, v in queryset.items() if
+                          k.startswith('alias') and k.endswith('-url')]
+    return target_source_names, target_name_values, target_urls
 
 
-def get_nonempty_names_from_queryset(queryset: Dict[str, Any]) -> List[Tuple[str, str]]:
+def get_nonempty_names_from_queryset(queryset: Dict[str, Any]) -> List[Tuple[str, str, str]]:
     """
     Extracts the non-empty aliases from the form queryset.
 
     :param queryset: data extracted from form as a dictionary
     :type queryset: Dict[str, Any]
 
-    :returns: list of (source_name, target_name)
-    :rtype: List[Tuple[str, str]]
+    :returns: list of (source_name, target_name,url)
+    :rtype: List[Tuple[str, str,str]]
     """
-    target_source_names, target_name_values = get_aliases_from_queryset(queryset)
-    return [(source_name, name) for source_name, name in zip(target_source_names, target_name_values) if
-            source_name.strip() and name.strip()]
+    target_source_names, target_name_values, target_urls = get_aliases_from_queryset(queryset)
+    return [(source_name, name, url) for source_name, name, url in zip(target_source_names, target_name_values, target_urls) if
+            source_name.strip() and name.strip() and url.strip()]
 
 
-def check_duplicate_source_names(target_names: List[Tuple[str, str]]) -> bool:
+def check_duplicate_source_names(target_names: List[Tuple[str, str, str]]) -> bool:
     """
     Checks for target names with duplicate source names.
 
-    :param target_names: list of (source_name, target_name)
+    :param target_names: list of (source_name, target_name,url)
     :type target_names: List[Tuple[str, str]]
 
     :returns: are there duplicate source names
     :rtype: bool
     """
-    nonempty_source_names: List[str] = [s for s, _ in target_names]
+    nonempty_source_names: List[str] = [s for s, _, u, in target_names]
     return len(nonempty_source_names) != len(set(nonempty_source_names))
 
 
-def check_for_existing_alias(target_names: List[Tuple[str, str]]) -> bool:
-    return sum([len(TargetName.objects.filter(name=alias)) for _, alias in target_names]) > 0
+def check_for_existing_alias(target_names: List[Tuple[str, str, str]]) -> bool:
+    return sum([len(TargetName.objects.filter(name=alias)) for _, alias, u in target_names]) > 0
 
 
 def check_for_existing_coords(ra: float, dec: float, radius: float, queryset: Dict[str, Any]) -> List[Tuple[str, str]]:
