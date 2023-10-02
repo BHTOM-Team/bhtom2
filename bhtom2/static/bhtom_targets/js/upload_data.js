@@ -47,9 +47,8 @@ function dataProductSelect() {
         observatory.setAttribute("required", true);
         filter.setAttribute("required", true);
         observer.removeAttribute("required");
-        mjd.removeAttribute("required");
-
-        mjd.parentElement.style.display = "none";
+        mjd.setAttribute("required", true);
+        mjd.parentElement.style.display = "block";
         dryRun.parentElement.style.display = "block";
         observatory.parentElement.style.display = "block";
         filter.parentElement.style.display = "block";
