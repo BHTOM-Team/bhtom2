@@ -45,7 +45,7 @@ class CalibrationResultsApiView(APIView):
         files_id = request.data['fileId']
         getPlot = request.data['getPlot']
         results = {}
-        base_path = settings.DATA_FILE_PATH
+        base_path = settings.DATA_PLOT_PATH
         try:
             for file in files_id:
                 instance = Calibration_data.objects.get(dataproduct_id=file)
