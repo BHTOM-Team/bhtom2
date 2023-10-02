@@ -5,6 +5,7 @@ import django_filters
 from bhtom_base.bhtom_targets.models import Target, TargetList
 from bhtom_base.bhtom_targets.utils import cone_search_filter
 
+CLASSIFICATION_TYPES = settings.CLASSIFICATION_TYPES
 
 def filter_for_field(field):
     if field['type'] == 'number':
@@ -59,31 +60,9 @@ def filter_text(queryset, name, value):
 
 
 class TargetFilter(django_filters.FilterSet):
-    #todo delete targetExtra
-    key = django_filters.CharFilter(field_name='targetextra__key', label='Key')
-    value = django_filters.CharFilter(field_name='targetextra__value', label='Value')
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field in settings.EXTRA_FIELDS:
-            new_filter = filter_for_field(field)
-            new_filter.parent = self
-            self.filters[field['name']] = new_filter
-
-    name = django_filters.CharFilter(method='filter_name', label='Name')
 
     def filter_name(self, queryset, name, value):
         return queryset.filter(Q(name__icontains=value) | Q(aliases__name__icontains=value)).distinct()
-
-    cone_search = django_filters.CharFilter(method='filter_cone_search', label='Cone Search',
-                                            help_text='RA, Dec, Search Radius (degrees)')
-
-    target_cone_search = django_filters.CharFilter(method='filter_cone_search', label='Cone Search (Target)',
-                                                   help_text='Target Name, Search Radius (degrees)')
-
-#copied from BHTOM1:
-    ra: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_ra', label='RA')
-    dec: django_filters.RangeFilter = django_filters.NumericRangeFilter(method='filter_dec', label='Dec')
 
     def filter_ra(self, queryset, name, value):
 
@@ -101,6 +80,33 @@ class TargetFilter(django_filters.FilterSet):
             return queryset.filter(Q(dec__gte=value.start))
         elif value.stop is not None:
             return queryset.filter(Q(dec__lte=value.stop))
+
+    def filter_priority(self, queryset, name, value):
+
+        if value.start is not None and value.stop is not None:
+            return queryset.filter(Q(cadence_priority__gte=value.start) & Q(cadence_priority__lte=value.stop))
+        elif value.start is not None:
+            return queryset.filter(Q(cadence_priority__gte=value.start))
+        elif value.stop is not None:
+            return queryset.filter(Q(cadence_priority__lte=value.stop))
+
+    def filter_sunDistance(self, queryset, name, value):
+
+        if value.start is not None and value.stop is not None:
+            return queryset.filter(Q(sun_separation__gte=value.start) & Q(sun_separation__lte=value.stop))
+        elif value.start is not None:
+            return queryset.filter(Q(sun_separation__gte=value.start))
+        elif value.stop is not None:
+            return queryset.filter(Q(sun_separation__lte=value.stop))
+
+    def filter_magLast(self, queryset, name, value):
+
+        if value.start is not None and value.stop is not None:
+            return queryset.filter(Q(mag_last__gte=value.start) & Q(mag_last__lte=value.stop))
+        elif value.start is not None:
+            return queryset.filter(Q(mag_last__gte=value.start))
+        elif value.stop is not None:
+            return queryset.filter(Q(mag_last__lte=value.stop))
 
     def filter_cone_search(self, queryset, name, value):
         """
@@ -135,7 +141,22 @@ class TargetFilter(django_filters.FilterSet):
         else:
             return TargetList.objects.none()
 
-    targetlist__name = django_filters.ModelChoiceFilter(queryset=get_target_list_queryset, label="Target Grouping")
+    name = django_filters.CharFilter(method='filter_name', label='Name')
+
+    cone_search = django_filters.CharFilter(method='filter_cone_search', label='Cone Search',
+                                            help_text='RA, Dec, Search Radius (degrees)')
+
+    target_cone_search = django_filters.CharFilter(method='filter_cone_search', label='Cone Search (Target)',
+                                                   help_text='Target Name, Search Radius (degrees)')
+
+    ra: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_ra', label='RA')
+    dec: django_filters.RangeFilter = django_filters.NumericRangeFilter(method='filter_dec', label='Dec')
+
+    priority: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_priority', label='Priority')
+    sun: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_sunDistance', label='Sun separation')
+    mag: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_magLast', label='Last magnitude')
+
+    targetList__name = django_filters.ModelChoiceFilter(queryset=get_target_list_queryset, label="Target Grouping")
 
     order = django_filters.OrderingFilter(
         fields=['name', 'created', 'modified'],
@@ -148,4 +169,4 @@ class TargetFilter(django_filters.FilterSet):
 
     class Meta:
         model = Target
-        fields = ['type', 'name', 'key', 'value', 'cone_search', 'targetlist__name']
+        fields = ['type', 'name', 'cone_search', 'targetList__name', 'classification']

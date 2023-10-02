@@ -48,18 +48,11 @@ class DataProductUploadForm(forms.Form):
         choices=[v for k, v in settings.DATA_PRODUCT_TYPES.items()],
         initial='photometry',
         widget=forms.RadioSelect(attrs={'onclick': "dataProductSelect();"}),
-        required=True
-    )
-
-    MJD = forms.DecimalField(
-        label="MJD OBS *",
-        widget=forms.NumberInput(attrs={'id': 'mjd', 'disable': 'none'}),
-        required=True
     )
 
     dryRun = forms.BooleanField(
         label='Dry Run (no data will be stored in the database)',
-        required=False
+        required=False,
     )
 
     referrer = forms.CharField(
@@ -78,22 +71,28 @@ class DataProductUploadForm(forms.Form):
 
         super(DataProductUploadForm, self).__init__(*args, **kwargs)
 
+        self.fields['mjd'] = forms.CharField(
+            widget=forms.NumberInput(attrs={'id': 'mjd', 'disable': 'none'}),
+           
+            label="MJD OBS *",
+        )
+
         self.fields['observer'] = forms.CharField(
             initial=user,
-            required=True,
+          
             label='Observer\'s Name *',
         )
 
         self.fields['observatory'] = ObservatoryChoiceField(
             queryset=ObservatoryMatrix.objects.filter(user=user, active_flg=True).order_by('observatory'),
             widget=forms.Select(),
-            required=True
+            
         )
         self.fields['filter'] = forms.ChoiceField(
             choices=[v for v in filter.items()],
             initial="GaiaSP/any",
             widget=forms.Select(),
-            required=True,
+            
             label='Force filter'
         )
 
