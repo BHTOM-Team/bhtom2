@@ -380,14 +380,3 @@ class DataDetailsView(DetailView):
             return HttpResponseRedirect(reverse('bhtom_dataproducts:list'))  # Replace with your desired URL
         return self.render_to_response(context)
 
-class generate_tokens(APIView):
-
-    def get(self, request):
-        users = User.objects.all()  # Replace 'User' with your user model
-        tokens_created = 0
-        for user in users:
-            if not Token.objects.filter(user=user).exists():
-                Token.objects.create(user=user)
-                tokens_created += 1
-
-        return Response({'message': f'{tokens_created} tokens generated successfully.'})

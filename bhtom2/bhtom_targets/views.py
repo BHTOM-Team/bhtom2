@@ -244,7 +244,7 @@ class TargetListView(SingleTableMixin, PermissionListMixin, FilterView):
         return context
 
 
-class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
+class TargetUpdateView(LoginRequiredMixin, UpdateView):
     """
     View that handles updating a target. Requires authorization.
     """
