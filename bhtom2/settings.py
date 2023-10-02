@@ -54,6 +54,8 @@ GRAYLOG_HOST = secret.get('GRAYLOG_HOST', '')
 GRAYLOG_PORT = int(secret.get('GRAYLOG_PORT', 12201))
 DATA_FILE_PATH = secret.get('DATA_FILE_PATH', './data/')
 DATA_PLOT_PATH = secret.get('DATA_PLOT_PATH', '../plots/')
+DATA_TARGET_PATH = secret.get('DATA_TARGET_PATH', '../targets/')
+
 
 CSRF_TRUSTED_ORIGINS = [] + list(secret.get("CSRF_TRUSTED_ORIGINS", 'localhost').split(','))
 
