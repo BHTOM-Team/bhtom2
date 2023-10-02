@@ -65,7 +65,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         dry_run = form.cleaned_data['dryRun']
         comment = form.cleaned_data['comment']
         observer = form.cleaned_data['observer']
-        #group = form.cleaned_data['group']
+        # group = form.cleaned_data['group']
         group = None
         user = self.request.user
         files = self.request.FILES.getlist('files')
@@ -113,7 +113,8 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         }
         # Make a POST request to upload-service with the extracted data
         try:
-            response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/',data=post_data, files=data_product_files ,headers=headers)
+            response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/', data=post_data, files=data_product_files,
+                                     headers=headers)
         except Exception as e:
             logger.error("Error in connect to upload service: " + str(e))
             messages.error(self.request, 'Service is unavailable, please retry again later.')
@@ -155,7 +156,7 @@ class FitsUploadAPIView(APIView):
         # Make a POST request to upload-service with the extracted data
         try:
             response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/', data=post_data, files=files_data,
-                                 headers=headers)
+                                     headers=headers)
         except Exception as e:
             logger.error("Error in connect to upload service: " + str(e))
             return HttpResponse("Internal error", status=500)
@@ -303,7 +304,7 @@ class photometry_download(LoginRequiredMixin, View):
                 return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
         try:
-            address = settings.BASE_DIR + '/data/' + format(dataProduct.photometry_data)
+            address = settings.DATA_PLOT_PATH + '/plots' + format(dataProduct.photometry_data)
 
             logger.debug('Photometry download address: ' + address)
             open(address, 'r')
@@ -318,7 +319,6 @@ class photometry_download(LoginRequiredMixin, View):
                 return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
 
-
 class DataDetailsView(DetailView):
     template_name = 'bhtom_dataproducts/dataproduct_details.html'
     model = DataProduct
@@ -327,7 +327,7 @@ class DataDetailsView(DetailView):
         try:
             context = {}
             data_product = DataProduct.objects.get(id=kwargs['pk'])
-            context['object']= data_product
+            context['object'] = data_product
             logger.error(data_product.target.id)
             target = Target.objects.get(id=data_product.target.id)
             context['target'] = target
@@ -379,4 +379,3 @@ class DataDetailsView(DetailView):
         except Exception as e:
             return HttpResponseRedirect(reverse('bhtom_dataproducts:list'))  # Replace with your desired URL
         return self.render_to_response(context)
-

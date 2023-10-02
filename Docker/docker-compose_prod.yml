@@ -38,7 +38,8 @@ services:
     volumes:
       - data_store:/data
       - log:/log
-      - plots:/plots
+      - plots:/data/plots
+      - targets:/data/targets
     ports:
       - "7010:8000"
     depends_on:
@@ -310,6 +311,12 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/plots
+  targets:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/targets
 networks:
   bhtom_network:
     driver: bridge
