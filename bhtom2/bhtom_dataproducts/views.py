@@ -106,7 +106,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         }
         token = Token.objects.get(user_id=user.id).key
 
-        headers = { # TODO !!! trzeba dodac Token do kazdego Api albo w kazdym bez Token
+        headers = {
             'Authorization': 'Token ' + token,
             'correlation_id': get_guid()
         }
@@ -333,7 +333,7 @@ class DataDetailsView(DetailView):
 
             if data_product.fits_data:
                 ccdphot = CCDPhotJob.objects.get(dataProduct=data_product.id)
-                context['fits_data'] = data_product.data.split('/')[-1]
+                context['fits_data'] = data_product.data.name
                 context['ccdphot'] = ccdphot
 
             if data_product.photometry_data:
