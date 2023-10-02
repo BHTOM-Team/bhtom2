@@ -37,6 +37,7 @@ services:
     restart: on-failure
     volumes:
       - data_store:/data
+      - log:/log
     ports:
       - "7010:8000"
     depends_on:
@@ -296,7 +297,12 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/graylog
-
+  log:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/log
 networks:
   bhtom_network:
     driver: bridge
