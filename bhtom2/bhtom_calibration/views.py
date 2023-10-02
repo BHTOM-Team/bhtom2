@@ -56,7 +56,7 @@ class CalibrationResultsApiView(APIView):
                     dp = DataProduct.objects.get(id=file)
                     target = dp.target
                     if target.photometry_plot:
-                        with open(base_path + 'plots' + str(target.photometry_plot), 'r') as json_file:
+                        with open(base_path + str(target.photometry_plot), 'r') as json_file:
                             plot = json.load(json_file)
                             results[instance.id] = {"calib-res":  data["fields"] ,"plot": plot}
                     else:

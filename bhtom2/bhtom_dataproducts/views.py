@@ -304,7 +304,7 @@ class photometry_download(LoginRequiredMixin, View):
                 return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
         try:
-            address = settings.DATA_PLOT_PATH + '/plots' + format(dataProduct.photometry_data)
+            address = settings.DATA_PLOT_PATH + format(dataProduct.photometry_data)
 
             logger.debug('Photometry download address: ' + address)
             open(address, 'r')

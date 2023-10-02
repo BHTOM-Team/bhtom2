@@ -323,7 +323,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
     if target.photometry_plot is not None and target.photometry_plot != '':
         base_path = settings.DATA_PLOT_PATH
         try:
-            fig = plotly.io.read_json(base_path + 'plots' + str(target.photometry_plot))
+            fig = plotly.io.read_json(base_path + str(target.photometry_plot))
             return {
                 'target': target,
                 'plot': offline.plot(fig, output_type='div', show_link=False)
@@ -375,7 +375,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
     if target.photometry_icon_plot is not None and target.photometry_icon_plot != '':
         base_path = settings.DATA_PLOT_PATH
         try:
-            fig = plotly.io.read_json(base_path + 'plots' + str(target.photometry_icon_plot))
+            fig = plotly.io.read_json(base_path  + str(target.photometry_icon_plot))
             return {
                 'target': target,
                 'plot': offline.plot(fig, output_type='div', show_link=False)
@@ -405,7 +405,7 @@ def spectroscopy_for_target(context, target, dataproduct=None):
     if target.spectroscopy_plot is not None and target.spectroscopy_plot != '':
         base_path = settings.DATA_PLOT_PATH
         try:
-            fig = plotly.io.read_json(base_path + 'plots' + str(target.spectroscopy_plot))
+            fig = plotly.io.read_json(base_path + str(target.spectroscopy_plot))
             return {
                 'target': target,
                 'plot': offline.plot(fig, output_type='div', show_link=False)
