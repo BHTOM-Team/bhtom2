@@ -51,9 +51,7 @@ curl -X 'POST' \
 # 2. PHOTOMETRY UPLOAD API
 
 ### Description
-This API  facilitates batch file uploads to the **BHTOM system** using the `/upload` API. It offers a command-line interface for uploading files along with their associated metadata.
-
-The script is located in the `documentation_scripts` folder.
+This API facilitates programmable batch file uploads to the **BHTOM system**. It offers a command-line interface for uploading files along with their associated meta data.
 
 <!-- Please note, an authentication `TOKEN` is required to use this script. -->
 
@@ -64,43 +62,48 @@ The script is located in the `documentation_scripts` folder.
 
 ### Usage
 
+The ready-to-use script is located in the `documentation_scripts` folder.
+
 ```bash
 python upload_files_script.py  <token> <target> <data_product_type> <files> [--match_dist <match_dist>] [--comment <comment>] [--dry_run] [--no_plot] [--mjd <mjd>] [--group <group>] [--observer <observer>]
 ```
 
-## Arguments
+### Arguments
 
-- `<token>`: Your authentication token.
-- `<target>`: Target destination for the uploaded files.
+- `<token>`: Your authentication token
+- `<target>`: Target destination for the uploaded files
 - `<data_product_type>`: Type of data product: `fits_file`, `photometry` (instrumental in SExtractor format), `photometry_nondetection`, `spectroscopy`
-- `<files>`: Provide a comma-separated list of files that you wish to upload.
-<!-- TODO: LW: check photometry vs SExtractor, we need both -->
-## Optional Arguments
+- `<files>`: Comma-separated list of files to be uploaded
+<!-- TODO: LW: check photometry vs SExtractor, we need both: WILL BE ADDED -->
+### Optional Arguments
 
 <!-- - `--match_dist <match_dist>`: This sets the matching distance (float) for astrometric cross-match in the standardisation procedure.  -->
 <!-- LW: I hid the match_dist as we set it fixed -->
-- `--comment <comment>`: Add any additional comments here.
-- `--dry_run`: Enable this to run the script in Dry Run (test) mode. If true, the data will not be stored in the database. The default is false.
-- `--no_plot`: Enable this to disable plot generation. The default setting is false.
+- `--comment <comment>`: comment to your upload
+- `--dry_run`: if true, the script will be run in Dry Run (test) mode. The data will processed but will not be stored in the database. The default is false.
+- `--no_plot`: if true, no calibration plot will be generated. The default setting is false.
 - `--mjd <mjd>`: Modified Julian Date (float) [note MJD=JD-2400000.5]
-- `--observer <observer>`: Enter the name of the observer.
+<!-- - `--group <group>`: target group where to add -->
+<!-- TODO: what groups are here? -->
+- `--observer <observer>`: name of the observer
 
 
 ### Example Usage
 
 ```bash
-python upload_files_script.py 123token456 Gaia22bpl photometry 
+python upload_files_script.py 123token456 Gaia22bpl photometry file1.cat,file2.cat --mjd 51234.123
 ```
 
 ### Advanced Usage
 
 ```bash
-python upload_files_script.py abc123 target2 type2 file3.txt --match_dist 0.5 --comment "Example comment" --dry_run --no_plot --mjd 2459371.5 --group "example_group" --observer "John Doe"
+# python upload_files_script.py abc123 target2 type2 file3.txt --match_dist 0.5 --comment "Example comment" --dry_run --no_plot --mjd 59371.5 --group "example_group" --observer "John Doe"
+python upload_files_script.py abc123 target2 type2 file3.txt --comment "my batch upload on 2023-10-02" --dry_run --no_plot --mjd 59371.5 --observer "John Doe"
 ```
 
 ### Response
 
-The script will display the response from the API, In response you will get list of uploaded files with id of each file, so you can later get calibrations result by ids.
+The script will display the response from the API with a list of uploaded files with id of each file, so you can check the calibrations result by their ids.
 
 ### Dependencies
 
@@ -108,16 +111,14 @@ The script will display the response from the API, In response you will get list
 - The `requests` library (install with `pip install requests`)
 
 
-
-
 # CALIBRATIONS API
 
-# 1. /calibration/get-catalogs/
+### Description
 
-This Python script allows you to retrieve a list of catalogs from the BHTOM2 system using the `get_catalogs` API. It provides a command-line interface for making GET requests with proper authorization.
+<!-- This Python script allows you to retrieve a list of catalogues from the BHTOM2 system using the `get_catalogs` API. It provides a command-line interface for making GET requests with proper authorization. -->
 
-TOKEN is requaired!
-
+<!-- TOKEN is required! -->
+<!-- 
 ### Endpoint
 
 - **Method**: GET
@@ -148,15 +149,17 @@ The requests library (install with pip install requests)
 
 Certainly! Here's the documentation for the `curl` command you provided in Markdown format:
 
----
+--- -->
 
 
-# 2. /calibration/get-calibration-res/
+### Description
+ <!-- /calibration/get-calibration-res/ -->
 
-This API endpoint allows users to retrieve calibration results.
-TOKEN is requaired!
+This API endpoint allows users to retrieve calibration results for previously uploaded observations.
 
-## Request
+<!-- TOKEN is required! -->
+
+### Request
 
 - **Method**: POST
 - **URL**: `/calibration/get-calibration-res`
@@ -170,8 +173,8 @@ TOKEN is requaired!
 
 ### Request Body
 
-- `fileId` (array): Array containing file IDs for calibration.
-- `getPlot` (boolean): Flag to indicate whether to retrieve the calibration plot.
+- `fileId` (array): Array containing file IDs for calibration
+- `getPlot` (boolean): Flag to indicate whether to retrieve the calibration plot
 
 ### Example Request
 
@@ -192,25 +195,24 @@ curl -X 'POST' \
 ```bash
     python get_calib_res.py "yourToken" 1 2 3 --get_plot
 ```
-## Response
+### Response
 
     Response is the list with calibration result and plot(if getPlot=True) for each file id 
 
 
-
 # OBSERVATORY API
 
-# 1. /observatory/getObservatoryList/
+# 1. Observatory List
+<!-- /observatory/getObservatoryList/ -->
     
-    This API endpoint allows users get observaatory list, all parametrs are optional.
-    TOKEN is requaired!
+    This API endpoint allows users to get the list of observatories registered in the system.
 
-## Request
-TOKEN is requaired!
+    <!-- TOKEN is requaired! -->
+
+### Request
+
 - **Method**: POST
 - **URL**: `/observatory/getObservatoryList/`
-
-## Request Body (Optional)
 
 ### Parameters
 
@@ -236,7 +238,7 @@ TOKEN is requaired!
 }
 ```
 
-## Request Header
+### Request Header
 
 The request header should include the following:
 
@@ -262,16 +264,17 @@ curl -X 'POST' \
 }'
 ```
 
-## Response
-    List of Observatories
+### Response
+    List of registered observatories
 
 
 
-# 2. /observatory/addFavouriteObservatory/
-This API endpoint allows users to add observatory to favoutire list. Users must provide the observatory name, and they can include an optional comment.
-TOKEN is requaired!
+# 2. Add Favourite Observatory
+<!-- /observatory/addFavouriteObservatory/ -->
 
-## Request
+This API endpoint allows users to add observatory to their favourite list. Users must provide the observatory name, and can include an optional comment.
+
+### Request
 
 - **Method**: POST
 - **URL**: `/api/create-observatory-matrix/`
@@ -308,19 +311,17 @@ curl -X POST \
   }'
 ```
 
-# 3.  /createObservatory/
+# 3. Create Observatory 
+<!-- /createObservatory/ -->
 
-    This document provides information about the Observatory API, which allows you to create observatories. Observatories are locations with various properties for astronomical observations. This API supports creating observatories with the specified attributes.
-    
-    TOKEN is requaired!
+    This API allows users to create an observatory. 
 
-
-## Request
+### Request
 
 - **Method**: POST
 - **URL**: `/observatory/create/`
 
-## Request Parameters
+### Request Parameters
 
 The request to create an observatory should include the following parameters in the request body:
 
@@ -354,7 +355,7 @@ The request to create an observatory should include the following parameters in 
 }
 ```
 
-## Example Requests
+### Example Requests
 
 You can make requests to create observatories using the `curl` command or a Python script.
 
@@ -382,18 +383,16 @@ You can use a Python script to create observatories:
 python create_observatory.py --name "My Observatory" --lon 45.12345 --lat -120.67890 --calibration_flg --example_file "observatory_example.txt" --comment "This observatory is for calibration purposes" --token <yourToken> 
 ```
 
-# 4.  /observatory/update/
+# 4. Update Observatory 
+<!-- /observatory/update/ -->
 
-    This document provides information about the Update Observatory API, which allows users to update observatory information. Observatories are locations with various properties for astronomical observations. This API supports updating observatory attributes.
-
-    TOKEN is requaired!
-## Request
+    This API allows users to update observatory information. 
+### Request
 
 - **Method**: POST
 - **URL**: `/observatory/update/`
 
-
-## Request Parameters
+### Request Parameters
 
 The request to update an observatory should include the following parameters in the request body:
 
@@ -427,7 +426,7 @@ The request to update an observatory should include the following parameters in 
 }
 ```
 
-## Example Requests
+### Example Requests
 
 You can make requests to update observatory information using the `curl` command or a Python script.
 
@@ -456,10 +455,10 @@ You can use a Python script to update observatory information:
 python create_observatory.py --name "My Observatory" --lon 45.12345 --lat -120.67890 --calibration_flg --example_file "observatory_example.txt" --comment "This observatory is for calibration purposes" --token <yourToken> 
 ```
 
-# 5. /observatory/getFavouriteObservatory/
+# 5. Get Favourite Observatory
+<!-- /observatory/getFavouriteObservatory/ -->
 
-    This document provides information about the Observatory API, which allows you to get favourite observatory.
-    TOKEN is requaired!
+    This API allows obtaining a favourite observatory.
 
 ## Request
 
@@ -488,7 +487,7 @@ The request to retrieve observatory matrix data can include the following parame
 }
 ```
 
-## Example Request
+### Example Request
 
 You can make a POST request to retrieve observatory matrix data using the `curl` command or a Python script.
 
@@ -516,17 +515,17 @@ You can use a Python script to retrieve observatory matrix data:
 python get_observatory_matrix.py --user "JohnDoe" --active_flg true --observatory "My Observatory" --created_start "2023-01-01T00:00:00Z" --created_end "2023-12-31T23:59:59Z" --token <yourToken>
 ```
 
-# 6. /observatory/deleteFavouriteObservatory/
+# 6. Delete Favourite Observatory
+<!-- /observatory/deleteFavouriteObservatory/ -->
 
-    This document provides information about the Delete Favourite Observatory API, which allows users to delete favourite observatory records based on the observatory name.
-    TOKEN is requaired!
-## Request
+    This API allows users to delete favourite observatory records based on the observatory name from their list.
+### Request
 
 - **Method**: DELETE
 - **URL**: `/observatory/deleteFavouriteObservatory/`
 
 
-## Request Parameters
+### Request Parameters
 
 The request to delete an observatory matrix record should include the following parameter in the request body:
 
@@ -540,7 +539,7 @@ The request to delete an observatory matrix record should include the following 
 }
 ```
 
-## Example Request
+### Example Request
 
 You can make a DELETE request to delete an observatory matrix record using the `curl` command or a Python script.
 
@@ -566,17 +565,17 @@ python delete_observatory_matrix.py --observatory "My Observatory" --token <your
 
 # Targets API
 
-## 1. /targets/createTarget/
+### 1. Create Target 
+<!-- /targets/createTarget/ -->
 
-  This document provides information about the Create Target API, which allows users to create a new target.
-  TOKEN is requaired!
+  This API allows users to create targets.
 
-## Request
+### Request
 
 - **Method**: POST
 - **URL**: `/targets/createTarget/`
 
-## Request Parameters
+### Request Parameters
 
 The request to create a new target should include the following parameters in the request body:
 
@@ -604,7 +603,7 @@ The request to create a new target should include the following parameters in th
 }
 ```
 
-## Example Request
+### Example Request
 
 You can make a POST request to create a new target using the `curl` command or a Python script.
 
@@ -635,12 +634,12 @@ python create_target.py --name "My Target" --ra 123.456 --dec -45.678 --epoch "J
 ```
 
 
-# 2. /targets/updateTarget/{name}/
+# 2. Update Target
+<!-- /targets/updateTarget/{name}/ -->
 
-This document provides information about the Update Target API, which allows users to update an existing target with new information.
-TOKEN is requaired!
+This API allows users to update an existing target with new information.
 
-## Request
+### Request
 
 - **Method**: PATCH
 - **URL**: `/targets/updateTarget/{name}/`
@@ -648,7 +647,7 @@ TOKEN is requaired!
 Here, `{name}` is the name or identifier of the target you want to update.
 
 
-## Request Parameters
+### Request Parameters
 
 The request to update a target should include the following parameters in the request body:
 
@@ -675,7 +674,7 @@ The request to update a target should include the following parameters in the re
 }
 ```
 
-## Example Request
+### Example Request
 
 You can make a PATCH request to update an existing target using the `curl` command or a Python script.
 
@@ -707,17 +706,18 @@ You can use a Python script to update an existing target with Token Authenticati
   python update_target.py "My Target" --ra 135.789 --dec -30.123 --epoch "J2023" --classification "Galaxy" --discovery_date "2022-12-15T08:30:00Z" --importance 3 --cadence 12 --token <yourToken> 
 ```
 
-# 3. targets/getTargetList/
+# 3. Target List
+<!-- targets/getTargetList/ -->
 
-This document provides information about the Get Target List API, which allows users to retrieve a list of targets based on specified criteria.  This API supports filtering targets by name, Right Ascension (RA) range, and Declination (Dec) range.
-  TOKEN is requaired!
+This API allows users to obtain a list of targets. 
+This API supports filtering targets by name, Right Ascension (RA) range, and Declination (Dec) range.
 
-## Request
+### Request
 
 - **Method**: GET
 - **URL**: `/targets/getTargetList/`
 
-## Request Parameters
+### Request Parameters
 
 The request to retrieve the target list may include the following query parameters:
 
@@ -726,8 +726,8 @@ The request to retrieve the target list may include the following query paramete
 - `raMax` (number, optional): The maximum Right Ascension (RA) value, represented as a floating-point number.
 - `decMin` (number, optional): The minimum Declination (Dec) value, represented as a floating-point number.
 - `decMax` (number, optional): The maximum Declination (Dec) value, represented as a floating-point number.
-
-## Example Request
+<!-- TODO: need more fields!! -->
+### Example Request
 
 You can make a GET request to retrieve a list of targets based on the specified criteria using the `curl` command or a web browser.
 
@@ -742,12 +742,12 @@ curl -X GET \
 Replace `<yourToken>` with your authentication token and adjust the URL as needed to specify your search criteria.
 
 
-# 4. targets/deleteTarget/
+# 4. Delete Target
+<!-- targets/deleteTarget/ -->
 
-This document provides information about the Delete Target API, which allows users to delete a target by specifying its name or identifier. This API supports deleting a target by providing its name.
-  TOKEN is requaired!
+This API supports deleting a target by providing its name.
 
-## Request
+### Request
 
 The endpoint for retrieving a list of targets based on criteria is:
 
@@ -756,7 +756,7 @@ The endpoint for retrieving a list of targets based on criteria is:
 - **URL**: `/targets/deleteTarget/`
 
 
-## Request Parameters
+### Request Parameters
 
 The request to delete a target should include the following parameters in the request body:
 
@@ -770,7 +770,7 @@ The request to delete a target should include the following parameters in the re
 }
 ```
 
-## Example Request
+### Example Request
 
 You can make a DELETE request to delete a target using the `curl` command or a web browser.
 
@@ -788,73 +788,16 @@ curl -X DELETE \
 
 Replace `<yourToken>` with your authentication token and `"MyTarget"` with the name or identifier of the target you want to delete.
 
-# 5. /targets/cleanTargetListCache/
+# 5. Targets: get plots
 
-This document provides information about the Clean Target List Cache API, which allows authorized users to clear the cache for the target list. Caching is used to improve the performance of retrieving target lists, and this API provides a way to manually refresh the cached data.
+<!-- targets/get-plots/ -->
+This API allows users to obtain the visual list of targets. Filtering criteria can be provided.
 
-## Request
-
-The endpoint for retrieving a list of targets based on criteria is:
-
-- **Method**: POST
-- **URL**: `/targets/cleanTargetListCache/`
-
-To clear the target list cache, you should make a POST request to the above endpoint with the following requirements:
-
-- Token Authentication: You must include a valid authentication token in the request headers.
-- User Authorization: Only users with superuser privileges are authorized to clean the cache.
-
-### Example Request
-
-You can make a POST request to clean the target list cache using the `curl` command or any HTTP client that supports POST requests.
-
-#### Using `curl`
-
-```bash
-curl -X POST \
-  -H "Authorization: Token <yourToken>" \
-  "url/targets/cleanTargetListCache/"
-```
-
-Replace `<yourToken>` with your valid authentication token.
-
-
-# 6. targets/cleanTargetDetailsCache/
-
-This document provides information about the Clean Target Details Cache API, which allows authorized users to clear the cache for target details. Caching is used to improve the performance of retrieving target details, and this API provides a way to manually refresh the cached data.
-
-## Request
-- **Method**: POST
-- **URL**: `targets/cleanTargetDetailsCache/`
-
-To clear the target details cache, you should make a POST request to the above endpoint with the following requirements:
-
-- Token Authentication: You must include a valid authentication token in the request headers.
-- User Authorization: Only users with superuser privileges are authorized to clean the cache.
-
-### Example Request
-
-You can make a POST request to clean the target details cache using the `curl` command or any HTTP client that supports POST requests.
-
-#### Using `curl`
-
-```bash
-curl -X POST \
-  -H "Authorization: Token <yourToken>" \
-  "url/targets/cleanTargetDetailsCache/"
-```
-
-Replace `<yourToken>` with your valid authentication token.
-
-
-# 7. targets/get-plots/
-This document provides information about the Get Plots API, which allows users to retrieve plots or visual representations associated with specific targets. Plots provide visual insights into various aspects of the target, such as its position, characteristics, or observational data.
-
-## Request
+### Request
 - **Method**: POST
 - **URL**: `targets/get-plots/`
 
-## Request Parameters
+### Request Parameters
 
 The request to retrieve plots should include the following parameters in the request body:
 
@@ -868,7 +811,7 @@ The request to retrieve plots should include the following parameters in the req
 }
 ```
 
-## Request Headers
+### Request Headers
 
 To authorize the request, you should include Token Authentication by providing a valid authentication token in the request headers.
 
@@ -887,3 +830,64 @@ url/targets/get-plots/
 ```
 
 Replace `<yourToken>` with your valid authentication token and adjust the target names in the request body as needed.
+
+# 6. Clean Target list cache (ADMINs only)
+<!-- /targets/cleanTargetListCache/ -->
+
+This document provides information about the Clean Target List Cache API, which allows authorized users to clear the cache for the target list. Caching is used to improve the performance of retrieving target lists, and this API provides a way to manually refresh the cached data.
+
+### Request
+
+The endpoint for retrieving a list of targets based on criteria is:
+
+- **Method**: POST
+- **URL**: `/targets/cleanTargetListCache/`
+
+To clear the target list cache, you should make a POST request to the above endpoint with the following requirements:
+
+- Token Authentication: You must include a valid authentication token in the request headers.
+- User Authorization: Only users with superuser privileges are authorized to clean the cache.
+
+### Example Request
+
+You can make a POST request to clean the target list cache using the `curl` command or any HTTP client that supports POST requests.
+
+### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Authorization: Token <yourToken>" \
+  "url/targets/cleanTargetListCache/"
+```
+
+Replace `<yourToken>` with your valid authentication token.
+
+
+# 7. Clean Target Details Cache (ADMINs only)
+<!-- targets/cleanTargetDetailsCache/ -->
+
+This document provides information about the Clean Target Details Cache API, which allows authorized users to clear the cache for target details. Caching is used to improve the performance of retrieving target details, and this API provides a way to manually refresh the cached data.
+
+### Request
+- **Method**: POST
+- **URL**: `targets/cleanTargetDetailsCache/`
+
+To clear the target details cache, you should make a POST request to the above endpoint with the following requirements:
+
+- Token Authentication: You must include a valid authentication token in the request headers.
+- User Authorization: Only users with superuser privileges are authorized to clean the cache.
+
+### Example Request
+
+You can make a POST request to clean the target details cache using the `curl` command or any HTTP client that supports POST requests.
+
+### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Authorization: Token <yourToken>" \
+  "url/targets/cleanTargetDetailsCache/"
+```
+
+Replace `<yourToken>` with your valid authentication token.
+
