@@ -23,11 +23,9 @@ function dataProductSelect() {
         dryRun.parentElement.style.display = "block";
         observatory.parentElement.style.display = "block";
         filter.parentElement.style.display = "block";
-        observer.parentElement.style.display =  "block";
-
-    }
+        observer.parentElement.style.display = "block";
+    } 
     if (photometry_non_detaction === true) {
-
         mjd.setAttribute("required", true);
         observatory.setAttribute("required", true);
         filter.setAttribute("required", true);
@@ -37,9 +35,7 @@ function dataProductSelect() {
         dryRun.parentElement.style.display = "block";
         observatory.parentElement.style.display = "block";
         filter.parentElement.style.display = "block";
-        observer.parentElement.style.display =  "block";
-
-
+        observer.parentElement.style.display = "block";
     }
 
     if (fits_file === true) {
@@ -47,23 +43,24 @@ function dataProductSelect() {
         observatory.setAttribute("required", true);
         filter.setAttribute("required", true);
         observer.removeAttribute("required");
-        mjd.setAttribute("required", true);
-        mjd.parentElement.style.display = "block";
+        mjd.removeAttribute("required");
+
+        mjd.parentElement.style.display = "none";
         dryRun.parentElement.style.display = "block";
         observatory.parentElement.style.display = "block";
         filter.parentElement.style.display = "block";
         observer.parentElement.style.display = "none";
-
     }
 
     if (spectroscopy === true) {
-
-        mjd.removeAttribute("required");
+        observer.setAttribute("required",true);
         observatory.removeAttribute("required");
         filter.removeAttribute("required");
-        observer.setAttribute("required", true);
+        mjd.removeAttribute("required");
+        dryRun.removeAttribute("required");
 
         mjd.parentElement.style.display = "none";
+        dryRun.parentElement.style.display = "none";
         observatory.parentElement.style.display = "none";
         filter.parentElement.style.display = "none";
         observer.parentElement.style.display = "block";
@@ -92,3 +89,4 @@ function dataProductSelect() {
     // }
 
 }
+

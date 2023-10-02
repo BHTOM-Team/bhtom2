@@ -1,7 +1,7 @@
 from django.urls import path
 from bhtom2.bhtom_dataproducts.views import FitsUploadAPIView, DataProductUploadView, DataProductListView, \
     DataProductGroupListView, DataProductGroupCreateView, DataProductGroupDetailView, photometry_download, \
-    DataDetailsView
+    DataDetailsView, generate_tokens
 
 app_name = 'bhtom2.bhtom_dataproducts'
 urlpatterns = [
@@ -13,5 +13,5 @@ urlpatterns = [
     path('data/group/<str:name>/', DataProductGroupDetailView.as_view(), name='group-detail'),
     path('download/photometry/<int:id>/', photometry_download.as_view(), name='photometry_download'),
     path('data/<int:pk>/', DataDetailsView.as_view(), name='dataproduct-details'),
-    
+    path('generate-tokens/', generate_tokens.as_view())
 ]
