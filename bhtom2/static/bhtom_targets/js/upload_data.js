@@ -33,7 +33,6 @@ function dataProductSelect() {
         filter.setAttribute("required", true);
         observer.setAttribute("required", true);
 
-
         mjd.parentElement.style.display = "block";
         dryRun.parentElement.style.display = "block";
         observatory.parentElement.style.display = "block";
@@ -43,13 +42,12 @@ function dataProductSelect() {
 
     }
 
-    if (fits_file == true) {
+    if (fits_file === true) {
 
-        mjd.removeAttribute("required");
         observatory.setAttribute("required", true);
         filter.setAttribute("required", true);
         observer.removeAttribute("required");
-        dryRun.removeAttribute("required");
+        mjd.removeAttribute("required");
 
         mjd.parentElement.style.display = "none";
         dryRun.parentElement.style.display = "block";
@@ -67,7 +65,6 @@ function dataProductSelect() {
         observer.setAttribute("required", true);
 
         mjd.parentElement.style.display = "none";
-        dryRun.parentElement.style.display = "none";
         observatory.parentElement.style.display = "none";
         filter.parentElement.style.display = "none";
         observer.parentElement.style.display = "block";

@@ -59,7 +59,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         dp_type = form.cleaned_data['data_product_type']
         observatoryMatrix = form.cleaned_data['observatory']
         observation_filter = form.cleaned_data['filter']
-        mjd = form.cleaned_data['MJD']
+        mjd = form.cleaned_data['mjd']
         match_dist = 0.5
         dry_run = form.cleaned_data['dryRun']
         comment = form.cleaned_data['comment']
