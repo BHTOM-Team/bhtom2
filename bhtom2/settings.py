@@ -53,6 +53,7 @@ ADMIN_EMAIL = secret.get('ADMIN_EMAIL', '')
 GRAYLOG_HOST = secret.get('GRAYLOG_HOST', '')
 GRAYLOG_PORT = int(secret.get('GRAYLOG_PORT', 12201))
 DATA_FILE_PATH = secret.get('DATA_FILE_PATH', './data/')
+DATA_PLOT_PATH = secret.get('DATA_PLOT_PATH', '../plots/')
 
 CSRF_TRUSTED_ORIGINS = [] + list(secret.get("CSRF_TRUSTED_ORIGINS", 'localhost').split(','))
 
