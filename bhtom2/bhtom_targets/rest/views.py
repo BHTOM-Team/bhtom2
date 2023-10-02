@@ -218,7 +218,7 @@ class GetPlotsApiView(views.APIView):
                 
                 target = Target.objects.get(name=target_name)
                 if target.photometry_plot:
-                    with open(base_path + 'plots' + str(target.data), 'r') as json_file:
+                    with open(base_path + 'plots' + str(target.photometry_plot), 'r') as json_file:
                         plot = json.load(json_file)
                     results[target.name] = plot
                 else:
