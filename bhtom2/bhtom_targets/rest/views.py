@@ -213,7 +213,7 @@ class GetPlotsApiView(views.APIView):
         targetNames = request.data['targetNames']
         results = {}
         try:
-            base_path = settings.DATA_FILE_PATH
+            base_path = settings.DATA_PLOT_PATH
             for target_name in targetNames:
                 
                 target = Target.objects.get(name=target_name)

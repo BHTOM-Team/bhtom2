@@ -352,7 +352,7 @@ class DataDetailsView(DetailView):
 
                     if calibration.calibration_plot:
                         try:
-                            with open(settings.DATA_FILE_PATH + calibration.calibration_plot, "rb") as image_file:
+                            with open(settings.DATA_PLOT_PATH + calibration.calibration_plot, "rb") as image_file:
                                 encoded_string = base64.b64encode(image_file.read())
                                 context['cpcs_plot'] = encoded_string.decode("utf-8")
                         except IOError as e:

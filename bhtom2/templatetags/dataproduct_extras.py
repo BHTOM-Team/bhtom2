@@ -321,7 +321,7 @@ def upload_dataproduct(context, obj):
 def photometry_for_target(context, target, width=1000, height=600, background=None, label_color=None, grid=True):
     fig = None
     if target.photometry_plot is not None and target.photometry_plot != '':
-        base_path = settings.DATA_FILE_PATH
+        base_path = settings.DATA_PLOT_PATH
         try:
             fig = plotly.io.read_json(base_path + str(target.photometry_plot))
             return {
@@ -373,7 +373,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
     """
     fig = None
     if target.photometry_icon_plot is not None and target.photometry_icon_plot != '':
-        base_path = settings.DATA_FILE_PATH
+        base_path = settings.DATA_PLOT_PATH
         try:
             fig = plotly.io.read_json(base_path + str(target.photometry_icon_plot))
             return {
@@ -403,7 +403,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
 def spectroscopy_for_target(context, target, dataproduct=None):
     fig = None
     if target.spectroscopy_plot is not None and target.spectroscopy_plot != '':
-        base_path = settings.DATA_FILE_PATH
+        base_path = settings.DATA_PLOT_PATH
         try:
             fig = plotly.io.read_json(base_path + str(target.spectroscopy_plot))
             return {
