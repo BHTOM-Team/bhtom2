@@ -33,7 +33,7 @@ secret = dotenv_values(os.path.join(BASE_DIR, 'bhtom2/.bhtom.env'))
 SECRET_KEY = secret.get("SECRET_KEY", '')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = bool(int(secret.get("DEBUG", False)))
 
 ALLOWED_HOSTS = [] + list(secret.get("ALLOWED_HOSTS", 'localhost').split(','))
 SITE_ID = int(secret.get("SITE_ID", 1))
@@ -53,6 +53,7 @@ ADMIN_EMAIL = secret.get('ADMIN_EMAIL', '')
 GRAYLOG_HOST = secret.get('GRAYLOG_HOST', '')
 GRAYLOG_PORT = int(secret.get('GRAYLOG_PORT', 12201))
 DATA_FILE_PATH = secret.get('DATA_FILE_PATH', './data/')
+DATA_PLOT_PATH = secret.get('DATA_PLOT_PATH', '../plots/')
 
 CSRF_TRUSTED_ORIGINS = [] + list(secret.get("CSRF_TRUSTED_ORIGINS", 'localhost').split(','))
 
