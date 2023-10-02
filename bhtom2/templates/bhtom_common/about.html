@@ -1,29 +1,46 @@
 {% extends 'bhtom_common/base.html' %}
 {% load static targets_extras observation_extras dataproduct_extras bhtom_common_extras %}
-{% block title %}Home{% endblock %}
+{% block title %}About BHTOM{% endblock %}
 {% block content %}
+{% load static %}
+
 <div class="row">
+    <p>Welcome to <strong>BLACK HOLE TOM</strong> - your comprehensive Target Observation Manager.</p>
 
-    <p>Welcome to <strong>BHTOM</strong> - your comprehensive Target Observation Manager.</p>
+    <div>
+        <h2>What is BHTOM?</h2>
+        <p><strong>BHTOM</strong> stands for Black Hole Target Observation Manager. It's a state-of-the-art web server designed to coordinate a network of telescopes, manage astronomical observations, and process the data obtained from these observations.</p>
+        <p>Our platform serves as a one-stop solution for astronomers and researchers around the globe, facilitating seamless coordination and efficient data management.</p>
+    </div>
 
-    <h2>What is BHTOM?</h2>
-    <p><strong>BHTOM</strong> stands for Black Hole Target Observation Manager. It's a state-of-the-art web server designed to coordinate a network of telescopes, manage astronomical observations, and process the data obtained from these observations.</p>
-    <p>Our platform serves as a one-stop solution for astronomers and researchers around the globe, facilitating seamless coordination and efficient data management.</p>
+    <div>
+        <h2>Key Features</h2>
+        <ul>
+            <li><strong>Telescope Network Coordination:</strong> BHTOM enables you to connect and manage multiple telescopes, forming a powerful network that can work in harmony to observe celestial bodies.</li>
+            <li><strong>Observation Processing:</strong> With BHTOM, you can easily submit your astronomical observations as fits or instrumental photometry. Our interface ensures a smooth submission process, reducing the time spent on data processing.</li>
+            <li><strong>Archives:</strong> BHTOM also gathers data already collected for target of interest, enabling time-domain astronomy studies.</li>
+        </ul>
+    </div>
 
-    <h2>Key Features</h2>
-    <ul>
-        <li><strong>Telescope Network Coordination:</strong> BHTOM enables you to connect and manage multiple telescopes, forming a powerful network that can work in harmony to observe celestial bodies.</li>
-        <li><strong>Observation Processing:</strong> With BHTOM, you can easily submit your astronomical observations as fits or instrumental photometry. Our interface ensures a smooth submission process, reducing the time spent on data processing.</li>
-        <li><strong>Archives:</strong> BHTOM also gathers data already collected for target of interest, enabling time-domain astronomy studies.</li>
-    </ul>
+    <div>
+        <h2>Why Choose BHTOM?</h2>
+        <p>Choosing BHTOM means choosing efficiency, precision, and ease-of-use. Our platform has been carefully designed with the needs of the astronomical community in mind. Whether you're a seasoned astronomer or a student just starting out, BHTOM provides the tools you need to make the most of your observations.</p>
+        <p>We invite you to join us on this journey of discovery. Let's explore the universe together with BHTOM.</p>
+    </div>
+<
+    <div>
+        <h2>Contact</h2>
+        <p><a href="https://github.com/BHTOM-Team/bhtom2/blob/bhtom2-dev/Documentation/Documentation.md">Draft version of the documentation</a></p>
+        <p>For more information contact us at bhtom_@_astrouw.edu.pl</p>
+    </div>
 
-    <h2>Why Choose BHTOM?</h2>
-    <p>Choosing BHTOM means choosing efficiency, precision, and ease-of-use. Our platform has been carefully designed with the needs of the astronomical community in mind. Whether you're a seasoned astronomer or a student just starting out, BHTOM provides the tools you need to make the most of your observations.</p>
-    <p>We invite you to join us on this journey of discovery. Let's explore the universe together with BHTOM.</p>
 
-    <hr>
-
-    <p>For more information, please feel free to contact us at bhtom_@_astrouw.edu.pl</p>
-
+    <div class="row" style="color:blue;">
+        <h3>Acknowledgments</h3>
+        <p>BHTOM has been based on the open-source <a href="https://lco.global/tomtoolkit/">TOM Toolkit by LCO</a> and has been developed with funding from the OPTICON-RadioNet Pilot of the European Union's Horizon 2020 research and innovation programme under grant agreement No 101004719. 
+        </p>
+        <p><br>Concept and design by <a href="https://www.linkedin.com/in/lukasz-wyrzykowski-warsaw/">Lukasz Wyrzykowski</a>, Warsaw University Astronomical Observatory. We acknowledge contributions from students and staff of the University of Warsaw. Hosting and technical development by <a href="https://www.akond.com/">AKOND</a>. 
+        </p>
+    </div>
 </div>
 {% endblock %}

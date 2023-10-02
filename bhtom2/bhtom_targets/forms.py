@@ -291,9 +291,9 @@ class TargetVisibilityForm(forms.Form):
 TargetExtraFormset = inlineformset_factory(Target, TargetExtra, fields=('key', 'value'),
                                            widgets={'value': forms.TextInput()}, extra=0)
 
-TargetNamesFormset = inlineformset_factory(Target, TargetName, fields=('source_name', 'name',), validate_min=False,
+TargetNamesFormset = inlineformset_factory(Target, TargetName, fields=('source_name', 'name','url'), validate_min=False,
                                            can_delete=False, extra=1, max_num=100,
-                                           widgets={'name': forms.TextInput()}, )
+                                           widgets={'name': forms.TextInput(), 'url:' : forms.TextInput()}, )
 
 
 class TargetLatexDescriptionForm(TargetForm):

@@ -183,10 +183,10 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             return super().form_invalid(form)
 
         # storing all the names
-        for source_name, name in target_names:
+        for source_name, name, url in target_names:
             # clearing CPCS names from prefixes if provided:
 
-            to_add, _ = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
+            to_add, _ = TargetName.objects.update_or_create(target=self.object, source_name=source_name, url=url)
             to_add.name = name
             to_add.save()
             run_hook('update_alias', target=self.object, broker=name)
@@ -283,19 +283,22 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
 
         if duplicate_names:
             form.add_error(None, 'Duplicate source names for aliases.')
+            return super().form_invalid(form)
+
 
         super().form_valid(form)
 
         # Update target names for given source
-        for source_name, name in target_names:
+        for source_name, name, url in target_names:
             # clearing  CPCS names from prefixes if provided:
 
             # Not clearing ASASSN, as it can have different prefixes
 
             to_update, created = TargetName.objects.update_or_create(target=self.object, source_name=source_name)
 
-            if to_update.name != name:
+            if to_update.name != name or to_update.url != url:
                 to_update.name = name
+                to_update.url = url
                 to_update.modified = datetime.now()
                 to_update.save()
                 run_hook('update_alias', target=self.object, broker=source_name)
@@ -307,7 +310,7 @@ class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
                     f'{get_pretty_survey_name(to_update.source_name)}'
                 )
 
-        target_source_names = [s for s, _ in target_names]
+        target_source_names = [s for s, _, u in target_names]
 
         # Delete target names not in the form (probably deleted by the user)
         for to_delete in TargetName.objects.filter(target=self.object).exclude(source_name__in=target_source_names):

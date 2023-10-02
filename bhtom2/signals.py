@@ -23,15 +23,16 @@ def send_activation_email(sender, instance, **kwargs):
         user_old = User.objects.get(id=instance.id)
     except Exception as e:
         user_old = None
+        logger.error('Activate observatory error: ' + str(e))
 
     if user_old is not None:
         if instance.is_active and not user_old.is_active:
             try:
                 send_mail(settings.EMAILTET_ACTIVATEUSER_TITLE, settings.EMAILTET_ACTIVATEUSER, settings.EMAIL_HOST_USER,
                       [instance.email], fail_silently=False)
-                logger.info('Ativate observatory' + instance.name + ', Send mail: ' + instance.email)
+                logger.info('Activate observatory' + instance.name + ', Send mail: ' + instance.email)
             except Exception as e:
-                logger.info('Ativate observatory error: ' + str(e))
+                logger.error('Activate observatory error: ' + str(e))
 
 
 @receiver(pre_save, sender=Observatory)
@@ -48,6 +49,6 @@ def Observatory_pre_save(sender, instance, **kwargs):
                 send_mail(settings.EMAILTEXT_ACTIVATEOBSERVATORY_TITLE, settings.EMAILTEXT_ACTIVATEOBSERVATORY,
                           settings.EMAIL_HOST_USER,
                           [user.email], fail_silently=False)
-                logger.info('Ativate observatory' + instance.name + ', Send mail: ' + user.email)
+                logger.info('Activate observatory' + instance.name + ', Send mail: ' + user.email)
             except Exception as e:
-                logger.info('Ativate observatory error: ' + str(e))
+                logger.info('Activate observatory error: ' + str(e))
