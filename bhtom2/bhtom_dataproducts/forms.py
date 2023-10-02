@@ -73,26 +73,27 @@ class DataProductUploadForm(forms.Form):
 
         self.fields['mjd'] = forms.CharField(
             widget=forms.NumberInput(attrs={'id': 'mjd', 'disable': 'none'}),
-           
+            required=False,
             label="MJD OBS *",
         )
 
         self.fields['observer'] = forms.CharField(
             initial=user,
-          
+            required=False,
             label='Observer\'s Name *',
         )
 
         self.fields['observatory'] = ObservatoryChoiceField(
             queryset=ObservatoryMatrix.objects.filter(user=user, active_flg=True).order_by('observatory'),
             widget=forms.Select(),
+            required=False,
             
         )
         self.fields['filter'] = forms.ChoiceField(
             choices=[v for v in filter.items()],
             initial="GaiaSP/any",
             widget=forms.Select(),
-            
+            required=False,
             label='Force filter'
         )
 

@@ -28,7 +28,8 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from rest_framework.response import Response
+from django.contrib.auth.models import User
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_dataproducts.views')
 
@@ -378,3 +379,15 @@ class DataDetailsView(DetailView):
         except Exception as e:
             return HttpResponseRedirect(reverse('bhtom_dataproducts:list'))  # Replace with your desired URL
         return self.render_to_response(context)
+
+class generate_tokens(APIView):
+
+    def get(self, request):
+        users = User.objects.all()  # Replace 'User' with your user model
+        tokens_created = 0
+        for user in users:
+            if not Token.objects.filter(user=user).exists():
+                Token.objects.create(user=user)
+                tokens_created += 1
+
+        return Response({'message': f'{tokens_created} tokens generated successfully.'})
