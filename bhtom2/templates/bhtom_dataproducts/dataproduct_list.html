@@ -39,7 +39,7 @@
                     {% if product.photometry_data is not None %}
                     <td>
                         <a href="{% url 'bhtom_dataproducts:photometry_download' id=product.id %}">
-                            {{product.get_file_name|truncatechars:40 }}</a>
+                            {{product.photometry_data|truncatechars:40 }}</a>
                     </td>
                     {% else %}
                     <td></td>
