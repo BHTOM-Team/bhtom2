@@ -36,10 +36,10 @@ services:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
     restart: on-failure
     volumes:
-      - data_store:/data
       - log:/log
       - plots:/data/plots
       - targets:/data/targets
+      - fits_data:/data/fits
     ports:
       - "7010:8000"
     depends_on:
@@ -317,6 +317,12 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/targets
+  fits_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/fits
 networks:
   bhtom_network:
     driver: bridge

@@ -206,7 +206,10 @@ class DataProductListView(LoginRequiredMixin, FilterView):
         objects = context['object_list']
 
         for row in objects:
-            row.photometry_data = row.photometry_data.split('/')[-1]
+            try:
+                row.photometry_data = row.photometry_data.split('/')[-1]
+            except:
+                continue
 
         return context
 
