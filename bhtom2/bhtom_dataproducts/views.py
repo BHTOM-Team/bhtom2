@@ -295,6 +295,8 @@ class photometry_download(LoginRequiredMixin, View):
             logger.info('Download Photometry file: %s, user: %s' % (str(file), str(self.request.user)))
             dataProduct = DataProduct.objects.get(id=file)
             assert dataProduct.photometry_data is not None
+            if request.user != dataProduct.user and not request.user.is_staff:
+                raise DataProduct.DoesNotExist
         except (DataProduct.DoesNotExist, AssertionError):
             logger.error('Download Photometry error, file not exist')
 
@@ -334,7 +336,7 @@ class DataDetailsView(DetailView):
 
             if data_product.fits_data:
                 ccdphot = CCDPhotJob.objects.get(dataProduct=data_product.id)
-                context['fits_data'] = data_product.data.name
+                context['fits_data'] = data_product.fits_data.split('/')[-1]
                 context['ccdphot'] = ccdphot
 
             if data_product.photometry_data:
