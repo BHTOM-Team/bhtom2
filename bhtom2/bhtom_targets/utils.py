@@ -200,6 +200,7 @@ def get_aliases_from_queryset(queryset: Dict[str, Any]) -> Tuple[List, List, Lis
     """
     target_source_names = [v for k, v in queryset.items() if
                            k.startswith('alias') and k.endswith('-source_name')]
+                      
     target_name_values = [v for k, v in queryset.items() if
                           k.startswith('alias') and k.endswith('-name')]
     target_urls = [v for k, v in queryset.items() if
@@ -219,7 +220,7 @@ def get_nonempty_names_from_queryset(queryset: Dict[str, Any]) -> List[Tuple[str
     """
     target_source_names, target_name_values, target_urls = get_aliases_from_queryset(queryset)
     return [(source_name, name, url) for source_name, name, url in zip(target_source_names, target_name_values, target_urls) if
-            source_name.strip() and name.strip() and url.strip()]
+            source_name.strip() and name.strip()]
 
 
 def check_duplicate_source_names(target_names: List[Tuple[str, str, str]]) -> bool:
