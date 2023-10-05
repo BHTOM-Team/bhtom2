@@ -5,9 +5,9 @@ services:
   bhtom_db:
     container_name: bhtom_db
     env_file:
-      - .env
+      - .db.env
     networks:
-      - bhtom_network
+      - bhtom_db
     restart: on-failure
     build:
       context: .
@@ -16,7 +16,8 @@ services:
       - ./data/db:/docker-entrypoint-initdb.d/
       - bhtom_db:/var/lib/postgresql/data
     environment:
-      - "POSTGRES_HOST_AUTH_METHOD=trust"
+      - POSTGRES_INITDB_ARGS=--auth=scram-sha-256
+      - POSTGRES_HOST_AUTH_METHOD=scram-sha-256
       - POSTGRES_DB=${POSTGRES_NAME}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
@@ -29,17 +30,19 @@ services:
       - .env
     networks:
       - bhtom_network
+      - bhtom_db
     build:
       context: ..
       dockerfile: Docker/web_Dockerfile
     environment:
-      - "POSTGRES_HOST_AUTH_METHOD=trust"
+      - "POSTGRES_HOST_AUTH_METHOD=scram-sha-256"
     restart: on-failure
     volumes:
       - log:/log
       - plots:/data/plots
       - targets:/data/targets
       - fits_data:/data/fits
+      - static:/_static
     ports:
       - "7010:8000"
     depends_on:
@@ -48,10 +51,10 @@ services:
   zookeeper1:
     image: 'confluentinc/cp-zookeeper:7.3.2'
     env_file:
-      - .env
+      - .kafka.env
     container_name: zookeeper1
     networks:
-      - bhtom_network
+      - kafka_network
     hostname: zookeeper1
     environment:
       ZOOKEEPER_SERVER_ID: 1
@@ -66,10 +69,10 @@ services:
   zookeeper2:
     image: confluentinc/cp-zookeeper:7.3.2
     env_file:
-      - .env
+      - .kafka.env
     container_name: zookeeper2
     networks:
-      - bhtom_network
+      - kafka_network
     hostname: zookeeper2
     environment:
       ZOOKEEPER_SERVER_ID: 2
@@ -84,10 +87,10 @@ services:
   zookeeper3:
     image: confluentinc/cp-zookeeper:7.3.2
     env_file:
-      - .env
+      - .kafka.env
     container_name: zookeeper3
     networks:
-      - bhtom_network
+      - kafka_network
     hostname: zookeeper3
     environment:
       ZOOKEEPER_SERVER_ID: 3
@@ -102,9 +105,10 @@ services:
   kafka1:
     image: 'confluentinc/cp-kafka:7.3.2'
     env_file:
-      - .env
+      - .kafka.env
     container_name: kafka1
     networks:
+      - kafka_network
       - bhtom_network
     restart: always
     ports:
@@ -129,8 +133,9 @@ services:
     image: 'confluentinc/cp-kafka:7.3.2'
     container_name: kafka2
     env_file:
-      - .env
+      - .kafka.env
     networks:
+      - kafka_network
       - bhtom_network
     ports:
       - "9093:9093"
@@ -155,8 +160,9 @@ services:
     image: 'confluentinc/cp-kafka:7.3.2'
     container_name: kafka3
     env_file:
-      - .env
+      - .kafka.env
     networks:
+      - kafka_network
       - bhtom_network
     ports:
       - "9094:9094"
@@ -181,9 +187,9 @@ services:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
     env_file:
-      - .env
+      - .kafka.env
     networks:
-      - bhtom_network
+      - kafka_network
     ports:
       - "7080:8080"
     environment:
@@ -209,7 +215,7 @@ services:
     image: mongo:7.0.0
     container_name: mongo
     env_file:
-      - .env
+      - .graylog.env
     volumes:
       - mongo_data:/data/db
     networks:
@@ -219,7 +225,7 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
     container_name: elasticsearch
     env_file:
-      - .env
+      - .graylog.env
     volumes:
       - es_data:/usr/share/elasticsearch/data
     environment:
@@ -239,7 +245,7 @@ services:
     image: graylog/graylog:5.1
     container_name: graylog
     env_file:
-      - .env
+      - .graylog.env
     volumes:
       - graylog_data:/usr/share/graylog/data
     environment:
@@ -249,6 +255,7 @@ services:
       - DISABLE_TELEMETRY=1
     networks:
       - graylog
+      - bhtom_network
     links:
       - mongo
       - elasticsearch
@@ -275,12 +282,6 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/bhtom_db
-  data_store:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${DATA_STORE_PATH}
   mongo_data:
     driver: local
     driver_opts:
@@ -323,8 +324,18 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/fits
+  static:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/static/bhtom
 networks:
   bhtom_network:
+    driver: bridge
+  bhtom_db:
+    driver: bridge
+  kafka_network:
     driver: bridge
   graylog:
     driver: bridge

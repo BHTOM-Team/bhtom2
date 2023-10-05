@@ -28,7 +28,7 @@ schema_view = get_schema_view(
         description="Black Hole Tom",
         contact=openapi.Contact(email="akrawczyk@akond.com"),
     ),
-    public=True,
+    public=False,
 )
 urlpatterns = [
     path('swagger/', schema_view.with_ui(cache_timeout=0), name='schema-json'),

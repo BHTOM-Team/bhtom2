@@ -22,14 +22,10 @@
                         </div>
                     </div>
                 {% endfor %} -->
-            
+
         {% buttons %}
-                    <!-- the page has no submit, only back -->
-                <!-- <button type="submit" id="save-btn" formaction="{% url 'targets:generate_target_description_latex' pk=object.id %}"
-                        class="btn btn-primary">Regenerate LaTeX
-                </button> -->
-         
-                <a href="{% url 'targets:detail' pk=object.id %}" class="btn btn-primary" title="Back">Back</a>
+
+        <a href="{% url 'targets:detail' pk=object.id %}" class="btn btn-primary" title="Back">Back</a>
         {% endbuttons %}
         </form>
         {% endblock %}
