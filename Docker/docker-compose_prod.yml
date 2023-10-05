@@ -27,7 +27,7 @@ services:
   bhtom:
     container_name: bhtom
     env_file:
-      - .bhtom.env
+      - .env
     networks:
       - bhtom_network
       - bhtom_db
