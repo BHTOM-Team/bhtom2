@@ -14,7 +14,7 @@ RUN touch bhtom-error.log
 COPY bhtom2 /bhtom2
 COPY bhtom_base /bhtom_base
 COPY bhtom_custom_registration /bhtom_custom_registration
-COPY Docker/.env /bhtom2/.bhtom.env
+COPY Docker/.bhtom.env /bhtom2/.bhtom.env
 
 RUN pwd
 RUN apt update

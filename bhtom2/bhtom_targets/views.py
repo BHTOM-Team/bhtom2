@@ -378,7 +378,8 @@ class TargetUpdateView(LoginRequiredMixin, UpdateView):
 
 # form for generating latex description of the target (under Publication)
 # very similar form to update
-class TargetGenerateTargetDescriptionLatexView(UpdateView):
+class TargetGenerateTargetDescriptionLatexView(LoginRequiredMixin, UpdateView):
+    permission_required = 'bhtom_targets.change_target'
     template_name = 'bhtom_targets/target_generate_latex_form.html'
     model = Target
     fields = '__all__'
@@ -426,7 +427,7 @@ class TargetGenerateTargetDescriptionLatexView(UpdateView):
 
 
 class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
-    permission_required = 'tom_dataproducts.add_dataproduct'
+    permission_required = 'bhtom_dataproducts.add_dataproduct'
 
     @abstractmethod
     def generate_data_method(self, target_id):
@@ -492,7 +493,7 @@ class TargetImportView(LoginRequiredMixin, TemplateView):
 
 
 class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
-    permission_required = 'tom_dataproducts.add_dataproduct'
+    permission_required = 'bhtom_dataproducts.add_dataproduct'
 
     @abstractmethod
     def generate_data_method(self, target_id):

@@ -53,8 +53,8 @@ ADMIN_EMAIL = secret.get('ADMIN_EMAIL', '')
 GRAYLOG_HOST = secret.get('GRAYLOG_HOST', '')
 GRAYLOG_PORT = int(secret.get('GRAYLOG_PORT', 12201))
 DATA_FILE_PATH = secret.get('DATA_FILE_PATH', './data/')
-DATA_PLOT_PATH = secret.get('DATA_PLOT_PATH', '../plots/')
-DATA_TARGET_PATH = secret.get('DATA_TARGET_PATH', '../targets/')
+DATA_PLOT_PATH = secret.get('DATA_PLOT_PATH', '../data/')
+DATA_TARGET_PATH = secret.get('DATA_TARGET_PATH', '../data/')
 
 
 CSRF_TRUSTED_ORIGINS = [] + list(secret.get("CSRF_TRUSTED_ORIGINS", 'localhost').split(','))
@@ -243,8 +243,7 @@ DATE_FORMAT = 'Y-m-d'
 STATIC_URL = '/_static/'
 STATIC_ROOT = os.path.join(BASE_DIR, '_static')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'bhtom2/static')]
-MEDIA_ROOT = os.path.join(BASE_DIR, 'data')
-MEDIA_URL = '/data/'
+MEDIA_ROOT = '../'
 
 # LOG
 logFolder = secret.get("LOG_FOLDER")
