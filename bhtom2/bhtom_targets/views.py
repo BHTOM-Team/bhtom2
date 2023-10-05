@@ -450,7 +450,10 @@ class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
             logger.error(f'Error while generating file for target with id={target_id}: {e}')
         finally:
             if tmp:
-                os.remove(tmp.name)
+                try:
+                    os.remove(tmp.name)
+                except Exception as e:
+                    logger.error("Error in delete tmp: " + str(e))
 
 
 class TargetDownloadPhotometryStatsLatexTableView(TargetDownloadDataView):

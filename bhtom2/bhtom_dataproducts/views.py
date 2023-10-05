@@ -302,8 +302,13 @@ class photometry_download(LoginRequiredMixin, View):
             logger.info('Download Photometry file: %s, user: %s' % (str(file), str(self.request.user)))
             dataProduct = DataProduct.objects.get(id=file)
             assert dataProduct.photometry_data is not None
-            if request.user != dataProduct.user and not request.user.is_staff:
-                raise DataProduct.DoesNotExist
+            if request.user == dataProduct.user and request.user.is_staff:
+                messages.error(self.request, 'You do not have permission to download this file')
+                if self.request.META.get('HTTP_REFERER') is None:
+                    return HttpResponseRedirect('/')
+                else:
+                    return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+
         except (DataProduct.DoesNotExist, AssertionError):
             logger.error('Download Photometry error, file not exist')
 

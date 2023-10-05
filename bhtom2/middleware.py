@@ -19,7 +19,13 @@ class RequestLogMiddleware:
         time1 = datetime.datetime.now()
         body = self.extract_request_body(request)
 
-        logger.info(f"Method: {request.method}, Path: {request.path}, IP: {request.META['REMOTE_ADDR']}, "
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META['REMOTE_ADDR']
+
+        logger.info(f"Method: {request.method}, Path: {request.path}, IP: {ip}, "
                     f"correlation_id: {request.correlation_id}, session_id: {request.session.session_key}, "
                     f"user: {request.user}, host: {request.META['HTTP_HOST']}, "
                     f"body: {body}")
@@ -41,7 +47,7 @@ class RequestLogMiddleware:
         if request.method in ['POST', 'PUT']:
             body = {}
             for key, value in request.POST.items():
-                if key == 'password':
+                if key == 'password' or key == 'password1' or key == 'password2':
                     body[key] = '*****'
                 elif not isinstance(value, list):
                     body[key] = value
@@ -57,6 +63,7 @@ class RequestLogMiddleware:
             return response.data
         else:
             return ''
+
 
 class AccessControlMiddleware:
     def __init__(self, get_response):
