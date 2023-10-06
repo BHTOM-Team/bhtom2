@@ -243,7 +243,8 @@ DATE_FORMAT = 'Y-m-d'
 STATIC_URL = '/_static/'
 STATIC_ROOT = os.path.join(BASE_DIR, '_static')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'bhtom2/static')]
-MEDIA_ROOT = '../'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'data')
+MEDIA_URL = '/data/'
 
 # LOG
 logFolder = secret.get("LOG_FOLDER")
