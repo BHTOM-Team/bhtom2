@@ -62,10 +62,10 @@ This API facilitates programmable batch file uploads to the **BHTOM system**. It
 
 ### Usage
 
-The ready-to-use script is located in the `documentation_scripts` folder.
+The ready-to-use script is located in the `documentation_scripts` folder. please fill parameters in the script before use
 
 ```bash
-python upload_files_script.py  <token> <target> <data_product_type> <files> [--match_dist <match_dist>] [--comment <comment>] [--dry_run] [--no_plot] [--mjd <mjd>] [--group <group>] [--observer <observer>]
+python upload_files_script.py  
 ```
 
 ### Arguments
@@ -173,7 +173,7 @@ This API endpoint allows users to retrieve calibration results for previously up
 
 ### Request Body
 
-- `fileId` (array): Array containing file IDs for calibration
+- `files` (array): Array containing file IDs or files name or both of them for calibration
 - `getPlot` (boolean): Flag to indicate whether to retrieve the calibration plot
 
 ### Example Request
@@ -186,14 +186,14 @@ curl -X 'POST' \
   -H 'Content-Type: application/json' \
   -H 'X-CSRFToken: uUz2fRnXhPuvD9YuuiDW9cD1LsajeaQnE4hwtEAfR00SgV9bD5HCe5i8n4m4KcOr' \
   -d '{
-    "fileId": [1],
+    "files": [1, 'fileName', 2 'fileName2'],
     "getPlot": true
   }'
 ```
     You can use script as well
 
 ```bash
-    python get_calib_res.py "yourToken" 1 2 3 --get_plot
+    python get_calib_res.py "yourToken" 1 "2_photometry_sample_2" 2 --get_plot
 ```
 ### Response
 

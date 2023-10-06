@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
 from rest_framework import status
 from bhtom2.bhtom_calibration.models import Calibration_data
 from django.core import serializers
@@ -20,48 +21,55 @@ class CalibrationResultsApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
-    @swagger_auto_schema(
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'fileId': openapi.Schema(type=openapi.TYPE_ARRAY,
-                items=openapi.Schema(type=openapi.TYPE_INTEGER),),
-                'getPlot': openapi.Schema(type=openapi.TYPE_BOOLEAN),
-            },
-            required=['fileId', 'getPlot']
-        ),
-        manual_parameters=[
-            openapi.Parameter(
-            name='Authorization',
-            in_=openapi.IN_HEADER,
-            type=openapi.TYPE_STRING,
-            required=True,
-            description='Token <Your Token>'
-        ),
-    ],
-    )
+    # @swagger_auto_schema(
+    #     request_body=openapi.Schema(
+    #         type=openapi.TYPE_OBJECT,
+    #         properties={
+    #             'files': openapi.Schema(type=openapi.TYPE_ARRAY,
+    #             items=openapi.Schema(type=openapi.TYPE_INTEGER),),
+    #             'getPlot': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+    #         },
+    #         required=['fileId', 'getPlot']
+    #     ),
+    #     manual_parameters=[
+    #         openapi.Parameter(
+    #         name='Authorization',
+    #         in_=openapi.IN_HEADER,
+    #         type=openapi.TYPE_STRING,
+    #         required=True,
+    #         description='Token <Your Token>'
+    #     ),
+    # ],
+    # )
 
     def post(self, request):
-        files_id = request.data['fileId']
+        files = request.data['files']
         getPlot = request.data['getPlot']
         results = {}
         base_path = settings.DATA_PLOT_PATH
         try:
-            for file in files_id:
-                instance = Calibration_data.objects.get(dataproduct_id=file)
-                serialized_data = serializers.serialize('json', [instance])
-                data = json.loads(serialized_data)[0] 
-                results[instance.id] = data["fields"]
-                if getPlot:
+            user = Token.objects.get(key=request.auth.key).user
+            for file in files:
+                if isinstance(file, str):
+                    instance = Calibration_data.objects.get(dataproduct__data__contains= file)
+                    dp = DataProduct.objects.get(data__contains=file)   
+                elif isinstance(file, int):
+                    instance = Calibration_data.objects.get(dataproduct_id=file)
                     dp = DataProduct.objects.get(id=file)
-                    target = dp.target
-                    if target.photometry_plot:
-                        with open(base_path + str(target.photometry_plot), 'r') as json_file:
-                            plot = json.load(json_file)
-                            results[instance.id] = {"calib-res":  data["fields"] ,"plot": plot}
+                if(instance.dataproduct.user_id == user.id or user.is_superuser):
+                    serialized_data = serializers.serialize('json', [instance])
+                    data = json.loads(serialized_data)[0] 
+                    results[instance.id] = data["fields"]
+                    if getPlot:
+                        target = dp.target
+                        if target.photometry_plot:
+                            with open(base_path + str(target.photometry_plot), 'r') as json_file:
+                                plot = json.load(json_file)
+                                results[instance.id] = {"calib-res":  data["fields"] ,"plot": plot}
                     else:
                         results[instance.id] ={"calib-res":  data["fields"] ,"plot": None}
-
+                else:
+                        results[instance.id] ={"calib-res":  "It's not yours data","plot": None}
         except Calibration_data.DoesNotExist:
             return Response({"Error": 'File does not exist in the database'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
