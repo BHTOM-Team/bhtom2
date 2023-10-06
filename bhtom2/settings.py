@@ -37,7 +37,7 @@ DEBUG = bool(int(secret.get("DEBUG", False)))
 
 ALLOWED_HOSTS = [] + list(secret.get("ALLOWED_HOSTS", 'localhost').split(','))
 SITE_ID = int(secret.get("SITE_ID", 1))
-
+BHTOM_URL= secret.get('BHTOM_URL', "http://localhost:8010/")
 CPCS_BASE_URL = secret.get('CPCS_BASE_URL', None)
 CPCS_DATA_ACCESS_HASHTAG = secret.get('CPCS_DATA_ACCESS_HASHTAG', None)
 UPLOAD_SERVICE_URL = secret.get('UPLOAD_SERVICE_URL', None)
