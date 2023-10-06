@@ -35,6 +35,15 @@ class GetTargetListApi(views.APIView):
             },
             required=[]
         ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
     )
     def post(self, request):
         query = Q()
@@ -87,6 +96,15 @@ class TargetCreateApi(views.APIView):
             },
             required=['name', 'ra', 'dec']
         ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
     )
     def post(self, request, *args, **kwargs):
         serializer = TargetsSerializers(data=request.data)
@@ -115,6 +133,15 @@ class TargetUpdateApi(views.APIView):
             },
             required=[]
         ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
     )
     def patch(self, request, name):
         instance = Target.objects.get(name=name)
@@ -140,6 +167,15 @@ class TargetDeleteApi(views.APIView):
             },
             required=['name']
         ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
     )
     def delete(self, request):
         name = request.data.get('name', None)
