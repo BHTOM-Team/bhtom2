@@ -342,7 +342,6 @@ class DataDetailsView(DetailView):
             context = {}
             data_product = DataProduct.objects.get(id=kwargs['pk'])
             context['object'] = data_product
-            logger.error(data_product.target.id)
             target = Target.objects.get(id=data_product.target.id)
             context['target'] = target
 
