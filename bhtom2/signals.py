@@ -23,16 +23,16 @@ def send_activation_email(sender, instance, **kwargs):
         user_old = User.objects.get(id=instance.id)
     except Exception as e:
         user_old = None
-        logger.error('Activate user error: ' + str(e))
+        logger.error("Activate user error, user doesn't exist in db: " + str(e))
 
     if user_old is not None:
         if instance.is_active and not user_old.is_active:
             try:
                 send_mail(settings.EMAILTET_ACTIVATEUSER_TITLE, settings.EMAILTET_ACTIVATEUSER, settings.EMAIL_HOST_USER,
                       [instance.email], fail_silently=False)
-                logger.info('Activate user' + instance.name + ', Send mail: ' + instance.email)
+                logger.info('Activate user' + instance.username + ', Send mail: ' + instance.email)
             except Exception as e:
-                logger.error('Activate user error: ' + str(e))
+                logger.error('Activate user error, error while send mail: ' + str(e))
 
 
 @receiver(pre_save, sender=Observatory)
