@@ -35,10 +35,10 @@
             {% endif %}
             {% target_unknown_statuses object %}
             {% target_data object %}
+            {% target_buttons object %} 
             {% if object.type == 'SIDEREAL' %}
             {% aladin object %}
             {% endif %}
-            {% target_buttons object %} 
         </div>
     </div>
     <div class="col-lg-8 target-right">
@@ -83,6 +83,22 @@
             <div class="tab-pane active" id="photometry">
 
                 {% photometry_for_target target %}
+
+                <div class="row menu-row">
+                    <div class="col-lg-6">
+                        <button onclick="download_photometry()" class="btn btn-primary" role="button">Download
+                            photometry data
+                        </button>
+                    </div>
+                    <div class="col-lg-6 text-right">
+                        <button onclick="download_radio()" class="btn btn-primary" role="button">Download radio
+                            data
+                        </button>
+                    </div>
+                </div>
+
+                {% comment %} Plot with observers instead of filters {% endcomment %}
+                {% photometry_for_target_obs target %}
 
                 <div class="row menu-row">
                     <div class="col-lg-6">
