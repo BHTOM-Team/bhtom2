@@ -265,3 +265,51 @@ class GetPlotsApiView(views.APIView):
         except Exception as e:
             return Response({"Error": 'Something went wrong' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"Plots": results}, status=status.HTTP_200_OK)
+    
+    
+class GetPlotsObsApiView(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'targetNames': openapi.Schema(type=openapi.TYPE_ARRAY,
+                items=openapi.Schema(type=openapi.TYPE_STRING),),
+            },
+            required=['targetNames']
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
+    )
+
+    def post(self, request):
+        targetNames = request.data['targetNames']
+        results = {}
+        try:
+            base_path = settings.DATA_PLOT_PATH
+            for target_name in targetNames:
+                
+                target = Target.objects.get(name=target_name)
+                if target.photometry_plot_obs:
+                    with open(base_path +  str(target.photometry_plot_obs), 'r') as json_file:
+                        plot = json.load(json_file)
+                    results[target.name] = plot
+                else:
+                    results[target.name] = "None"
+
+        except Target.DoesNotExist:
+            return Response({"Error": 'Target does not exist in the database'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"Error": 'Something went wrong' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"Plots": results}, status=status.HTTP_200_OK)
+    
+    

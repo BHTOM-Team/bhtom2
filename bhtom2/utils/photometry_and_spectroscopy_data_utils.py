@@ -97,7 +97,7 @@ def get_photometry_stats(target: Target) -> Tuple[List[List[str]], List[str]]:
     stats: List[List[Any]] = []
 
     for facility in facilities:
-        observers = df[df['Facility'] == facility]['Observer'].unique()
+        observers = df[df['Facility'] == facility]['Owner'].unique()
         datapoints = len(df[df['Facility'] == facility].index)
         filters = df[df['Facility'] == facility]['Filter'].unique()
         earliest_time = around(df[df['Facility'] == facility]['MJD'].min(), 2)
