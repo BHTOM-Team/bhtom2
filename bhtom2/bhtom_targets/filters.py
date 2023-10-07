@@ -156,7 +156,7 @@ class TargetFilter(django_filters.FilterSet):
     sun: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_sunDistance', label='Sun separation')
     mag: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_magLast', label='Last magnitude')
 
-    targetList__name = django_filters.ModelChoiceFilter(queryset=get_target_list_queryset, label="Target Grouping")
+    targetlist__name = django_filters.ModelChoiceFilter(queryset=get_target_list_queryset, label="Target Grouping")
 
     order = django_filters.OrderingFilter(
         fields=['name', 'created', 'modified'],
@@ -169,4 +169,4 @@ class TargetFilter(django_filters.FilterSet):
 
     class Meta:
         model = Target
-        fields = ['type', 'name', 'cone_search', 'targetList__name', 'classification']
+        fields = ['type', 'name', 'cone_search', 'targetlist__name', 'classification']
