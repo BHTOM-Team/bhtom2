@@ -6,12 +6,13 @@
     </h4>
     </div>
     <table class="table">
-        <thead><tr><th>Facility</th><th>Filters</th><th>Number</th><th>Min MJD</th><th>Max MJD</th></tr>
+        <thead><tr><th>Facility</th><th>Observers<th>Filters</th><th>Number</th><th>Min MJD</th><th>Max MJD</th></tr>
         </thead>
         <tbody>
         {% for datum in data %}
         <tr>
             <td>{{ datum.Facility }}</td>
+            <td>{{ datum.Observers }}</td>
             <td>{{ datum.Filters }}</td>
             <td>{{ datum.Data_points }}</td>
             <td>{{ datum.Min_MJD }}</td>

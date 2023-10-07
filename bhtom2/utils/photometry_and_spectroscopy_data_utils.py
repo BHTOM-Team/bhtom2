@@ -93,16 +93,17 @@ def get_photometry_stats(target: Target) -> Tuple[List[List[str]], List[str]]:
 
     facilities = df['Facility'].unique()
 
-    columns: List[str] = ['Facility', 'Filters', 'Data_points', 'Earliest_time', 'Latest_time']
+    columns: List[str] = ['Facility', 'Observers','Filters', 'Data_points', 'Earliest_time', 'Latest_time']
     stats: List[List[Any]] = []
 
     for facility in facilities:
+        observers = df[df['Facility'] == facility]['Observer'].unique()
         datapoints = len(df[df['Facility'] == facility].index)
         filters = df[df['Facility'] == facility]['Filter'].unique()
         earliest_time = around(df[df['Facility'] == facility]['MJD'].min(), 2)
         latest_time = around(df[df['Facility'] == facility]['MJD'].max(), 2)
 
-        stats.append([facility, ", ".join(filters), datapoints, earliest_time, latest_time])
+        stats.append([facility, ", ".join(observers), ", ".join(filters), datapoints, earliest_time, latest_time])
 
     stats = sorted(stats, key=operator.itemgetter(2), reverse=True)
 

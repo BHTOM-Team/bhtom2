@@ -84,7 +84,8 @@ def recent_photometry(target, limit=1):
     return {'data': [{'timestamp': rd.timestamp,
                       'magnitude': rd.value,
                       'filter': rd.filter,
-                      'facility': rd.facility} for rd in photometry
+                      'facility': rd.facility,
+                      'observer': rd.observer} for rd in photometry
                      if rd.value_unit == ReducedDatumUnit.MAGNITUDE]}
 
 
@@ -104,6 +105,7 @@ def photometry_stats(target):
     data_list = []
     for index, row in df.iterrows():
         data_dict = {'Facility': row['Facility'],
+                     'Observers': row['Observers'],
                      'Filters': row['Filters'],
                      'Data_points': row['Data_points'],
                      'Min_MJD': row['Earliest_time'],
