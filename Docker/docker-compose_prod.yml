@@ -373,19 +373,19 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ${DATA_STORE_PATH}/zookeeper/zookeeper1
+      device: ${DATA_STORE_PATH}/kafka/zookeeper1
   zookeeper2-data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ${DATA_STORE_PATH}/zookeeper/zookeeper2
+      device: ${DATA_STORE_PATH}/kafka/zookeeper2
   zookeeper3-data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ${DATA_STORE_PATH}/zookeeper/zookeeper3
+      device: ${DATA_STORE_PATH}/kafka/zookeeper3
 
 networks:
   bhtom_network:
