@@ -308,16 +308,10 @@ class TargetUpdateView(LoginRequiredMixin, UpdateView):
                     f'{"Added" if created else "Updated"} alias {to_update.name} for '
                     f'{get_pretty_survey_name(to_update.source_name)}'
                 )
-
-
-        logger.info("HERREEEEEEEEEEEE_________________________________________________________________________________________")
-        logger.info( [s for s, _, u in target_names])
         target_source_names = [s for s, _, u in target_names]
 
         # Delete target names not in the form (probably deleted by the user)
         for to_delete in TargetName.objects.filter(target=self.object).exclude(source_name__in=target_source_names):
-            logger.info("HERREEEEEEEEEEEE11111111111_________________________________________________________________________________________")
-            logger.info(to_delete)
             to_delete.delete()
             messages.add_message(
                 self.request,

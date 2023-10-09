@@ -21,26 +21,26 @@ class CalibrationResultsApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
-    # @swagger_auto_schema(
-    #     request_body=openapi.Schema(
-    #         type=openapi.TYPE_OBJECT,
-    #         properties={
-    #             'files': openapi.Schema(type=openapi.TYPE_ARRAY,
-    #             items=openapi.Schema(type=openapi.TYPE_INTEGER),),
-    #             'getPlot': openapi.Schema(type=openapi.TYPE_BOOLEAN),
-    #         },
-    #         required=['fileId', 'getPlot']
-    #     ),
-    #     manual_parameters=[
-    #         openapi.Parameter(
-    #         name='Authorization',
-    #         in_=openapi.IN_HEADER,
-    #         type=openapi.TYPE_STRING,
-    #         required=True,
-    #         description='Token <Your Token>'
-    #     ),
-    # ],
-    # )
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'files': openapi.Schema(type=openapi.TYPE_ARRAY,
+                items=openapi.Schema(type=openapi.TYPE_INTEGER),),
+                'getPlot': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+            },
+            required=['fileId', 'getPlot']
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
+    )
 
     def post(self, request):
         files = request.data['files']

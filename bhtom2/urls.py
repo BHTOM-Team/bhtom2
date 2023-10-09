@@ -29,6 +29,7 @@ schema_view = get_schema_view(
         contact=openapi.Contact(email="akrawczyk@akond.com"),
     ),
     public=False,
+    url=settings.BHTOM_URL
 )
 urlpatterns = [
     path('swagger/', schema_view.with_ui(cache_timeout=0), name='schema-json'),

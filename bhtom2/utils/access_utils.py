@@ -9,4 +9,6 @@ def can_access(request):
         return user.is_authenticated and (user.is_staff or user.is_superuser)
     if request.path.startswith('/alerts/'):
         return user.is_authenticated and (user.is_staff or user.is_superuser)
+    if request.path.startswith('/swagger/'):
+        return user.is_authenticated and  user.is_superuser
     return True  # Allow access to other URLs

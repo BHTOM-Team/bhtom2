@@ -35,6 +35,15 @@ class GetObservatoryApi(views.APIView):
             },
             required=[]
         ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
     )
     def post(self, request):
         query = Q()
@@ -93,7 +102,16 @@ class CreateObservatoryApi(views.APIView):
                 'filters': openapi.Schema(type=openapi.TYPE_STRING),
             },
             required=['name', 'lon', 'lat']
-        )
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
     )
     def post(self, request, *args, **kwargs):
         serializer = ObservatorySerializers(data=request.data)
@@ -141,7 +159,16 @@ class UpdateObservatoryApi(views.APIView):
                 'filters': openapi.Schema(type=openapi.TYPE_STRING),
             },
             required=['name']
-        )
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
     )
     def patch(self, request):
 
@@ -172,6 +199,15 @@ class GetObservatoryMatrixApi(views.APIView):
             },
             required=[]
         ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
     )
     def post(self, request):
         query = Q()
@@ -211,6 +247,15 @@ class CreateObservatoryMatrixApi(views.APIView):
             },
             required=['observatory']
         ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
     )
     def post(self, request, *args, **kwargs):
         observatoryName = request.data.get('observatory', None)
@@ -248,6 +293,15 @@ class DeleteObservatoryMatrixApi(views.APIView):
             },
             required=['observatory']
         ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
     )
     def delete(self, request):
         observatory = request.data.get('observatory', None)
