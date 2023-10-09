@@ -35,8 +35,8 @@ class CalibCreateEventProducer:
 
         value = {
             "dataProductId": data_product_id,
-            "targetName": target_name,
-            "dataProductData": dp_data
+            "targetName": str(target_name),
+            "dataProductData": str(dp_data)
         }
         guid = get_guid()
 

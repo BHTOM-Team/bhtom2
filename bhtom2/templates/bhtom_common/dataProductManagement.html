@@ -21,7 +21,6 @@
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane" id="fits">
-                        <script type="text/javascript" src="{% static 'bhtom/sorttable.js' %}"></script>
                         <form id="data-form" action="{% url 'bhtom_common:reload_fits' %}" method="POST">
                             {% csrf_token %}
 
@@ -44,7 +43,7 @@
                                 {% for fits in fits_file %}
                                     <tr>
                                         <td><label>
-                                            <input type="checkbox" name="selected-target" value="{{ fits.id }}"
+                                            <input type="checkbox" name="selected-fits" value="{{ fits.id }}"
                                                    onClick="single_select()"/>
                                         </label></td>
 
@@ -72,7 +71,6 @@
                         </form>
                     </div>
                     <div class="tab-pane active" id="photometry">
-                        <script type="text/javascript" src="{% static 'bhtom/sorttable.js' %}"></script>
                         <form id="data-form" action="{% url 'bhtom_common:reload_photometry' %}" method="POST">
                             {% csrf_token %}
 
@@ -97,7 +95,7 @@
                                 {% for data in photometry_data %}
                                     <tr>
                                         <td><label>
-                                            <input type="checkbox" name="selected-target" value="{{ data.id }}"
+                                            <input type="checkbox" name="selected-photometry" value="{{ data.dataProduct.id }}"
                                                    onClick="single_select()"/>
                                         </label></td>
 
