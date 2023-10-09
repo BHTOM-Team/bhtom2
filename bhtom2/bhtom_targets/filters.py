@@ -90,6 +90,32 @@ class TargetFilter(django_filters.FilterSet):
         elif value.stop is not None:
             return queryset.filter(Q(cadence_priority__lte=value.stop))
 
+    def filter_gall(self, queryset, name, value):
+
+        if value.start is not None and value.stop is not None:
+            return queryset.filter(Q(galactic_lng__gte=value.start) & Q(galactic_lng__lte=value.stop))
+        elif value.start is not None:
+            return queryset.filter(Q(galactic_lng__gte=value.start))
+        elif value.stop is not None:
+            return queryset.filter(Q(galactic_lng__lte=value.stop))
+
+    def filter_galb(self, queryset, name, value):
+        if value.start is not None and value.stop is not None:
+            return queryset.filter(Q(galactic_lat__gte=value.start) & Q(galactic_lat__lte=value.stop))
+        elif value.start is not None:
+            return queryset.filter(Q(galactic_lat__gte=value.start))
+        elif value.stop is not None:
+            return queryset.filter(Q(galactic_lat__lte=value.stop))
+
+    def filter_importance(self, queryset, name, value):
+
+        if value.start is not None and value.stop is not None:
+            return queryset.filter(Q(importance__gte=value.start) & Q(importance__lte=value.stop))
+        elif value.start is not None:
+            return queryset.filter(Q(importance__gte=value.start))
+        elif value.stop is not None:
+            return queryset.filter(Q(importance__lte=value.stop))
+
     def filter_sunDistance(self, queryset, name, value):
 
         if value.start is not None and value.stop is not None:
@@ -151,7 +177,10 @@ class TargetFilter(django_filters.FilterSet):
 
     ra: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_ra', label='RA')
     dec: django_filters.RangeFilter = django_filters.NumericRangeFilter(method='filter_dec', label='Dec')
+    gall: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_gall', label='Galactic Longitude (0,360)')
+    galb: django_filters.RangeFilter = django_filters.NumericRangeFilter(method='filter_galb', label='Galactic Latitude (-90,90)')
 
+    importance: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_importance', label='Importance (0,10)')
     priority: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_priority', label='Priority')
     sun: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_sunDistance', label='Sun separation')
     mag: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_magLast', label='Last magnitude')

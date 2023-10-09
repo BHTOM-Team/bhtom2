@@ -9,23 +9,34 @@
 
     <!-- <dt class="col-sm-6">{{ target.as_dict }}</dt>-->
 
-    {% for key, value in target.as_dict.items %}
-    {% if value and key != 'name' and key != 'type' %}
+    {% comment %} {% for key, value in target.as_dict.items %}
+    {% if value and key != 'name' and key != 'type' and key != 'ra' and key != 'dec' and key != 'epoch'%}
     <dt class="col-sm-6">{% verbose_name target key %}</dt>
     <dd class="col-sm-6">{{ value }}</dd>
     {% endif %}
-    {% if key == 'ra' %}
+    {% comment %} {% if key == 'ra' %}
     <dt class="col-sm-6">&nbsp;</dt>
     <dd class="col-sm-6">{{ value|deg_to_sexigesimal:"hms" }}</dd>
     {% endif %}
     {% if key == 'dec' %}
     <dt class="col-sm-6">&nbsp;</dt>
     <dd class="col-sm-6">{{ value|deg_to_sexigesimal:"dms" }}</dd>
-    {% endif %}
-    {% endfor %}
+    {% endif %} {% endcomment %}
+    {% endfor %} {% endcomment %}
 </dl>
 <dl class="row">
 
+    {% if target.ra and target.dec %}
+    <dt class="col-sm-6">{{ "Ra,Dec"}}</dt>
+    <dd class="col-sm-6">{{ target.ra }} {{ target.dec }}</dd>
+    <dt class="col-sm-6">&nbsp;</dt>
+    <dd class="col-sm-6">{{ target.ra|deg_to_sexigesimal:"hms" }} {{ target.dec|deg_to_sexigesimal:"dms"}}</dd>
+    {% endif %}
+
+    {% if target.galactic_lat and target.galactic_lng %}
+    <dt class="col-sm-6">{{ "Galactic (l,b)"}}</dt>
+    <dd class="col-sm-6">{{ target.galactic_lng }} {{ target.galactic_lat }}</dd>
+    {% endif %}
 
     {% if target.constellation %}
     <dt class="col-sm-6">{{ "Constellation" }}</dt>
@@ -40,6 +51,11 @@
     {% if target.classification %}
     <dt class="col-sm-6">{{ "Class" }}</dt>
     <dd class="col-sm-6">{{ target.get_classification_type_display }}</dd>
+    {% endif %}
+
+    {% if target.description %}
+    <dt class="col-sm-6">{{ "Description" }}</dt>
+    <dd class="col-sm-6">{{ target.description }}</dd>
     {% endif %}
 
     {% if target.phot_class %}
