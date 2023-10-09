@@ -1,4 +1,3 @@
-import logging
 import os
 
 from confluent_kafka import Producer, KafkaError
@@ -9,8 +8,11 @@ from django_guid import get_guid
 from dotenv import dotenv_values
 
 from bhtom2 import settings
+from bhtom2.utils.bhtom_logger import BHTOMLogger
 
 secret = dotenv_values(os.path.join(settings.BASE_DIR, 'bhtom2/.bhtom.env'))
+
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: kafka.target_event')
 
 
 class TargetCreateEventProducer:
@@ -24,7 +26,7 @@ class TargetCreateEventProducer:
         try:
             self.producer = Producer(conf)
         except KafkaError as e:
-            logging.error("Kafka Procucer error: " + str(e))
+            logger.error("Kafka Procucer error: " + str(e))
 
     def send_message(self, topic, target):
         if self.producer is None:

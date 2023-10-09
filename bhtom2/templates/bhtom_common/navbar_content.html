@@ -69,12 +69,21 @@ For customization instructions, see bhtom_common/base.html
 <li class="nav-item {% if request.resolver_match.namespace == 'proposals' %}active{% endif %}">
     <a class="nav-link" href="{% url 'bhtom_proposals:list' %}">Proposals</a>
 </li>
+
 {% endif %}
 <li class="nav-item {% if request.resolver_match.namespace == 'observatory' %}active{% endif %}">
     <a class="nav-link" href="{% url 'bhtom_observatory:list' %}">Observatory</a>
 </li>
 {% if request.user.is_superuser or request.user.is_staff %}
-<li class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
-    <a class="nav-link" href="{% url 'user-list' %}">Users</a>
+    <li class="nav-item dropdown {% if 'bhtom_common' in request.resolver_match.url_name %}active{% endif %}">
+    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+        aria-haspopup="true" aria-expanded="false">
+        Admin
+    </a>
+    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item" href="{% url 'user-list' %}">Users</a>
+        <a class="dropdown-item" href="{% url 'bhtom_common:list' %}">Data</a>
+    </div>
 </li>
+
 {% endif %}

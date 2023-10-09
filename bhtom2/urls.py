@@ -39,6 +39,7 @@ urlpatterns = [
     path('proposals/', include('bhtom2.bhtom_observations.urls', namespace='bhtom_proposals')),
     path('observatory/', include('bhtom2.bhtom_observatory.urls', namespace='bhtom_observatory')),
     path('dataproducts/', include('bhtom2.bhtom_dataproducts.urls', namespace='bhtom_dataproducts')),
+    path('common/', include('bhtom2.bhtom_common.urls', namespace='bhtom_common')),
     path('', include('bhtom_base.bhtom_common.urls')),
     path('', include('bhtom_custom_registration.bhtom_registration.registration_flows.approval_required.urls',
                      namespace='registration')),

@@ -15,7 +15,7 @@ class BHTOMLogger:
         except Exception:
             self.__graylog_host: str = "localhost"
 
-        self.__logger.addHandler(graypy.GELFTCPHandler(self.__graylog_host))
+        #self.__logger.addHandler(graypy.GELFTCPHandler(self.__graylog_host))
 
     def info(self, message: str):
         frame = logging.currentframe().f_back

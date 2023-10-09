@@ -86,7 +86,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
                 messages.error(self.request, f"Observatory doesn't exist")
                 return redirect(form.cleaned_data.get('referrer', '/'))
             if  observatory.calibration_flg is True:
-                messages.error(self.request, 'Observatory without ObsInfo')
+                messages.error(self.request, 'Observatory can calibration only')
                 return redirect(form.cleaned_data.get('referrer', '/'))
 
         if group is not None:

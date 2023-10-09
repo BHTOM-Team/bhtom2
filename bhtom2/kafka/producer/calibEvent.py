@@ -1,3 +1,4 @@
+
 import os
 
 from confluent_kafka import Producer, KafkaError
@@ -12,10 +13,10 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 
 secret = dotenv_values(os.path.join(settings.BASE_DIR, 'bhtom2/.bhtom.env'))
 
-logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: kafka.reducedDatum_event')
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: kafka.calib_event')
 
 
-class ReducedDatumEventProducer:
+class CalibCreateEventProducer:
     def __init__(self):
         self.producer = None
 
@@ -28,21 +29,19 @@ class ReducedDatumEventProducer:
         except KafkaError as e:
             logger.error("Kafka Procucer error: " + str(e))
 
-    def send_message(self, topic, target, broker, isNew=False, plotForce=False):
+    def send_message(self, data_product_id, target_name, dp_data):
         if self.producer is None:
             self.initialize_producer()
 
         value = {
-            "name": target.name,
-            "broker": broker,
-            "setTargetName": isNew,
-            "plotForce": plotForce
+            "dataProductId": data_product_id,
+            "targetName": target_name,
+            "dataProductData": dp_data
         }
-
         guid = get_guid()
 
         message_json = json.dumps(value)
-        self.producer.produce(topic,
+        self.producer.produce('Event_Calibration_File',
                               value=message_json,
                               headers={"correlation_id": guid}
                               )

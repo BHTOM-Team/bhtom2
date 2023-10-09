@@ -1,0 +1,141 @@
+{% extends 'bhtom_common/base.html' %}
+{% load bootstrap4 bhtom_common_extras static %}
+{% block title %}Data Product {{ object.name }}{% endblock %}
+{% block additional_css %}
+    <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}">
+{% endblock %}
+{% block content %}
+    {% if request.user.is_superuser %}
+
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="nav nav-tabs" id="tabs">
+                    <li class="nav-item">
+                        <span class="nav-link active" data-target="#photometry"
+                              data-toggle="tab">Photometry File</span>
+                    </li>
+                    <li class="nav-item">
+                        <span class="nav-link" data-target="#fits" data-toggle="tab">FIts File</span>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane" id="fits">
+                        <script type="text/javascript" src="{% static 'bhtom/sorttable.js' %}"></script>
+                        <form id="data-form" action="{% url 'bhtom_common:reload_fits' %}" method="POST">
+                            {% csrf_token %}
+
+                            <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Reload Fits
+                            </button>
+                            <table class="table table-hover sortable">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Data</th>
+                                    <th>Created</th>
+                                    <th>Observatory</th>
+                                    <th>Target</th>
+                                    <th>User</th>
+                                    <th>Status</th>
+                                    <th>Edit</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for fits in fits_file %}
+                                    <tr>
+                                        <td><label>
+                                            <input type="checkbox" name="selected-target" value="{{ fits.id }}"
+                                                   onClick="single_select()"/>
+                                        </label></td>
+
+                                        <td>{{ fits.data }}</td>
+                                        <td>{{ fits.created }}</td>
+                                        <td>{{ fits.observatory }}</td>
+                                        <td>{{ fits.target }}</td>
+                                        <td>{{ fits.user }}</td>
+                                        <td>{{ fits.status }}</td>
+
+                                        <td>Details</td>
+
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5">
+                                            {% if fits_count == 0 %}
+                                                No data yet.
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="tab-pane active" id="photometry">
+                        <script type="text/javascript" src="{% static 'bhtom/sorttable.js' %}"></script>
+                        <form id="data-form" action="{% url 'bhtom_common:reload_photometry' %}" method="POST">
+                            {% csrf_token %}
+
+                            <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Reload Photometry
+                            </button>
+                            <table class="table table-hover sortable">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Data</th>
+                                    <th>Created</th>
+                                    <th>Observatory</th>
+                                    <th>Target</th>
+                                    <th>User</th>
+                                    <th>Data Type</th>
+                                    <th>Status</th>
+                                    <th>Status Message</th>
+                                    <th>Edit</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for data in photometry_data %}
+                                    <tr>
+                                        <td><label>
+                                            <input type="checkbox" name="selected-target" value="{{ data.id }}"
+                                                   onClick="single_select()"/>
+                                        </label></td>
+
+                                        <td>{{ data.dataProduct.data }}</td>
+                                        <td>{{ data.calibData.created }}</td>
+                                        <td>{{ data.dataProduct.observatory }}</td>
+                                        <td>{{ data.dataProduct.target }}</td>
+                                        <td>{{ data.dataProduct.user }}</td>
+                                        <td>{{ data.dataProduct.data_product_type }}</td>
+                                        <td>{{ data.calibData.status }}</td>
+                                        <td>{{ data.calibData.status_message }}</td>
+                                        <td>Edit</td>
+
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5">
+                                            {% if photometry_count == 0 %}
+                                                No data yet.
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+<script language="JavaScript">
+    function single_select() {
+        count_selected();
+        document.getElementById("optionSelectAll").innerHTML = "";
+        document.getElementById("selectPage").checked = false;
+        document.getElementById("isSelectAll").value = "False";
+    }
+</script>
