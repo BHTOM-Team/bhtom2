@@ -7,22 +7,6 @@
     {% endif %}
     {% endfor %}
 
-    <!-- <dt class="col-sm-6">{{ target.as_dict }}</dt>-->
-
-    {% comment %} {% for key, value in target.as_dict.items %}
-    {% if value and key != 'name' and key != 'type' and key != 'ra' and key != 'dec' and key != 'epoch'%}
-    <dt class="col-sm-6">{% verbose_name target key %}</dt>
-    <dd class="col-sm-6">{{ value }}</dd>
-    {% endif %}
-    {% comment %} {% if key == 'ra' %}
-    <dt class="col-sm-6">&nbsp;</dt>
-    <dd class="col-sm-6">{{ value|deg_to_sexigesimal:"hms" }}</dd>
-    {% endif %}
-    {% if key == 'dec' %}
-    <dt class="col-sm-6">&nbsp;</dt>
-    <dd class="col-sm-6">{{ value|deg_to_sexigesimal:"dms" }}</dd>
-    {% endif %} {% endcomment %}
-    {% endfor %} {% endcomment %}
 </dl>
 <dl class="row">
 
