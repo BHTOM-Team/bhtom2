@@ -65,7 +65,7 @@ class ReloadFits(LoginRequiredMixin, View):
 
         for data_id in data_ids:
             post_data = {
-                'id': data_id
+                'dataId': data_id
             }
 
             try:
