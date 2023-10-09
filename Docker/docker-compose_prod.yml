@@ -56,6 +56,8 @@ services:
     networks:
       - kafka_network
     hostname: zookeeper1
+    volumes:
+      - zookeeper1-data:/var/lib/zookeeper/data
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -64,7 +66,7 @@ services:
     ports:
       - "2181:2181"
 
-    restart: on-failure
+    restart: always
 
   zookeeper2:
     image: confluentinc/cp-zookeeper:7.3.2
@@ -74,6 +76,8 @@ services:
     networks:
       - kafka_network
     hostname: zookeeper2
+    volumes:
+      - zookeeper2-data:/var/lib/zookeeper/data
     environment:
       ZOOKEEPER_SERVER_ID: 2
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -82,7 +86,7 @@ services:
     ports:
       - "2182:2182"
 
-    restart: on-failure
+    restart: always
 
   zookeeper3:
     image: confluentinc/cp-zookeeper:7.3.2
@@ -92,6 +96,8 @@ services:
     networks:
       - kafka_network
     hostname: zookeeper3
+    volumes:
+      - zookeeper3-data:/var/lib/zookeeper/data
     environment:
       ZOOKEEPER_SERVER_ID: 3
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -100,7 +106,7 @@ services:
     ports:
       - "2183:2183"
 
-    restart: on-failure
+    restart: always
 
   kafka1:
     image: 'confluentinc/cp-kafka:7.3.2'
@@ -111,6 +117,8 @@ services:
       - kafka_network
       - bhtom_network
     restart: always
+    volumes:
+      - kafka1-data:/var/lib/kafka/data
     ports:
       - "9092:9092"
       - "29092:29092"
@@ -132,6 +140,8 @@ services:
   kafka2:
     image: 'confluentinc/cp-kafka:7.3.2'
     container_name: kafka2
+    volumes:
+      - kafka2-data:/var/lib/kafka/data
     env_file:
       - .kafka.env
     networks:
@@ -159,6 +169,8 @@ services:
   kafka3:
     image: 'confluentinc/cp-kafka:7.3.2'
     container_name: kafka3
+    volumes:
+      - kafka3-data:/var/lib/kafka/data
     env_file:
       - .kafka.env
     networks:
@@ -253,6 +265,14 @@ services:
       - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD_SHA2}
       - GRAYLOG_HTTP_EXTERNAL_URI=http://localhost:7900/
       - DISABLE_TELEMETRY=1
+      - GRAYLOG_EMAIL_ENABLED=true
+      - GRAYLOG_EMAIL_HOSTNAME=smtp.gmail.com
+      - GRAYLOG_EMAIL_PORT=587
+      - GRAYLOG_EMAIL_USE_AUTH=true
+      - GRAYLOG_EMAIL_USE_TLS=true
+      - GRAYLOG_EMAIL_USE_SSL=false
+      - GRAYLOG_EMAIL_AUTH_USERNAME=${TOMEMAIL}
+      - GRAYLOG_EMAIL_AUTH_PASSWORD=${TOMEMAILPASSWORD}
     networks:
       - graylog
       - bhtom_network
@@ -330,6 +350,43 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/static/bhtom
+  kafka1-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/kafka/kafka1
+  kafka2-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/kafka/kafka2
+  kafka3-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/kafka/kafka3
+  zookeeper1-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/zookeeper/zookeeper1
+  zookeeper2-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/zookeeper/zookeeper2
+  zookeeper3-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/zookeeper/zookeeper3
+
 networks:
   bhtom_network:
     driver: bridge
