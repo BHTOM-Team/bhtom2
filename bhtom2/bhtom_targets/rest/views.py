@@ -6,6 +6,8 @@ from rest_framework import views
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR
+
 from bhtom2.bhtom_targets.rest.serializers import TargetsSerializers
 from bhtom2.bhtom_targets.utils import update_targetList_cache, update_targetDetails_cache
 from bhtom2.utils.bhtom_logger import BHTOMLogger
@@ -17,7 +19,8 @@ from django.conf import settings
 from django.core import serializers
 import os
 from django.http import FileResponse
-from bhtom2.utils.reduced_data_utils import save_photometry_data_for_target_to_csv_file, save_radio_data_for_target_to_csv_file
+from bhtom2.utils.reduced_data_utils import save_photometry_data_for_target_to_csv_file, \
+    save_radio_data_for_target_to_csv_file
 from abc import ABC, abstractmethod
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.rest-view')
@@ -26,6 +29,7 @@ logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.rest-view')
 class GetTargetListApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -40,13 +44,13 @@ class GetTargetListApi(views.APIView):
         ),
         manual_parameters=[
             openapi.Parameter(
-            name='Authorization',
-            in_=openapi.IN_HEADER,
-            type=openapi.TYPE_STRING,
-            required=True,
-            description='Token <Your Token>'
-        ),
-    ],
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
     )
     def post(self, request):
         query = Q()
@@ -84,6 +88,7 @@ class GetTargetListApi(views.APIView):
 class TargetCreateApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -101,13 +106,13 @@ class TargetCreateApi(views.APIView):
         ),
         manual_parameters=[
             openapi.Parameter(
-            name='Authorization',
-            in_=openapi.IN_HEADER,
-            type=openapi.TYPE_STRING,
-            required=True,
-            description='Token <Your Token>'
-        ),
-    ],
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
     )
     def post(self, request, *args, **kwargs):
         serializer = TargetsSerializers(data=request.data)
@@ -121,6 +126,7 @@ class TargetCreateApi(views.APIView):
 class TargetUpdateApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -138,13 +144,13 @@ class TargetUpdateApi(views.APIView):
         ),
         manual_parameters=[
             openapi.Parameter(
-            name='Authorization',
-            in_=openapi.IN_HEADER,
-            type=openapi.TYPE_STRING,
-            required=True,
-            description='Token <Your Token>'
-        ),
-    ],
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
     )
     def patch(self, request, name):
         instance = Target.objects.get(name=name)
@@ -153,7 +159,7 @@ class TargetUpdateApi(views.APIView):
         if instance is not None:
             if serializer.is_valid():
                 serializer.save()
-                #run_hook('update_alias', target=target, created=True) TODO UPDATE TARGET NAME
+                # run_hook('update_alias', target=target, created=True) TODO UPDATE TARGET NAME
                 return Response({'Status': 'updated'}, status=201)
         return Response(serializer.errors, status=404)
 
@@ -172,13 +178,13 @@ class TargetDeleteApi(views.APIView):
         ),
         manual_parameters=[
             openapi.Parameter(
-            name='Authorization',
-            in_=openapi.IN_HEADER,
-            type=openapi.TYPE_STRING,
-            required=True,
-            description='Token <Your Token>'
-        ),
-    ],
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
     )
     def delete(self, request):
         name = request.data.get('name', None)
@@ -194,6 +200,7 @@ class TargetDeleteApi(views.APIView):
 class CleanTargetListCache(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
     def post(self, request):
         try:
             if request.user.is_superuser:
@@ -233,31 +240,30 @@ class GetPlotsApiView(views.APIView):
             type=openapi.TYPE_OBJECT,
             properties={
                 'targetNames': openapi.Schema(type=openapi.TYPE_ARRAY,
-                items=openapi.Schema(type=openapi.TYPE_STRING),),
+                                              items=openapi.Schema(type=openapi.TYPE_STRING), ),
             },
             required=['targetNames']
         ),
         manual_parameters=[
             openapi.Parameter(
-            name='Authorization',
-            in_=openapi.IN_HEADER,
-            type=openapi.TYPE_STRING,
-            required=True,
-            description='Token <Your Token>'
-        ),
-    ],
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
     )
-
     def post(self, request):
         targetNames = request.data['targetNames']
         results = {}
         try:
             base_path = settings.DATA_PLOT_PATH
             for target_name in targetNames:
-                
+
                 target = Target.objects.get(name=target_name)
                 if target.photometry_plot:
-                    with open(base_path +  str(target.photometry_plot), 'r') as json_file:
+                    with open(base_path + str(target.photometry_plot), 'r') as json_file:
                         plot = json.load(json_file)
                     results[target.name] = plot
                 else:
@@ -268,8 +274,8 @@ class GetPlotsApiView(views.APIView):
         except Exception as e:
             return Response({"Error": 'Something went wrong' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"Plots": results}, status=status.HTTP_200_OK)
-    
-    
+
+
 class GetPlotsObsApiView(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -279,31 +285,30 @@ class GetPlotsObsApiView(views.APIView):
             type=openapi.TYPE_OBJECT,
             properties={
                 'targetNames': openapi.Schema(type=openapi.TYPE_ARRAY,
-                items=openapi.Schema(type=openapi.TYPE_STRING),),
+                                              items=openapi.Schema(type=openapi.TYPE_STRING), ),
             },
             required=['targetNames']
         ),
         manual_parameters=[
             openapi.Parameter(
-            name='Authorization',
-            in_=openapi.IN_HEADER,
-            type=openapi.TYPE_STRING,
-            required=True,
-            description='Token <Your Token>'
-        ),
-    ],
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
     )
-
     def post(self, request):
         targetNames = request.data['targetNames']
         results = {}
         try:
             base_path = settings.DATA_PLOT_PATH
             for target_name in targetNames:
-                
+
                 target = Target.objects.get(name=target_name)
                 if target.photometry_plot_obs:
-                    with open(base_path +  str(target.photometry_plot_obs), 'r') as json_file:
+                    with open(base_path + str(target.photometry_plot_obs), 'r') as json_file:
                         plot = json.load(json_file)
                     results[target.name] = plot
                 else:
@@ -314,13 +319,11 @@ class GetPlotsObsApiView(views.APIView):
         except Exception as e:
             return Response({"Error": 'Something went wrong' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"Plots": results}, status=status.HTTP_200_OK)
-    
 
 
 class TargetDownloadRadioDataApiView(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-
 
     @swagger_auto_schema(
         request_body=openapi.Schema(
@@ -332,15 +335,14 @@ class TargetDownloadRadioDataApiView(views.APIView):
         ),
         manual_parameters=[
             openapi.Parameter(
-            name='Authorization',
-            in_=openapi.IN_HEADER,
-            type=openapi.TYPE_STRING,
-            required=True,
-            description='Token <Your Token>'
-        ),
-    ],
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
     )
-
     def post(self, request):
 
         target_id = request.data['target']
@@ -359,6 +361,7 @@ class TargetDownloadRadioDataApiView(views.APIView):
             if tmp:
                 os.remove(tmp.name)
 
+
 class TargetDownloadPhotometryDataApiView(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -373,13 +376,13 @@ class TargetDownloadPhotometryDataApiView(views.APIView):
         ),
         manual_parameters=[
             openapi.Parameter(
-            name='Authorization',
-            in_=openapi.IN_HEADER,
-            type=openapi.TYPE_STRING,
-            required=True,
-            description='Token <Your Token>'
-        ),
-    ],
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
     )
     def post(self, request):
 
