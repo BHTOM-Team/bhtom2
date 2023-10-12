@@ -4,7 +4,7 @@
 Click [here for BHTOM2 API documentation](DocumentationAPI.md).
 
 
-<p style="color:red">Note: the documentation is still in preparation.</p>
+**Note: the documentation is still in preparation.**
 
 In the meantime, you can listen to [a recording on the BHTOM2 presentation by Lukasz Wyrzykowski from Malta 2023 workshop](https://www.youtube.com/watch?v=jzlkFjEZVz0)
 
