@@ -5,7 +5,7 @@ from bhtom_base.bhtom_targets.views import TargetAddRemoveGroupingView, TargetDe
     TargetExportView, TargetGroupingCreateView, TargetGroupingDeleteView, TargetGroupingView, TargetNameSearchView, \
     TargetDetailView
 from .rest.views import CleanTargetListCache, GetTargetListApi, CleanTargetDetailsCache, TargetCreateApi, \
-    TargetUpdateApi, TargetDeleteApi, GetPlotsApiView
+    TargetUpdateApi, TargetDeleteApi, GetPlotsApiView, TargetDownloadRadioDataApiView, TargetDownloadPhotometryDataApiView
 
 from .views import TargetCreateView, TargetUpdateView, TargetGenerateTargetDescriptionLatexView, TargetImportView, \
     TargetDownloadPhotometryStatsLatexTableView, TargetListImagesView, TargetDownloadPhotometryDataView, \
@@ -28,6 +28,8 @@ urlpatterns = [
      path('updateTarget/<str:name>/', TargetUpdateApi.as_view()),
      path('deleteTarget/', TargetDeleteApi.as_view()),
      path('get-plots/', GetPlotsApiView.as_view()),
+     path('download-radio-data/', TargetDownloadRadioDataApiView.as_view()),
+     path('download-reduced-data/', TargetDownloadPhotometryDataApiView.as_view()),
      path('', TargetListView.as_view(), name='list'),
      path('', TargetListView.as_view(), name='targets'),
      path('create/', TargetCreateView.as_view(), name='create'),

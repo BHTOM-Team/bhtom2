@@ -6,7 +6,6 @@ from rest_framework import views
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
 from bhtom2.bhtom_targets.rest.serializers import TargetsSerializers
 from bhtom2.bhtom_targets.utils import update_targetList_cache, update_targetDetails_cache
 from bhtom2.utils.bhtom_logger import BHTOMLogger
@@ -16,6 +15,10 @@ from rest_framework import status
 import json
 from django.conf import settings
 from django.core import serializers
+import os
+from django.http import FileResponse
+from bhtom2.utils.reduced_data_utils import save_photometry_data_for_target_to_csv_file, save_radio_data_for_target_to_csv_file
+from abc import ABC, abstractmethod
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.rest-view')
 
@@ -312,4 +315,86 @@ class GetPlotsObsApiView(views.APIView):
             return Response({"Error": 'Something went wrong' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"Plots": results}, status=status.HTTP_200_OK)
     
-    
+
+
+class TargetDownloadRadioDataApiView(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'target': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=['target']
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
+    )
+
+    def post(self, request):
+
+        target_id = request.data['target']
+        logger.info(f'Generating photometry CSV file for target with id={target_id}...')
+
+        tmp = None
+        try:
+            tmp, filename = save_radio_data_for_target_to_csv_file(target_id)
+            return FileResponse(open(tmp.name, 'rb'),
+                                as_attachment=True,
+                                filename=filename)
+        except Exception as e:
+            logger.error(f'Error while generating photometry CSV file for target with id={target_id}: {e}')
+            return Response({"Error": 'Something went wrong' + str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
+        finally:
+            if tmp:
+                os.remove(tmp.name)
+
+class TargetDownloadPhotometryDataApiView(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'target': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=['target']
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
+    )
+    def post(self, request):
+
+        target_id = request.data['target']
+        logger.info(f'Generating photometry CSV file for target with id={target_id}...')
+
+        tmp = None
+        try:
+            tmp, filename = save_photometry_data_for_target_to_csv_file(target_id)
+            return FileResponse(open(tmp.name, 'rb'),
+                                as_attachment=True,
+                                filename=filename)
+        except Exception as e:
+            logger.error(f'Error while generating photometry CSV file for target with id={target_id}: {e}')
+            return Response({"Error": 'Something went wrong' + str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
+        finally:
+            if tmp:
+                os.remove(tmp.name)
