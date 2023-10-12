@@ -6,6 +6,8 @@ Click [here for BHTOM2 API documentation](DocumentationAPI.md).
 
 <p style="color:red">Note: the documentation is still in preparation.</p>
 
+A recording on the BHTOM2 presentation by Lukasz Wyrzykowski is available [https://www.youtube.com/watch?v=jzlkFjEZVz0](here).
+
 # 1. Brokers
 
 Brokers in BHTOM search for time-series archival data in photometric (and soon also radio and spectra) archives providing publicly available data.
