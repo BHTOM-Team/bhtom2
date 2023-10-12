@@ -714,7 +714,7 @@ This API supports filtering targets by name, Right Ascension (RA) range, and Dec
 
 ### Request
 
-- **Method**: GET
+- **Method**: POST
 - **URL**: `/targets/getTargetList/`
 
 ### Request Parameters
@@ -729,14 +729,14 @@ The request to retrieve the target list may include the following query paramete
 <!-- TODO: need more fields!! -->
 ### Example Request
 
-You can make a GET request to retrieve a list of targets based on the specified criteria using the `curl` command or a web browser.
+You can make a POST request to retrieve a list of targets based on the specified criteria using the `curl` command or a web browser.
 
 ### Using `curl`
 
 ```bash
-curl -X GET \
+curl -X POST \
   -H "Authorization: Token <yourToken>" \
-  "url/targets/getTargetList/?name=MyTarget&raMin=100.0&raMax=200.0&decMin=-30.0&decMax=30.0"
+  "https://bh-tom2.astrolabs.pl/targets/getTargetList/?name=MyTarget&raMin=100.0&raMax=200.0&decMin=-30.0&decMax=30.0"
 ```
 
 Replace `<yourToken>` with your authentication token and adjust the URL as needed to specify your search criteria.
