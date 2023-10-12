@@ -180,7 +180,7 @@ This API endpoint allows users to retrieve calibration results for previously up
 
 ```bash
 curl -X 'POST' \
-  'url/calibration/get-calibration-res/' \
+  'https://bh-tom2.astrolabs.pl/calibration/get-calibration-res/' \
   -H 'accept: application/json' \
   -H 'Authorization: Token <yourToken>' \
   -H 'Content-Type: application/json' \
@@ -248,7 +248,7 @@ The request header should include the following:
 
 ```bash
 curl -X 'POST' \
-  'url/observatory/getObservatoryList/' \
+  'https://bh-tom2.astrolabs.pl/observatory/getObservatoryList/' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Token <yourToken>' \
@@ -302,7 +302,7 @@ This API endpoint allows users to add observatory to their favourite list. Users
 
 ```bash
 curl -X POST \
-  'url/observatory/addFavouriteObservatory/' \
+  'https://bh-tom2.astrolabs.pl/observatory/addFavouriteObservatory/' \
   -H 'Authorization: Token <yourToken>' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -623,7 +623,7 @@ curl -X POST \
     "importance": 5,
     "cadence": 24
   }' \
-  url/targets/createTarget/
+  https://bh-tom2.astrolabs.pl/targets/createTarget/
 ```
 ### Using Python Script
 
@@ -693,7 +693,7 @@ curl -X PATCH \
     "importance": 3,
     "cadence": 12
   }' \
-  url/api/targets/updateTarget/{name}/
+  https://bh-tom2.astrolabs.pl/api/targets/updateTarget/{name}/
 ```
 
 Replace `<yourToken>` with your authentication token and `{name}` with the actual name or identifier of the target you want to update.
@@ -783,7 +783,7 @@ curl -X DELETE \
   -d '{
     "name": "MyTarget"
   }' \
-  url/targets/deleteTarget/
+  https://bh-tom2.astrolabs.pl/targets/deleteTarget/
 ```
 
 Replace `<yourToken>` with your authentication token and `"MyTarget"` with the name or identifier of the target you want to delete.
@@ -826,7 +826,7 @@ curl -X POST \
   -d '{
     "targetNames": ["Target1", "Target2", "Target3"]
   }' \
-url/targets/get-plots/
+https://bh-tom2.astrolabs.pl/targets/get-plots/
 ```
 
 Replace `<yourToken>` with your valid authentication token and adjust the target names in the request body as needed.
@@ -857,7 +857,7 @@ You can make a POST request to clean the target list cache using the `curl` comm
 ```bash
 curl -X POST \
   -H "Authorization: Token <yourToken>" \
-  "url/targets/cleanTargetListCache/"
+  "https://bh-tom2.astrolabs.pl/targets/cleanTargetListCache/"
 ```
 
 Replace `<yourToken>` with your valid authentication token.
@@ -886,7 +886,7 @@ You can make a POST request to clean the target details cache using the `curl` c
 ```bash
 curl -X POST \
   -H "Authorization: Token <yourToken>" \
-  "url/targets/cleanTargetDetailsCache/"
+  "https://bh-tom2.astrolabs.pl/targets/cleanTargetDetailsCache/"
 ```
 
 Replace `<yourToken>` with your valid authentication token.
