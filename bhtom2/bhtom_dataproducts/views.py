@@ -98,7 +98,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             'data_product_type': dp_type,
             'match_dist': match_dist,
             'comment': comment,
-            'dry_tun': dry_run,
+            'dry_run': dry_run,
             'no_plot': False,
             'observatory': observatoryMatrix,
             'mjd': mjd,
