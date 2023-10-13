@@ -7,7 +7,7 @@ This is a simple guide for BHTOM's REST API. It lets you use BHTOM webpage featu
 
 > **Remember!** To use API you should get your own TOKEN first!
 
-# 1. AUTHORIZATION API: /api/token-auth/
+# AUTHORIZATION API: /api/token-auth/
 
 ### Description
 <!-- 
@@ -48,7 +48,7 @@ curl -X 'POST' \
     }
 
 
-# 2. PHOTOMETRY UPLOAD API
+# DATA UPLOAD API
 
 ### Description
 This API facilitates programmable batch file uploads to the **BHTOM system**. It offers a command-line interface for uploading files along with their associated meta data.
@@ -562,8 +562,99 @@ You can use a Python script to delete an observatory matrix record:
 python delete_observatory_matrix.py --observatory "My Observatory" --token <yourToken>"
 ```
 
+# DATA DOWNLOAD API
 
-# Targets API
+### 1. Photometry download
+
+With this API one can download all photometric observations (magnitudes) in semi-color separated form. The columns of the output are the following: 
+
+*** MJD;Magnitude;Error;Facility;Filter;Observer ***
+
+### Request 
+- **Method**: POST
+- **URL**: `/targets/download-photometry/`
+
+### Request Parameters
+
+- `name` (string, required): The name or identifier of the target.
+
+### Example Request Body
+
+```json
+{
+    "name": "My Target",
+}
+```
+
+### Example Request
+
+You can make a POST request to download the data using the `curl` command or a Python script.
+
+### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Token <yourToken>" \
+  -d '{
+    "name": "My Target",
+  }' \
+  https://bh-tom2.astrolabs.pl/targets/download-photometry/
+```
+### Using Python Script
+
+You can use a Python script to create a new target:
+
+```bash
+python download_photometry.py --name "My Target" --token <yourToken>
+```
+
+### 2. Radio data download
+
+With this API one can download all radio observations (mJy) in semi-color separated form. The columns of the output are the following: 
+
+*** MJD;mJy;Error;Facility;Filter;Observer ***
+### Request 
+- **Method**: POST
+- **URL**: `/targets/download-radio/`
+
+### Request Parameters
+
+- `name` (string, required): The name or identifier of the target.
+
+### Example Request Body
+
+```json
+{
+    "name": "My Target",
+}
+```
+
+### Example Request
+
+You can make a POST request to download the data using the `curl` command or a Python script.
+
+### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Token <yourToken>" \
+  -d '{
+    "name": "My Target",
+  }' \
+  https://bh-tom2.astrolabs.pl/targets/download-radio/
+```
+### Using Python Script
+
+You can use a Python script to create a new target:
+
+```bash
+python download_radio.py --name "My Target" --token <yourToken>
+```
+
+
+# TARGETS API
 
 ### 1. Create Target 
 <!-- /targets/createTarget/ -->
@@ -791,7 +882,7 @@ Replace `<yourToken>` with your authentication token and `"MyTarget"` with the n
 # 5. Targets: get plots
 
 <!-- targets/get-plots/ -->
-This API allows users to obtain the visual list of targets. Filtering criteria can be provided.
+This API allows users to obtain the plots for a list of targets. The plots are returned in JSON format and in order to be displayed, one has to use plotly or matplotlib libraries.
 
 ### Request
 - **Method**: POST
