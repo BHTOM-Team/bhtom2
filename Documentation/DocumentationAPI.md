@@ -736,6 +736,35 @@ You can use a Python script to create a new target:
 python create_target.py --name "My Target" --ra 123.456 --dec -45.678 --epoch 2000.0 --classification "Star" --discovery_date "2023-09-28T10:00:00Z" --importance 5 --cadence 24 --token <yourToken> 
 ```
 
+List of available classifications:
+
+```("Unknown", "Unknown"), 
+    ('Be-star outburst', 'Be-star outburst'),
+    ('AGN', "Active Galactic Nucleus(AGN)"), 
+    ("BL Lac", "BL Lac"),
+    ("CV", "Cataclysmic Variable(CV)"), 
+    ("CEPH", "Cepheid Variable(CEPH)"),
+    ("EB", "Eclipsing Binary(EB)"),
+    ("Galaxy", "Galaxy"), 
+    ("LPV", "Long Period Variable(LPV)"),
+    ("LBV", "Luminous Blue Variable(LBV)"),
+    ("M-dwarf flare", "M-dwarf flare"), 
+    ("Microlensing Event", "Microlensing Event"), 
+    ("Nova", "Nova"),
+    ("Peculiar Supernova", "Peculiar Supernova"),
+    ("QSO", "Quasar(QSO)"), 
+    ("RCrB", "R CrB Variable"), 
+    ("RR Lyrae Variable", "RR Lyrae Variable"),
+    ("SSO", "Solar System Object(SSO)"),
+    ("Star", "Star"), 
+    ("SN", "Supernova(SN)"), 
+    ("Supernova imposter", "Supernova imposter"),
+    ("Symbiotic star", "Symbiotic star"),
+    ("TDE", "Tidal Disruption Event(TDE)"), 
+    ("Variable star-other", "Variable star-other"),
+    ("XRB", "X-Ray Binary(XRB)"),
+    ("YSO", "Young Stellar Object(YSO)")
+```
 
 ## 2. Update Target
 <!-- /targets/updateTarget/{name}/ -->
