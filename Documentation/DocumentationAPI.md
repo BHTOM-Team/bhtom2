@@ -606,7 +606,7 @@ curl -X POST \
 You can use a Python script to create a new target:
 
 ```bash
-python download_photometry.py --name "My Target" --token <yourToken>
+python download_photometry.py <yourToken> <targetName>
 ```
 
 ### 2. Radio data download
@@ -650,7 +650,7 @@ curl -X POST \
 You can use a Python script to create a new target:
 
 ```bash
-python download_radio.py --name "My Target" --token <yourToken>
+python download_radio.py <yourToken> <targetName>
 ```
 
 
