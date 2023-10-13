@@ -21,6 +21,11 @@ class TargetsSerializers(serializers.ModelSerializer):
         if 'dec' in data:
             dec = data['dec']
 
+        data.setdefault('epoch', 2000.0)
+        data.setdefault('classification', 'Unknown')
+        data.setdefault('importance', 9.98)
+        data.setdefault('cadence', 1.0)
+
         if unknown:
             raise serializers.ValidationError("Unknown field(s): {}".format(", ".join(unknown)))
         if ra < 0 or ra > 360 or dec < -90 or dec > 90:
@@ -45,6 +50,7 @@ class TargetsSerializers(serializers.ModelSerializer):
         #existing_names = check_for_existing_alias(validated_data['name'])
         validated_data['ra'] = coords_to_degrees(validated_data['ra'], 'ra')
         validated_data['dec'] = coords_to_degrees(validated_data['dec'], 'dec')
+        validated_data['type'] = "SIDEREAL"
         stored = Target.objects.all()
         coords_names = check_for_existing_coords(validated_data['ra'], validated_data['dec'], 3. / 3600., stored)
 
@@ -52,4 +58,5 @@ class TargetsSerializers(serializers.ModelSerializer):
             raise serializers.ValidationError("Source found already at these coordinates (rad 3 arcsec)")
         #if duplicate_names or existing_names:
           #  raise serializers.ValidationError("Duplicate names.")
+
         return Target.objects.create(**validated_data)
