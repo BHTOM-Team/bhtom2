@@ -568,7 +568,9 @@ Here we present end-points how to download the photometry and radio data from BH
 
 Please contact us if you plan to use the data in a publication. By downloading the data from BHTOM you agree to follow our data policy and to use this acknowledgment:
 
-```The data was obtained via [BHTOM](https://bhtom.space), which has received funding from the European Union's Horizon 2020 research and innovation program under grant agreement No. 101004719 (OPTICON-RadioNet Pilot).```
+```
+The data was obtained via [BHTOM](https://bhtom.space), which has received funding from the European Union's Horizon 2020 research and innovation program under grant agreement No. 101004719 (OPTICON-RadioNet Pilot).
+```
 
 For more information about acknowledgement and data policy please visit [https://about.bhtom.space](https://about.bhtom.space)
 
