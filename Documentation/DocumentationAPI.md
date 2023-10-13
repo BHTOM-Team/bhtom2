@@ -684,7 +684,7 @@ The request to create a new target should include the following parameters in th
 - `name` (string, required): The name or identifier of the target.
 - `ra` (number, required): The Right Ascension (RA) of the target, represented as a floating-point number.
 - `dec` (number, required): The Declination (Dec) of the target, represented as a floating-point number.
-- `epoch` (string): The epoch or reference time for the target (e.g., "J2000").
+- `epoch` (string): The epoch or reference time for the target (e.g., 2000.0).
 - `classification` (string): The classification or type of the target.
 - `discovery_date` (string, datetime format): The date and time of the target's discovery.
 - `importance` (number): A numerical value representing the importance or priority of the target.
@@ -697,7 +697,7 @@ The request to create a new target should include the following parameters in th
     "name": "My Target",
     "ra": 123.456,
     "dec": -45.678,
-    "epoch": "J2000",
+    "epoch": 2000.0,
     "classification": "Asteroid",
     "discovery_date": "2023-09-28T10:00:00Z",
     "importance": 5,
@@ -719,7 +719,7 @@ curl -X POST \
     "name": "My Target",
     "ra": 123.456,
     "dec": -45.678,
-    "epoch": "J2000",
+    "epoch": 2000.0,
     "classification": "Asteroid",
     "discovery_date": "2023-09-28T10:00:00Z",
     "importance": 5,
@@ -732,7 +732,7 @@ curl -X POST \
 You can use a Python script to create a new target:
 
 ```bash
-python create_target.py --name "My Target" --ra 123.456 --dec -45.678 --epoch "J2000" --classification "Asteroid" --discovery_date "2023-09-28T10:00:00Z" --importance 5 --cadence 24 --token <yourToken> 
+python create_target.py --name "My Target" --ra 123.456 --dec -45.678 --epoch 2000.0 --classification "Asteroid" --discovery_date "2023-09-28T10:00:00Z" --importance 5 --cadence 24 --token <yourToken> 
 ```
 
 
@@ -756,7 +756,7 @@ The request to update a target should include the following parameters in the re
 - `name` (string): The name or identifier of the target. This parameter is part of the URL and does not need to be included in the request body.
 - `ra` (number, optional): The Right Ascension (RA) of the target, represented as a floating-point number.
 - `dec` (number, optional): The Declination (Dec) of the target, represented as a floating-point number.
-- `epoch` (string, optional): The epoch or reference time for the target (e.g., "J2000").
+- `epoch` (string, optional): The epoch or reference time for the target (e.g., 2000.0).
 - `classification` (string, optional): The classification or type of the target.
 - `discovery_date` (string, datetime format, optional): The date and time of the target's discovery.
 - `importance` (number, optional): A numerical value representing the importance or priority of the target.
