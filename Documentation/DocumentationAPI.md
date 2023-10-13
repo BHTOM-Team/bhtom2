@@ -564,11 +564,20 @@ python delete_observatory_matrix.py --observatory "My Observatory" --token <your
 
 # DATA DOWNLOAD API
 
+Here we present end-points how to download the photometry and radio data from BHTOM. 
+
+Please contact us if you plan to use the data in a publication. By downloading the data from BHTOM you agree to follow our data policy and to use this acknowledgment:
+
+```The data was obtained via [BHTOM](https://bhtom.space), which has received funding from the European Union's Horizon 2020 research and innovation program under grant agreement No. 101004719 (OPTICON-RadioNet Pilot).```
+
+For more information about acknowledgement and data policy please visit [https://about.bhtom.space](https://about.bhtom.space)
+
+
 ### 1. Photometry download
 
 With this API one can download all photometric observations (magnitudes) in semi-color separated form. The columns of the output are the following: 
 
-*** MJD;Magnitude;Error;Facility;Filter;Observer ***
+***MJD;Magnitude;Error;Facility;Filter;Observer***
 
 ### Request 
 - **Method**: POST
@@ -613,7 +622,7 @@ python download_photometry.py <yourToken> <targetName>
 
 With this API one can download all radio observations (mJy) in semi-color separated form. The columns of the output are the following: 
 
-*** MJD;mJy;Error;Facility;Filter;Observer ***
+***MJD;mJy;Error;Facility;Filter;Observer***
 ### Request 
 - **Method**: POST
 - **URL**: `/targets/download-radio/`
