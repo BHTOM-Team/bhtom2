@@ -8,6 +8,16 @@ Click [here for BHTOM2 API documentation](DocumentationAPI.md).
 
 In the meantime, you can listen to [a recording on the BHTOM2 presentation by Lukasz Wyrzykowski from Malta 2023 workshop](https://www.youtube.com/watch?v=jzlkFjEZVz0)
 
+# Data Download and Use policy
+
+Please contact us if you plan to use the data in a publication. By downloading the data from BHTOM you agree to follow our data policy and to use this acknowledgment:
+
+```
+The data was obtained via [BHTOM](https://bhtom.space), which has received funding from the European Union's Horizon 2020 research and innovation program under grant agreement No. 101004719 (OPTICON-RadioNet Pilot).
+```
+
+For more information about acknowledgement and data policy contact us and visit [https://about.bhtom.space](https://about.bhtom.space)
+
 # 1. Brokers
 
 Brokers in BHTOM search for time-series archival data in photometric (and soon also radio and spectra) archives providing publicly available data.

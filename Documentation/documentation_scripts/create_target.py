@@ -17,7 +17,7 @@ def create_target(name, ra, dec, epoch, classification, discovery_date, importan
         "importance": importance,
         "cadence": cadence,
     }
-    api_url=
+    api_url="https://bh-tom2.astrolabs.pl/targets/createTarget/"
     response = requests.post(api_url,headers=headers, json=data)
     print(response.json())
 
@@ -26,11 +26,11 @@ if __name__ == "__main__":
     parser.add_argument("--name", required=True, help="Name or identifier of the target")
     parser.add_argument("--ra", type=float, required=True, help="Right Ascension (RA) of the target")
     parser.add_argument("--dec", type=float, required=True, help="Declination (Dec) of the target")
-    parser.add_argument("--epoch", help="Epoch or reference time of the target")
-    parser.add_argument("--classification", help="Classification or type of the target")
-    parser.add_argument("--discovery_date", help="Discovery date and time of the target")
-    parser.add_argument("--importance", type=int, help="Importance or priority of the target")
-    parser.add_argument("--cadence", type=int, help="Cadence or observation frequency of the target")
+    parser.add_argument("--epoch", type=int, default=2000.0, help="Epoch or reference time of the target")
+    parser.add_argument("--classification", default="Unknown", help="Classification or type of the target")
+    parser.add_argument("--discovery_date", default="2023-01-01T0:00:01Z", help="Discovery date and time of the target")
+    parser.add_argument("--importance", type=int, default=9.97, help="Importance or priority of the target")
+    parser.add_argument("--cadence", type=int, default=1.0, help="Cadence or observation frequency of the target")
     parser.add_argument("--token", required=True, help="Authentication token")
 
     args = parser.parse_args()

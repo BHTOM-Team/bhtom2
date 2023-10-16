@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR
 
-from bhtom2.bhtom_targets.rest.serializers import TargetsSerializers
+from bhtom2.bhtom_targets.rest.serializers import TargetsSerializers, TargetDownloadDataSerializer
 from bhtom2.bhtom_targets.utils import update_targetList_cache, update_targetDetails_cache
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_common.hooks import run_hook
@@ -84,7 +84,7 @@ class GetTargetListApi(views.APIView):
         serialized_queryset = serializers.serialize('json', queryset)
         return Response(serialized_queryset, status=200)
 
-
+#this is API for SIDEREAL target creation, non-sidereal has to go to a different api
 class TargetCreateApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -96,7 +96,7 @@ class TargetCreateApi(views.APIView):
                 'name': openapi.Schema(type=openapi.TYPE_STRING),
                 'ra': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'dec': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
-                'epoch': openapi.Schema(type=openapi.TYPE_STRING),
+                'epoch': openapi.Schema(type=openapi.TYPE_NUMBER),
                 'classification': openapi.Schema(type=openapi.TYPE_STRING),
                 'discovery_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'importance': openapi.Schema(type=openapi.TYPE_NUMBER),
@@ -134,7 +134,7 @@ class TargetUpdateApi(views.APIView):
                 'name': openapi.Schema(type=openapi.TYPE_STRING),
                 'ra': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'dec': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
-                'epoch': openapi.Schema(type=openapi.TYPE_STRING),
+                'epoch': openapi.Schema(type=openapi.TYPE_NUMBER),
                 'classification': openapi.Schema(type=openapi.TYPE_STRING),
                 'discovery_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'importance': openapi.Schema(type=openapi.TYPE_NUMBER),
@@ -270,9 +270,9 @@ class GetPlotsApiView(views.APIView):
                     results[target.name] = "None"
 
         except Target.DoesNotExist:
-            return Response({"Error": 'Target does not exist in the database'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Error ": 'Target does not exist in the database '}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"Error": 'Something went wrong' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Error ": 'Something went wrong ' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"Plots": results}, status=status.HTTP_200_OK)
 
 
@@ -317,7 +317,7 @@ class GetPlotsObsApiView(views.APIView):
         except Target.DoesNotExist:
             return Response({"Error": 'Target does not exist in the database'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"Error": 'Something went wrong' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Error ": 'Something went wrong ' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"Plots": results}, status=status.HTTP_200_OK)
 
 
@@ -329,9 +329,9 @@ class TargetDownloadRadioDataApiView(views.APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'target': openapi.Schema(type=openapi.TYPE_STRING),
+                'name': openapi.Schema(type=openapi.TYPE_STRING),
             },
-            required=['target']
+            required=['name']
         ),
         manual_parameters=[
             openapi.Parameter(
@@ -344,9 +344,13 @@ class TargetDownloadRadioDataApiView(views.APIView):
         ],
     )
     def post(self, request):
+        serializer = TargetDownloadDataSerializer(data=request.data)
+        if not serializer.is_valid():
+            logger.info('Error bad request')
+            return Response({"Error": 'Something went wrong' }, status=status.HTTP_400_BAD_REQUEST)
 
-        target_id = request.data['target']
-        logger.info(f'Generating photometry CSV file for target with id={target_id}...')
+        target_id = serializer.validated_data['name']
+        logger.info(f'API Generating radio data in CSV file for target with id={target_id}...')
 
         tmp = None
         try:
@@ -355,8 +359,8 @@ class TargetDownloadRadioDataApiView(views.APIView):
                                 as_attachment=True,
                                 filename=filename)
         except Exception as e:
-            logger.error(f'Error while generating photometry CSV file for target with id={target_id}: {e}')
-            return Response({"Error": 'Something went wrong' + str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(f'Error while generating radio data to CSV file for target with id={target_id}: {e}')
+            return Response({"Error ": 'Something went wrong ' + str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
         finally:
             if tmp:
                 os.remove(tmp.name)
@@ -370,9 +374,9 @@ class TargetDownloadPhotometryDataApiView(views.APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'target': openapi.Schema(type=openapi.TYPE_STRING),
+                'name': openapi.Schema(type=openapi.TYPE_STRING),
             },
-            required=['target']
+            required=['name']
         ),
         manual_parameters=[
             openapi.Parameter(
@@ -385,9 +389,12 @@ class TargetDownloadPhotometryDataApiView(views.APIView):
         ],
     )
     def post(self, request):
-
-        target_id = request.data['target']
-        logger.info(f'Generating photometry CSV file for target with id={target_id}...')
+        serializer = TargetDownloadDataSerializer(data=request.data)
+        if not serializer.is_valid():
+            logger.info('Error bad request')
+            return Response({"Error": 'Something went wrong'}, status=status.HTTP_400_BAD_REQUEST)
+        target_id = serializer.validated_data['name']
+        logger.info(f'API Generating photometry CSV file for target with id={target_id}...')
 
         tmp = None
         try:
@@ -397,7 +404,7 @@ class TargetDownloadPhotometryDataApiView(views.APIView):
                                 filename=filename)
         except Exception as e:
             logger.error(f'Error while generating photometry CSV file for target with id={target_id}: {e}')
-            return Response({"Error": 'Something went wrong' + str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"Error ": 'Something went wrong ' + str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
         finally:
             if tmp:
                 os.remove(tmp.name)
