@@ -48,6 +48,11 @@ function addForm(e) {
         element.setAttribute('value', "")
     });
 
+    let url = newForm.querySelectorAll('[name*="-url"]');
+    url.forEach(function(element) {
+        element.setAttribute('name', `aliases-${formNum}-url`);
+        element.setAttribute('value', "")
+    });
 
     newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`) //Update the new form to have the correct form number
     container.insertBefore(newForm, addButton) //Insert the new form at the end of the list of forms

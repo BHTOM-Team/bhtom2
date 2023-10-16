@@ -189,7 +189,6 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             to_add, _ = TargetName.objects.update_or_create(target=self.object, source_name=source_name, url=url)
             to_add.name = name
             to_add.save()
-            run_hook('update_alias', target=self.object, broker=name)
 
         messages.success(self.request, 'Target created, grabbing all the data for it. Please wait and refresh in about a minute...')
 

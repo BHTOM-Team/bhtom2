@@ -115,12 +115,17 @@
 </dd>
 {% elif value.source_name == "ASASSN" %}
 <dd class="col-sm-6">
-    <a href='{{ value }}' target="_blank"> {{ value }}
+    <a href='{{ value.url }}' target="_blank"> {{ value }}
     </a>
 </dd>
 {% elif value.source_name == "TNS" %}
 <dd class="col-sm-6">
-    <a href='https://www.wis-tns.org/object/{{ value|truncatechars:2 }}' target="_blank">{{ value }}</a> <!-- TODO -->
+    <a href='{{ value.url }}' target="_blank">{{ value }}</a>
+    <!-- value|trim_chars:2 -->
+</dd>
+ {% elif value.source_name == "ATLAS" %}
+<dd class="col-sm-6">
+    <a href='{{ value.url }}' target="_blank">{{ value }}</a>
     <!-- value|trim_chars:2 -->
 </dd>
 {% else %}

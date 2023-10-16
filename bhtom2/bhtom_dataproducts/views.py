@@ -22,14 +22,11 @@ from rest_framework.views import APIView
 from django.urls import reverse
 
 import requests
-import os
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.contrib import messages
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.mixins import LoginRequiredMixin
-from rest_framework.response import Response
-from django.contrib.auth.models import User
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_dataproducts.views')
 
@@ -79,13 +76,13 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             messages.error(self.request, f'You can upload max. {self.MAX_FILES} files at once')
             return redirect(form.cleaned_data.get('referrer', '/'))
 
-        if dp_type == 'fits_file': 
+        if dp_type == 'fits_file':
             try:
                 observatory = Observatory.objects.get(id=observatoryMatrix.observatory_id)
             except Exception as e:
                 messages.error(self.request, f"Observatory doesn't exist")
                 return redirect(form.cleaned_data.get('referrer', '/'))
-            if  observatory.calibration_flg is True:
+            if observatory.calibration_flg is True:
                 messages.error(self.request, 'Observatory can calibration only')
                 return redirect(form.cleaned_data.get('referrer', '/'))
 
@@ -302,12 +299,6 @@ class photometry_download(LoginRequiredMixin, View):
             logger.info('Download Photometry file: %s, user: %s' % (str(file), str(self.request.user)))
             dataProduct = DataProduct.objects.get(id=file)
             assert dataProduct.photometry_data is not None
-            if request.user == dataProduct.user and request.user.is_staff:
-                messages.error(self.request, 'You do not have permission to download this file')
-                if self.request.META.get('HTTP_REFERER') is None:
-                    return HttpResponseRedirect('/')
-                else:
-                    return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
         except (DataProduct.DoesNotExist, AssertionError):
             logger.error('Download Photometry error, file not exist')

@@ -365,7 +365,7 @@ TOM_ALERT_CLASSES = [
     # 'bhtom_base.bhtom_alerts.brokers.mars.MARSBroker',
     # 'bhtom_base.bhtom_alerts.brokers.scimma.SCIMMABroker',
     # 'bhtom_base.bhtom_alerts.brokers.scout.ScoutBroker',
-    # 'bhtom_base.bhtom_alerts.brokers.tns.TNSBroker',
+    'bhtom_base.bhtom_alerts.brokers.tns.TNSBroker',
     # 'bhtom_base.bhtom_alerts.brokers.fink.FinkBroker',
     'bhtom2.brokers.gaia_alerts.GaiaAlertsBroker',
     'bhtom2.brokers.cpcs.CPCSBroker',
