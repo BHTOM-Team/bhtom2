@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR
 
-from bhtom2.bhtom_targets.rest.serializers import TargetsSerializers
+from bhtom2.bhtom_targets.rest.serializers import TargetsSerializers, TargetDownloadDataSerializer
 from bhtom2.bhtom_targets.utils import update_targetList_cache, update_targetDetails_cache
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_common.hooks import run_hook
@@ -344,10 +344,13 @@ class TargetDownloadRadioDataApiView(views.APIView):
         ],
     )
     def post(self, request):
+        serializer = TargetDownloadDataSerializer(data=request.data)
+        if not serializer.is_valid():
+            logger.info('Error bad request')
+            return Response({"Error": 'Something went wrong' }, status=status.HTTP_400_BAD_REQUEST)
 
-        target_id = request.data['target']
+        target_id = serializer.validated_data['target']
         logger.info(f'Generating photometry CSV file for target with id={target_id}...')
-
         tmp = None
         try:
             tmp, filename = save_radio_data_for_target_to_csv_file(target_id)
@@ -385,10 +388,12 @@ class TargetDownloadPhotometryDataApiView(views.APIView):
         ],
     )
     def post(self, request):
-
+        serializer = TargetDownloadDataSerializer(data=request.data)
+        if not serializer.is_valid():
+            logger.info('Error bad request')
+            return Response({"Error": 'Something went wrong'}, status=status.HTTP_400_BAD_REQUEST)
         target_id = request.data['target']
         logger.info(f'Generating photometry CSV file for target with id={target_id}...')
-
         tmp = None
         try:
             tmp, filename = save_photometry_data_for_target_to_csv_file(target_id)

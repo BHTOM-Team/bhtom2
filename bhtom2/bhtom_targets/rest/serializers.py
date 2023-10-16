@@ -53,3 +53,7 @@ class TargetsSerializers(serializers.ModelSerializer):
         #if duplicate_names or existing_names:
           #  raise serializers.ValidationError("Duplicate names.")
         return Target.objects.create(**validated_data)
+
+
+class TargetDownloadDataSerializer(serializers.Serializer):
+    target = serializers.CharField(required=True)
