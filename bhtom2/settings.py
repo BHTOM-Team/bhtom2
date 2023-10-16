@@ -338,7 +338,7 @@ DATA_PRODUCT_TYPES = {
     # 'image_file': ('image_file', 'Image File')
 }
 CLASSIFICATION_TYPES= [
-    ("unknown", "Unknown"), ('Be-star outburst', 'Be-star outburst'),
+    ("Unknown", "Unknown"), ('Be-star outburst', 'Be-star outburst'),
     ('AGN', "Active Galactic Nucleus(AGN)"), ("BL Lac", "BL Lac"),
     ("CV", "Cataclysmic Variable(CV)"), ("CEPH", "Cepheid Variable(CEPH)"),
     ("EB", "Eclipsing Binary(EB)"),

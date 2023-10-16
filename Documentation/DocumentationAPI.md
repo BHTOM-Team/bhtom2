@@ -7,7 +7,7 @@ This is a simple guide for BHTOM's REST API. It lets you use BHTOM webpage featu
 
 > **Remember!** To use API you should get your own TOKEN first!
 
-# 1. AUTHORIZATION API: /api/token-auth/
+# AUTHORIZATION API: /api/token-auth/
 
 ### Description
 <!-- 
@@ -48,7 +48,7 @@ curl -X 'POST' \
     }
 
 
-# 2. PHOTOMETRY UPLOAD API
+# DATA UPLOAD API
 
 ### Description
 This API facilitates programmable batch file uploads to the **BHTOM system**. It offers a command-line interface for uploading files along with their associated meta data.
@@ -202,7 +202,7 @@ curl -X 'POST' \
 
 # OBSERVATORY API
 
-# 1. Observatory List
+## 1. Observatory List
 <!-- /observatory/getObservatoryList/ -->
     
     This API endpoint allows users to get the list of observatories registered in the system.
@@ -269,7 +269,7 @@ curl -X 'POST' \
 
 
 
-# 2. Add Favourite Observatory
+## 2. Add Favourite Observatory
 <!-- /observatory/addFavouriteObservatory/ -->
 
 This API endpoint allows users to add observatory to their favourite list. Users must provide the observatory name, and can include an optional comment.
@@ -311,7 +311,7 @@ curl -X POST \
   }'
 ```
 
-# 3. Create Observatory 
+## 3. Create Observatory 
 <!-- /createObservatory/ -->
 
     This API allows users to create an observatory. 
@@ -383,7 +383,7 @@ You can use a Python script to create observatories:
 python create_observatory.py --name "My Observatory" --lon 45.12345 --lat -120.67890 --calibration_flg --example_file "observatory_example.txt" --comment "This observatory is for calibration purposes" --token <yourToken> 
 ```
 
-# 4. Update Observatory 
+## 4. Update Observatory 
 <!-- /observatory/update/ -->
 
     This API allows users to update observatory information. 
@@ -455,7 +455,7 @@ You can use a Python script to update observatory information:
 python create_observatory.py --name "My Observatory" --lon 45.12345 --lat -120.67890 --calibration_flg --example_file "observatory_example.txt" --comment "This observatory is for calibration purposes" --token <yourToken> 
 ```
 
-# 5. Get Favourite Observatory
+## 5. Get Favourite Observatory
 <!-- /observatory/getFavouriteObservatory/ -->
 
     This API allows obtaining a favourite observatory.
@@ -515,7 +515,7 @@ You can use a Python script to retrieve observatory matrix data:
 python get_observatory_matrix.py --user "JohnDoe" --active_flg true --observatory "My Observatory" --created_start "2023-01-01T00:00:00Z" --created_end "2023-12-31T23:59:59Z" --token <yourToken>
 ```
 
-# 6. Delete Favourite Observatory
+## 6. Delete Favourite Observatory
 <!-- /observatory/deleteFavouriteObservatory/ -->
 
     This API allows users to delete favourite observatory records based on the observatory name from their list.
@@ -562,10 +562,112 @@ You can use a Python script to delete an observatory matrix record:
 python delete_observatory_matrix.py --observatory "My Observatory" --token <yourToken>"
 ```
 
+# DATA DOWNLOAD API
 
-# Targets API
+Here we present end-points how to download the photometry and radio data from BHTOM. 
 
-### 1. Create Target 
+Please contact us if you plan to use the data in a publication. By downloading the data from BHTOM you agree to follow our data policy and to use this acknowledgment:
+
+```
+The data was obtained via [BHTOM](https://bhtom.space), which has received funding from the European Union's Horizon 2020 research and innovation program under grant agreement No. 101004719 (OPTICON-RadioNet Pilot).
+```
+
+For more information about acknowledgement and data policy please visit [https://about.bhtom.space](https://about.bhtom.space)
+
+
+## 1. Photometry download
+
+With this API one can download all photometric observations (magnitudes) in semi-color separated form. The columns of the output are the following: 
+
+***MJD;Magnitude;Error;Facility;Filter;Observer***
+
+### Request 
+- **Method**: POST
+- **URL**: `/targets/download-photometry/`
+
+### Request Parameters
+
+- `name` (string, required): The name or identifier of the target.
+
+### Example Request Body
+
+```json
+{
+    "name": "My Target",
+}
+```
+
+### Example Request
+
+You can make a POST request to download the data using the `curl` command or a Python script.
+
+### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Token <yourToken>" \
+  -d '{
+    "name": "My Target",
+  }' \
+  https://bh-tom2.astrolabs.pl/targets/download-photometry/
+```
+### Using Python Script
+
+You can use a Python script to create a new target:
+
+```bash
+python download_photometry.py <yourToken> <targetName>
+```
+
+## 2. Radio data download
+
+With this API one can download all radio observations (mJy) in semi-color separated form. The columns of the output are the following: 
+
+***MJD;mJy;Error;Facility;Filter;Observer***
+### Request 
+- **Method**: POST
+- **URL**: `/targets/download-radio/`
+
+### Request Parameters
+
+- `name` (string, required): The name or identifier of the target.
+
+### Example Request Body
+
+```json
+{
+    "name": "My Target",
+}
+```
+
+### Example Request
+
+You can make a POST request to download the data using the `curl` command or a Python script.
+
+### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Token <yourToken>" \
+  -d '{
+    "name": "My Target",
+  }' \
+  https://bh-tom2.astrolabs.pl/targets/download-radio/
+```
+### Using Python Script
+
+You can use a Python script to create a new target:
+
+```bash
+python download_radio.py <yourToken> <targetName>
+```
+
+
+# TARGETS API
+
+## 1. Create Target 
 <!-- /targets/createTarget/ -->
 
   This API allows users to create targets.
@@ -577,12 +679,13 @@ python delete_observatory_matrix.py --observatory "My Observatory" --token <your
 
 ### Request Parameters
 
-The request to create a new target should include the following parameters in the request body:
+The request to create a new Sidereal target should include the following parameters in the request body:
 
 - `name` (string, required): The name or identifier of the target.
 - `ra` (number, required): The Right Ascension (RA) of the target, represented as a floating-point number.
 - `dec` (number, required): The Declination (Dec) of the target, represented as a floating-point number.
-- `epoch` (string): The epoch or reference time for the target (e.g., "J2000").
+- `epoch` (number): The epoch or reference time for the target (e.g., 2000.0).
+<!-- - `type` (string): SIDEREAL or NONSIDEREAL type of object, default: SIDEREAL -->
 - `classification` (string): The classification or type of the target.
 - `discovery_date` (string, datetime format): The date and time of the target's discovery.
 - `importance` (number): A numerical value representing the importance or priority of the target.
@@ -595,8 +698,8 @@ The request to create a new target should include the following parameters in th
     "name": "My Target",
     "ra": 123.456,
     "dec": -45.678,
-    "epoch": "J2000",
-    "classification": "Asteroid",
+    "epoch": 2000.0,
+    "classification": "Star",
     "discovery_date": "2023-09-28T10:00:00Z",
     "importance": 5,
     "cadence": 24
@@ -605,7 +708,7 @@ The request to create a new target should include the following parameters in th
 
 ### Example Request
 
-You can make a POST request to create a new target using the `curl` command or a Python script.
+You can make a POST request to create a new target using the `curl` command or a Python script. 
 
 ### Using `curl`
 
@@ -617,8 +720,8 @@ curl -X POST \
     "name": "My Target",
     "ra": 123.456,
     "dec": -45.678,
-    "epoch": "J2000",
-    "classification": "Asteroid",
+    "epoch": 2000.0,
+    "classification": "Star",
     "discovery_date": "2023-09-28T10:00:00Z",
     "importance": 5,
     "cadence": 24
@@ -630,11 +733,40 @@ curl -X POST \
 You can use a Python script to create a new target:
 
 ```bash
-python create_target.py --name "My Target" --ra 123.456 --dec -45.678 --epoch "J2000" --classification "Asteroid" --discovery_date "2023-09-28T10:00:00Z" --importance 5 --cadence 24 --token <yourToken> 
+python create_target.py --name "My Target" --ra 123.456 --dec -45.678 --epoch 2000.0 --classification "Star" --discovery_date "2023-09-28T10:00:00Z" --importance 5 --cadence 24 --token <yourToken> 
 ```
 
+List of available classifications:
 
-# 2. Update Target
+```("Unknown", "Unknown"), 
+    ('Be-star outburst', 'Be-star outburst'),
+    ('AGN', "Active Galactic Nucleus(AGN)"), 
+    ("BL Lac", "BL Lac"),
+    ("CV", "Cataclysmic Variable(CV)"), 
+    ("CEPH", "Cepheid Variable(CEPH)"),
+    ("EB", "Eclipsing Binary(EB)"),
+    ("Galaxy", "Galaxy"), 
+    ("LPV", "Long Period Variable(LPV)"),
+    ("LBV", "Luminous Blue Variable(LBV)"),
+    ("M-dwarf flare", "M-dwarf flare"), 
+    ("Microlensing Event", "Microlensing Event"), 
+    ("Nova", "Nova"),
+    ("Peculiar Supernova", "Peculiar Supernova"),
+    ("QSO", "Quasar(QSO)"), 
+    ("RCrB", "R CrB Variable"), 
+    ("RR Lyrae Variable", "RR Lyrae Variable"),
+    ("SSO", "Solar System Object(SSO)"),
+    ("Star", "Star"), 
+    ("SN", "Supernova(SN)"), 
+    ("Supernova imposter", "Supernova imposter"),
+    ("Symbiotic star", "Symbiotic star"),
+    ("TDE", "Tidal Disruption Event(TDE)"), 
+    ("Variable star-other", "Variable star-other"),
+    ("XRB", "X-Ray Binary(XRB)"),
+    ("YSO", "Young Stellar Object(YSO)")
+```
+
+## 2. Update Target
 <!-- /targets/updateTarget/{name}/ -->
 
 This API allows users to update an existing target with new information.
@@ -654,7 +786,7 @@ The request to update a target should include the following parameters in the re
 - `name` (string): The name or identifier of the target. This parameter is part of the URL and does not need to be included in the request body.
 - `ra` (number, optional): The Right Ascension (RA) of the target, represented as a floating-point number.
 - `dec` (number, optional): The Declination (Dec) of the target, represented as a floating-point number.
-- `epoch` (string, optional): The epoch or reference time for the target (e.g., "J2000").
+- `epoch` (string, optional): The epoch or reference time for the target (e.g., 2000.0).
 - `classification` (string, optional): The classification or type of the target.
 - `discovery_date` (string, datetime format, optional): The date and time of the target's discovery.
 - `importance` (number, optional): A numerical value representing the importance or priority of the target.
@@ -706,7 +838,7 @@ You can use a Python script to update an existing target with Token Authenticati
   python update_target.py "My Target" --ra 135.789 --dec -30.123 --epoch "J2023" --classification "Galaxy" --discovery_date "2022-12-15T08:30:00Z" --importance 3 --cadence 12 --token <yourToken> 
 ```
 
-# 3. Target List
+## 3. Target List
 <!-- targets/getTargetList/ -->
 
 This API allows users to obtain a list of targets. 
@@ -742,7 +874,7 @@ curl -X POST \
 Replace `<yourToken>` with your authentication token and adjust the URL as needed to specify your search criteria.
 
 
-# 4. Delete Target
+## 4. Delete Target
 <!-- targets/deleteTarget/ -->
 
 This API supports deleting a target by providing its name.
@@ -788,10 +920,10 @@ curl -X DELETE \
 
 Replace `<yourToken>` with your authentication token and `"MyTarget"` with the name or identifier of the target you want to delete.
 
-# 5. Targets: get plots
+## 5. Targets: get plots
 
 <!-- targets/get-plots/ -->
-This API allows users to obtain the visual list of targets. Filtering criteria can be provided.
+This API allows users to obtain the plots for a list of targets. The plots are returned in JSON format and in order to be displayed, one has to use plotly or matplotlib libraries.
 
 ### Request
 - **Method**: POST
@@ -831,7 +963,7 @@ https://bh-tom2.astrolabs.pl/targets/get-plots/
 
 Replace `<yourToken>` with your valid authentication token and adjust the target names in the request body as needed.
 
-# 6. Clean Target list cache (ADMINs only)
+## 6. Clean Target list cache (ADMINs only)
 <!-- /targets/cleanTargetListCache/ -->
 
 This document provides information about the Clean Target List Cache API, which allows authorized users to clear the cache for the target list. Caching is used to improve the performance of retrieving target lists, and this API provides a way to manually refresh the cached data.
@@ -863,7 +995,7 @@ curl -X POST \
 Replace `<yourToken>` with your valid authentication token.
 
 
-# 7. Clean Target Details Cache (ADMINs only)
+## 7. Clean Target Details Cache (ADMINs only)
 <!-- targets/cleanTargetDetailsCache/ -->
 
 This document provides information about the Clean Target Details Cache API, which allows authorized users to clear the cache for target details. Caching is used to improve the performance of retrieving target details, and this API provides a way to manually refresh the cached data.
