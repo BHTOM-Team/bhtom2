@@ -63,4 +63,4 @@ class TargetsSerializers(serializers.ModelSerializer):
 
 
 class TargetDownloadDataSerializer(serializers.Serializer):
-    target = serializers.CharField(required=True)
+    name = serializers.CharField(required=True)
