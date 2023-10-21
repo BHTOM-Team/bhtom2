@@ -113,7 +113,7 @@ The script will display the response from the API with a list of uploaded files 
 
 # CALIBRATIONS API
 
-### Description
+<!-- ### Description -->
 
 <!-- This Python script allows you to retrieve a list of catalogues from the BHTOM2 system using the `get_catalogs` API. It provides a command-line interface for making GET requests with proper authorization. -->
 
