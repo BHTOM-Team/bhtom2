@@ -69,36 +69,36 @@ python upload_files_script.py
 ```
 
 ### Arguments
+Note you can hardcode some of the recurring arguments within the script, for example token, observatory
 
-- `<token>`: Your authentication token
-- `<target>`: Target destination for the uploaded files
-- `<data_product_type>`: Type of data product: `fits_file`, `photometry` (instrumental in SExtractor format), `photometry_nondetection`, `spectroscopy`
-- `<files>`: Comma-separated list of files to be uploaded
+- `--directory` : The directory containing all the necessary fits files
+or
+- `--filename` : A single file to be processed
+
+- `--token token`: authentication token for the BHTOM user, which will be associated to the data points uploaded
+- `--target target`: Target destination for the uploaded files
+- `--observatory observatory`: name of the observatory/facility
+
+<!-- - `<files>`: Comma-separated list of files to be uploaded -->
 <!-- TODO: LW: check photometry vs SExtractor, we need both: WILL BE ADDED -->
 ### Optional Arguments
 
 <!-- - `--match_dist <match_dist>`: This sets the matching distance (float) for astrometric cross-match in the standardisation procedure.  -->
 <!-- LW: I hid the match_dist as we set it fixed -->
-- `--comment <comment>`: comment to your upload
-- `--dry_run`: if true, the script will be run in Dry Run (test) mode. The data will processed but will not be stored in the database. The default is false.
-- `--no_plot`: if true, no calibration plot will be generated. The default setting is false.
-- `--mjd <mjd>`: Modified Julian Date (float) [note MJD=JD-2400000.5]
-<!-- - `--group <group>`: target group where to add -->
-<!-- TODO: what groups are here? -->
-- `--observer <observer>`: name of the observer
-
+- `--data_product_type data_product_type`: Type of data product: `fits_file`, `photometry` (instrumental in SExtractor format), `photometry_nondetection`, `spectroscopy`
+- `--comment comment`: comment to your upload
+- `--dry_run True/False`: if true, the script will be run in Dry Run (test) mode. The data will processed but will not be stored in the database. The default is false.
+<!-- - `--no_plot`: if true, no calibration plot will be generated. The default setting is false. -->
+- `--mjd <mjd>`: Modified Julian Date (float) [note MJD=JD-2400000.5], required for single photometry file
 
 ### Example Usage
 
 ```bash
-python upload_files_script.py 123token456 Gaia22bpl photometry file1.cat,file2.cat --mjd 51234.123
+python upload_files_script.py --token 123_my_user_name_token_456 --observatory "my telescope" --target Gaia22bpl --directory path_to_files/
 ```
 
-### Advanced Usage
-
 ```bash
-# python upload_files_script.py abc123 target2 type2 file3.txt --match_dist 0.5 --comment "Example comment" --dry_run --no_plot --mjd 59371.5 --group "example_group" --observer "John Doe"
-python upload_files_script.py abc123 target2 type2 file3.txt --comment "my batch upload on 2023-10-02" --dry_run --no_plot --mjd 59371.5 --observer "John Doe"
+python upload_files_script.py --token 123token456 --target Gaia22bpl --observatory "my telescope" --data_product_type photometry --filename file1.cat --mjd 51234.123
 ```
 
 ### Response
