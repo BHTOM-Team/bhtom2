@@ -1,5 +1,6 @@
 {% extends 'bhtom_common/base.html' %}
-{% load bootstrap4 targets_extras bhtom_targets_extras dataproduct_extras cache%}
+{% load bootstrap4 targets_extras bhtom_targets_extras dataproduct_extras cache static %}
+<link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
 {% block title %}Targets{% endblock %}
 {% block content %}
     <div class="row">

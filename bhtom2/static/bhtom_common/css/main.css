@@ -54,3 +54,101 @@ h1, h2, h3, h4, h5, h6, p, li, label, dt, dd, th, td {
 .dataTables_length select {
   color: #f7586f;
 }
+.pagination {
+  background-color: #000; /* Black background color */
+  display: flex;
+  padding: 10px; /* Adjust padding as needed */
+}
+
+.page-item {
+  margin: 0 5px; /* Adjust margin as needed */
+}
+
+.page-link {
+  color: #fff; /* Text color */
+  background-color: transparent;
+  border: 1px solid #fff; /* Border color */
+  border-radius: 5px; /* Rounded edges */
+  padding: 5px 10px; /* Adjust padding as needed */
+  transition: background-color 0.3s, color 0.3s; /* Smooth hover transition */
+}
+
+
+.page-item.active .page-link {
+  background-color:  #777; /* You can set a gray background if desired */
+  border: 1px solid #777; /* Gray border for the selected page */
+}
+
+
+.page-link:hover {
+  background-color: #fff; /* Background color on hover */
+  color: #000; /* Text color on hover */
+  
+}/* Custom CSS for SingleTableMixin pagination */
+
+
+/* Style for the DataTables pagination with existing classes */
+
+/* Style for the DataTables pagination with existing classes */
+
+#DataTables_Table_0_paginate {
+  display: flex !important;
+  justify-content: center !important;
+  background-color: #000 !important;
+  padding: 10px !important;
+  color: #fff !important;
+}
+
+#DataTables_Table_0_info {
+  color: #fff !important;
+}
+
+
+.paginate_button {
+  background-color: transparent !important;
+  border: 1px solid #fff !important;
+  border-radius: 5px !important;
+  padding: 5px 10px !important;
+  cursor: pointer !important;
+  margin: 0 5px !important;
+  text-indent: 0 !important;
+  text-decoration: none !important;
+  font-weight: bold !important;
+  font-size: 16px !important;
+  color: #fff !important;
+}
+
+.paginate_button.current {
+  color: #fff !important;
+  background-color: #777 !important;
+  border: 1px solid #777 !important;
+}
+
+.paginate_button.current:hover {
+  color: #fff !important;
+  background-color: #777 !important;
+  border: 1px solid #777 !important;
+}
+
+#DataTables_Table_0{
+  color: #fff !important;
+  margin-right: 5px !important;
+}
+
+
+#DataTables_Table_0_previous {
+  color: #fff !important;
+  content: "<<" !important;
+  margin-right: 5px !important;
+}
+
+#DataTables_Table_0_next {
+  color: #fff !important;
+  content: ">>" !important;
+  margin-left: 5px !important;
+}
+
+.paginate_button:hover {
+  background-color: #fff !important;
+  color: #000 !important;
+}

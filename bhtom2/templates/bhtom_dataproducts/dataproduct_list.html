@@ -3,93 +3,199 @@
 {% block title %} Data Product List {% endblock %}
 {% block additional_css %}
 <link rel="stylesheet" href="{% static 'bhtom_observations/css/main.css' %}">
+<link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
 {% endblock %}
 {% block content %}
 {% include 'bhtom_dataproducts/partials/js9_scripts.html' %}
-<div class="row">
-    <div class="col-md-2">
-        <form action="" method="get" class="form">
-            {% bootstrap_form filter.form %}
-            {% buttons %}
-            <button type="submit" class="btn btn-primary">
-                Filter
-            </button>
-            <a href="{% url 'bhtom_base.bhtom_dataproducts:list' %}" class="btn btn-secondary" title="Reset">Reset</a>
-            {% endbuttons %}
-        </form>
-    </div>
-    <div class="col-md-8 ">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>File</th>
-                    <th>Photometry</th>
-                    <th>Target</th>
-                    <th>Observatory</th>
-                    <th>Owner</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Details</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product in object_list %}
-                <tr>
-                    <td>{{ product.get_file_name|truncatechars:40 }}</td>
-                    {% if product.photometry_data is not None %}
-                    <td>
-                        <a href="{% url 'bhtom_dataproducts:photometry_download' id=product.id %}">
-                            {{product.photometry_data|truncatechars:40 }}</a>
-                    </td>
-                    {% else %}
-                    <td></td>
-                    {% endif %}
-                    <td>
-                        <a href="{% url 'bhtom_targets:detail' product.target.name %}">
-                            {{product.target.name|truncatechars:40 }}</a>
-                    </td>
-                    <td>{{ product.observatory }}</td>
-                    <td>{{ product.user }}</td>
-                    <td>
-                        {% if product.data_product_type %}
-                        {{ product.get_type_display }}
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if product.status == "C" %}
-                        TO DO
-                        {% endif %}
-                        {% if product.status == "P" %}
-                        IN PROGRESS
-                        {% endif %}
-                        {% if product.status == "S" %}
-                        SUCCESS
-                        {% endif %}
-                        {% if product.status == "E" %}
-                        ERROR
-                        {% endif %}
-                    </td>
 
-                    {% if product.data_product_type == 'fits_file' or product.data_product_type == 'photometry' %}
-                    <td>
-                        <a href="{% url 'bhtom_dataproducts:dataproduct-details' pk=product.id %}" title="Show details"
-                            class="btn btn-primary">Detail</a>
-                    </td>
-                    {% else %}
-                    <td></td>
-                    {% endif %}
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="9">
-                        No data yet. You might want to save some data products from your
-                        <a href="{% url 'bhtom_base.bhtom_observations:list' %}">completed observations</a>.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% bootstrap_pagination page_obj extra=request.GET.urlencode %}
+<ul class="nav nav-tabs" id="tabs">
+    <li class="nav-item">
+        <span class="nav-link active" data-target="#all" data-toggle="tab">All</span>
+    </li>
+    <li class="nav-item">
+        <span class="nav-link" data-target="#user" data-toggle="tab">Your file</span>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane active" id="all">
+        <div class="row">
+            <div class="col-md-2">
+                <form action="" method="get" class="form">
+                    {% bootstrap_form filter.form %}
+                    {% buttons %}
+                    <button type="submit" class="btn btn-primary">
+                        Filter
+                    </button>
+                    <a href="{% url 'bhtom_base.bhtom_dataproducts:list' %}" class="btn btn-secondary" title="Reset">Reset</a>
+                    {% endbuttons %}
+                </form>
+            </div>
+            <div class="col-md-8 ">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Photometry</th>
+                            <th>Target</th>
+                            <th>Observatory</th>
+                            <th>Owner</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in object_list %}
+                        <tr>
+                            <td>{{ product.get_file_name|truncatechars:40 }}</td>
+                            {% if product.photometry_data is not None %}
+                            <td>
+                                <a href="{% url 'bhtom_dataproducts:photometry_download' id=product.id %}">
+                                    {{product.photometry_data|truncatechars:40 }}</a>
+                            </td>
+                            {% else %}
+                            <td></td>
+                            {% endif %}
+                            <td>
+                                <a href="{% url 'bhtom_targets:detail' product.target.name %}">
+                                    {{product.target.name|truncatechars:40 }}</a>
+                            </td>
+                            <td>{{ product.observatory }}</td>
+                            <td>{{ product.user }}</td>
+                            <td>
+                                {% if product.data_product_type %}
+                                {{ product.get_type_display }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if product.status == "C" %}
+                                TO DO
+                                {% endif %}
+                                {% if product.status == "P" %}
+                                IN PROGRESS
+                                {% endif %}
+                                {% if product.status == "S" %}
+                                SUCCESS
+                                {% endif %}
+                                {% if product.status == "E" %}
+                                ERROR
+                                {% endif %}
+                            </td>
+                        
+                            {% if product.data_product_type == 'fits_file' or product.data_product_type == 'photometry' %}
+                            <td>
+                                <a href="{% url 'bhtom_dataproducts:dataproduct-details' pk=product.id %}" title="Show details"
+                                    class="btn btn-primary">Detail</a>
+                            </td>
+                            {% else %}
+                            <td></td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9">
+                                No data yet. You might want to save some data products from your
+                                <a href="{% url 'bhtom_base.bhtom_observations:list' %}">completed observations</a>.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% bootstrap_pagination page_obj extra=request.GET.urlencode %}
+            </div>
+        </div>
     </div>
-</div>
+
+    <div class="tab-pane" id="user">
+        <div class="row">
+            <div class="col-md-2">
+                <form action="" method="get" class="form">
+                    {% bootstrap_form filter.form %}
+                    {% buttons %}
+                    <button type="submit" class="btn btn-primary">
+                        Filter
+                    </button>
+                    <a href="{% url 'bhtom_base.bhtom_dataproducts:list' %}" class="btn btn-secondary" title="Reset">Reset</a>
+                    {% endbuttons %}
+                </form>
+            </div>
+            <div class="col-md-8 ">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Photometry</th>
+                            <th>Target</th>
+                            <th>Observatory</th>
+                            <th>Owner</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in object_list %}
+                            {% if user == product.user %}
+                                <tr>
+                                    <td>{{ product.get_file_name|truncatechars:40 }}</td>
+                                    {% if product.photometry_data is not None %}
+                                    <td>
+                                        <a href="{% url 'bhtom_dataproducts:photometry_download' id=product.id %}">
+                                            {{product.photometry_data|truncatechars:40 }}</a>
+                                    </td>
+                                    {% else %}
+                                    <td></td>
+                                    {% endif %}
+                                    <td>
+                                        <a href="{% url 'bhtom_targets:detail' product.target.name %}">
+                                            {{product.target.name|truncatechars:40 }}</a>
+                                    </td>
+                                    <td>{{ product.observatory }}</td>
+                                    <td>{{ product.user }}</td>
+                                    <td>
+                                        {% if product.data_product_type %}
+                                        {{ product.get_type_display }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if product.status == "C" %}
+                                        TO DO
+                                        {% endif %}
+                                        {% if product.status == "P" %}
+                                        IN PROGRESS
+                                        {% endif %}
+                                        {% if product.status == "S" %}
+                                        SUCCESS
+                                        {% endif %}
+                                        {% if product.status == "E" %}
+                                        ERROR
+                                        {% endif %}
+                                    </td>
+                                
+                                    {% if product.data_product_type == 'fits_file' or product.data_product_type == 'photometry' %}
+                                    <td>
+                                        <a href="{% url 'bhtom_dataproducts:dataproduct-details' pk=product.id %}" title="Show details"
+                                            class="btn btn-primary">Detail</a>
+                                    </td>
+                                    {% else %}
+                                    <td></td>
+                                    {% endif %}
+                                </tr>
+                            {% endif %}
+                                {% empty %}
+                            <tr>
+                                <td colspan="9">
+                                    No data yet. You might want to save some data products from your
+                                    <a href="{% url 'bhtom_base.bhtom_observations:list' %}">completed observations</a>.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% bootstrap_pagination page_obj extra=request.GET.urlencode %}
+            </div>
+        </div>
+    </div>
+</div>        
 {% endblock %}
