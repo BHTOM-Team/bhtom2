@@ -84,13 +84,9 @@ h1, h2, h3, h4, h5, h6, p, li, label, dt, dd, th, td {
   background-color: #fff; /* Background color on hover */
   color: #000; /* Text color on hover */
   
-}/* Custom CSS for SingleTableMixin pagination */
-
-
+}
+/* Custom CSS for SingleTableMixin pagination */
 /* Style for the DataTables pagination with existing classes */
-
-/* Style for the DataTables pagination with existing classes */
-
 #DataTables_Table_0_paginate {
   display: flex !important;
   justify-content: center !important;
@@ -148,7 +144,4 @@ h1, h2, h3, h4, h5, h6, p, li, label, dt, dd, th, td {
   margin-left: 5px !important;
 }
 
-.paginate_button:hover {
-  background-color: #fff !important;
-  color: #000 !important;
-}
+
