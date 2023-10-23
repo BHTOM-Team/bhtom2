@@ -21,7 +21,7 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, ReducedDatumUnit
 from bhtom_base.bhtom_dataproducts.processors.data_serializers import SpectrumSerializer
 from bhtom_base.bhtom_observations.models import ObservationRecord
-from bhtom_base.bhtom_targets.models import Target, TargetName
+from bhtom_base.bhtom_targets.models import Target, TargetName, TargetGaiaDr3, TargetGaiaDr2
 
 from numpy import around
 
@@ -117,131 +117,47 @@ def photometry_stats(target):
 
 @register.inclusion_tag('bhtom_dataproducts/partials/gaia_stats.html')
 def gaia_stats(target):
-    import pandas as pd
-    from astroquery.gaia import Gaia
-
     """
     Displays a table of the stats and info from Gaia DR2 and DR3 for a target.
     """
-    # LATEX: from 18cbf Kruszynska22
-    # \begin{table}
-    # \caption{\label{tab:gdrsVals}Gaia astrometric parameters for the source star in Gaia18cbf.}.
-    #      \centering
-    #         \begin{tabular}{c c c}
-    #         \hline
-    #         \noalign{\smallskip}
-    #              Parameter &  GDR2 & GEDR3 \\
-    #              \noalign{\smallskip}
-    #         \hline
-    #         \hline
-    #         \noalign{\smallskip}
-    #              $\varpi$ [mas] & $-1.11\pm0.70$ &  $-0.36\pm0.59$ \\
-    #              $\mu_{\alpha}$ [$\mathrm{mas} \, \mathrm{yr}^{-1}$] & $-0.68\pm1.96$ & $-1.83\pm0.68$ \\
-    #              $\mu_{\delta}$ [$\mathrm{mas}\, \mathrm{yr}^{-1}$] & $-0.76\pm1.16$ & $-1.82\pm0.46$ \\
-    #         \noalign{\smallskip}
-    #         \hline
-    #         \noalign{\smallskip}
-    #          \multicolumn{3}{c}{Bailer-Jones et al. distances} \\
-    #         \noalign{\smallskip}
-    #         \hline
-    #         \noalign{\smallskip}
-    #              $r_{\rm est}$ [kpc] &  $4.4^{+3.2}_{-2.9}$ & --\\
-    #              $r_{\rm geo, est}$ [kpc] &  -- & $5.4^{+2.2}_{-1.9}$ \\
-    #              $r_{\rm photgeo, est}$ [kpc] &  -- & $7.8^{+2.0}_{-1.4}$ \\
-    #         \noalign{\smallskip}
-    #         \hline
-    #         \end{tabular}
-    # \end{table}
-
-    # TODO: add check for Gaia DR2 name and use in queries, also display in the table
-    # do we want to show the ra dec too?
-
-    # TODO: this will be bloody slow, as the query will be run every time we go to Publication...
 
     data_list = []
     try:
-        gaia_name = TargetName.objects.get(target=target, source_name=DataSource.GAIA_DR3.name).name
-    except:
+        gaiaDr2 = TargetGaiaDr2.objects.get(target=target)
+        gaiaDr3 = TargetGaiaDr3.objects.get(target=target)
+    except (TargetGaiaDr2.DoesNotExist, TargetGaiaDr3.DoesNotExist):
+        return {'data': data_list}
+    except Exception as e:
+        logger.error("Error in GaiaDr2/3: " + str(e))
         return {'data': data_list}
 
-    source_id = gaia_name
-
-    # Initialize all variables to 0
-    parallax3 = parallax3_error = pmra3 = pmra3_error = pmdec3 = pmdec3_error = ruwe3 = aen3 = 0
-    parallax2 = parallax2_error = pmra2 = pmra2_error = pmdec2 = pmdec2_error = aen2 = ruwe2 = 0
-    r3_med_geo = 0
-
-    job = Gaia.launch_job(f"select  \
-                        parallax, parallax_error, \
-                        pmra, pmra_error, pmdec, pmdec_error, ruwe, astrometric_excess_noise \
-                        from gaiadr3.gaia_source where source_id={source_id};")
-    r3 = job.get_results().to_pandas()
-    if not r3.empty:
-        r3 = r3.iloc[0]  # assuring only first row will be read
-        parallax3, parallax3_error = r3.parallax.item(), r3.parallax_error.item()
-        pmra3, pmra3_error = r3.pmra.item(), r3.pmra_error.item()
-        pmdec3, pmdec3_error = r3.pmdec.item(), r3.pmdec_error.item()
-        ruwe3 = r3.ruwe.item()
-        aen3 = r3.astrometric_excess_noise.item()
-
-    job = Gaia.launch_job(f"select  \
-                        parallax, parallax_error, \
-                        pmra, pmra_error, pmdec, pmdec_error,astrometric_excess_noise \
-                        from gaiadr2.gaia_source where source_id={source_id};")
-    r2 = job.get_results().to_pandas()
-    if not r2.empty:
-        r2 = r2.iloc[0]  # assuring only first row will be read
-        parallax2 = r2.parallax.item()
-        parallax2_error = r2.parallax_error.item()
-        pmra2 = r2.pmra.item()
-        pmra2_error = r2.pmra_error.item()
-        pmdec2 = r2.pmdec.item()
-        pmdec2_error = r2.pmdec_error.item()
-        aen2 = r2.astrometric_excess_noise.item()
-
-    job = Gaia.launch_job(f"select  \
-                        ruwe \
-                        from gaiadr2.ruwe where source_id={source_id};")
-    ruwe2 = job.get_results().to_pandas().ruwe.item()
-
-    job = Gaia.launch_job(f"select  \
-                        r_med_geo,     r_lo_geo,      r_hi_geo,  r_med_photogeo,  r_lo_photogeo,  r_hi_photogeo\
-                        from external.gaiaedr3_distance where source_id={source_id};")
-    r = job.get_results().to_pandas()
-    if not r.empty:
-        r = r.iloc[0]
-        r3_med_geo = r.r_med_geo.item()
-
-    # external.external.gaiadr2_geometric_distance
-    # external.external.gaiaedr3_distance
-
     data_dict = {'Parameter': 'parallax [mas]',
-                 'GDR2': f'{around(parallax2, 3)}&plusmn;{around(parallax2_error, 3)}',
-                 'GDR3': f'{around(parallax3, 3)}&plusmn;{around(parallax3_error, 3)}'
+                 'GDR2': f'{around(gaiaDr2.parallax, 3)}&plusmn;{around(gaiaDr2.parallax_error, 3)}',
+                 'GDR3': f'{around(gaiaDr3.parallax, 3)}&plusmn;{around(gaiaDr3.parallax_error, 3)}'
                  }
     data_list.append(data_dict)
 
     data_dict = {'Parameter': 'PM RA [mas/yr]',
-                 'GDR2': f'{around(pmra2, 3)}&plusmn;{around(pmra2_error, 3)}',
-                 'GDR3': f'{around(pmra3, 3)}&plusmn;{around(pmra3_error, 3)}'
+                 'GDR2': f'{around(gaiaDr2.pmra, 3)}&plusmn;{around(gaiaDr2.pmra_error, 3)}',
+                 'GDR3': f'{around(gaiaDr3.pmra, 3)}&plusmn;{around(gaiaDr3.pmra_error, 3)}'
                  }
     data_list.append(data_dict)
 
     data_dict = {'Parameter': 'PM Dec [mas/yr]',
-                 'GDR2': f'{around(pmdec2, 3)}&plusmn;{around(pmdec2_error, 3)}',
-                 'GDR3': f'{around(pmdec3, 3)}&plusmn;{around(pmdec3_error, 3)}'
+                 'GDR2': f'{around(gaiaDr3.pmdec, 3)}&plusmn;{around(gaiaDr2.pmdec_error, 3)}',
+                 'GDR3': f'{around(gaiaDr3.pmdec, 3)}&plusmn;{around(gaiaDr3.pmdec_error, 3)}'
                  }
     data_list.append(data_dict)
 
     data_dict = {'Parameter': 'RUWE / AEN [mas]',
-                 'GDR2': f'{around(ruwe2, 3)} / {around(aen2, 3)}',
-                 'GDR3': f'{around(ruwe3, 3)} / {around(aen3, 3)}'
+                 'GDR2': f'{around(gaiaDr2.ruwe, 3)} / {around(gaiaDr2.astrometric_excess_noise, 3)}',
+                 'GDR3': f'{around(gaiaDr3.ruwe, 3)} / {around(gaiaDr3.astrometric_excess_noise, 3)}'
                  }
     data_list.append(data_dict)
 
     data_dict = {'Parameter': 'Dist_med_geo [kpc]',
                  'GDR2': '-',
-                 'GDR3': f'{around(r3_med_geo / 1000., 3)}'
+                 'GDR3': f'{around(gaiaDr3.r_med_geo / 1000., 3)}'
                  }
     data_list.append(data_dict)
 
