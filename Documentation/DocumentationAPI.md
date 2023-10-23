@@ -90,15 +90,18 @@ or
 - `--dry_run True/False`: if true, the script will be run in Dry Run (test) mode. The data will processed but will not be stored in the database. The default is false.
 <!-- - `--no_plot`: if true, no calibration plot will be generated. The default setting is false. -->
 - `--mjd <mjd>`: Modified Julian Date (float) [note MJD=JD-2400000.5], required for single photometry file
+- `--observer <observer>`: Name of the observer to be associated with the datapoint(s). Note that by default the token's owner name will be used as a an observer. Selecting this option overwrites the name from the token.
 
-### Example Usage
+### Example Usage 1
 
 ```bash
 python upload_files_script.py --token 123_my_user_name_token_456 --observatory "my telescope" --target Gaia22bpl --directory path_to_files/
 ```
 
+### Example Usage 2
+
 ```bash
-python upload_files_script.py --token 123token456 --target Gaia22bpl --observatory "my telescope" --data_product_type photometry --filename file1.cat --mjd 51234.123
+python upload_files_script.py --token 123token456 --target Gaia22bpl --observatory "my telescope" --data_product_type photometry --filename file1.cat --mjd 51234.123 --observer "John Doe"
 ```
 
 ### Response

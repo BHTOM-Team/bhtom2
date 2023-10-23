@@ -39,6 +39,7 @@ parser.add_argument('--dry_run', default='False', help='\'True\' if you just wan
 parser.add_argument('--comment', default=None, help='Comment about the observation, data processing, etc.')
 parser.add_argument('--mjd', default=None, help='Time of the observation in MJD, only needed for photometry uploads')
 parser.add_argument('--data_product_type', default='', help='Data product type')
+parser.add_argument('--observer', default=None, help='Name of the observer to be associated to the data. Note this overwrites the name from the token, used as default.')
 
 # Parse the arguments
 args = parser.parse_args()
@@ -54,6 +55,7 @@ dry_run = args.dry_run
 comment = args.comment
 mjd = args.mjd
 data_product_type = args.data_product_type
+observer = args.observer
 
 # Check if directory or filename is provided
 if directory is not None:
@@ -80,6 +82,8 @@ for file in file_list:
             data['comment'] = comment
         if mjd is not None:
             data['mjd'] = mjd
+        if observer is not None:
+            data['observer'] = observer
 
         response = requests.post(
             url='https://uploadsvc2.astrolabs.pl/upload/',
