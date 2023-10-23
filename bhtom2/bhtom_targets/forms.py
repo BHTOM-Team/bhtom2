@@ -80,7 +80,6 @@ class TargetForm(forms.ModelForm):
         # for field in self.fields.keys():
         #     if (field in settings.CREATE_TARGET_HIDDEN_FIELDS): 
         #         self.fields[field].widget = forms.HiddenInput()
-
         self.extra_fields = {}
         for extra_field in settings.EXTRA_FIELDS:
             # Add extra fields to the form
@@ -172,6 +171,8 @@ class SiderealTargetCreateForm(TargetForm):
         for field in REQUIRED_SIDEREAL_FIELDS:
             self.fields[field].required = True
         self.fields['epoch'].initial = 2000.0
+        self.fields['type'].initial = Target.SIDEREAL
+
 
         self.fields['classification']=CustomClassificationChoiceField(
             choices=CLASSIFICATION_TYPES,
