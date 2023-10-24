@@ -302,7 +302,7 @@ class photometry_download(LoginRequiredMixin, View):
 
         except (DataProduct.DoesNotExist, AssertionError):
             logger.error('Download Photometry error, file not exist')
-
+            messages.error(self.request, 'File not found')
             if self.request.META.get('HTTP_REFERER') is None:
                 return HttpResponseRedirect('/')
             else:
@@ -318,6 +318,7 @@ class photometry_download(LoginRequiredMixin, View):
 
         except IOError:
             logger.error('Download Photometry error, file not exist')
+            messages.error(self.request, 'File not found')
             if self.request.META.get('HTTP_REFERER') is None:
                 return HttpResponseRedirect('/')
             else:
@@ -329,23 +330,45 @@ class DataDetailsView(DetailView):
     model = DataProduct
 
     def get_context_data(self, **kwargs):
+        logger.debug("Start preparation data details")
+
         try:
-            context = {}
-            data_product = DataProduct.objects.get(id=kwargs['pk'])
-            context['object'] = data_product
-            target = Target.objects.get(id=data_product.target.id)
-            context['target'] = target
+            try:
+                context = {}
+                data_product = DataProduct.objects.get(id=kwargs['pk'])
+                context['object'] = data_product
+                target = Target.objects.get(id=data_product.target.id)
+                context['target'] = target
+            except DataProduct.DoesNotExist:
+                logger.error("DataProduct not found")
+                messages.error(self.request, 'Data not found')
+                raise
+            except Target.DoesNotExist:
+                logger.error("Target not found")
+                messages.error(self.request, 'Target not found')
+                raise
 
             if data_product.fits_data:
-                ccdphot = CCDPhotJob.objects.get(dataProduct=data_product.id)
+                try:
+                    ccdphot = CCDPhotJob.objects.get(dataProduct=data_product.id)
+                except CCDPhotJob.DoesNotExist:
+                    logger.error("CCDPhotJob not found")
+                    messages.error(self.request, 'Data not found')
+                    raise
+
                 context['fits_data'] = data_product.fits_data.split('/')[-1]
                 context['ccdphot'] = ccdphot
 
             if data_product.photometry_data:
                 context['photometry_data'] = data_product.photometry_data.split('/')[-1]
 
-                observatory_matrix = ObservatoryMatrix.objects.get(id=data_product.observatory.id)
-                observatory = Observatory.objects.get(id=observatory_matrix.observatory.id)
+                try:
+                    observatory_matrix = ObservatoryMatrix.objects.get(id=data_product.observatory.id)
+                    observatory = Observatory.objects.get(id=observatory_matrix.observatory.id)
+                except (ObservatoryMatrix.DoesNotExist, Observatory.DoesNotExist):
+                    logger.error("Observatory not found")
+                    messages.error(self.request, 'Observatory not found')
+                    raise
 
                 context['observatory'] = observatory
                 context['owner'] = observatory_matrix.user
@@ -360,18 +383,12 @@ class DataDetailsView(DetailView):
                                 encoded_string = base64.b64encode(image_file.read())
                                 context['cpcs_plot'] = encoded_string.decode("utf-8")
                         except IOError as e:
-                            logger.error('plot error')
+                            logger.error('plot error: ' + str(e))
                 except Calibration_data.DoesNotExist:
+                    logger.debug("Calibration_data not found")
                     context['calibration'] = None
 
-        except Target.DoesNotExist:
-            messages.error(self.request, 'Target not found')
-            raise Http404
-        except (ObservatoryMatrix.DoesNotExist, Observatory.DoesNotExist) as e:
-            messages.error(self.request, 'Observatory not found: ' + str(e))
-            raise Http404
         except Exception as e:
-            messages.error(self.request, 'There was a problem: ' + str(e))
             logger.error(str(e))
             raise Http404
 
@@ -381,5 +398,6 @@ class DataDetailsView(DetailView):
         try:
             context = self.get_context_data(**kwargs)
         except Exception as e:
+            logger.error("Error in DataDetailsView: " + str(e))
             return HttpResponseRedirect(reverse('bhtom_dataproducts:list'))  # Replace with your desired URL
         return self.render_to_response(context)

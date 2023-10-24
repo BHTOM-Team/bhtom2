@@ -169,13 +169,18 @@ def dataproduct_list_for_target(context, target):
     """
     Given a ``Target``, returns a list of ``DataProduct`` objects associated with that ``Target``
     """
-    if settings.TARGET_PERMISSIONS_ONLY:
-        target_products_for_user = target.dataproduct_set.all()
-    else:
-        target_products_for_user = get_objects_for_user(
-            context['request'].user, 'bhtom_dataproducts.view_dataproduct', klass=target.dataproduct_set.all())
+
+    target_products = target.dataproduct_set.order_by('-created')[:10]
+
+    for row in target_products:
+        try:
+            row.photometry_data = row.photometry_data.split('/')[-1]
+            row.observatory.observatory.prefix = row.observatory.observatory.prefix.split('_CpcsOnly')[0]
+        except Exception:
+            continue
+
     return {
-        'products': target_products_for_user,
+        'products': target_products,
         'target': target
     }
 
