@@ -49,7 +49,7 @@ function dataProductSelect() {
         dryRun.parentElement.style.display = "block";
         observatory.parentElement.style.display = "block";
         filter.parentElement.style.display = "block";
-        observer.parentElement.style.display = "none";
+        observer.parentElement.style.display = "block";
     }
 
     if (spectroscopy === true) {
