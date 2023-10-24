@@ -3,12 +3,10 @@ import math
 import operator
 from tempfile import NamedTemporaryFile
 from typing import Any, List, Optional, Tuple
-from astropy.time import Time
 
 import pandas as pd
 
 from django.conf import settings
-from bhtom_base.bhtom_dataproducts.processors.data_serializers import SpectrumSerializer
 from bhtom_base.bhtom_targets.models import Target
 
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
@@ -54,22 +52,12 @@ def get_spectroscopy_observation_time_jd(reduced_datum: ReducedDatum) -> Optiona
 
 
 def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str]]:
-    from astropy.time import Time
-
     datums = ReducedDatum.objects.filter(target=target,
                                          data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
-                                         )
+                                         ).values('mjd', 'value', 'error', 'facility', 'filter', 'observer')
 
-    columns: List[str] = ['MJD', 'Magnitude', 'Error', 'Facility', 'Filter', 'Owner']
-    data: List[List[Any]] = []
-
-    for datum in datums:
-        data.append([Time(datum.timestamp).mjd,
-                     datum.value,
-                     datum.error,
-                     datum.facility,
-                     datum.filter,
-                     datum.observer])
+    columns = ['mjd', 'value', 'error', 'facility', 'filter', 'observer']
+    data = list(datums.values())
 
     return data, columns
 
@@ -77,31 +65,30 @@ def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str
 def get_photometry_stats(target: Target) -> Tuple[List[List[str]], List[str]]:
     data, columns = get_photometry_data_table(target)
 
-    df: pd.DataFrame = pd.DataFrame(data=data,
-                                    columns=columns)
+    df = pd.DataFrame(data=data, columns=columns)
 
     # For now, ignore anything after the ',' character if present
     # This is because sometimes Facility is in form "Facility, Observer"
     # and we only want to take the Facility name
     # If Facility is not present, then fill it with Owner value
     # If the Owner is blank too, fill it with "Unspecified"
-    df['Facility'] = df['Facility'] \
+    df['facility'] = df['facility'] \
         .apply(lambda x: None if (isinstance(x, float) and math.isnan(x)) else x) \
-        .fillna(df['Owner']) \
+        .fillna(df['observer']) \
         .fillna('Unspecified') \
         .apply(lambda x: str(x).split(',', 1)[0])
 
-    facilities = df['Facility'].unique()
+    facilities = df['facility'].unique()
 
-    columns: List[str] = ['Facility', 'Observers','Filters', 'Data_points', 'Earliest_time', 'Latest_time']
+    columns: List[str] = ['facility', 'observer', 'filter', 'Data_points', 'Earliest_time', 'Latest_time']
     stats: List[List[Any]] = []
 
     for facility in facilities:
-        observers = df[df['Facility'] == facility]['Owner'].unique()
-        datapoints = len(df[df['Facility'] == facility].index)
-        filters = df[df['Facility'] == facility]['Filter'].unique()
-        earliest_time = around(df[df['Facility'] == facility]['MJD'].min(), 2)
-        latest_time = around(df[df['Facility'] == facility]['MJD'].max(), 2)
+        observers = df[df['facility'] == facility]['observer'].unique()
+        datapoints = len(df[df['facility'] == facility].index)
+        filters = df[df['facility'] == facility]['filter'].unique()
+        earliest_time = around(df[df['facility'] == facility]['mjd'].min(), 2)
+        latest_time = around(df[df['facility'] == facility]['mjd'].max(), 2)
 
         stats.append([facility, ", ".join(observers), ", ".join(filters), datapoints, earliest_time, latest_time])
 

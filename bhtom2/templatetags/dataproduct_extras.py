@@ -1,27 +1,21 @@
-from datetime import datetime
 from urllib.parse import urlencode
 
 import plotly
-from django.template import Context, loader
-from bhtom2.external_service.data_source_information import DataSource
 
-import numpy as np
 import plotly.graph_objs as go
 from django import template
 from django.conf import settings
-from django.contrib.auth.models import Group
+
 from django.core.paginator import Paginator
 from django.shortcuts import reverse
 from guardian.shortcuts import get_objects_for_user
 from plotly import offline
-from astropy.time import Time
 
 from bhtom2.bhtom_dataproducts.forms import DataProductUploadForm
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, ReducedDatumUnit
-from bhtom_base.bhtom_dataproducts.processors.data_serializers import SpectrumSerializer
 from bhtom_base.bhtom_observations.models import ObservationRecord
-from bhtom_base.bhtom_targets.models import Target, TargetName, TargetGaiaDr3, TargetGaiaDr2
+from bhtom_base.bhtom_targets.models import Target, TargetGaiaDr3, TargetGaiaDr2
 
 from numpy import around
 
@@ -96,17 +90,18 @@ def photometry_stats(target):
     """
     Displays a table of the the photometric data stats for a target.
     """
+
     stats, columns = get_photometry_stats(target)
-    sort_by = 'Facility'
+    sort_by = 'facility'
     sort_by_asc = True
     df: pd.DataFrame = pd.DataFrame(data=stats,
                                     columns=columns).sort_values(by=sort_by, ascending=sort_by_asc)
 
     data_list = []
     for index, row in df.iterrows():
-        data_dict = {'Facility': row['Facility'],
-                     'Observers': row['Observers'],
-                     'Filters': row['Filters'],
+        data_dict = {'Facility': row['facility'],
+                     'Observers': row['observer'],
+                     'Filters': row['filter'],
                      'Data_points': row['Data_points'],
                      'Min_MJD': row['Earliest_time'],
                      'Max_MJD': row['Latest_time']}
@@ -255,10 +250,10 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
             logger.warning("Plot(filters) does not exist")
 
     layout = go.Layout(
-            height=height,
-            width=width,
-            paper_bgcolor=background,
-            plot_bgcolor=background
+        height=height,
+        width=width,
+        paper_bgcolor=background,
+        plot_bgcolor=background
 
     )
     layout.legend.font.color = label_color
@@ -268,6 +263,7 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
         'target': target,
         'plot': offline.plot(fig, output_type='div', show_link=False)
     }
+
 
 @register.inclusion_tag('bhtom_dataproducts/partials/photometry_for_target_obs.html', takes_context=True)
 def photometry_for_target_obs(context, target, width=1000, height=600, background=None, label_color=None, grid=True):
@@ -284,10 +280,10 @@ def photometry_for_target_obs(context, target, width=1000, height=600, backgroun
             logger.warning("Plot(observers) does not exist")
 
     layout = go.Layout(
-            height=height,
-            width=width,
-            paper_bgcolor=background,
-            plot_bgcolor=background
+        height=height,
+        width=width,
+        paper_bgcolor=background,
+        plot_bgcolor=background
 
     )
     layout.legend.font.color = label_color
@@ -323,11 +319,11 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
     :param grid: Whether to show grid lines.
     :type grid: bool
     """
-    fig = None
+
     if target.photometry_icon_plot is not None and target.photometry_icon_plot != '':
         base_path = settings.DATA_PLOT_PATH
         try:
-            fig = plotly.io.read_json(base_path  + str(target.photometry_icon_plot))
+            fig = plotly.io.read_json(base_path + str(target.photometry_icon_plot))
             return {
                 'target': target,
                 'plot': offline.plot(fig, output_type='div', show_link=False)
@@ -336,10 +332,10 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
             logger.warning("Plot does not exist")
 
     layout = go.Layout(
-            height=height,
-            width=width,
-            paper_bgcolor=background,
-            plot_bgcolor=background
+        height=height,
+        width=width,
+        paper_bgcolor=background,
+        plot_bgcolor=background
 
     )
     layout.legend.font.color = label_color
@@ -353,7 +349,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
 
 @register.inclusion_tag('bhtom_dataproducts/partials/spectroscopy_for_target.html', takes_context=True)
 def spectroscopy_for_target(context, target, dataproduct=None):
-    fig = None
+
     if target.spectroscopy_plot is not None and target.spectroscopy_plot != '':
         base_path = settings.DATA_PLOT_PATH
         try:
@@ -366,16 +362,16 @@ def spectroscopy_for_target(context, target, dataproduct=None):
             logger.warning("Plot not exist")
 
     layout = go.Layout(
-            height=600,
-            width=700,
-            xaxis=dict(
-                tickformat="d"
-            ),
-            yaxis=dict(
-                tickformat=".1eg"
-            )
+        height=600,
+        width=700,
+        xaxis=dict(
+            tickformat="d"
+        ),
+        yaxis=dict(
+            tickformat=".1eg"
+        )
     )
-    fig = go.Figure(data=[], layout=layout)
+
     return {
         'target': target,
         'plot': offline.plot(fig, output_type='div', show_link=False)
