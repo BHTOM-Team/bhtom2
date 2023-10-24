@@ -17,67 +17,67 @@
     <dd class="col-sm-6">{{ target.ra|deg_to_sexigesimal:"hms" }} {{ target.dec|deg_to_sexigesimal:"dms"}}</dd>
     {% endif %}
 
-    {% if target.galactic_lat and target.galactic_lng %}
+    {% if target.galactic_lat != None and target.galactic_lng != None %}
     <dt class="col-sm-6">{{ "Galactic (l,b)"}}</dt>
     <dd class="col-sm-6">{{ target.galactic_lng }} {{ target.galactic_lat }}</dd>
     {% endif %}
 
-    {% if target.constellation %}
+    {% if target.constellation != None %}
     <dt class="col-sm-6">{{ "Constellation" }}</dt>
     <dd class="col-sm-6">{{ target.constellation }}</dd>
     {% endif %}
 
-    {% if target.discovery_date %}
+    {% if target.discovery_date != None %}
     <dt class="col-sm-6">{{ "Discovered" }}</dt>
     <dd class="col-sm-6">{{ target.discovery_date|utc }}</dd>
     {% endif %}
 
-    {% if target.classification %}
+    {% if target.classification != None %}
     <dt class="col-sm-6">{{ "Class" }}</dt>
     <dd class="col-sm-6">{{ target.get_classification_type_display }}</dd>
     {% endif %}
 
-    {% if target.description %}
+    {% if target.description != None %}
     <dt class="col-sm-6">{{ "Description" }}</dt>
     <dd class="col-sm-6">{{ target.description }}</dd>
     {% endif %}
 
-    {% if target.phot_class %}
+    {% if target.phot_class != None %}
     <dt class="col-sm-6">{{ "Phot.Class" }}</dt>
     <dd class="col-sm-6">{{ target.phot_class }}</dd>
     {% endif %}
 
-    {% if target.mjd_last %}
+    {% if target.mjd_last != None %}
     <dt class="col-sm-6">{{ "Last MJD" }}</dt>
     <dd class="col-sm-6">{{ target.mjd_last }}</dd>
     {% endif %}
 
-    {% if target.mag_last %}
+    {% if target.mag_last != None %}
     <dt class="col-sm-6">{{ "Last G Mag" }}</dt>
     <dd class="col-sm-6">{{ target.mag_last }}</dd>
     {% endif %}
 
-    {% if target.importance %}
+    {% if target.importance != None %}
     <dt class="col-sm-6">{{ "Target importance (0-10)" }}</dt>
     <dd class="col-sm-6">{{ target.importance }}</dd>
     {% endif %}
 
-    {% if target.cadence %}
+    {% if target.cadence != None %}
     <dt class="col-sm-6">{{ "Cadence requested (d)" }}</dt>
     <dd class="col-sm-6">{{ target.cadence }}</dd>
     {% endif %}
 
-    {% if target.priority %}
+    {% if target.priority != None %}
     <dt class="col-sm-6">{{ "Observing priority" }}</dt>
     <dd class="col-sm-6">{{ target.priority }}</dd>
     {% endif %}
 
-    {% if target.sun_separation %}
+    {% if target.sun_separation != None %}
     <dt class="col-sm-6">{{ "Sun Separation (deg)" }}</dt>
     <dd class="col-sm-6">{{ target.sun_separation }}</dd>
     {% endif %}
 
-    {% if target.creation_date %}
+    {% if target.creation_date != None %}
     <dt class="col-sm-6">{{ "Target created" }}</dt>
     <dd class="col-sm-6">{{ target.creation_date|utc }}</dd>
     {% endif %}
