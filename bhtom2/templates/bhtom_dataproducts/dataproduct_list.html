@@ -63,7 +63,7 @@
                                     {{product.target.name|truncatechars:40 }}</a>
                             </td>
                             <td>{{ product.observatory }}</td>
-                            <td>{{ product.user }}</td>
+                            <td>{{ product.user.first_name }} {{ product.user.last_name }}</td>
                             <td>
                                 {% if product.data_product_type %}
                                 {{ product.get_type_display }}
@@ -96,14 +96,17 @@
                         {% empty %}
                         <tr>
                             <td colspan="9">
-                                No data yet. You might want to save some data products from your
-                                <a href="{% url 'bhtom_base.bhtom_observations:list' %}">completed observations</a>.
+                                No data yet.
+
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                {% bootstrap_pagination page_obj extra=request.GET.urlencode %}
+            {% if object_list %}
+                    {% bootstrap_pagination page_obj extra=request.GET.urlencode %}
+            {% endif %}
+
             </div>
                  
             <div class="tab-pane" id="user">
@@ -121,8 +124,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for product in object_list %}
-                            {% if user == product.user %}
+                        {% for product in user_list %}
+
                                 <tr>
                                     <td>{{ product.get_file_name|truncatechars:40 }}</td>
                                     {% if product.photometry_data is not None %}
@@ -138,7 +141,7 @@
                                             {{product.target.name|truncatechars:40 }}</a>
                                     </td>
                                     <td>{{ product.observatory }}</td>
-                                    <td>{{ product.user }}</td>
+                                    <td>{{ product.user.first_name }} {{ product.user.last_name }}</td>
                                     <td>
                                         {% if product.data_product_type %}
                                         {{ product.get_type_display }}
@@ -168,18 +171,19 @@
                                     <td></td>
                                     {% endif %}
                                 </tr>
-                            {% endif %}
+
                             {% empty %}
                             <tr>
                                 <td colspan="9">
-                                    No data yet. You might want to save some data products from your
-                                    <a href="{% url 'bhtom_base.bhtom_observations:list' %}">completed observations</a>.
+                                    No data yet.
                                 </td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                {% bootstrap_pagination page_obj extra=request.GET.urlencode %}
+                {% if user_list %}
+                    {% bootstrap_pagination page_obj extra=request.GET.urlencode %}
+                {% endif %}
             </div>
         </div>
     </div>

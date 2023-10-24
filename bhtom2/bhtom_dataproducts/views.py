@@ -201,13 +201,17 @@ class DataProductListView(LoginRequiredMixin, FilterView):
         context = super().get_context_data(*args, **kwargs)
         context['product_groups'] = DataProductGroup.objects.all()
         objects = context['object_list']
+        user_list = []
 
         for row in objects:
             try:
+                if row.user == self.request.user:
+                    user_list.append(row)
                 row.photometry_data = row.photometry_data.split('/')[-1]
             except:
                 continue
 
+        context['user_list'] = user_list
         return context
 
 
