@@ -78,7 +78,7 @@ class DataProductUploadForm(forms.Form):
         )
 
         self.fields['observer'] = forms.CharField(
-            initial=user,
+            initial=user.first_name + " " + user.last_name,
             required=False,
             label='Observer\'s Name *',
         )
