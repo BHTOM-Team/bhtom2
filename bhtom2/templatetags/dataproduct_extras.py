@@ -8,12 +8,11 @@ from django.conf import settings
 
 from django.core.paginator import Paginator
 from django.shortcuts import reverse
-from guardian.shortcuts import get_objects_for_user
 from plotly import offline
 
 from bhtom2.bhtom_dataproducts.forms import DataProductUploadForm
 from bhtom2.utils.bhtom_logger import BHTOMLogger
-from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, ReducedDatumUnit
+from bhtom_base.bhtom_dataproducts.models import ReducedDatum, ReducedDatumUnit
 from bhtom_base.bhtom_observations.models import ObservationRecord
 from bhtom_base.bhtom_targets.models import Target, TargetGaiaDr3, TargetGaiaDr2
 
@@ -207,18 +206,6 @@ def dataproduct_list_for_observation_unsaved(data_products):
     return {'products': data_products['unsaved']}
 
 
-@register.inclusion_tag('bhtom_dataproducts/partials/dataproduct_list.html', takes_context=True)
-def dataproduct_list_all(context):
-    """
-    Returns the full list of data products in the TOM, with the most recent first.
-    """
-    if settings.TARGET_PERMISSIONS_ONLY:
-        products = DataProduct.objects.all().order_by('-created')
-    else:
-        products = get_objects_for_user(context['request'].user, 'bhtom_dataproducts.view_dataproduct')
-    return {'products': products}
-
-
 @register.inclusion_tag('bhtom_dataproducts/partials/upload_dataproduct.html', takes_context=True)
 def upload_dataproduct(context, obj):
     user = context['user']
@@ -371,6 +358,8 @@ def spectroscopy_for_target(context, target, dataproduct=None):
             tickformat=".1eg"
         )
     )
+
+    fig = go.Figure(data=[], layout=layout)
 
     return {
         'target': target,
