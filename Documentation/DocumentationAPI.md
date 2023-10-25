@@ -69,36 +69,39 @@ python upload_files_script.py
 ```
 
 ### Arguments
+Note you can hardcode some of the recurring arguments within the script, for example token, observatory
 
-- `<token>`: Your authentication token
-- `<target>`: Target destination for the uploaded files
-- `<data_product_type>`: Type of data product: `fits_file`, `photometry` (instrumental in SExtractor format), `photometry_nondetection`, `spectroscopy`
-- `<files>`: Comma-separated list of files to be uploaded
+- `--directory` : The directory containing all the necessary fits files
+or
+- `--filename` : A single file to be processed
+
+- `--token token`: authentication token for the BHTOM user, which will be associated to the data points uploaded
+- `--target target`: Target destination for the uploaded files
+- `--observatory observatory`: name of the observatory/facility
+
+<!-- - `<files>`: Comma-separated list of files to be uploaded -->
 <!-- TODO: LW: check photometry vs SExtractor, we need both: WILL BE ADDED -->
 ### Optional Arguments
 
 <!-- - `--match_dist <match_dist>`: This sets the matching distance (float) for astrometric cross-match in the standardisation procedure.  -->
 <!-- LW: I hid the match_dist as we set it fixed -->
-- `--comment <comment>`: comment to your upload
-- `--dry_run`: if true, the script will be run in Dry Run (test) mode. The data will processed but will not be stored in the database. The default is false.
-- `--no_plot`: if true, no calibration plot will be generated. The default setting is false.
-- `--mjd <mjd>`: Modified Julian Date (float) [note MJD=JD-2400000.5]
-<!-- - `--group <group>`: target group where to add -->
-<!-- TODO: what groups are here? -->
-- `--observer <observer>`: name of the observer
+- `--data_product_type data_product_type`: Type of data product: `fits_file`, `photometry` (instrumental in SExtractor format), `photometry_nondetection`, `spectroscopy`
+- `--comment comment`: comment to your upload
+- `--dry_run True/False`: if true, the script will be run in Dry Run (test) mode. The data will processed but will not be stored in the database. The default is false.
+<!-- - `--no_plot`: if true, no calibration plot will be generated. The default setting is false. -->
+- `--mjd <mjd>`: Modified Julian Date (float) [note MJD=JD-2400000.5], required for single photometry file
+- `--observer <observer>`: Name of the observer to be associated with the datapoint(s). Note that by default the token's owner name will be used as a an observer. Selecting this option overwrites the name from the token.
 
-
-### Example Usage
+### Example Usage 1
 
 ```bash
-python upload_files_script.py 123token456 Gaia22bpl photometry file1.cat,file2.cat --mjd 51234.123
+python upload_files_script.py --token 123_my_user_name_token_456 --observatory "my telescope" --target Gaia22bpl --directory path_to_files/
 ```
 
-### Advanced Usage
+### Example Usage 2
 
 ```bash
-# python upload_files_script.py abc123 target2 type2 file3.txt --match_dist 0.5 --comment "Example comment" --dry_run --no_plot --mjd 59371.5 --group "example_group" --observer "John Doe"
-python upload_files_script.py abc123 target2 type2 file3.txt --comment "my batch upload on 2023-10-02" --dry_run --no_plot --mjd 59371.5 --observer "John Doe"
+python upload_files_script.py --token 123token456 --target Gaia22bpl --observatory "my telescope" --data_product_type photometry --filename file1.cat --mjd 51234.123 --observer "John Doe"
 ```
 
 ### Response
@@ -113,7 +116,7 @@ The script will display the response from the API with a list of uploaded files 
 
 # CALIBRATIONS API
 
-### Description
+<!-- ### Description -->
 
 <!-- This Python script allows you to retrieve a list of catalogues from the BHTOM2 system using the `get_catalogs` API. It provides a command-line interface for making GET requests with proper authorization. -->
 
@@ -212,7 +215,7 @@ curl -X 'POST' \
 ### Request
 
 - **Method**: POST
-- **URL**: `/observatory/getObservatoryList/`
+- **URL**: `api/observatory/getObservatoryList/`
 
 ### Parameters
 
@@ -248,7 +251,7 @@ The request header should include the following:
 
 ```bash
 curl -X 'POST' \
-  'https://bh-tom2.astrolabs.pl/observatory/getObservatoryList/' \
+  'https://bh-tom2.astrolabs.pl/api/observatory/getObservatoryList/' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Token <yourToken>' \
@@ -302,7 +305,7 @@ This API endpoint allows users to add observatory to their favourite list. Users
 
 ```bash
 curl -X POST \
-  'https://bh-tom2.astrolabs.pl/observatory/addFavouriteObservatory/' \
+  'https://bh-tom2.astrolabs.pl/api/observatory/addFavouriteObservatory/' \
   -H 'Authorization: Token <yourToken>' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -319,7 +322,7 @@ curl -X POST \
 ### Request
 
 - **Method**: POST
-- **URL**: `/observatory/create/`
+- **URL**: `api//observatory/create/`
 
 ### Request Parameters
 
@@ -373,7 +376,7 @@ curl -X POST \
     "example_file": "observatory_example.txt",
     "comment": "This observatory is for calibration purposes."
   }' \
-  https://api.example.com/observatory/create/
+  https://bh-tom2.astrolabs.pl/api/observatory/create/
 ```
 
 ### Using Python Script
@@ -390,7 +393,7 @@ python create_observatory.py --name "My Observatory" --lon 45.12345 --lat -120.6
 ### Request
 
 - **Method**: POST
-- **URL**: `/observatory/update/`
+- **URL**: `api/observatory/update/`
 
 ### Request Parameters
 
@@ -444,7 +447,7 @@ curl -X PATCH \
     "example_file": "new_observatory_example.txt",
     "comment": "Updated observatory information."
   }' \
-  https://api.example.com/api/observatory/update/
+  https://bh-tom2.astrolabs.pl/api/observatory/update/
 ```
 
 ### Using Python Script
@@ -463,7 +466,7 @@ python create_observatory.py --name "My Observatory" --lon 45.12345 --lat -120.6
 ## Request
 
 - **Method**: POST
-- **URL**: `/observatory/getFavouriteObservatory/`
+- **URL**: `api//observatory/getFavouriteObservatory/`
 
 ## Request Parameters
 
@@ -504,7 +507,7 @@ curl -X POST \
     "created_start": "2023-01-01T00:00:00Z",
     "created_end": "2023-12-31T23:59:59Z"
   }' \
-  https://api.example.com/api/observatory-matrix/get-matrix/
+  https://bh-tom2.astrolabs.pl/api/observatory-matrix/get-matrix/
 ```
 
 ### Using Python Script
@@ -522,7 +525,7 @@ python get_observatory_matrix.py --user "JohnDoe" --active_flg true --observator
 ### Request
 
 - **Method**: DELETE
-- **URL**: `/observatory/deleteFavouriteObservatory/`
+- **URL**: `api/observatory/deleteFavouriteObservatory/`
 
 
 ### Request Parameters
@@ -552,7 +555,7 @@ curl -X DELETE \
   -d '{
     "observatory": "My Observatory"
   }' \
-  https://api.example.com/api/observatory-matrix/delete/
+  https://bh-tom2.astrolabs.pl/api/observatory-matrix/delete/
 ```
 
 ### Using Python Script
@@ -825,10 +828,11 @@ curl -X PATCH \
     "importance": 3,
     "cadence": 12
   }' \
-  https://bh-tom2.astrolabs.pl/api/targets/updateTarget/{name}/
+  https://bh-tom2.astrolabs.pl/targets/updateTarget/{name}/
 ```
 
 Replace `<yourToken>` with your authentication token and `{name}` with the actual name or identifier of the target you want to update.
+Note, the last slash is required!
 
 ### Using Python Script
 

@@ -78,13 +78,13 @@ class DataProductUploadForm(forms.Form):
         )
 
         self.fields['observer'] = forms.CharField(
-            initial=user,
+            initial=user.first_name + " " + user.last_name,
             required=False,
             label='Observer\'s Name *',
         )
 
         self.fields['observatory'] = ObservatoryChoiceField(
-            queryset=ObservatoryMatrix.objects.filter(user=user, active_flg=True).order_by('observatory'),
+            queryset=ObservatoryMatrix.objects.filter(user=user, active_flg=True).order_by('observatory__name'),
             widget=forms.Select(),
             required=False,
             

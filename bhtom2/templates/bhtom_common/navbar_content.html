@@ -51,20 +51,17 @@ For customization instructions, see bhtom_common/base.html
     </ul>
 </li>
 {% endif %}
-<li class="nav-item">
-    <a class="nav-link {% if request.resolver_match.namespace == 'dataproducts' %}active{% endif %}" href="{% url 'bhtom_dataproducts:list' %}">Data</a>
+
+<li class="nav-item dropdown {% if request.resolver_match.namespace == 'dataproducts' %}active{% endif %}"">
+    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+        aria-haspopup="true" aria-expanded="false">
+        Data
+    </a>
+    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item" href="{% url 'bhtom_dataproducts:list_all' %}">All</a>
+        <a class="dropdown-item" href="{% url 'bhtom_dataproducts:list_user' %}">Yours files</a>
+    </div>
 </li>
-{% comment %} <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" data-toggle="dropdown">Data</a>
-    <ul class="dropdown-menu">
-        <li class="nav-item {% if request.resolver_match.namespace == 'dataproducts' %}active{% endif %}">
-            <a class="nav-link" href="{% url 'bhtom_dataproducts:list' %}" style="color:black">Public data</a>
-        </li>
-        <!-- <li class="nav-item {% if request.resolver_match.namespace == 'dataproducts-group' %}active{% endif %}">
-            <a class="nav-link" href="{% url 'bhtom_dataproducts:group-list' %}" style="color:black">Data group</a>
-        </li> -->
-    </ul>
-</li> {% endcomment %}
 {% if request.user.is_superuser or request.user.is_staff %}
 <li class="nav-item {% if request.resolver_match.namespace == 'proposals' %}active{% endif %}">
     <a class="nav-link" href="{% url 'bhtom_proposals:list' %}">Proposals</a>
