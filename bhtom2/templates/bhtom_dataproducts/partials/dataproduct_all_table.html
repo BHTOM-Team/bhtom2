@@ -1,0 +1,103 @@
+
+{% extends 'bhtom_common/base.html' %}
+{% load bootstrap4 static cache %}
+{% block title %} Data Product List {% endblock %}
+{% block additional_css %}
+<link rel="stylesheet" href="{% static 'bhtom_observations/css/main.css' %}">
+<link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
+{% endblock %}
+{% block content %}
+{% include 'bhtom_dataproducts/partials/js9_scripts.html' %}
+
+
+<div class="row">
+    <div class="col-md-2">
+        <form action="" method="get" class="form">
+            {% bootstrap_form filter.form %}
+            {% buttons %}
+            <button type="submit" class="btn btn-primary">
+                Filter
+            </button>
+            <a href="{% url 'bhtom_base.bhtom_dataproducts:list' %}" class="btn btn-secondary" title="Reset">Reset</a>
+            {% endbuttons %}
+        </form>
+    </div>
+    <div class="col-md-8 ">
+        <div class="tab-pane active" id="all">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>Photometry</th>
+                        <th>Target</th>
+                        <th>Observatory</th>
+                        <th>Owner</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in object_list %}
+                    <tr>
+                        <td>{{ product.get_file_name|truncatechars:40 }}</td>
+                        {% if product.photometry_data is not None %}
+                        <td>
+                            <a href="{% url 'bhtom_dataproducts:photometry_download' id=product.id %}">
+                                {{product.photometry_data|truncatechars:40 }}</a>
+                        </td>
+                        {% else %}
+                        <td></td>
+                        {% endif %}
+                        <td>
+                            <a href="{% url 'bhtom_targets:detail' product.target.name %}">
+                                {{product.target.name|truncatechars:40 }}</a>
+                        </td>
+                        <td>{{ product.observatory }}</td>
+                        <td>{{ product.user.first_name }} {{ product.user.last_name }}</td>
+                        <td>
+                            {% if product.data_product_type %}
+                            {{ product.get_type_display }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if product.status == "C" %}
+                            TO DO
+                            {% endif %}
+                            {% if product.status == "P" %}
+                            IN PROGRESS
+                            {% endif %}
+                            {% if product.status == "S" %}
+                            SUCCESS
+                            {% endif %}
+                            {% if product.status == "E" %}
+                            ERROR
+                            {% endif %}
+                        </td>
+                
+                        {% if product.data_product_type == 'fits_file' or product.data_product_type == 'photometry' %}
+                        <td>
+                            <a href="{% url 'bhtom_dataproducts:dataproduct-details' pk=product.id %}" title="Show details"
+                                class="btn btn-primary">Detail</a>
+                        </td>
+                        {% else %}
+                        <td></td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9">
+                            No data yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if object_list %}
+                {% bootstrap_pagination page_obj extra=request.GET.urlencode %}
+            {% endif %}
+        </div>
+    </div>
+</div>        
+{% endblock %}
+

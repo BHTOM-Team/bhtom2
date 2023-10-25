@@ -161,13 +161,56 @@ class FitsUploadAPIView(APIView):
         return HttpResponse(response.content, status=response.status_code)
 
 
-class DataProductListView(LoginRequiredMixin, FilterView):
+class DataProductListAllView(LoginRequiredMixin, FilterView):
     """
     View that handles the list of ``DataProduct`` objects.
     """
 
     model = DataProduct
-    template_name = 'bhtom_dataproducts/dataproduct_list.html'
+    template_name = 'bhtom_dataproducts/partials/dataproduct_all_table.html'
+    paginate_by = 25
+    filterset_class = DataProductFilter
+    strict = False
+
+    def get_queryset(self):
+        """
+        Gets the set of ``DataProduct`` objects that the user has permission to view.
+
+        :returns: Set of ``DataProduct`` objects
+        :rtype: QuerySet
+        """
+
+        dataProductGroup = DataProductGroup.objects.filter(private=True)
+
+        if settings.TARGET_PERMISSIONS_ONLY:
+            return super().get_queryset().filter(
+                target__in=get_objects_for_user(self.request.user, 'bhtom_targets.view_target'),
+            ).exclude(
+                group__in=dataProductGroup
+            ).order_by('created')
+        else:
+            return get_objects_for_user(self.request.user, 'bhtom_dataproducts.view_dataproduct').order_by('created')
+
+    def get_context_data(self, *args, **kwargs):
+        """
+        Adds the set of ``DataProductGroup`` objects to the context dictionary.
+
+        :returns: context dictionary
+        :rtype: dict
+        """
+        context = super().get_context_data(*args, **kwargs)
+        context['product_groups'] = DataProductGroup.objects.all()
+        objects = context['object_list']
+        return context
+
+
+class DataProductListUserView(LoginRequiredMixin, FilterView):
+    """
+    View that handles the list of ``DataProduct`` objects.
+    """
+
+    model = DataProduct
+    template_name = 'bhtom_dataproducts/partials/dataproduct_user_table.html'
     paginate_by = 25
     filterset_class = DataProductFilter
     strict = False
