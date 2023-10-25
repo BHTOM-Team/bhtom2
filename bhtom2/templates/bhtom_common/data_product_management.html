@@ -26,7 +26,7 @@
                     <div class="tab-pane" id="photometry">
                         <form id="data-form" action="{% url 'bhtom_common:reload_photometry' %}" method="POST">
                             {% csrf_token %}
-                             <h4>Delay: 7 days</h4>
+                            <h4>Delay: 7 days</h4>
                             <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Reload Photometry
                             </button>
                             <table class="table table-hover sortable">
@@ -48,17 +48,33 @@
                                 {% for data in photometry_data %}
                                     <tr>
                                         <td><label>
-                                            <input type="checkbox" name="selected-photometry" value="{{ data.dataProduct.id }}"
+                                            <input type="checkbox" name="selected-photometry"
+                                                   value="{{ data.dataProduct.id }}"
                                                    onClick="single_select()"/>
                                         </label></td>
 
                                         <td>{{ data.dataProduct.data }}</td>
                                         <td>{{ data.calibData.created }}</td>
                                         <td>{{ data.dataProduct.observatory }}</td>
-                                        <td>{{ data.dataProduct.target }}</td>
-                                        <td>{{ data.dataProduct.user }}</td>
+                                        <td><a href="{% url 'bhtom_targets:detail' data.dataProduct.target.name %}">
+                                            {{ data.dataProduct.target.name }}</a></td>
+                                        <td>{{ data.dataProduct.user.first_name }} {{ data.dataProduct.user.last_name }}</td>
                                         <td>{{ data.dataProduct.data_product_type }}</td>
-                                        <td>{{ data.calibData.status }}</td>
+
+                                        <td>
+                                            {% if  data.calibData.status == "C" %}
+                                                TO DO
+                                            {% endif %}
+                                            {% if  data.calibData.status == "P" %}
+                                                IN PROGRESS
+                                            {% endif %}
+                                            {% if  data.calibData.status == "S" %}
+                                                SUCCESS
+                                            {% endif %}
+                                            {% if  data.calibData.status == "E" %}
+                                                ERROR
+                                            {% endif %}
+                                        </td>
                                         <td>{{ data.calibData.status_message }}</td>
                                         <td></td>
 
@@ -103,9 +119,23 @@
                                         <td>{{ fits.data }}</td>
                                         <td>{{ fits.created }}</td>
                                         <td>{{ fits.observatory }}</td>
-                                        <td>{{ fits.target }}</td>
-                                        <td>{{ fits.user }}</td>
-                                        <td>{{ fits.status }}</td>
+                                        <td><a href="{% url 'bhtom_targets:detail' fits.target.name %}">
+                                            {{ fits.target.name }}</a></td>
+                                        <td>{{ fits.user.first_name }} {{ fits.user.last_name }}</td>
+                                        <td>
+                                            {% if fits.status == "C" %}
+                                                TO DO
+                                            {% endif %}
+                                            {% if fits.status == "P" %}
+                                                IN PROGRESS
+                                            {% endif %}
+                                            {% if fits.status == "S" %}
+                                                SUCCESS
+                                            {% endif %}
+                                            {% if fits.status == "E" %}
+                                                ERROR
+                                            {% endif %}
+                                        </td>
 
                                     </tr>
                                 {% empty %}
@@ -148,9 +178,23 @@
                                         <td>{{ fits.data }}</td>
                                         <td>{{ fits.created }}</td>
                                         <td>{{ fits.observatory }}</td>
-                                        <td>{{ fits.target }}</td>
-                                        <td>{{ fits.user }}</td>
-                                        <td>{{ fits.status }}</td>
+                                        <td><a href="{% url 'bhtom_targets:detail' fits.target.name %}">
+                                            {{ fits.target.name }}</a></td>
+                                        <td>{{ fits.user.first_name }}{{ fits.user.last_name }}</td>
+                                        <td>
+                                            {% if fits.status == "C" %}
+                                                TO DO
+                                            {% endif %}
+                                            {% if fits.status == "P" %}
+                                                IN PROGRESS
+                                            {% endif %}
+                                            {% if fits.status == "S" %}
+                                                SUCCESS
+                                            {% endif %}
+                                            {% if fits.status == "E" %}
+                                                ERROR
+                                            {% endif %}
+                                        </td>
 
                                     </tr>
                                 {% empty %}

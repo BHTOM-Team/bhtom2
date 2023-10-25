@@ -223,6 +223,8 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
 
             try:
                 dataProduct = DataProduct.objects.get(id=data_id)
+                dataProduct.status = 'P'
+                dataProduct.save()
             except DataProduct.DoesNotExist:
                 logger.error("DataProduct not Exist, data: " + str(data_id))
                 messages.error(self.request, 'DataProduct not Exist.')

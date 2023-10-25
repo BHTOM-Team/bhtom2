@@ -226,8 +226,10 @@ class DataProductListUserView(LoginRequiredMixin, FilterView):
         dataProductGroup = DataProductGroup.objects.filter(private=True)
 
         if settings.TARGET_PERMISSIONS_ONLY:
+
             return super().get_queryset().filter(
                 target__in=get_objects_for_user(self.request.user, 'bhtom_targets.view_target'),
+                user=self.request.user
             ).exclude(
                 group__in=dataProductGroup
             ).order_by('created')
@@ -248,13 +250,11 @@ class DataProductListUserView(LoginRequiredMixin, FilterView):
 
         for row in objects:
             try:
-                if row.user == self.request.user:
-                    user_list.append(row)
                 row.photometry_data = row.photometry_data.split('/')[-1]
             except:
                 continue
 
-        context['user_list'] = user_list
+        context['user_list'] = objects
         return context
 
 
@@ -399,7 +399,7 @@ class DataDetailsView(DetailView):
                 try:
                     ccdphot = CCDPhotJob.objects.get(dataProduct=data_product.id)
                 except CCDPhotJob.DoesNotExist:
-                    logger.error("CCDPhotJob not found")
+                    logger.error("CCDPhotJob not found: data" + str(data_product.id))
                     messages.error(self.request, 'Data not found')
                     raise
 
@@ -437,7 +437,7 @@ class DataDetailsView(DetailView):
 
         except Exception as e:
             logger.error(str(e))
-            raise Http404
+            return HttpResponseRedirect(reverse('bhtom_dataproducts:list'))
 
         return context
 
