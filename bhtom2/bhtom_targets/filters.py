@@ -63,6 +63,9 @@ class TargetFilter(django_filters.FilterSet):
 
     def filter_name(self, queryset, name, value):
         return queryset.filter(Q(name__icontains=value) | Q(aliases__name__icontains=value)).distinct()
+   
+    def filter_description(self, queryset, description, value):
+        return queryset.filter(Q(description__icontains=value)).distinct()
 
     def filter_ra(self, queryset, name, value):
 
@@ -187,6 +190,8 @@ class TargetFilter(django_filters.FilterSet):
 
     targetlist__name = django_filters.ModelChoiceFilter(queryset=get_target_list_queryset, label="Target Grouping")
 
+    description = django_filters.CharFilter(method='filter_description', label='Description')
+
     order = django_filters.OrderingFilter(
         fields=['name', 'created', 'modified'],
         field_labels={
@@ -198,4 +203,4 @@ class TargetFilter(django_filters.FilterSet):
 
     class Meta:
         model = Target
-        fields = ['type', 'name', 'cone_search', 'targetlist__name', 'classification']
+        fields = ['type', 'name', 'classification', 'description', 'cone_search', 'targetlist__name']

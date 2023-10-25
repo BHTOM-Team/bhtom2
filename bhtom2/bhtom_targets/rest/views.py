@@ -139,6 +139,7 @@ class TargetUpdateApi(views.APIView):
                 'discovery_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'importance': openapi.Schema(type=openapi.TYPE_NUMBER),
                 'cadence': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'description': openapi.Schema(type=openapi.TYPE_STRING)
             },
             required=[]
         ),
