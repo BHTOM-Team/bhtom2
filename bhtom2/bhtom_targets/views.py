@@ -1,3 +1,4 @@
+import csv
 from datetime import datetime
 from io import StringIO
 
@@ -475,6 +476,15 @@ class TargetImportView(LoginRequiredMixin, TemplateView):
         """
         csv_file = request.FILES['target_csv']
         csv_stream = StringIO(csv_file.read().decode('utf-8'), newline=None)
+        targets_count = StringIO(csv_file.read().decode('utf-8'), newline=None)
+        targets_count = len(list(csv.reader(targets_count)))
+
+        logger.info("Import targets, count: %s" % str(targets_count))
+
+        if targets_count > 500:
+            messages.error(request, "You can upload max 500 targets")
+            return redirect(reverse('bhtom_targets:list'))
+
         result = import_targets(csv_stream)
         messages.success(
             request,
