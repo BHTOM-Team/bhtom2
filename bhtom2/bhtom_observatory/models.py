@@ -61,6 +61,7 @@ class ObservatoryMatrix(models.Model):
     created = models.DateTimeField(null=False, blank=False, editable=False, auto_now_add=True, db_index=True)
     modified = models.DateTimeField(null=True, blank=True, editable=True, auto_now_add=True)
     number_of_uploaded_file = models.IntegerField(editable=True, default=0)
+    file_size = models.IntegerField(editable=True, default=0)
     last_file_process = models.DateTimeField(null=True, blank=True, editable=True)
 
     def __str__(self):

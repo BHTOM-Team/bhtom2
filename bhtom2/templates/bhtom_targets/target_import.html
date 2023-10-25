@@ -4,13 +4,13 @@
 {% block content %}
 <h3>Import Targets</h3>
 <p>
-  Upload a .csv to import targets in bulk. 
-  <h6>Allowed field names:</h6> 
+  Upload a .csv to import targets in bulk.
+  <h6>Allowed field names:</h6>
 <pre style="color: grey;">
-name, ra, dec, epoch, parallax, pm_ra, pm_dec, distance, distance_err, 
+name, ra, dec, epoch, parallax, pm_ra, pm_dec, distance, distance_err,
 classification, discovery_date, importance, cadence, phot_class,
-description, epoch_of_elements, mean_anomaly, arg_of_perihelion, eccentricity, 
-lng_asc_node, inclination, mean_daily_motion, semimajor_axis, epoch_of_perihelion, 
+description, epoch_of_elements, mean_anomaly, arg_of_perihelion, eccentricity,
+lng_asc_node, inclination, mean_daily_motion, semimajor_axis, epoch_of_perihelion,
 ephemeris_period, ephemeris_period_err, ephemeris_epoch, ephemeris_epoch_err, perihdist
 </pre>
 <h6>CSV file format examples:</h6>
@@ -31,17 +31,22 @@ mytarget, Gaia20dup
 <pre style="color: grey;">
 name, GAIA_ALERTS_name, cadence
 mytarget, Gaia20dup, 3
-</pre>    
+</pre>
 <p style="font-size: small; color: white;">
 In these special cases, the Gaia Alerts harvester will gather all information from Gaia Alerts, but any extra columns in the CSV file with corresponding fields will replace those read from Gaia Alerts.
 </p>
+    <p style="font-size: small; color: white;">
+You can upload max 500 targets.
+    </p>
 <hr style="border-top: 1px solid grey;">
-</p>
+<br>
 <form method="POST" action="{% url 'targets:import' %}" enctype="multipart/form-data">
   {% csrf_token %}
   <input type="file" name="target_csv" style="color: rgb(0, 217, 255);">
   {% buttons %}
+  <br>
   <input type="submit" value="Upload" class="btn btn-primary">
   {% endbuttons %}
+
 </form>
 {% endblock %}

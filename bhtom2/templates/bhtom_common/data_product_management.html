@@ -6,74 +6,27 @@
     <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}">
 {% endblock %}
 {% block content %}
-    {% if request.user.is_superuser %}
+    {% if request.user.is_staff %}
 
         <div class="row">
             <div class="col-md-12">
                 <ul class="nav nav-tabs" id="tabs">
                     <li class="nav-item">
-                        <span class="nav-link active" data-target="#photometry"
+                        <span class="nav-link" data-target="#photometry"
                               data-toggle="tab">Photometry File</span>
                     </li>
                     <li class="nav-item">
-                        <span class="nav-link" data-target="#fits" data-toggle="tab">FIts File</span>
+                        <span class="nav-link active" data-target="#fits" data-toggle="tab">FIts File Error</span>
+                    </li>
+                    <li class="nav-item">
+                        <span class="nav-link" data-target="#fits_s" data-toggle="tab">Completed Fits</span>
                     </li>
                 </ul>
                 <div class="tab-content">
-                    <div class="tab-pane" id="fits">
-                        <form id="data-form" action="{% url 'bhtom_common:reload_fits' %}" method="POST">
-                            {% csrf_token %}
-
-                            <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Reload Fits
-                            </button>
-                            <table class="table table-hover sortable">
-                                <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>Data</th>
-                                    <th>Created</th>
-                                    <th>Observatory</th>
-                                    <th>Target</th>
-                                    <th>User</th>
-                                    <th>Status</th>
-                                    <th>Edit</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for fits in fits_file %}
-                                    <tr>
-                                        <td><label>
-                                            <input type="checkbox" name="selected-fits" value="{{ fits.id }}"
-                                                   onClick="single_select()"/>
-                                        </label></td>
-
-                                        <td>{{ fits.data }}</td>
-                                        <td>{{ fits.created }}</td>
-                                        <td>{{ fits.observatory }}</td>
-                                        <td>{{ fits.target }}</td>
-                                        <td>{{ fits.user }}</td>
-                                        <td>{{ fits.status }}</td>
-
-                                        <td>Details</td>
-
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="5">
-                                            {% if fits_count == 0 %}
-                                                No data yet.
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </form>
-                    </div>
-                    <div class="tab-pane active" id="photometry">
+                    <div class="tab-pane" id="photometry">
                         <form id="data-form" action="{% url 'bhtom_common:reload_photometry' %}" method="POST">
                             {% csrf_token %}
-
+                             <h4>Delay: 7 days</h4>
                             <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Reload Photometry
                             </button>
                             <table class="table table-hover sortable">
@@ -88,7 +41,7 @@
                                     <th>Data Type</th>
                                     <th>Status</th>
                                     <th>Status Message</th>
-                                    <th>Edit</th>
+                                    <th></th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -107,15 +60,103 @@
                                         <td>{{ data.dataProduct.data_product_type }}</td>
                                         <td>{{ data.calibData.status }}</td>
                                         <td>{{ data.calibData.status_message }}</td>
-                                        <td>Edit</td>
+                                        <td></td>
 
                                     </tr>
                                 {% empty %}
                                     <tr>
                                         <td colspan="5">
-                                            {% if photometry_count == 0 %}
-                                                No data yet.
-                                            {% endif %}
+                                            No data yet.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="tab-pane active" id="fits">
+                        <form id="data-form" action="{% url 'bhtom_common:reload_fits' %}" method="POST">
+                            {% csrf_token %}
+
+                            <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Reload Fits
+                            </button>
+                            <table class="table table-hover sortable">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Data</th>
+                                    <th>Created</th>
+                                    <th>Observatory</th>
+                                    <th>Target</th>
+                                    <th>User</th>
+                                    <th>Status</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for fits in fits_file %}
+                                    <tr>
+                                        <td><label>
+                                            <input type="checkbox" name="selected-fits" value="{{ fits.id }}"
+                                                   onClick="single_select()"/>
+                                        </label></td>
+
+                                        <td>{{ fits.data }}</td>
+                                        <td>{{ fits.created }}</td>
+                                        <td>{{ fits.observatory }}</td>
+                                        <td>{{ fits.target }}</td>
+                                        <td>{{ fits.user }}</td>
+                                        <td>{{ fits.status }}</td>
+
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5">
+                                            No data yet.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="tab-pane" id="fits_s">
+                        <form id="data-form" action="{% url 'bhtom_common:reload_s_fits' %}" method="POST">
+                            {% csrf_token %}
+                            <h4>Delay: 7 days</h4>
+                            <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Restart Fits
+                            </button>
+                            <table class="table table-hover sortable">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Data</th>
+                                    <th>Created</th>
+                                    <th>Observatory</th>
+                                    <th>Target</th>
+                                    <th>User</th>
+                                    <th>Status</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for fits in fits_s_file %}
+                                    <tr>
+                                        <td><label>
+                                            <input type="checkbox" name="selected-s-fits" value="{{ fits.id }}"
+                                                   onClick="single_select()"/>
+                                        </label></td>
+
+                                        <td>{{ fits.data }}</td>
+                                        <td>{{ fits.created }}</td>
+                                        <td>{{ fits.observatory }}</td>
+                                        <td>{{ fits.target }}</td>
+                                        <td>{{ fits.user }}</td>
+                                        <td>{{ fits.status }}</td>
+
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5">
+                                            No data yet.
                                         </td>
                                     </tr>
                                 {% endfor %}
