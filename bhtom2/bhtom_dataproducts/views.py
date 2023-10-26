@@ -70,7 +70,12 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         for index, file_obj in enumerate(files):
             # Add each file to the dictionary with a unique key
             data_product_files[f'file_{index}'] = (file_obj.name, file_obj)
-
+        if dp_type == 'photometry':
+            if len(data_product_files) > 1:
+                logger.error('upload max for photometry: %s %s' % (1, str(target)))
+                messages.error(self.request, f'You can upload max. 1 file at once for photometry type')
+                return redirect(form.cleaned_data.get('referrer', '/'))
+        
         if len(data_product_files) > self.MAX_FILES:
             logger.error('upload max: %s %s' % (str(self.MAX_FILES), str(target)))
             messages.error(self.request, f'You can upload max. {self.MAX_FILES} files at once')
