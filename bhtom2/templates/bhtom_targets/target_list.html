@@ -1,6 +1,5 @@
 {% extends 'bhtom_common/base.html' %}
 {% load bootstrap4 targets_extras bhtom_targets_extras dataproduct_extras cache static %}
-<link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
 {% block title %}Targets{% endblock %}
 {% block content %}
     <div class="row">
@@ -54,9 +53,9 @@
                     <button type="submit" class="btn btn-outline-danger ml-1" name="remove">Remove</button>
                 </div>
                 {% if query_string == '' %}
-                         {% target_table object_list %}
+                   {% target_table object_list %}
                 {% else %}
-                     {% target_table object_list %}
+                    {% target_table object_list %}
                 {% endif %}
             </form>
             <!-- closing table and form to add targets -->
@@ -92,10 +91,45 @@
             integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="//cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
     <script>
-
         $(document).ready(function () {
-            $('.table').DataTable();
+            var table = $('.table').DataTable();
             $('#DataTables_Table_0_filter').hide();
+
+            // Function to set color and text for pagination buttons
+            function setPaginationStyle() {
+              var buttons = document.querySelectorAll('.paginate_button');
+              for (var i = 0; i < buttons.length; i++) {
+                buttons[i].style.setProperty('color', '#fff', 'important');
+            }
+
+              // Change the text and color for the previous button
+              var prev_button = document.querySelector('.paginate_button.previous');
+              if (prev_button) {
+                prev_button.textContent = '<<';
+                prev_button.style.color = '#fff !important';
+            }
+
+              // Change the text and color for the next button
+              var next_button = document.querySelector('.paginate_button.next');
+              if (next_button) {
+                next_button.textContent = '>>';
+                next_button.style.color = '#fff !important';
+            }
+            } 
+
+            // Initial style setup
+            setPaginationStyle();
+      
+            // Event delegation for pagination buttons
+            $('.dataTables_paginate').on('click', '.paginate_button', function () {
+            // Set the color immediately on click
+            $(this).css('color', '#fff !important');
+            });
+      
+            // After each page change, reapply the style
+            table.on('draw', function () {
+                setPaginationStyle();
+            });
         });
     </script>
 {% endblock %}
