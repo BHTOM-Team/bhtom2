@@ -92,48 +92,47 @@
     <script type="text/javascript" src="//cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function () {
-            var table = $('.table');
-            if ($.fn.DataTable.isDataTable(table)) {
-                // DataTables is initialized, you can work with it
-                table.DataTable();
-                $('#DataTables_Table_0_filter').hide();
-            }
-
+            var table = $('.table').DataTable();
+            $('#DataTables_Table_0_filter').hide();
+    
             // Function to set color and text for pagination buttons
             function setPaginationStyle() {
-              var buttons = document.querySelectorAll('.paginate_button');
-              for (var i = 0; i < buttons.length; i++) {
-                buttons[i].style.setProperty('color', '#fff', 'important');
-            }
-
-              // Change the text and color for the previous button
-              var prev_button = document.querySelector('.paginate_button.previous');
-              if (prev_button) {
-                prev_button.textContent = '<<';
-                prev_button.style.color = '#fff !important';
-            }
-
-              // Change the text and color for the next button
-              var next_button = document.querySelector('.paginate_button.next');
-              if (next_button) {
-                next_button.textContent = '>>';
-                next_button.style.color = '#fff !important';
-            }
+                var buttons = document.querySelectorAll('.paginate_button');
+                for (var i = 0; i < buttons.length; i++) {
+                    buttons[i].style.setProperty('color', '#fff', 'important');
+                }
+    
+                // Change the text and color for the previous button
+                var prev_button = document.querySelector('.paginate_button.previous');
+                if (prev_button) {
+                    prev_button.textContent = '<<';
+                    prev_button.style.setProperty('color', '#fff', 'important');
+                }
+    
+                // Change the text and color for the next button
+                var next_button = document.querySelector('.paginate_button.next');
+                if (next_button) {
+                    next_button.textContent = '>>';
+                    next_button.style.setProperty('color', '#fff', 'important');
+                }
             } 
-
-            // Initial style setup
-            setPaginationStyle();
-      
-            // Event delegation for pagination buttons
-            $('.dataTables_paginate').on('click', '.paginate_button', function () {
-            // Set the color immediately on click
-            $(this).css('color', '#fff !important');
-            });
-      
-            // After each page change, reapply the style
-            table.on('draw', function () {
+    
+            // Check if the DataTables table is empty
+            if (table.data().count() > 0) {
+                // Initial style setup
                 setPaginationStyle();
-            });
+          
+                // Event delegation for pagination buttons
+                $('.dataTables_paginate').on('click', '.paginate_button', function () {
+                    // Set the color immediately on click
+                    $(this).css('color', '#fff !important');
+                });
+          
+                // After each page change, reapply the style
+                table.on('draw', function () {
+                    setPaginationStyle();
+                });
+            }
         });
     </script>
 {% endblock %}
