@@ -242,7 +242,13 @@ class TargetListView(SingleTableMixin, PermissionListMixin, FilterView):
         context['target_count'] = context['object_list'].count
 
         return context
-
+    
+    #default filter sets importance_min=1
+    def get_filterset_kwargs(self, filterset_class):
+        kwargs = super().get_filterset_kwargs(filterset_class)
+        if kwargs['data'] is None:
+            kwargs['data'] = {'importance_min': '1'}
+        return kwargs
 
 class TargetUpdateView(LoginRequiredMixin, UpdateView):
     """
