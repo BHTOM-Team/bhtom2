@@ -92,8 +92,12 @@
     <script type="text/javascript" src="//cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function () {
-            var table = $('.table').DataTable();
-            $('#DataTables_Table_0_filter').hide();
+            var table = $('.table');
+            if ($.fn.DataTable.isDataTable(table)) {
+                // DataTables is initialized, you can work with it
+                table.DataTable();
+                $('#DataTables_Table_0_filter').hide();
+            }
 
             // Function to set color and text for pagination buttons
             function setPaginationStyle() {
