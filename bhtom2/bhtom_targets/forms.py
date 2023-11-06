@@ -142,7 +142,7 @@ class TargetForm(forms.ModelForm):
         abstract = True
         model = Target
         fields = '__all__'
-        widgets = {'type': forms.HiddenInput()}
+        #widgets = {'type': forms.HiddenInput()}
 
 
 class SiderealTargetCreateForm(TargetForm):

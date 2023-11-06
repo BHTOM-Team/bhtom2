@@ -54,11 +54,9 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     
     datums = ReducedDatum.objects.filter(target=target,
                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
-                                             )
-        
+                                             ).filter(error__gt=0)
     selected_filters = [f for f, checked in sel.items() if checked]
     non_selected_filters = [f for f, checked in sel.items() if not checked]
-
     times = defaultdict(list)
     mags = defaultdict(list)
     errors = defaultdict(list)
@@ -491,7 +489,7 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
     print(f"INIT: {init_t0},{init_te}, {init_u0}, {init_piEN}, {init_piEE}, {auto_init}, {filter_counts}")    
     datums = ReducedDatum.objects.filter(target=target,
                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
-                                             )
+                                             ).filter(error__gt=0)
         
     selected_filters = [f for f, checked in sel.items() if checked]
     non_selected_filters = [f for f, checked in sel.items() if not checked]
