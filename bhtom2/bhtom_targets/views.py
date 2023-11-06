@@ -284,6 +284,15 @@ class TargetUpdateView(LoginRequiredMixin, UpdateView):
             form.add_error(None, 'Duplicate source names for aliases.')
             return super().form_invalid(form)
 
+        target = Target.objects.get(id=self.object.id)
+        cadence = form.cleaned_data['cadence']
+        importance = form.cleaned_data['importance']
+
+        if target.importance != importance or target.cadence != cadence:
+            try:
+                run_hook('update_priority', target=self.object)
+            except Exception as e:
+                logger.error("Error in update priority: " + str(e))
 
         super().form_valid(form)
 

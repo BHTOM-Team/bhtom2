@@ -44,7 +44,7 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
             return redirect(reverse('home'))
 
         context['fits_file'] = DataProduct.objects.filter(data_product_type='fits_file') \
-            .exclude(status='S') \
+            .exclude(status='S', fits_data__isnull=True) \
             .order_by('-created')
 
         days_delay = timezone.now() - timedelta(days=7)
