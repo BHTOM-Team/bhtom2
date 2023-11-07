@@ -1,0 +1,22 @@
+{% extends 'bhtom_common/base.html' %}
+{% load bootstrap4 static %}
+{% block title %}Update Fits{% endblock %}
+<script src="{% static 'bhtom_observatory/create_observatory.js' %}"></script>
+{% block content %}
+    <script src="{% static 'bhtom_observatory/create_observatory.js' %}"></script>
+
+    <form action="{% url 'bhtom_common:update_fits' %}?data={{ fitsId }}" enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <h4>Fits to update:</h4>
+        {% for file in fitsName %}
+            <li>{{ file }}</li>
+        {% endfor %}
+        <br><br>
+        {% bootstrap_form form %}
+        {% buttons %}
+            <button type="submit" class="btn btn-primary">
+                Update
+            </button>
+        {% endbuttons %}
+    </form>
+{% endblock %}
