@@ -1,18 +1,21 @@
+import os
 from datetime import timedelta, datetime
 
 import requests
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
+from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django_guid import get_guid
 from rest_framework.authtoken.models import Token
 from django.shortcuts import redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import ListView
+from django.views.generic import ListView, FormView
 
 from bhtom2 import settings
 from bhtom2.bhtom_calibration.models import Calibration_data
+from bhtom2.bhtom_common.forms import UpdateFitsForm
 from bhtom2.kafka.producer.calibEvent import CalibCreateEventProducer
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from django_tables2.views import SingleTableMixin
@@ -44,7 +47,9 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
             return redirect(reverse('home'))
 
         context['fits_file'] = DataProduct.objects.filter(data_product_type='fits_file') \
-            .exclude(status='S', fits_data__isnull=True) \
+            .exclude(status='S')\
+            .exclude(fits_data__isnull=True) \
+            .exclude(fits_data='') \
             .order_by('-created')
 
         days_delay = timezone.now() - timedelta(days=7)
@@ -96,6 +101,9 @@ class ReloadFits(LoginRequiredMixin, View):
         if not request.user.is_staff:
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
+
+        if 'update' in request.POST:
+            return HttpResponseRedirect(reverse('bhtom_common:update_fits') + f'?data={",".join(data_ids)}')
 
         try:
             token = Token.objects.get(user=user)
@@ -256,3 +264,48 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
             messages.success(self.request, 'Send file to ccdphot')
 
         return redirect(reverse('bhtom_common:list'))
+
+
+class UpdateFits(LoginRequiredMixin, FormView):
+    model = DataProduct
+    form_class = UpdateFitsForm
+    template_name = 'bhtom_common/fits_update.html'
+    success_url = reverse_lazy('bhtom_common:list')
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        fitsId = self.request.GET.get('data', '')
+        context['fitsId'] = fitsId
+        fits = DataProduct.objects.filter(id__in=fitsId.split(','))
+        context['fitsName'] = [fit.get_file_name() for fit in fits]
+        return context
+
+    def form_valid(self, form):
+        fitsId = self.request.GET.get('data', '').split(',')
+        delete_fits = form.cleaned_data['delete_fits']
+        status = form.cleaned_data['status']
+        status_message = form.cleaned_data['status_message']
+
+        dataProducts = DataProduct.objects.filter(id__in=fitsId)
+
+        for data in dataProducts:
+            if delete_fits:
+                try:
+                    base_path = settings.DATA_FILE_PATH
+                    url_result = base_path + str(data.fits_data)
+                    os.remove(url_result)
+                    data.fits_data = ''
+                except Exception as e:
+                    logger.error("Error in delete fits: " + str(e))
+                    continue
+            if status_message:
+                ccdphot = CCDPhotJob.objects.get(dataProduct=data)
+                ccdphot.status_message = status_message
+                ccdphot.save()
+
+            data.status = status
+            data.save()
+
+        messages.success(self.request,
+                         'successfully created, observatory requires administrator approval')
+        return redirect(self.get_success_url())

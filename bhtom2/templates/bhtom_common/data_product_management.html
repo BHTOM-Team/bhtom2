@@ -1,6 +1,6 @@
 {% extends 'bhtom_common/base.html' %}
 {% load bootstrap4 bhtom_common_extras static %}
-{% block title %}Data Product {{ object.name }}{% endblock %}
+{% block title %}Admin Data{% endblock %}
 {% block additional_css %}
     <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
     <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}">
@@ -96,6 +96,9 @@
 
                             <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Reload Fits
                             </button>
+                            <button type="submit" class="btn btn-outline-primary ml-1" name="update">Update Fits
+                            </button>
+
                             <table class="table table-hover sortable">
                                 <thead>
                                 <tr>
