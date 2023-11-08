@@ -281,6 +281,8 @@ class UpdateFits(LoginRequiredMixin, FormView):
         return context
 
     def form_valid(self, form):
+        logger.info("Start update Fits by Admin")
+
         fitsId = self.request.GET.get('data', '').split(',')
         delete_fits = form.cleaned_data['delete_fits']
         status = form.cleaned_data['status']
@@ -295,12 +297,14 @@ class UpdateFits(LoginRequiredMixin, FormView):
                     url_result = base_path + str(data.fits_data)
                     os.remove(url_result)
                     data.fits_data = ''
+                    logger.info("Delete fits from disk: " + str(data.data))
                 except Exception as e:
                     logger.error("Error in delete fits: " + str(e))
                     continue
             if status_message:
                 ccdphot = CCDPhotJob.objects.get(dataProduct=data)
                 ccdphot.status_message = status_message
+                logger.info("Set status message: " + str(data.data))
                 ccdphot.save()
 
             data.status = status
