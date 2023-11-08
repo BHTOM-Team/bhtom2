@@ -37,7 +37,7 @@
                 {% target_data object %}
                 {% target_buttons object %}
                 {% if object.type == 'SIDEREAL' %}
-                    {% cache 31536000 target_distribution_cache object_list using="targetDetails" %}
+                    {% cache 31536000 target_distribution_cache target.name using="targetDetails" %}
                         {% aladin object %}
                     {% endcache %}
                 {% endif %}
