@@ -383,6 +383,7 @@ TOM_ALERT_CLASSES = [
     'bhtom2.brokers.decaps.DECAPSBroker',
     'bhtom2.brokers.asassn.ASASSNBroker',
     'bhtom2.brokers.ogleews.OGLEEWSBroker',
+    'bhtom2.brokers.lofar.LOFARBroker',
 ]
 
 BROKERS = {
@@ -457,6 +458,7 @@ OPEN_URLS = []
 HOOKS = {
     'target_post_save': 'bhtom2.bhtom_targets.hooks.target_post_save',
     'update_alias': 'bhtom2.bhtom_targets.hooks.update_alias',
+    'update_priority': 'bhtom2.bhtom_targets.hooks.update_priority',
     'reduced_datum_pre_save': 'bhtom_base.bhtom_dataproducts.hooks.reduced_datum_pre_save',
     'observation_change_state': 'bhtom_base.bhtom_common.hooks.observation_change_state',
     'data_product_post_upload': 'bhtom_base.bhtom_dataproducts.hooks.data_product_post_upload',

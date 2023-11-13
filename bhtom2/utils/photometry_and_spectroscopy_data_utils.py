@@ -53,7 +53,8 @@ def get_spectroscopy_observation_time_jd(reduced_datum: ReducedDatum) -> Optiona
 
 def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str]]:
     datums = ReducedDatum.objects.filter(target=target,
-                                         data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
+                                         data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
+                                         active_flg=True
                                          ).values('mjd', 'value', 'error', 'facility', 'filter', 'observer')
 
     columns = ['mjd', 'value', 'error', 'facility', 'filter', 'observer']

@@ -93,7 +93,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-            {% if object_list %}
+            {% if user_list %}
                 {% bootstrap_pagination page_obj extra=request.GET.urlencode %}
             {% endif %}
         </div>

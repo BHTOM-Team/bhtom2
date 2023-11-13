@@ -21,7 +21,8 @@ def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str
 
     datums = ReducedDatum.objects.filter(target=target,
                                          data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
-                                         value_unit=ReducedDatumUnit.MAGNITUDE)
+                                         value_unit=ReducedDatumUnit.MAGNITUDE,
+                                         active_flg=True)
 
     columns: List[str] = ['MJD', 'Magnitude',
                           'Error', 'Facility', 'Filter', 'Observer']
@@ -44,7 +45,8 @@ def get_radio_data_table(target: Target) -> Tuple[List[List[str]], List[str]]:
 
     radio_datums = ReducedDatum.objects.filter(target=target,
                                                data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
-                                               value_unit=ReducedDatumUnit.MILLIJANSKY)
+                                               value_unit=ReducedDatumUnit.MILLIJANSKY,
+                                               active_flg=True)
 
     columns: List[str] = ['MJD', 'mJy',
                           'Error', 'Facility', 'Filter', 'Observer']
