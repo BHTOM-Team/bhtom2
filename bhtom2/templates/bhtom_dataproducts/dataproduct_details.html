@@ -3,170 +3,358 @@
 {% block title %} Data Product Details {% endblock %}
 {% block additional_css %}
     <link rel="stylesheet" href="{% static 'bhtom_observations/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}">
     <style>
         .dhtmlwindow {
             top: 100px !important;
         }
     </style>
+
 {% endblock %}
 {% block content %}
     {% include 'bhtom_dataproducts/partials/js9_scripts.html' %}
+    
 
-    <h1>Target: {{ target.name }}</h1>
-    <div class="row">
-        <div class="col-md-6">
-            <table class="table">
-                <thead>
-                <tr>
-                    <th></th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>Fits</td>
-                    <td>
-                        <div title="{{ fits_data }}">{{ fits_data }}</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Photometry</td>
-                    {% if photometry_data is not None %}
-                        <td>
-                            <a href="{% url 'bhtom_dataproducts:photometry_download' id=object.id %}"> {{ photometry_data }}</a>
-                        </td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-                </tr>
-                 <tr>
-                    <td>Owner</td>
-                    <td>{{ owner }}</td>
-                </tr>
-                <tr>
-                    <td>Observatory</td>
-                    <td>{{ object.observatory }}</td>
-                </tr>
-                <tr>
-                    <td>Time Uploaded</td>
-                    {% if object.created != None %}
-                        <td>{{ object.created }}</td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-                </tr>
-                <tr>
-                    <td>Time Photometry</td>
-                    {% if calibration.modified != None %}
-                        <td>{{ calibration.modified }}</td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-                </tr>
-                <tr>
-                    <td>Status</td>
-                    <td>{{ calibration.status_message }}</td>
-                </tr>
-                <tr>
-                    <td>MJD</td>
-                    {% if calibration.mjd != None %}
-                        <td>{{ calibration.mjd }}</td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-
-                </tr>
-                <tr>
-                    <td>Exposure time</td>
-                    {% if calibration.expTime != None %}
-                        <td>{{ calibration.expTime }}</td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-
-                </tr>
-                <tr>
-                    <td>Calib Filter</td>
-                    <td>{{ calibration.best_filter }}</td>
-                </tr>
-
-                <tr>
-                    <td>Magnitude</td>
-                    {% if calibration.mag != None %}
-                        <td>{{ calibration.mag|floatformat:2 }} +/- {{ calibration.mag_error|floatformat:2 }} mag</td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-
-                </tr>
-                <tr>
-                    <td>ZP</td>
-                    {% if calibration.zeropoint != None %}
-                        <td>{{ calibration.zeropoint|floatformat:2 }} mag</td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-
-                </tr>
-                <tr>
-                    <td>Scatter</td>
-                    {% if calibration.scatter != None %}
-                        <td>{{ calibration.scatter|floatformat:3 }} mag</td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-
-                </tr>
-                <tr>
-                    <td>Number of datapoints used for calibration</td>
-                    {% if calibration.npoints != None %}
-                        <td>{{ calibration.npoints }}</td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-
-                </tr>
-                <tr>
-                    <td>Outlier fraction</td>
-                    {% if calibration.outlier_fraction != None %}
-                        <td>{{ calibration.outlier_fraction|floatformat }}</td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-
-                </tr>
-                <tr>
-                    <td>Matching radius[arcsec]</td>
-                    <td>{{ calibration.match_distans }}</td>
-                </tr>
-                <tr>
-                    <td>Dry Run (no data will be stored in the database)</td>
-                    <td>{{ object.dryRun }}</td>
-                </tr>
-                <tr>
-                    <td>Comment</td>
-                    {% if object.comment != None %}
-                        <td>{{ object.comment }}</td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-                </tr>
-                <!--
-
--->
-                </tbody>
-            </table>
-        </div>
-
-        {% if cpcs_plot != None %}
-
-            <div class="col-md-2">
-
-                <img src="data:image/png;base64,{{ cpcs_plot }}"/>
-            </div>
+    <ul class="nav nav-tabs" id="tabs">
+        <li class="nav-item">
+          <span class="nav-link active" data-target="#calib" data-toggle="tab">Calibration</span>
+        </li>
+        {% if object.data_product_type == "fits_file" %}
+            <li class="nav-item">
+                <span class="nav-link" data-target="#ccdphot" data-toggle="tab">CCDPHOT</span>
+            </li>
         {% endif %}
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane active" id="calib">
+            <div class="row">
+                <div class="col-md-6">
+                    <h1>Target: {{ target.name }}</h1>
+                    <table class="table">
+                        <tbody>
+                        <tr>
+                            <td>Fits</td>
+                            <td>
+                                <div title="{{ fits_data }}">{{ fits_data }}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Photometry</td>
+                            {% if photometry_data is not None %}
+                                <td>
+                                    <a href="{% url 'bhtom_dataproducts:photometry_download' id=object.id %}"> {{ photometry_data }}</a>
+                                </td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        </tr>
+                         <tr>
+                            <td>Owner</td>
+                            <td>{{ owner }}</td>
+                        </tr>
+                        <tr>
+                            <td>Observatory</td>
+                            <td>{{ object.observatory }}</td>
+                        </tr>
+                        <tr>
+                            <td>Time Uploaded</td>
+                            {% if object.created != None %}
+                                <td>{{ object.created }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Time Photometry</td>
+                            {% if calibration.modified != None %}
+                                <td>{{ calibration.modified }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Status</td>
+                            <td>{{ calibration.status_message }}</td>
+                        </tr>
+                        <tr>
+                            <td>MJD</td>
+                            {% if calibration.mjd != None %}
+                                <td>{{ calibration.mjd }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        
+                        </tr>
+                        <tr>
+                            <td>Exposure time</td>
+                            {% if calibration.expTime != None %}
+                                <td>{{ calibration.expTime }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        
+                        </tr>
+                        <tr>
+                            <td>Calib Filter</td>
+                            <td>{{ calibration.best_filter }}</td>
+                        </tr>
+                    
+                        <tr>
+                            <td>Magnitude</td>
+                            {% if calibration.mag != None %}
+                                <td>{{ calibration.mag|floatformat:2 }} +/- {{ calibration.mag_error|floatformat:2 }} mag</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        
+                        </tr>
+                        <tr>
+                            <td>ZP</td>
+                            {% if calibration.zeropoint != None %}
+                                <td>{{ calibration.zeropoint|floatformat:2 }} mag</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        
+                        </tr>
+                        <tr>
+                            <td>Scatter</td>
+                            {% if calibration.scatter != None %}
+                                <td>{{ calibration.scatter|floatformat:3 }} mag</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        
+                        </tr>
+                        <tr>
+                            <td>Number of datapoints used for calibration</td>
+                            {% if calibration.npoints != None %}
+                                <td>{{ calibration.npoints }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        
+                        </tr>
+                        <tr>
+                            <td>Outlier fraction</td>
+                            {% if calibration.outlier_fraction != None %}
+                                <td>{{ calibration.outlier_fraction|floatformat }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        
+                        </tr>
+                        <tr>
+                            <td>Matching radius[arcsec]</td>
+                            <td>{{ calibration.match_distans }}</td>
+                        </tr>
+                        <tr>
+                            <td>Dry Run (no data will be stored in the database)</td>
+                            <td>{{ object.dryRun }}</td>
+                        </tr>
+                        <tr>
+                            <td>Comment</td>
+                            {% if object.comment != None %}
+                                <td>{{ object.comment }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            
+                {% if cpcs_plot %}
+                    <div class="col-md-2">
+                        <img src="data:image/png;base64,{{ cpcs_plot }}" />
+                        <button id="downloadButton" class="btn btn-primary">Download Calibration Plot</button>
+                    </div>
+                    <script>
+                        document.getElementById('downloadButton').addEventListener('click', function() {
+                            var encodedData = '{{ cpcs_plot }}';
+                            
+                            // Create a Blob from the base64-encoded data
+                            var blob = new Blob([encodedData], { type: 'image/png' });
+                        
+                            // Create a link and trigger the download
+                            var link = document.createElement('a');
+                            link.href = URL.createObjectURL(blob);
+                            link.download = 'calibration_plot.png';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        });
+                    </script>
+                {% endif %}
+            </div>
+        </div>
+        <div class="tab-pane" id="ccdphot">
+            <div class="row">
+                <div class="col-md-6">
+                    <h1>Target: {{ target.name }}</h1>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td>Job id</td>
+                                <td>{{ ccdphot.job_id }}</td>
+                            </tr>
+                            <tr>
+                                <td>Instrument</td>
+                                <td>{{ ccdphot.instrument|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Instrument Prefix</td>
+                                <td>{{ ccdphot.instrument_prefix|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Webhook id</td>
+                                <td>{{ ccdphot.webhook_id|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Target Name</td>
+                                <td>{{ ccdphot.target_name|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Target RA</td>
+                                <td>{{ ccdphot.target_ra|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Target DEC</td>
+                                <td>{{ ccdphot.target_dec|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Username</td>
+                                <td>{{ ccdphot.username|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Hashtag</td>
+                                <td>{{ ccdphot.hashtag|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Dry Run</td>
+                                <td>{{ ccdphot.dry_run|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Fits ID</td>
+                                <td>{{ ccdphot.fits_id|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Priority</td>
+                                <td>{{ ccdphot.priority|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Start Time</td>
+                                <td>{{ ccdphot.start_time|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Status Time</td>
+                                <td>{{ ccdphot.status_time|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Status</td>
+                                <td>{{ ccdphot.status|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Status Message</td>
+                                <td>{{ ccdphot.status_message|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Progress</td>
+                                <td>{{ ccdphot.progress|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Fits File</td>
+                                <td>{{ ccdphot.fits_file|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>CCDPhot Result</td>
+                                <td>{{ ccdphot.ccdphot_result|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>CCDPhot Result File</td>
+                                <td>{{ ccdphot.ccdphot_result_file|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>CCDPhot Stdout File</td>
+                                <td>{{ ccdphot.ccdphot_stdout_file|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Fits Object</td>
+                                <td>{{ ccdphot.fits_object|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Fits RA</td>
+                                <td>{{ ccdphot.fits_ra|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Fits DEC</td>
+                                <td>{{ ccdphot.fits_dec|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Fits MJD</td>
+                                <td>{{ ccdphot.fits_mjd|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Fits HJD</td>
+                                <td>{{ ccdphot.fits_hjd|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Fits EXP</td>
+                                <td>{{ ccdphot.fits_exp|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Fits Filter</td>
+                                <td>{{ ccdphot.fits_filter|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Fits Origin</td>
+                                <td>{{ ccdphot.fits_origin|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Fits Observatory</td>
+                                <td>{{ ccdphot.fits_observat|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Fits Telescope</td>
+                                <td>{{ ccdphot.fits_telescop|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Fits Instrument</td>
+                                <td>{{ ccdphot.fits_instrume|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Fits Observer</td>
+                                <td>{{ ccdphot.fits_observer|default:"N/A" }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            
+                {% if cpcs_plot %}
+                    <div class="col-md-2">
+                        <img src="data:image/png;base64,{{ cpcs_plot }}" />
+                        <button id="downloadButton" class="btn btn-primary">Download Calibration Plot</button>
+                    </div>
+                    <script>
+                        document.getElementById('downloadButton').addEventListener('click', function() {
+                            var encodedData = '{{ cpcs_plot }}';
+                        
+                            // Create a Blob from the base64-encoded data
+                            var blob = new Blob([encodedData], { type: 'image/png' });
+                            // Create a link and trigger the download
+                            var link = document.createElement('a');
+                            link.href = URL.createObjectURL(blob);
+                            link.download = 'calibration_plot.png';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        });
+                    </script>
+                {% endif %}
+            </div>
+        </div>
     </div>
-
-
-
+   
 {% endblock %}
