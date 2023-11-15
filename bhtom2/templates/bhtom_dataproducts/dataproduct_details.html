@@ -166,28 +166,12 @@
                     </table>
                 </div>
             
-                {% if cpcs_plot %}
-                    <div class="col-md-2">
-                        <img src="data:image/png;base64,{{ cpcs_plot }}" />
-                        <button id="downloadButton" class="btn btn-primary">Download Calibration Plot</button>
-                    </div>
-                    <script>
-                        document.getElementById('downloadButton').addEventListener('click', function() {
-                            var encodedData = '{{ cpcs_plot }}';
-                            
-                            // Create a Blob from the base64-encoded data
-                            var blob = new Blob([encodedData], { type: 'image/png' });
-                        
-                            // Create a link and trigger the download
-                            var link = document.createElement('a');
-                            link.href = URL.createObjectURL(blob);
-                            link.download = 'calibration_plot.png';
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                        });
-                    </script>
-                {% endif %}
+            {% if cpcs_plot %}
+                <div class="col-md-2">
+                    <img id="calibrationPlot" src="data:image/png;base64,{{ cpcs_plot }}" />
+                    <button id="downloadButton" class="btn btn-primary">Download Calibration Plot</button>
+                </div>
+            {% endif %}
             </div>
         </div>
         <div class="tab-pane" id="ccdphot">
@@ -209,10 +193,6 @@
                                 <td>{{ ccdphot.instrument_prefix|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Webhook id</td>
-                                <td>{{ ccdphot.webhook_id|default:"N/A" }}</td>
-                            </tr>
-                            <tr>
                                 <td>Target Name</td>
                                 <td>{{ ccdphot.target_name|default:"N/A" }}</td>
                             </tr>
@@ -227,10 +207,6 @@
                             <tr>
                                 <td>Username</td>
                                 <td>{{ ccdphot.username|default:"N/A" }}</td>
-                            </tr>
-                            <tr>
-                                <td>Hashtag</td>
-                                <td>{{ ccdphot.hashtag|default:"N/A" }}</td>
                             </tr>
                             <tr>
                                 <td>Dry Run</td>
@@ -334,27 +310,31 @@
             
                 {% if cpcs_plot %}
                     <div class="col-md-2">
-                        <img src="data:image/png;base64,{{ cpcs_plot }}" />
+                        <img id="calibrationPlot" src="data:image/png;base64,{{ cpcs_plot }}" />
                         <button id="downloadButton" class="btn btn-primary">Download Calibration Plot</button>
                     </div>
-                    <script>
-                        document.getElementById('downloadButton').addEventListener('click', function() {
-                            var encodedData = '{{ cpcs_plot }}';
-                        
-                            // Create a Blob from the base64-encoded data
-                            var blob = new Blob([encodedData], { type: 'image/png' });
-                            // Create a link and trigger the download
-                            var link = document.createElement('a');
-                            link.href = URL.createObjectURL(blob);
-                            link.download = 'calibration_plot.png';
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                        });
-                    </script>
                 {% endif %}
             </div>
         </div>
     </div>
-   
+    <script>
+        document.getElementById('downloadButton').addEventListener('click', function () {
+            // Get the base64-encoded data from the image source
+            var encodedData = document.getElementById('calibrationPlot').src.split(',')[1];
+
+            // Decode base64 data
+            var decodedData = atob(encodedData);
+
+            // Create a data URI for the image
+            var dataURI = 'data:image/png;base64,' + encodedData;
+
+            // Create a link and trigger the download
+            var link = document.createElement('a');
+            link.href = dataURI;
+            link.download = 'calibration_plot.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    </script>
 {% endblock %}
