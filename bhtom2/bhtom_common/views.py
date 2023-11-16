@@ -303,6 +303,7 @@ class UpdateFits(LoginRequiredMixin, FormView):
                     continue
             if status_message:
                 ccdphot = CCDPhotJob.objects.get(dataProduct=data)
+                ccdphot.status = status
                 ccdphot.status_message = status_message
                 logger.info("Set status message: " + str(data.data))
                 ccdphot.save()
