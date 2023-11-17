@@ -402,7 +402,7 @@ class DataDetailsView(DetailView):
 
             if data_product.fits_data:
                 try:
-                    ccdphot = CCDPhotJob.objects.get(dataProduct=data_product.id)
+                    ccdphot = CCDPhotJob.objects.get(job_id=data_product.id)
                 except CCDPhotJob.DoesNotExist:
                     logger.error("CCDPhotJob not found: data" + str(data_product.id))
                     messages.error(self.request, 'Data not found')
