@@ -400,7 +400,7 @@ class DataDetailsView(DetailView):
                 messages.error(self.request, 'Target not found')
                 raise
 
-            if data_product.fits_data:
+            if data_product.data_product_type == "fits_file":
                 try:
                     ccdphot = CCDPhotJob.objects.get(job_id=data_product.id)
                 except CCDPhotJob.DoesNotExist:
