@@ -35,7 +35,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
           <table class="table table-striped sortable">
           <thead>
             <tr>
-              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Prefix</th><th>Comment</th><th>Only Instrumental photometry file</th>
+              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Observatory API ID (ONAME)</th><th>Comment</th><th>Only Instrumental photometry file</th>
               <th>Details</th>
               {% if request.user.is_superuser %}
               <th>Update</th><th>Delete</th>
@@ -73,7 +73,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
        <table class="table table-striped sortable">
           <thead>
             <tr>
-              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Active</th><th>Comment</th><th>Details</th>
+              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Active</th><th>Observatory API ID (ONAME)</th><th>Comment</th><th>Details</th>
               <th style="pointer-events:none">Update</th><th style="pointer-events:none">Delete</th>
             </tr>
           </thead>
@@ -84,6 +84,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
               <td>{{ observatory.lon }}</td>
               <td>{{ observatory.lat }}</td>
               <td>{% if active_flg %} True {%else%} False{% endif %}</td>
+              <td>{{ observatory.prefix}}</td>
               <td>{{ observatory.comment|truncatechars:30  }}</td>
               <td>
                 <a href="{% url 'bhtom_observatory:detail' pk=observatory.id %}" title="Observatory details" class="btn  btn-primary">Details</a>
