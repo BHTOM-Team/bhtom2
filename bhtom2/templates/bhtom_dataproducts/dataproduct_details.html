@@ -180,10 +180,7 @@
                     <h1>Target: {{ target.name }}</h1>
                     <table class="table">
                         <tbody>
-                            <tr>
-                                <td>Job id</td>
-                                <td>{{ ccdphot.job_id }}</td>
-                            </tr>
+
                             <tr>
                                 <td>Instrument</td>
                                 <td>{{ ccdphot.instrument|default:"N/A" }}</td>
@@ -193,20 +190,12 @@
                                 <td>{{ ccdphot.instrument_prefix|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Target Name</td>
-                                <td>{{ ccdphot.target_name|default:"N/A" }}</td>
-                            </tr>
-                            <tr>
                                 <td>Target RA</td>
                                 <td>{{ ccdphot.target_ra|default:"N/A" }}</td>
                             </tr>
                             <tr>
                                 <td>Target DEC</td>
                                 <td>{{ ccdphot.target_dec|default:"N/A" }}</td>
-                            </tr>
-                            <tr>
-                                <td>Username</td>
-                                <td>{{ ccdphot.username|default:"N/A" }}</td>
                             </tr>
                             <tr>
                                 <td>Dry Run</td>
@@ -228,10 +217,7 @@
                                 <td>Status Time</td>
                                 <td>{{ ccdphot.status_time|default:"N/A" }}</td>
                             </tr>
-                            <tr>
-                                <td>Status</td>
-                                <td>{{ ccdphot.status|default:"N/A" }}</td>
-                            </tr>
+
                             <tr>
                                 <td>Status Message</td>
                                 <td>{{ ccdphot.status_message|default:"N/A" }}</td>
