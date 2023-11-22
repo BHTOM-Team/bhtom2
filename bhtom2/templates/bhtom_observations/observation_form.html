@@ -17,8 +17,9 @@
 </div> -->
 {% endif %}
 <div class="row">
-    <div class="col-md-6">
-        <div class="row">
+    {% comment %} <div class="col-md-6"> {% endcomment %}
+    <div class="col-lg-4">
+            <div class="row">
             {% target_data target %}
         </div>
         <!-- <div class="row">
@@ -26,7 +27,8 @@
             {% moon_distance target %}
         </div> -->
     </div>
-    <div class="col-md-6">
+    {% comment %} <div class="col-md-6"> {% endcomment %}
+    <div class="col-lg-8 target-right">
         <ul class="nav nav-tabs" id="tabs">
         {% for observation_type, observation_form in observation_type_choices %}
             <li class="nav-item">
