@@ -506,6 +506,7 @@ TOM_FACILITY_CLASSES = [
     'bhtom2.bhtom_observations.facilities.piwnice.Piwnice',
     'bhtom2.bhtom_observations.facilities.suhora.Suhora',
     'bhtom2.bhtom_observations.facilities.loiano.Loiano',
+    'bhtom2.bhtom_observations.facilities.evn.EvnObservationFacility',
 ]
 
 DJANGO_GUID = {
