@@ -146,29 +146,31 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
 
         cleaned_data = form.cleaned_data
         stored = Target.objects.all()
+        target_type = self.get_target_type()
 
-        try:
-            ra = coords_to_degrees(cleaned_data['ra'], 'ra')
-            dec = coords_to_degrees(cleaned_data['dec'], 'dec')
-        except Exception as e:
-            logger.error("Invalid format of the coordinates: %s " % str(e))
-            form.add_error(None, "Invalid format of the coordinates")
-            return super().form_invalid(form)
+        if target_type == Target.SIDEREAL:
+            try:
+                ra = coords_to_degrees(cleaned_data['ra'], 'ra')
+                dec = coords_to_degrees(cleaned_data['dec'], 'dec')
+            except Exception as e:
+                logger.error("Invalid format of the coordinates: %s " % str(e))
+                form.add_error(None, "Invalid format of the coordinates")
+                return super().form_invalid(form)
         # raise ValidationError(f'Invalid format of the coordinates')
 
-        if ra < 0 or ra > 360 or dec < -90 or dec > 90:
-            logger.error("Coordinates beyond range")
-            form.add_error(None, "Coordinates beyond range")
-            return super().form_invalid(form)
+            if ra < 0 or ra > 360 or dec < -90 or dec > 90:
+                logger.error("Coordinates beyond range")
+                form.add_error(None, "Coordinates beyond range")
+                return super().form_invalid(form)
         #            raise ValidationError(f'Coordinates beyond range error')
 
-        coords_names = check_for_existing_coords(ra, dec, 3. / 3600., stored)
+            coords_names = check_for_existing_coords(ra, dec, 3. / 3600., stored)
 
-        if len(coords_names) != 0:
-            ccnames = ' '.join(coords_names)
-            logger.error("There is a source found already at these coordinates (rad 3 arcsec)")
-            form.add_error(None, f"Source found already at these coordinates (rad 3 arcsec): {ccnames}")
-            return super().form_invalid(form)
+            if len(coords_names) != 0:
+                ccnames = ' '.join(coords_names)
+                logger.error("There is a source found already at these coordinates (rad 3 arcsec)")
+                form.add_error(None, f"Source found already at these coordinates (rad 3 arcsec): {ccnames}")
+                return super().form_invalid(form)
         #            raise ValidationError(f'Source found already at these coordinates: {ccnames}')
 
         # Check if the form, extras and names are all valid:
