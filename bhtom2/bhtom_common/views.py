@@ -238,31 +238,41 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
                 messages.error(self.request, 'DataProduct not Exist.')
                 continue
 
+            calib_deleted = False
             try:
                 calib = Calibration_data.objects.get(dataproduct=dataProduct)
                 calib.delete()
+                calib_deleted = True
+            except Calibration_data.DoesNotExist:
+                calib_deleted = True  
             except Exception as e:
                 logger.error("Error in delete Calibration_data: " + str(e))
                 messages.error(self.request, 'Error in delete Calibration_data.')
+
+            reducedDatum_deleted = False
             try:
                 reducedDatum = ReducedDatum.objects.get(data_product=dataProduct)
                 reducedDatum.delete()
+                reducedDatum_deleted = True
+            except ReducedDatum.DoesNotExist:
+                reducedDatum_deleted = True 
             except Exception as e:
                 logger.error("Error in delete ReducedDatum: " + str(e))
                 messages.error(self.request, 'Error in delete ReducedDatum.')
 
-            try:
-                logger.info("DeletePointAndRestartProcess for dataProduct_id: " + str(data_id))
-                requests.post(settings.UPLOAD_SERVICE_URL + 'reloadFits/', data=post_data, headers=headers)
-                success = True
-            except Exception as e:
-                logger.error("Error in connect to upload service: " + str(e))
-                messages.error(self.request, 'Error in connect to upload service.')
-                return redirect(reverse('bhtom_common:list'))
+            if calib_deleted and reducedDatum_deleted:
+                try:
+                    logger.info("DeletePointAndRestartProcess for dataProduct_id: " + str(data_id))
+                    requests.post(settings.UPLOAD_SERVICE_URL + 'reloadFits/', data=post_data, headers=headers)
+                    success = True
+                except Exception as e:
+                    logger.error("Error in connect to upload service: " + str(e))
+                    messages.error(self.request, 'Error in connect to upload service.')
+                    return redirect(reverse('bhtom_common:list'))
 
         if success:
             messages.success(self.request, 'Send file to ccdphot')
-
+            
         return redirect(reverse('bhtom_common:list'))
 
 
