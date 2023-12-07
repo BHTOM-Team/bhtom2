@@ -442,7 +442,7 @@ class DataDetailsView(DetailView):
 
         except Exception as e:
             logger.error(str(e))
-            return HttpResponseRedirect(reverse('bhtom_dataproducts:list'))
+            return HttpResponseRedirect(reverse('bhtom_dataproducts:list_all'))
 
         return context
 
