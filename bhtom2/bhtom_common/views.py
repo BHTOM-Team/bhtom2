@@ -1,6 +1,6 @@
 import os
 from datetime import timedelta, datetime
-
+from django.db import transaction
 import requests
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
@@ -202,7 +202,7 @@ class ReloadPhotometry(LoginRequiredMixin, View):
 class DeletePointAndRestartProcess(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
-
+        calibration_copy, reducedDatum_copy= None, None
         data_ids = request.POST.getlist('selected-s-fits')
         user = request.user
         success = False
@@ -232,44 +232,54 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
             try:
                 dataProduct = DataProduct.objects.get(id=data_id)
                 dataProduct.status = 'P'
-                dataProduct.save()
             except DataProduct.DoesNotExist:
                 logger.error("DataProduct not Exist, data: " + str(data_id))
                 messages.error(self.request, 'DataProduct not Exist.')
                 continue
 
-            calib_deleted = False
             try:
-                calib = Calibration_data.objects.get(dataproduct=dataProduct)
-                calib.delete()
-                calib_deleted = True
-            except Calibration_data.DoesNotExist:
-                calib_deleted = True  
-            except Exception as e:
-                logger.error("Error in delete Calibration_data: " + str(e))
-                messages.error(self.request, 'Error in delete Calibration_data.')
+                calib_deleted = False
+                reducedDatum_deleted = False
+                with transaction.atomic():
+                    try:
+                        calib = Calibration_data.objects.get(dataproduct=dataProduct)
+                        calib.delete()
+                        calib_deleted = True
+                    except Calibration_data.DoesNotExist:
+                        calib_deleted = True  
+                    except Exception as e:
+                        logger.error("Error in delete Calibration_data: " + str(e))
+                        messages.error(self.request, 'Error in delete Calibration_data.')
 
-            reducedDatum_deleted = False
-            try:
-                reducedDatum = ReducedDatum.objects.get(data_product=dataProduct)
-                reducedDatum.delete()
-                reducedDatum_deleted = True
-            except ReducedDatum.DoesNotExist:
-                reducedDatum_deleted = True 
-            except Exception as e:
-                logger.error("Error in delete ReducedDatum: " + str(e))
-                messages.error(self.request, 'Error in delete ReducedDatum.')
+                    try:
+                        reducedDatum = ReducedDatum.objects.get(data_product=dataProduct)
+                        reducedDatum.delete()
+                        reducedDatum_deleted = True
+                    except ReducedDatum.DoesNotExist:
+                        reducedDatum_deleted = True 
+                    except Exception as e:
+                        logger.error("Error in delete ReducedDatum: " + str(e))
+                        messages.error(self.request, 'Error in delete ReducedDatum.')
+
+                    if not calib_deleted or not reducedDatum_deleted:
+                        raise Exception("Rollback")
+
+            except Exception as rollback_exception:
+                logger.error("Rollback: " + str(rollback_exception))
+                messages.error(self.request, 'Rollback: Unable to delete data.')
 
             if calib_deleted and reducedDatum_deleted:
                 try:
                     logger.info("DeletePointAndRestartProcess for dataProduct_id: " + str(data_id))
+                    dataProduct.save()
                     requests.post(settings.UPLOAD_SERVICE_URL + 'reloadFits/', data=post_data, headers=headers)
                     success = True
+                    
                 except Exception as e:
                     logger.error("Error in connect to upload service: " + str(e))
                     messages.error(self.request, 'Error in connect to upload service.')
                     return redirect(reverse('bhtom_common:list'))
-
+                
         if success:
             messages.success(self.request, 'Send file to ccdphot')
             
