@@ -4,6 +4,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework import status
+from django_guid import get_guid
 from bhtom2.bhtom_calibration.models import Calibration_data
 from django.core import serializers
 from bhtom2.bhtom_calibration.models import Catalogs as calibration_catalog
@@ -13,6 +14,7 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 import json
+import requests
 from django.conf import settings
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_calibration.views')
 
@@ -92,3 +94,30 @@ class GetCatalogsApiView(APIView):
         except Exception as e:
             return Response({"Error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response({"Catalogs": instance}, status=status.HTTP_200_OK)
+
+
+class GetCpcsArchiveDataApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        radius = request.data['radius']
+        ra = request.data['ra']
+        dec = request.data['dec']
+        if ra == None or dec == None:
+             return Response({"Error": "ra and dec can't be None"}, status=status.HTTP_400_BAD_REQUEST)
+        cpcs_archive_data = {}
+        post_data = {
+            'radius': radius,
+            'ra': ra,
+            'dec': dec,
+        }
+        header = {
+            "correlation_id" : get_guid(),
+        }
+        try:
+            cpcs_archive_data = requests.post(settings.CPCS_BASE_URL + 'getArchiveData/', data=post_data,
+                      headers=header)    
+        except Exception as e:
+            return Response({"Error": 'Oops.. something went wrong ' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"Result": cpcs_archive_data}, status=status.HTTP_200_OK)

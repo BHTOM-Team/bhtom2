@@ -31,7 +31,7 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 lon = form.cleaned_data['lon']
                 lat = form.cleaned_data['lat']
                 calibration_flg = form.cleaned_data['calibration_flg']
-                example_file = self.request.FILES.get('fits')
+                example_file = self.request.FILES.get('example_file')
                 altitude = form.cleaned_data['altitude']
                 gain = form.cleaned_data['gain']
                 readout_noise = form.cleaned_data['readout_noise']
