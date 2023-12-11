@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 
 def example_file_path(instance, filename):
-    return 'exampleObservatoryFile/{0}/{1}'.format(instance.name, filename)
+    return 'fits/exampleObservatoryFile/{0}/{1}'.format(instance.name, filename)
 
 
 class Observatory(models.Model):
