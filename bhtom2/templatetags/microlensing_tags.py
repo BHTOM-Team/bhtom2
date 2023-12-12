@@ -120,7 +120,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
             )
             
         #overwriting the settings for Gaia data:
-        if (filter=='G(GAIA_ALERTS)' or filter=='G(GAIA)' or filter=='BP(GAIA)' or filter=='RP(GAIA)' or filter=='G(Gaia)' or filter=='BP(Gaia)' or filter=='RP(Gaia)' or filter=='G(GAIA_DR3)' or filter=='RP(GAIA_DR3)' or filter=='BP(GAIA_DR3)'):
+        if (filter=='G(GAIA_ALERTS)' or filter=='G(GAIA)' or filter=='BP(GAIA)' or filter=='RP(GAIA)' or filter=='G(Gaia)' or filter=='BP(Gaia)' or filter=='RP(Gaia)' or filter=='G(GAIA DR3)' or filter=='RP(GAIA DR3)' or filter=='BP(GAIA DR3)'):
             mulens_datas[filter] = mm.MulensData(
                 data_list = (times[filter], mags[filter], errors[filter]),
                 phot_fmt = 'mag',
