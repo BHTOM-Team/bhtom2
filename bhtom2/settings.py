@@ -384,6 +384,7 @@ TOM_ALERT_CLASSES = [
     'bhtom2.brokers.asassn.ASASSNBroker',
     'bhtom2.brokers.ogleews.OGLEEWSBroker',
     'bhtom2.brokers.lofar.LOFARBroker',
+    'bhtom2.brokers.twomass.twomassBroker'
 ]
 
 BROKERS = {
