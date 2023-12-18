@@ -5,9 +5,10 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import views
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR
-
+from django.contrib.auth.models import User
 from bhtom2.bhtom_targets.rest.serializers import TargetsSerializers, TargetDownloadDataSerializer
 from bhtom2.bhtom_targets.utils import update_targetList_cache, update_targetDetails_cache
 from bhtom2.utils.bhtom_logger import BHTOMLogger
@@ -116,9 +117,16 @@ class TargetCreateApi(views.APIView):
     )
     def post(self, request, *args, **kwargs):
         serializer = TargetsSerializers(data=request.data)
+        try:
+            user_id = Token.objects.get(key=request.auth.key).user_id
+            user = User.objects.get(id=user_id)
+        except Exception as e:
+            logger.error("Error while get user from token: " + str(e))
+            user = None
+
         if serializer.is_valid():
             target = serializer.save()
-            run_hook('target_post_save', target=target, created=True)
+            run_hook('target_post_save', target=target, created=True, user=user)
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=404)
 

@@ -196,7 +196,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, 'Target created, grabbing all the data for it. Please wait and refresh in about a minute...')
 
         logger.info('Target post save hook: %s created: %s' % (self.object, True))
-        run_hook('target_post_save', target=self.object, created=True)
+        run_hook('target_post_save', target=self.object, created=True, user=self.request.user)
         return redirect(self.get_success_url())
 
     def get_form(self, *args, **kwargs):

@@ -71,8 +71,8 @@ class DataProductUploadForm(forms.Form):
 
         super(DataProductUploadForm, self).__init__(*args, **kwargs)
 
-        self.fields['mjd'] = forms.CharField(
-            widget=forms.NumberInput(attrs={'id': 'mjd', 'disable': 'none'}),
+        self.fields['mjd'] = forms.FloatField(
+            widget=forms.NumberInput(attrs={'id': 'mjd'}),
             required=False,
             label="MJD OBS *",
         )
