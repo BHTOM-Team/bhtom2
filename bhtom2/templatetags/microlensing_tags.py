@@ -54,7 +54,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     
     datums = ReducedDatum.objects.filter(target=target,
                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
-                                             ).filter(error__gt=0)
+                                             ).filter(error__gt=0,active_flg=True)
     selected_filters = [f for f, checked in sel.items() if checked]
     non_selected_filters = [f for f, checked in sel.items() if not checked]
     times = defaultdict(list)
@@ -66,6 +66,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     for datum in datums:
         if str(datum.filter) in selected_filters:
             try:
+                if (datum.error<0): continue
                 filter = datum.filter
                 times[filter].append(datum.mjd+2400000.5) #store JD here
                 mags[filter].append(datum.value)
@@ -83,6 +84,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     for datum in datums:
         if str(datum.filter) in non_selected_filters:
             try:
+                if (datum.error<0): continue
                 filter = datum.filter
                 non_times[filter].append(datum.mjd+2400000.5) #store JD here
                 non_mags[filter].append(datum.value)
@@ -489,7 +491,7 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
     print(f"INIT: {init_t0},{init_te}, {init_u0}, {init_piEN}, {init_piEE}, {auto_init}, {filter_counts}")    
     datums = ReducedDatum.objects.filter(target=target,
                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
-                                             ).filter(error__gt=0)
+                                             ).filter(error__gt=0,active_flg=True)
         
     selected_filters = [f for f, checked in sel.items() if checked]
     non_selected_filters = [f for f, checked in sel.items() if not checked]
@@ -503,6 +505,7 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
     for datum in datums:
         if str(datum.filter) in selected_filters:
             try:
+                if (datum.error<0): continue
                 filter = datum.filter
                 times[filter].append(datum.mjd+2400000.5) #store JD here
                 mags[filter].append(datum.value)
@@ -520,6 +523,7 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
     for datum in datums:
         if str(datum.filter) in non_selected_filters:
             try:
+                if (datum.error<0): continue
                 filter = datum.filter
                 non_times[filter].append(datum.mjd+2400000.5) #store JD here
                 non_mags[filter].append(datum.value)

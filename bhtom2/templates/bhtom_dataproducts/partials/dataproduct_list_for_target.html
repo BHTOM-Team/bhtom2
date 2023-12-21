@@ -18,11 +18,13 @@
             <tbody>
             {% for product in products %}
                 <tr>
-                    <td>{{ product.get_file_name|truncatechars:240 }}</td>
+                    <td><span data-toggle="tooltip" data-placement="top" title="{{ product.get_file_name }}">
+                        {{ product.get_file_name|truncatechars:60 }}
+                    </span></td>
                     {% if product.photometry_data is not None %}
                         <td>
                             <a href="{% url 'bhtom_dataproducts:photometry_download' id=product.id %}">
-                                {{ product.photometry_data|truncatechars:20 }}</a>
+                                {{ product.photometry_data|truncatechars:40 }}</a>
                         </td>
                     {% else %}
                         <td></td>
@@ -72,3 +74,10 @@
        title="All Data">All Data</a>
 
 </div>
+
+<script>
+    // Enable tooltips
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>

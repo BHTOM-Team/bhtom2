@@ -21,9 +21,8 @@
                              title="Catalog Search">Catalog Search</a>
                         </div>
 
-                        <button onclick="document.getElementById('invisible-export-button').click()"
-                                class="btn btn-primary">Export Filtered Targets</button>
-                        <!-- use an invisible button, because the key "Enter" event will triggered the first submit button and we want the default action to be applying filter -->
+                        <button type="button" class="btn btn-primary" onclick="export_selected_targets()">Export Selected Targets</button>
+
                   </span>
                 </div>
             </div>
