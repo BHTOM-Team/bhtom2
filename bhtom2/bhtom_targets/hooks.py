@@ -20,6 +20,8 @@ def target_post_save(target, created=False, user=None):
         except Exception as e:
             logger.error("Error targetEvent, %s" % str(e))
         try:
+            full_name = user.get_full_name() or user.username
+
             Comment.objects.create(
                 user_id=user.id,
                 user_name = user.username,
@@ -28,7 +30,7 @@ def target_post_save(target, created=False, user=None):
                 content_type_id=12,
                 site_id=1,
                 is_public= True,
-                comment=f"Target created by {user.username} on {target.created}",
+                comment=f"Target created by {full_name}({user.username}) on {target.created}",
             )
         except Exception as e :
             logger.error("Error while create comment: " + str(e))
