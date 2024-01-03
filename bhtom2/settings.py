@@ -37,7 +37,8 @@ DEBUG = bool(int(secret.get("DEBUG", False)))
 
 ALLOWED_HOSTS = [] + list(secret.get("ALLOWED_HOSTS", 'localhost').split(','))
 SITE_ID = int(secret.get("SITE_ID", 1))
-BHTOM_URL= secret.get('BHTOM_URL', "http://localhost:8010/")
+BHTOM_URL= secret.get('BHTOM_URL', None)
+HARVESTER_URL = secret.get('HARVESTER_URL', None)
 CPCS_BASE_URL = secret.get('CPCS_BASE_URL', None)
 CPCS_DATA_ACCESS_HASHTAG = secret.get('CPCS_DATA_ACCESS_HASHTAG', None)
 UPLOAD_SERVICE_URL = secret.get('UPLOAD_SERVICE_URL', None)
@@ -396,14 +397,6 @@ BROKERS = {
     }
 }
 
-TOM_HARVESTER_CLASSES = [
-    'bhtom2.harvesters.gaia_alerts.GaiaAlertsHarvester',
-    'bhtom2.harvesters.tns.TNSHarvester',
-    'bhtom2.harvesters.antares.ANTARESHarvester',
-    'bhtom_base.bhtom_catalogs.harvesters.simbad.SimbadHarvester',
-    'bhtom_base.bhtom_catalogs.harvesters.ned.NEDHarvester',
-    'bhtom_base.bhtom_catalogs.harvesters.jplhorizons.JPLHorizonsHarvester',
-]
 
 HARVESTERS = {
     'TNS': {

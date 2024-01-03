@@ -11,7 +11,6 @@ from django.http import HttpRequest
 from django.shortcuts import render
 
 from bhtom2.bhtom_targets.filters import TargetFilter
-from bhtom2.harvesters.gaia_alerts import GaiaAlertsHarvester
 from bhtom2.templatetags.bhtom_targets_extras import target_table
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_targets.models import Target, TargetName, TargetExtra, TargetList
@@ -19,6 +18,8 @@ from io import StringIO
 from django.db.models import ExpressionWrapper, FloatField
 from django.db.models.functions.math import ACos, Cos, Radians, Pi, Sin
 from django.conf import settings
+import requests
+import json
 from math import radians
 from bhtom_base.bhtom_common.hooks import run_hook
 from astropy.coordinates import Angle
@@ -104,20 +105,34 @@ def import_targets(targets):
             # special case when Gaia Alerts name is provided, then not using Ra,Dec from the file
             # TODO: should be generalised for any special source name, e.g. ZTF, for which we have a harvester
             if "GAIA_ALERTS" in target_names:
-                harvester = GaiaAlertsHarvester()
-
                 for name in target_names.items():
                     source_name = name[0].upper().replace('_NAME', '')
 
                     if source_name == "GAIA_ALERTS":
                         gaia_alerts_name = name[1].lower().replace("gaia",
                                                                    "Gaia")  # to be sure of the correct format, at least first letters
-                        catalog_data = harvester.query(gaia_alerts_name)
-                        ra: str = catalog_data["ra"]
-                        dec: str = catalog_data["dec"]
-                        disc: str = catalog_data["disc"]
-
-                        description: str = catalog_data["classif"]
+                        post_data = {
+                        'terms': gaia_alerts_name,
+                        'harvester': "GAIA_ALERTS"
+                        }            
+                        try:
+                            response = requests.post(settings.HARVESTER_URL + 'findTargetWithHarvester/', data=post_data)
+                            if response.status_code == 200:
+                                # Extract JSON from the response
+                                catalog_data = json.loads(response.text)
+                                ra: str = catalog_data["ra"]
+                                dec: str = catalog_data["dec"]
+                                disc: str = catalog_data["disc"]
+                                description: str = catalog_data["classif"]
+                            else:
+                                response.raise_for_status()
+                        except Exception as e:
+                            logger.error("Oops something went wrong: " + str(e))
+                            ra: str = ""
+                            dec: str = ""
+                            disc: str = ""
+                            description: str = ""
+                        
                         importance = str(9.99)  # by default importing from Gaia Alerts gets 9.99
                         cadence = str(1.0)  # default cadence
 
