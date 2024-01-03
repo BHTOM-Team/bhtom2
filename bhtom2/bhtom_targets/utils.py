@@ -113,26 +113,23 @@ def import_targets(targets):
                                                                    "Gaia")  # to be sure of the correct format, at least first letters
                         post_data = {
                         'terms': gaia_alerts_name,
-                        'harvester': "GAIA_ALERTS"
+                        'harvester': "Gaia Alerts"
                         }            
                         try:
                             response = requests.post(settings.HARVESTER_URL + 'findTargetWithHarvester/', data=post_data)
                             if response.status_code == 200:
                                 # Extract JSON from the response
                                 catalog_data = json.loads(response.text)
-                                ra: str = catalog_data["ra"]
-                                dec: str = catalog_data["dec"]
-                                disc: str = catalog_data["disc"]
-                                description: str = catalog_data["classif"]
+                               
                             else:
                                 response.raise_for_status()
                         except Exception as e:
                             logger.error("Oops something went wrong: " + str(e))
-                            ra: str = ""
-                            dec: str = ""
-                            disc: str = ""
-                            description: str = ""
-                        
+                          
+                        ra: str = catalog_data["ra"]
+                        dec: str = catalog_data["dec"]
+                        disc: str = catalog_data["discovery_date"]
+                        description: str = catalog_data["classification"]
                         importance = str(9.99)  # by default importing from Gaia Alerts gets 9.99
                         cadence = str(1.0)  # default cadence
 
