@@ -75,5 +75,6 @@ For the ASASSN name one can use either the name found in ASASSN archive, or a ge
 The time-series data has to be added manually by requesting data from ATLAS Webpage: https://fallingstar-data.com/forcedphot/.
 Make sure you request for photometry with reference flux added: from here https://fallingstar-data.com/forcedphot/queue/, marking **Use reduced (input) instead of difference images.**. Under ATLAS url the user should put the entire link to the photometry, e.g. https://fallingstar-data.com/forcedphot/static/results/job664347.txt For the name, one can use simply a generic name ATLAS+RA+DEC.
 
+ATLAS data is being cleaned from outliers (scipy.stats.z_score>1) as well as 5>mag>22, including negative magnitudes (limits), which are not currently stored nor showed.
 
 

@@ -4,13 +4,14 @@
       Recent Photometry
     </div>
     <table class="table">
-        <thead><tr><th>Timestamp</th><th>Magnitude</th><th>Filter</th><th>Facility</th><th>Observer</th></tr>
+        <thead><tr><th>Timestamp</th><th>Magnitude</th><th>Mag.error<th>Filter</th><th>Facility</th><th>Observer</th></tr>
         </thead>
         <tbody>
         {% for datum in data %}
         <tr>
             <td>{{ datum.timestamp }}</td>
             <td>{{ datum.magnitude|truncate_number }}</td>
+            <td>{{ datum.magerr|truncate_number }}</td>
             <td>{{ datum.filter }}</td>
             <td>{{ datum.facility }}</td>
             <td>{{ datum.observer }}</td>
