@@ -360,35 +360,6 @@ DATA_PROCESSORS = {
     'spectroscopy': 'bhtom_base.bhtom_dataproducts.processors.spectroscopy_processor.SpectroscopyProcessor',
 }
 
-TOM_ALERT_CLASSES = [
-    # 'bhtom_base.bhtom_alerts.brokers.alerce.ALeRCEBroker',
-    # 'bhtom_base.bhtom_alerts.brokers.lasair.LasairBroker',
-    # 'bhtom_base.bhtom_alerts.brokers.mars.MARSBroker',
-    # 'bhtom_base.bhtom_alerts.brokers.scimma.SCIMMABroker',
-    # 'bhtom_base.bhtom_alerts.brokers.scout.ScoutBroker',
-    'bhtom_base.bhtom_alerts.brokers.tns.TNSBroker',
-    # 'bhtom_base.bhtom_alerts.brokers.fink.FinkBroker',
-    'bhtom2.brokers.gaia_alerts.GaiaAlertsBroker',
-    'bhtom2.brokers.cpcs.CPCSBroker',
-    'bhtom2.brokers.aavso.AAVSOBroker',
-    'bhtom2.brokers.ztf.ZTFBroker',
-    'bhtom2.brokers.gaia.GaiaBroker',
-    'bhtom2.brokers.sdss.SDSSBroker',
-    'bhtom2.brokers.neowise.NEOWISEBroker',
-    'bhtom2.brokers.catalina.CRTSBroker',
-    'bhtom2.brokers.linear.LINEARBroker',
-    'bhtom2.brokers.first.FIRSTBroker',
-    'bhtom2.brokers.ps1.PS1Broker',
-    'bhtom2.brokers.allwise.ALLWISEBroker',
-    'bhtom2.brokers.antares.ANTARESBroker',
-    'bhtom2.brokers.decaps.DECAPSBroker',
-    'bhtom2.brokers.asassn.ASASSNBroker',
-    'bhtom2.brokers.ogleews.OGLEEWSBroker',
-    'bhtom2.brokers.lofar.LOFARBroker',
-    'bhtom2.brokers.twomass.twomassBroker',
-    'bhtom2.brokers.ptf.PTFBroker'
-]
-
 BROKERS = {
     'TNS': {
         # BHTOM_Bot TNS API

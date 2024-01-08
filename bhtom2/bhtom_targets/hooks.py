@@ -4,7 +4,7 @@ from bhtom2.kafka.producer.targetEvent import TargetCreateEventProducer
 
 from bhtom2.kafka.topic import kafkaTopic
 from bhtom2.utils.bhtom_logger import BHTOMLogger
-from bhtom_base.bhtom_alerts import alerts
+from bhtom2.bhtom_targets.utils import get_brokers
 from bhtom_base.bhtom_dataproducts.models import BrokerCadence, ReducedDatum
 from django_comments.models import Comment
 
@@ -35,7 +35,7 @@ def target_post_save(target, created=False, user=None):
         except Exception as e :
             logger.error("Error while create comment: " + str(e))
     try:
-        brokers = alerts.get_service_classes()
+        brokers = get_brokers()
         for broker in brokers:
             ReducedDatumEventProducer().send_message(kafkaTopic.updateReducedDatum, target, broker, isNew=True)
         logger.info("Send Create reducedDatum Event, %s" % str(target.name))

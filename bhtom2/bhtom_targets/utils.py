@@ -329,3 +329,14 @@ def update_targetDetails_cache():
         f = os.path.join(cachePath, file)
         if file.endswith('.djcache') and os.path.isfile(f):
             os.remove(f)
+
+
+
+def get_brokers():
+    try:
+        response = requests.get(settings.HARVESTER_URL + 'getAliasesBrokerList/')
+        harvesters = response.json()  # Parse the response as JSON
+    except Exception as e:
+        logger.error("Error in harvester-service: " + str(e))
+        harvesters = []
+    return harvesters
