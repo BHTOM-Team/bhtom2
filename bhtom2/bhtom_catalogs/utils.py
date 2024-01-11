@@ -11,5 +11,5 @@ def get_harvesters():
         harvesters = response.json()  # Parse the response as JSON
     except Exception as e:
         logger.error("Error in harvester-service: " + str(e))
-        harvesters = []
+        harvesters = ["Gaia Alerts","ANTARES","OGLE EWS","TNS","JPL Horizons","NED","Simbad"]
     return harvesters
