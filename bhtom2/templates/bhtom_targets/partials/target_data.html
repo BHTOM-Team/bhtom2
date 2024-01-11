@@ -123,11 +123,7 @@
     <a href='{{ value.url }}' target="_blank">{{ value }}</a>
     <!-- value|trim_chars:2 -->
 </dd>
- {% elif value.source_name == "ATLAS" %}
-<dd class="col-sm-6">
-    <a href='{{ value.url }}' target="_blank">{{ value }}</a>
-    <!-- value|trim_chars:2 -->
-</dd>
+
 {% else %}
 <dd class="col-sm-6">{{ value }}</dd>
 {% endif %}
