@@ -139,3 +139,7 @@ div.dataTables_paginate {
 #DataTables_Table_0_next {
   color: #fff !important;
 }
+
+.dataTables_filter input {
+  color: white !important;
+}
