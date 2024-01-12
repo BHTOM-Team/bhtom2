@@ -18,9 +18,9 @@ The data was obtained via [BHTOM](https://bhtom.space), which has received fundi
 
 For more information about acknowledgement and data policy contact us and visit [https://about.bhtom.space](https://about.bhtom.space)
 
-# 1. Brokers
+# 1. Time-Domain Archives
 
-Brokers in BHTOM search for time-series archival data in photometric (and soon also radio and spectra) archives providing publicly available data.
+Brokers in BHTOM search for time-series archival data in photometric (and soon also radio and spectra) archives providing publicly available data. We access the data either via API's provided by each service, or we access copies of archives stored in the Whole Sky Data Base (WSDB), maintained at the Institute of Cambridge, UK, by Sergey Koposov.
 
 ### Gaia Alerts
 Webpage: https://gsaweb.ast.cam.ac.uk/alerts
@@ -35,7 +35,7 @@ ALLWISE is an archival MID-IR WISE data, while NEOWISE is a new on-going scannin
 Read directly from Caltech archive, contain neary 10-year long time-series for most of the sky (North and South) except the Galactic Plane. Observations were taken in a broad-band clear filter we call CRTS (CL)
 
 ### FIRST (Radio)
-Reads WSDB archive. WSDB is a vast database of archival surveys stored and maintained at the Institute of Cambridge, UK, by Sergey Koposov.
+From WSDB.
 
 Problem: only mean epoch JD is stored in that table. 
 Returns flux in miliJanskys (ReducedDatumUnit.MILLIJANSKY).
