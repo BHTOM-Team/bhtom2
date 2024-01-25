@@ -49,3 +49,14 @@ def target_table(targets):
     by default
     """
     return {'object_list': targets}
+
+@register.filter
+def substring(value, arg):
+    """
+    Splits the string into a list of substrings at each point where 
+    the separator occurs.
+    """
+    indices = list(map(int, arg.split(',')))
+    start = indices[0]
+    end = indices[1] if len(indices) > 1 else None
+    return value[start:end]
