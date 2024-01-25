@@ -5,8 +5,7 @@ def get_catalogs(token):
     headers = {
         'Authorization': f'Token {token}'
     }
-    # change url to bhtom2 url
-    api_url = 'http://127.0.0.1:8000/calibration/get-catalogs/'
+    api_url =  "https://bh-tom2.astrolabs.pl/calibration/get-catalogs/"
     response = requests.get(api_url, headers=headers)
     print(response.json())
  
