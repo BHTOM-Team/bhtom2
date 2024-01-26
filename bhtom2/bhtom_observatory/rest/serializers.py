@@ -87,3 +87,9 @@ class ObservatoryMatrixSerializers(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+from bhtom_base.bhtom_dataproducts.models import DataProduct
+class DataProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DataProduct
+        fields = '__all__'  # Or specify the fields you want to include in the API
