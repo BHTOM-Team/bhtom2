@@ -22,6 +22,16 @@ from django_tables2.views import SingleTableMixin
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, CCDPhotJob
 from django.contrib import messages
 
+from rest_framework import views
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from django.db.models import Q
+from bhtom2.bhtom_observatory.rest.serializers import DataProductSerializer
+
+
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_common.views')
 
 
@@ -335,15 +345,6 @@ class UpdateFits(LoginRequiredMixin, FormView):
                          'successfully created, observatory requires administrator approval')
         return redirect(self.get_success_url())
 
-from rest_framework import views
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
-from django.core import serializers
-from django.db.models import Q
-from bhtom2.bhtom_observatory.rest.serializers import DataProductSerializer
 
 class GetDataProductApi(views.APIView):
     authentication_classes = [TokenAuthentication]
@@ -394,5 +395,5 @@ class GetDataProductApi(views.APIView):
             query &= Q(created__lte=created_end)
 
         queryset = DataProduct.objects.filter(query).order_by('created')
-        serialized_queryset = serializers.serialize('json', queryset)
+        serialized_queryset = self.serializer_class(queryset,many=True).data
         return Response(serialized_queryset, status=200)
