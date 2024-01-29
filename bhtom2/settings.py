@@ -248,12 +248,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'data')
 MEDIA_URL = '/data/'
 
 # LOG
-logFolder = secret.get("LOG_FOLDER")
-logWhen = secret.get("LOG_CADENCE")
-logInterval = int(secret.get("LOG_INTERVAL"))
-logBackupCount = int(secret.get("LOG_BACKUP_COUNT"))
-logFileLevel = secret.get("LOG_FILE_LEVEL")
-logGrayPyLevel = secret.get("LOG_GRAYPY_LEVEL")
+logFolder = secret.get("LOG_FOLDER", '../log/bhtom.log')
+logWhen = secret.get("LOG_CADENCE", "D")
+logInterval = int(secret.get("LOG_INTERVAL", 7))
+logBackupCount = int(secret.get("LOG_BACKUP_COUNT", 20))
+logFileLevel = secret.get("LOG_FILE_LEVEL", 'INFO')
+logGrayPyLevel = secret.get("LOG_GRAYPY_LEVEL", 'DEBUG')
 
 LOGGING = {
     'version': 1,
@@ -283,13 +283,11 @@ LOGGING = {
             'formatter': 'default',
             'filters': ['correlation_id'],
         },
-
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'console',
             'level': 'INFO',
         },
-
         'file': {
             'level': logFileLevel,
             'class': 'logging.handlers.TimedRotatingFileHandler',
@@ -300,14 +298,13 @@ LOGGING = {
             'backupCount': logBackupCount,
             'filters': ['correlation_id'],
         },
-
     },
     'loggers': {
         '': {
-            'handlers': ['file', 'graypy', 'console'],
+            'handlers': ['file', 'console', 'graypy'],
             'level': 'DEBUG',
             'propagate': True
-        }
+        },
     },
 }
 
