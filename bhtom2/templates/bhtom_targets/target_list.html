@@ -68,10 +68,9 @@
 
             <h4>Filtering</h4>
             {{ filter.fields }}
-            <div class="col-md-12">
+            <div class="col-md-4">
                 <form action="" method="get" class="form">
                     {% bootstrap_form filter.form exclude='tweet,epoch,pm_ra,pm_dec,distance,distance_err,dont_update_me' %}
-                    <!-- {% bootstrap_form filter.form %} -->
                     {% buttons %}
                         <button type="submit" class="btn btn-primary">
                             Filter

@@ -18,16 +18,17 @@ from .forms import DataProductUploadForm
 from ..bhtom_calibration.models import Calibration_data
 from ..bhtom_observatory.models import ObservatoryMatrix
 from bhtom2.bhtom_observatory.models import Observatory
+from bhtom2.external_service.connectWSDB import WSDBConnection
 from rest_framework.views import APIView
 from django.urls import reverse
 
 import requests
 from django.http import HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from bhtom2.bhtom_dataproducts.utils import map_data_from_cpcs
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_dataproducts.views')
 
 
@@ -115,7 +116,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         }
         # Make a POST request to upload-service with the extracted data
         try:
-            response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/', data=post_data, files=data_product_files,
+            response = requests.post(settings.UPLOAD_SERVICE_URL + '/upload/', data=post_data, files=data_product_files,
                                      headers=headers)
         except Exception as e:
             logger.error("Error in connect to upload service: " + str(e))
@@ -157,7 +158,7 @@ class FitsUploadAPIView(APIView):
 
         # Make a POST request to upload-service with the extracted data
         try:
-            response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/', data=post_data, files=files_data,
+            response = requests.post(settings.UPLOAD_SERVICE_URL + '/upload/', data=post_data, files=files_data,
                                      headers=headers)
         except Exception as e:
             logger.error("Error in connect to upload service: " + str(e))
@@ -453,3 +454,74 @@ class DataDetailsView(DetailView):
             logger.error("Error in DataDetailsView: " + str(e))
             return HttpResponseRedirect(reverse('bhtom_dataproducts:list'))  # Replace with your desired URL
         return self.render_to_response(context)
+
+
+class CpcsArchiveData(LoginRequiredMixin, View):
+    template_name = 'bhtom_dataproducts/cpcs_archiwum_data.html'
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        return render(request, self.template_name, context)
+
+    def get_context_data(self):
+        context = {}
+
+        logger.debug("Preparing data for your view")
+
+        if not self.request.user.is_staff:
+            logger.error("The user is not an admin")
+            return redirect('home')
+
+        try:
+            wsdb = WSDBConnection()
+
+            try: 
+                cpcs_alerts = wsdb.run_query("SELECT * FROM cpcs_alerts")
+                columns_alert = ['id', 'ivorn', 'ra', 'dec', 'url', 'published', 'comment']
+                context["cpcs_alerts"] = map_data_from_cpcs(columns_alert,cpcs_alerts)
+            except Exception as e:
+                logger.error("Error loading data cpcs_alerts from wsdb: " + str(e))
+                context["cpcs_alerts"] = []
+
+            try: 
+                cpcs_archive_calib = wsdb.run_query("SELECT * FROM cpcs_archive_calibrations")
+                columns_calib =  ['id', 'ra', 'dec', 'observation_target_name', 'observer', 'facility', 'mjd', 'mag', 'mag_err', 'exp_time',
+                                'zeropoint', 'outlier_fraction', 'scatter', 'npoints', 'created', 'filter', 'survey', 'match_distance', 'processing_time',
+                                'data', 'observatory_lon', 'observatory_lat', 'observatory_filter', 'source']
+                context["cpcs_archive_calib"] = map_data_from_cpcs(columns_calib,cpcs_archive_calib)
+            
+            except Exception as e:
+                logger.error("Error loading data cpcs_archive_calib from wsdb: " + str(e))
+                context["cpcs_archive_calib"] = []
+
+            try: 
+                cpcs_catalogs = wsdb.run_query("SELECT * FROM cpcs_catalogs")
+                columns_catalog = ['id', 'name', 'filters']
+                context["cpcs_catalogs"] = map_data_from_cpcs(columns_catalog,cpcs_catalogs)
+            except Exception as e:
+                logger.error("Error loading data cpcs_catalogs from wsdb: " + str(e))
+                context["cpcs_catalogs"] = []
+
+            try: 
+                cpcs_followup = wsdb.run_query("SELECT * FROM cpcs_followup")
+                columns_followup = ['id', 'alert_id', 'observatory_id', 'mjd_obs', 'mag', 'mag_err', 'calib_err', 'catalog_id', 'filter_id',
+                                    'comment', 'npoints', 'match_dist', 'isfits', 'force_filter', 'exp_time', 'calib_date', 'is_archive']
+
+                context["cpcs_followup"] = map_data_from_cpcs(columns_followup,cpcs_followup)
+            except Exception as e:
+                logger.error("Error loading data cpcs_followup from wsdb: " + str(e))
+                context["cpcs_followup"] = []
+
+            try: 
+                cpcs_observatories= wsdb.run_query("SELECT * FROM cpcs_observatories")
+                columns_obs = ['id', 'name', 'lon', 'lat', 'hashtag', 'filters', 'is_admin', 'allow_upload']
+
+                context["cpcs_observatories"] = map_data_from_cpcs(columns_obs, cpcs_observatories)
+            except Exception as e:
+                logger.error("Error loading data cpcs_observatories from wsdb: " + str(e))
+                context["cpcs_observatories"] = []
+
+        except Exception as e:
+            logger.error("Error connecting to wsdb")
+        return context
+

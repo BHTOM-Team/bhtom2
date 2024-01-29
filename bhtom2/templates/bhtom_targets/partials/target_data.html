@@ -90,6 +90,7 @@
 <!-- the link to the source could be also stored in DATASOURCE -->
 {% for value in target.aliases.all %}
 <dt class="col-sm-6">{{ value.source_name }}</dt>
+
 {% if value.source_name == "GAIA_ALERTS" %}
 <dd class="col-sm-6">
     <a href='https://gsaweb.ast.cam.ac.uk/alerts/alert/{{ value }}' target="_blank">
@@ -118,16 +119,20 @@
     <a href='{{ value.url }}' target="_blank"> {{ value }}
     </a>
 </dd>
+{% elif value.source_name == "TNS" %}
+<dd class="col-sm-6">
+    <a href='{{ value.url }}' target="_blank">{{ value }}</a>
+<dt class="col-sm-6">Astro Colibri</dt>
+<dd class="col-sm-6">
+    <a href='https://astro-colibri.com/event:TNS{{ value.name|substring:"2" }}' target="_blank">TNS{{ value.name|substring:"2" }}
+    </a>
+</dd>
 {% elif value.url != 'None' %}
 <dd class="col-sm-6">
     <a href='{{ value.url }}' target="_blank">{{ value }}</a>
     <!-- value|trim_chars:2 -->
 </dd>
- {% elif value.source_name == "ATLAS" %}
-<dd class="col-sm-6">
-    <a href='{{ value.url }}' target="_blank">{{ value }}</a>
-    <!-- value|trim_chars:2 -->
-</dd>
+
 {% else %}
 <dd class="col-sm-6">{{ value }}</dd>
 {% endif %}

@@ -37,14 +37,15 @@ DEBUG = bool(int(secret.get("DEBUG", False)))
 
 ALLOWED_HOSTS = [] + list(secret.get("ALLOWED_HOSTS", 'localhost').split(','))
 SITE_ID = int(secret.get("SITE_ID", 1))
-BHTOM_URL= secret.get('BHTOM_URL', "http://localhost:8010/")
-CPCS_BASE_URL = secret.get('CPCS_BASE_URL', None)
-CPCS_DATA_ACCESS_HASHTAG = secret.get('CPCS_DATA_ACCESS_HASHTAG', None)
-UPLOAD_SERVICE_URL = secret.get('UPLOAD_SERVICE_URL', None)
-WSDB_USER = secret.get('WSDB_USER', '')
-WSDB_PASSWORD = secret.get('WSDB_PASSWORD', '')
-WSDB_HOST = secret.get('WSDB_HOST', '')
-WSDB_PORT = secret.get('WSDB_PORT', '')
+BHTOM_URL = secret.get('BHTOM_URL', '')
+HARVESTER_URL = secret.get('HARVESTER_URL', '')
+CPCS_URL = secret.get('CPCS_URL', '')
+CPCS_DATA_ACCESS_HASHTAG = secret.get('CPCS_DATA_ACCESS_HASHTAG', '')
+UPLOAD_SERVICE_URL = secret.get('UPLOAD_SERVICE_URL', '')
+WSDB_USER = secret.get('WSDB_LOCAL_USER', '')
+WSDB_PASSWORD = secret.get('WSDB_LOCAL_PASSWORD', '')
+WSDB_HOST = secret.get('WSDB_LOCAL_HOST', '')
+WSDB_PORT = secret.get('WSDB_LOCAL_PORT', '')
 
 ADMIN_USERNAME = secret.get('ADMIN_USERNAME')
 ADMIN_PASSWORD = secret.get('ADMIN_PASSWORD')
@@ -247,11 +248,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'data')
 MEDIA_URL = '/data/'
 
 # LOG
-logFolder = secret.get("LOG_FOLDER")
-logWhen = secret.get("LOG_CADENCE")
-logInterval = int(secret.get("LOG_INTERVAL"))
-logBackupCount = int(secret.get("LOG_BACKUP_COUNT"))
-logLevel = secret.get("LOG_LEVEL")
+logFolder = secret.get("LOG_FOLDER", '../log/bhtom.log')
+logWhen = secret.get("LOG_CADENCE", "D")
+logInterval = int(secret.get("LOG_INTERVAL", 7))
+logBackupCount = int(secret.get("LOG_BACKUP_COUNT", 20))
+logFileLevel = secret.get("LOG_FILE_LEVEL", 'INFO')
+logGrayPyLevel = secret.get("LOG_GRAYPY_LEVEL", 'DEBUG')
 
 LOGGING = {
     'version': 1,
@@ -274,21 +276,20 @@ LOGGING = {
 
     'handlers': {
         'graypy': {
-            'level': logLevel,
+            'level': logGrayPyLevel,
             'class': 'graypy.GELFTCPHandler',
             'host': GRAYLOG_HOST,
             'port': GRAYLOG_PORT,
             'formatter': 'default',
             'filters': ['correlation_id'],
         },
-
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'console'
+            'formatter': 'console',
+            'level': 'INFO',
         },
-
         'file': {
-            'level': logLevel,
+            'level': logFileLevel,
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': logFolder,
             'formatter': 'default',
@@ -297,13 +298,13 @@ LOGGING = {
             'backupCount': logBackupCount,
             'filters': ['correlation_id'],
         },
-
     },
     'loggers': {
         '': {
-            'handlers': ['file', 'graypy', 'console'],
-            'level': logLevel
-        }
+            'handlers': ['file', 'console', 'graypy'],
+            'level': 'DEBUG',
+            'propagate': True
+        },
     },
 }
 
@@ -337,7 +338,7 @@ DATA_PRODUCT_TYPES = {
     'spectroscopy': ('spectroscopy', 'Spectroscopy'),
     # 'image_file': ('image_file', 'Image File')
 }
-CLASSIFICATION_TYPES= [
+CLASSIFICATION_TYPES = [
     ("Unknown", "Unknown"), ('Be-star outburst', 'Be-star outburst'),
     ('AGN', "Active Galactic Nucleus(AGN)"), ("BL Lac", "BL Lac"),
     ("CV", "Cataclysmic Variable(CV)"), ("CEPH", "Cepheid Variable(CEPH)"),
@@ -359,35 +360,6 @@ DATA_PROCESSORS = {
     'spectroscopy': 'bhtom_base.bhtom_dataproducts.processors.spectroscopy_processor.SpectroscopyProcessor',
 }
 
-TOM_ALERT_CLASSES = [
-    # 'bhtom_base.bhtom_alerts.brokers.alerce.ALeRCEBroker',
-    # 'bhtom_base.bhtom_alerts.brokers.lasair.LasairBroker',
-    # 'bhtom_base.bhtom_alerts.brokers.mars.MARSBroker',
-    # 'bhtom_base.bhtom_alerts.brokers.scimma.SCIMMABroker',
-    # 'bhtom_base.bhtom_alerts.brokers.scout.ScoutBroker',
-    'bhtom_base.bhtom_alerts.brokers.tns.TNSBroker',
-    # 'bhtom_base.bhtom_alerts.brokers.fink.FinkBroker',
-    'bhtom2.brokers.gaia_alerts.GaiaAlertsBroker',
-    'bhtom2.brokers.cpcs.CPCSBroker',
-    'bhtom2.brokers.aavso.AAVSOBroker',
-    'bhtom2.brokers.ztf.ZTFBroker',
-    'bhtom2.brokers.gaia.GaiaBroker',
-    'bhtom2.brokers.sdss.SDSSBroker',
-    'bhtom2.brokers.neowise.NEOWISEBroker',
-    'bhtom2.brokers.catalina.CRTSBroker',
-    'bhtom2.brokers.linear.LINEARBroker',
-    'bhtom2.brokers.first.FIRSTBroker',
-    'bhtom2.brokers.ps1.PS1Broker',
-    'bhtom2.brokers.allwise.ALLWISEBroker',
-    'bhtom2.brokers.antares.ANTARESBroker',
-    'bhtom2.brokers.decaps.DECAPSBroker',
-    'bhtom2.brokers.asassn.ASASSNBroker',
-    'bhtom2.brokers.ogleews.OGLEEWSBroker',
-    'bhtom2.brokers.lofar.LOFARBroker',
-    'bhtom2.brokers.twomass.twomassBroker',
-    'bhtom2.brokers.ptf.PTFBroker'
-]
-
 BROKERS = {
     'TNS': {
         # BHTOM_Bot TNS API
@@ -396,14 +368,6 @@ BROKERS = {
     }
 }
 
-TOM_HARVESTER_CLASSES = [
-    'bhtom2.harvesters.gaia_alerts.GaiaAlertsHarvester',
-    'bhtom2.harvesters.tns.TNSHarvester',
-    'bhtom2.harvesters.antares.ANTARESHarvester',
-    'bhtom_base.bhtom_catalogs.harvesters.simbad.SimbadHarvester',
-    'bhtom_base.bhtom_catalogs.harvesters.ned.NEDHarvester',
-    'bhtom_base.bhtom_catalogs.harvesters.jplhorizons.JPLHorizonsHarvester',
-]
 
 HARVESTERS = {
     'TNS': {

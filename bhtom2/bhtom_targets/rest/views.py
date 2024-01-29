@@ -85,7 +85,8 @@ class GetTargetListApi(views.APIView):
         serialized_queryset = serializers.serialize('json', queryset)
         return Response(serialized_queryset, status=200)
 
-#this is API for SIDEREAL target creation, non-sidereal has to go to a different api
+
+# this is API for SIDEREAL target creation, non-sidereal has to go to a different api
 class TargetCreateApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -230,7 +231,7 @@ class CleanTargetDetailsCache(views.APIView):
     def post(self, request):
         try:
             if request.user.is_superuser:
-                logger.error("Start clean target details cache")
+                logger.info("Start clean target details cache")
                 update_targetDetails_cache()
             else:
                 raise Http404
@@ -356,7 +357,7 @@ class TargetDownloadRadioDataApiView(views.APIView):
         serializer = TargetDownloadDataSerializer(data=request.data)
         if not serializer.is_valid():
             logger.info('Error bad request')
-            return Response({"Error": 'Something went wrong' }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Error": 'Something went wrong'}, status=status.HTTP_400_BAD_REQUEST)
 
         target_id = serializer.validated_data['name']
         logger.info(f'API Generating radio data in CSV file for target with id={target_id}...')

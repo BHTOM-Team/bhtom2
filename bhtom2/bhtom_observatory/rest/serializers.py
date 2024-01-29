@@ -2,7 +2,11 @@ from django.utils import timezone
 
 from rest_framework import serializers
 
+from django.contrib.auth.models import User
 from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix
+
+from bhtom_base.bhtom_dataproducts.models import DataProduct
+
 
 
 class ObservatorySerializers(serializers.ModelSerializer):
@@ -87,3 +91,19 @@ class ObservatoryMatrixSerializers(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+class DataProductSerializer(serializers.ModelSerializer):
+    observatory = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DataProduct
+        fields = '__all__'
+
+    def get_user(self, obj):
+        user_name = obj.observatory.user.username
+        return user_name
+
+    def get_observatory(self, obj):
+        observatory_name = obj.observatory.observatory.name
+        return observatory_name

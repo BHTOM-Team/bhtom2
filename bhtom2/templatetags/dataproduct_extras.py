@@ -76,6 +76,7 @@ def recent_photometry(target, limit=1):
     photometry = ReducedDatum.objects.filter(target=target, data_type='photometry').order_by('-timestamp')[:limit]
     return {'data': [{'timestamp': rd.timestamp,
                       'magnitude': rd.value,
+                      'magerr': rd.error,
                       'filter': rd.filter,
                       'facility': rd.facility,
                       'observer': rd.observer} for rd in photometry
