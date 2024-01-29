@@ -116,7 +116,7 @@ def import_targets(targets):
                         'harvester': "Gaia Alerts"
                         }            
                         try:
-                            response = requests.post(settings.HARVESTER_URL + 'findTargetWithHarvester/', data=post_data)
+                            response = requests.post(settings.HARVESTER_URL + '/findTargetWithHarvester/', data=post_data)
                             if response.status_code == 200:
                                 # Extract JSON from the response
                                 catalog_data = json.loads(response.text)
@@ -313,7 +313,11 @@ def update_targetList_cache():
     for file in os.listdir(cachePath):
         f = os.path.join(cachePath, file)
         if file.endswith('.djcache') and os.path.isfile(f):
-            os.remove(f)
+            try:
+                os.remove(f)
+            except OSError as e:
+                logger.error('Failed to remove + ' + str(e))
+                continue
 
     context = {}
     target = Target.objects.all()
@@ -334,7 +338,7 @@ def update_targetDetails_cache():
 
 def get_brokers():
     try:
-        response = requests.get(settings.HARVESTER_URL + 'getAliasesBrokerList/')
+        response = requests.get(settings.HARVESTER_URL + '/getAliasesBrokerList/')
         harvesters = response.json()  # Parse the response as JSON
     except Exception as e:
         logger.error("Error in harvester-service: " + str(e))

@@ -7,7 +7,7 @@ logger = BHTOMLogger(__name__, 'Your Logger Name')
 
 def get_harvesters():
     try:
-        response = requests.get(settings.HARVESTER_URL + 'getHarvesterList/')
+        response = requests.get(settings.HARVESTER_URL + '/getHarvesterList/')
         harvesters = response.json()  # Parse the response as JSON
     except Exception as e:
         logger.error("Error in harvester-service: " + str(e))

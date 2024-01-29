@@ -37,11 +37,11 @@ DEBUG = bool(int(secret.get("DEBUG", False)))
 
 ALLOWED_HOSTS = [] + list(secret.get("ALLOWED_HOSTS", 'localhost').split(','))
 SITE_ID = int(secret.get("SITE_ID", 1))
-BHTOM_URL= secret.get('BHTOM_URL', None)
-HARVESTER_URL = secret.get('HARVESTER_URL', None)
-CPCS_BASE_URL = secret.get('CPCS_BASE_URL', None)
-CPCS_DATA_ACCESS_HASHTAG = secret.get('CPCS_DATA_ACCESS_HASHTAG', None)
-UPLOAD_SERVICE_URL = secret.get('UPLOAD_SERVICE_URL', None)
+BHTOM_URL = secret.get('BHTOM_URL', '')
+HARVESTER_URL = secret.get('HARVESTER_URL', '')
+CPCS_URL = secret.get('CPCS_URL', '')
+CPCS_DATA_ACCESS_HASHTAG = secret.get('CPCS_DATA_ACCESS_HASHTAG', '')
+UPLOAD_SERVICE_URL = secret.get('UPLOAD_SERVICE_URL', '')
 WSDB_USER = secret.get('WSDB_LOCAL_USER', '')
 WSDB_PASSWORD = secret.get('WSDB_LOCAL_PASSWORD', '')
 WSDB_HOST = secret.get('WSDB_LOCAL_HOST', '')
@@ -252,7 +252,8 @@ logFolder = secret.get("LOG_FOLDER")
 logWhen = secret.get("LOG_CADENCE")
 logInterval = int(secret.get("LOG_INTERVAL"))
 logBackupCount = int(secret.get("LOG_BACKUP_COUNT"))
-logLevel = secret.get("LOG_LEVEL")
+logFileLevel = secret.get("LOG_FILE_LEVEL")
+logGrayPyLevel = secret.get("LOG_GRAYPY_LEVEL")
 
 LOGGING = {
     'version': 1,
@@ -275,7 +276,7 @@ LOGGING = {
 
     'handlers': {
         'graypy': {
-            'level': logLevel,
+            'level': logGrayPyLevel,
             'class': 'graypy.GELFTCPHandler',
             'host': GRAYLOG_HOST,
             'port': GRAYLOG_PORT,
@@ -285,11 +286,12 @@ LOGGING = {
 
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'console'
+            'formatter': 'console',
+            'level': 'INFO',
         },
 
         'file': {
-            'level': logLevel,
+            'level': logFileLevel,
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': logFolder,
             'formatter': 'default',
@@ -303,7 +305,8 @@ LOGGING = {
     'loggers': {
         '': {
             'handlers': ['file', 'graypy', 'console'],
-            'level': logLevel
+            'level': 'DEBUG',
+            'propagate': True
         }
     },
 }
@@ -338,7 +341,7 @@ DATA_PRODUCT_TYPES = {
     'spectroscopy': ('spectroscopy', 'Spectroscopy'),
     # 'image_file': ('image_file', 'Image File')
 }
-CLASSIFICATION_TYPES= [
+CLASSIFICATION_TYPES = [
     ("Unknown", "Unknown"), ('Be-star outburst', 'Be-star outburst'),
     ('AGN', "Active Galactic Nucleus(AGN)"), ("BL Lac", "BL Lac"),
     ("CV", "Cataclysmic Variable(CV)"), ("CEPH", "Cepheid Variable(CEPH)"),

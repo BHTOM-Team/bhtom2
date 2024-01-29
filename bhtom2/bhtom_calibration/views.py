@@ -117,7 +117,7 @@ class GetCpcsArchiveDataApiView(APIView):
             "correlation_id" : get_guid(),
         }
         try:
-            cpcs_archive_data = requests.post(settings.CPCS_BASE_URL + 'getArchiveData/', data=post_data,
+            cpcs_archive_data = requests.post(settings.CPCS_URL + '/getArchiveData/', data=post_data,
                       headers=header)    
         except Exception as e:
             return Response({"Error": 'Oops.. something went wrong ' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
