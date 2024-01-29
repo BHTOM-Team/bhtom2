@@ -184,7 +184,7 @@ class TargetFilter(django_filters.FilterSet):
     galb: django_filters.RangeFilter = django_filters.NumericRangeFilter(method='filter_galb', label='Galactic Latitude (-90,90)')
 
     importance: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_importance', label='Importance (0,10)')
-    priority: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_priority', label='Priority')
+#    priority: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_priority', label='Priority')
     sun: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_sunDistance', label='Sun separation')
     mag: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_magLast', label='Last magnitude')
 
@@ -193,11 +193,16 @@ class TargetFilter(django_filters.FilterSet):
     description = django_filters.CharFilter(method='filter_description', label='Description')
 
     order = django_filters.OrderingFilter(
-        fields=['name', 'created', 'modified'],
+        fields=['name', 'mag_last', 'importance', 'priority', 'sun_separation', 'galb', 'created', 'modified'],
         field_labels={
             'name': 'Name',
             'created': 'Creation Date',
-            'modified': 'Last Update'
+            'modified': 'Last Update',
+            'mag_last': 'Last Magnitude',
+            'importance': 'Importance',
+            'priority' : 'Observing Priority',
+            'sun_separation': 'Sun Separation',
+            'galb': 'Galactic Latitude'
         }
     )
 

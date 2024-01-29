@@ -18,9 +18,9 @@ The data was obtained via [BHTOM](https://bhtom.space), which has received fundi
 
 For more information about acknowledgement and data policy contact us and visit [https://about.bhtom.space](https://about.bhtom.space)
 
-# 1. Brokers
+# 1. Time-Domain Archives
 
-Brokers in BHTOM search for time-series archival data in photometric (and soon also radio and spectra) archives providing publicly available data.
+Brokers in BHTOM search for time-series archival data in photometric (and soon also radio and spectra) archives providing publicly available data. We access the data either via API's provided by each service, or we access copies of archives stored in the Whole Sky Data Base (WSDB), maintained at the Institute of Cambridge, UK, by Sergey Koposov.
 
 ### Gaia Alerts
 Webpage: https://gsaweb.ast.cam.ac.uk/alerts
@@ -35,7 +35,7 @@ ALLWISE is an archival MID-IR WISE data, while NEOWISE is a new on-going scannin
 Read directly from Caltech archive, contain neary 10-year long time-series for most of the sky (North and South) except the Galactic Plane. Observations were taken in a broad-band clear filter we call CRTS (CL)
 
 ### FIRST (Radio)
-Reads WSDB archive. WSDB is a vast database of archival surveys stored and maintained at the Institute of Cambridge, UK, by Sergey Koposov.
+From WSDB.
 
 Problem: only mean epoch JD is stored in that table. 
 Returns flux in miliJanskys (ReducedDatumUnit.MILLIJANSKY).
@@ -72,9 +72,13 @@ for variable star https://asas-sn.osu.edu/variables/448970 it is going to be htt
 For the ASASSN name one can use either the name found in ASASSN archive, or a generic ASASSN+Ra+Dec name.
 
 ### ATLAS
-The time-series data has to be added manually by requesting data from ATLAS Webpage: https://fallingstar-data.com/forcedphot/.
-Make sure you request for photometry with reference flux added: from here https://fallingstar-data.com/forcedphot/queue/, marking **Use reduced (input) instead of difference images.**. Under ATLAS url the user should put the entire link to the photometry, e.g. https://fallingstar-data.com/forcedphot/static/results/job664347.txt For the name, one can use simply a generic name ATLAS+RA+DEC.
+The data from this Survey orignate from ATLAS Webpage: https://fallingstar-data.com/forcedphot/.
+For a new target created, the request is sent to this service. It typically takes up to 15 minutes for the request on the entire ATLAS time-span to be generated. The data are then automatically loaded to the target. Then, an automated process is taking care to keep ATLAS light curve up-to-date, with refresh time of 12h. Note, we download magnitudes which include reference flux (if available).
 
-ATLAS data is being cleaned from outliers (scipy.stats.z_score>1) as well as 5>mag>22, including negative magnitudes (limits), which are not currently stored nor showed.
+<!-- The time-series data has to be added manually by requesting data from ATLAS Webpage: https://fallingstar-data.com/forcedphot/.
+Make sure you request for photometry with reference flux added: from here https://fallingstar-data.com/forcedphot/queue/, marking **Use reduced (input) instead of difference images.**. Under ATLAS url the user should put the entire link to the photometry, e.g. https://fallingstar-data.com/forcedphot/static/results/job664347.txt For the name, one can use simply a generic name ATLAS+RA+DEC. -->
 
+ATLAS data is automatically cleaned from extreme outliers (scipy.stats.z_score>10) as well as limited to 5>mag>22, including negative magnitudes (limits), which are not currently stored nor showed.
+
+Cite: Tonry et al. (2018), Smith et al. (2020), Heinze et al. (2018), Shingles et al. (2021).
 

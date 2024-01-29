@@ -22,6 +22,16 @@ from django_tables2.views import SingleTableMixin
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, CCDPhotJob
 from django.contrib import messages
 
+from rest_framework import views
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from django.db.models import Q
+from bhtom2.bhtom_observatory.rest.serializers import DataProductSerializer
+
+
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_common.views')
 
 
@@ -334,3 +344,56 @@ class UpdateFits(LoginRequiredMixin, FormView):
         messages.success(self.request,
                          'successfully created, observatory requires administrator approval')
         return redirect(self.get_success_url())
+
+
+class GetDataProductApi(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = DataProductSerializer
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'data_product_type': openapi.Schema(type=openapi.TYPE_STRING),
+                'status': openapi.Schema(type=openapi.TYPE_STRING),
+                'fits_data': openapi.Schema(type=openapi.TYPE_STRING),
+                'created_start': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+                'created_end': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+            },
+            required=[]
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+            name='Authorization',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            required=True,
+            description='Token <Your Token>'
+        ),
+    ],
+    )
+    def post(self, request):
+        query = Q()
+
+        data_product_type = self.request.data.get('data_product_type', None)
+        status = self.request.data.get('status', None)
+        fits_data = self.request.data.get('fits_data', None)
+        created_start = self.request.data.get('created_start', None)
+        created_end = self.request.data.get('created_end', None)
+
+        if data_product_type is not None:
+            query &= Q(data_product_type=data_product_type)
+        if status is not None:
+            query &= Q(status=status)
+        if fits_data is not None:
+            query &= Q(fits_data=fits_data)
+        if created_start is not None:
+            query &= Q(created__gte=created_start)
+        if created_end is not None:
+            query &= Q(created__lte=created_end)
+
+        queryset = DataProduct.objects.filter(query).order_by('created')
+        serialized_queryset = self.serializer_class(queryset,many=True).data
+        return Response(serialized_queryset, status=200)
