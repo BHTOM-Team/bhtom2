@@ -60,7 +60,6 @@ For customization instructions, see bhtom_common/base.html
     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
         <a class="dropdown-item" href="{% url 'bhtom_dataproducts:list_all' %}">All</a>
         <a class="dropdown-item" href="{% url 'bhtom_dataproducts:list_user' %}">Yours files</a>
-        <a class="dropdown-item" href="{% url 'bhtom_dataproducts:list_cpcs' %}">Archiwum data</a>
     </div>
 </li>
 {% if request.user.is_superuser or request.user.is_staff %}

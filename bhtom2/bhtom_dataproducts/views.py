@@ -116,7 +116,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         }
         # Make a POST request to upload-service with the extracted data
         try:
-            response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/', data=post_data, files=data_product_files,
+            response = requests.post(settings.UPLOAD_SERVICE_URL + '/upload/', data=post_data, files=data_product_files,
                                      headers=headers)
         except Exception as e:
             logger.error("Error in connect to upload service: " + str(e))
@@ -158,7 +158,7 @@ class FitsUploadAPIView(APIView):
 
         # Make a POST request to upload-service with the extracted data
         try:
-            response = requests.post(settings.UPLOAD_SERVICE_URL + 'upload/', data=post_data, files=files_data,
+            response = requests.post(settings.UPLOAD_SERVICE_URL + '/upload/', data=post_data, files=files_data,
                                      headers=headers)
         except Exception as e:
             logger.error("Error in connect to upload service: " + str(e))
@@ -456,9 +456,8 @@ class DataDetailsView(DetailView):
         return self.render_to_response(context)
 
 
-
 class CpcsArchiveData(LoginRequiredMixin, View):
-    template_name =  'bhtom_dataproducts/cpcs_archiwum_data.html'
+    template_name = 'bhtom_dataproducts/cpcs_archiwum_data.html'
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data()

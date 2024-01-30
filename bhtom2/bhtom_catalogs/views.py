@@ -35,7 +35,7 @@ class CatalogQueryView(FormView):
                 'terms': term,
                 'harvester': service
             }
-            response = requests.post(settings.HARVESTER_URL + 'findTargetWithHarvester/', data=post_data)
+            response = requests.post(settings.HARVESTER_URL + '/findTargetWithHarvester/', data=post_data)
             
             if response.status_code == 200:
                 # Extract JSON from the response

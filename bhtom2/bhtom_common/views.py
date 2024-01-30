@@ -132,7 +132,7 @@ class ReloadFits(LoginRequiredMixin, View):
             }
 
             try:
-                requests.post(settings.UPLOAD_SERVICE_URL + 'reloadFits/', data=post_data, headers=headers)
+                requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
             except Exception as e:
                 logger.error("Error in connect to upload service: " + str(e))
                 messages.error(self.request, 'Error in connect to upload service.')
@@ -282,7 +282,7 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
                 try:
                     logger.info("DeletePointAndRestartProcess for dataProduct_id: " + str(data_id))
                     dataProduct.save()
-                    requests.post(settings.UPLOAD_SERVICE_URL + 'reloadFits/', data=post_data, headers=headers)
+                    requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
                     success = True
                     
                 except Exception as e:
