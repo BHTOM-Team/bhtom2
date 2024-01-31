@@ -28,7 +28,7 @@ class RequestLogMiddleware:
             ip = request.META['REMOTE_ADDR']
 
         loggerRequest.info(f"Method: {request.method}, Path: {request.path}, IP: {ip}, "
-                           f"correlation_id: {request.correlation_id}, session_id: {request.session.session_key}, "
+                           f"Correlation-ID: {request.correlation_id}, session_id: {request.session.session_key}, "
                            f"user: {request.user}, host: {request.META['HTTP_HOST']}, "
                            f"body: {body}")
 
@@ -40,7 +40,7 @@ class RequestLogMiddleware:
         time = time.total_seconds()
 
         loggerResponse.info(f"Method: {request.method}, Path: {request.path}, IP: {ip}, "
-                            f"correlation_id: {request.correlation_id}, session_id: {request.session.session_key}, "
+                            f"Correlation-ID: {request.correlation_id}, session_id: {request.session.session_key}, "
                             f" user: {request.user}, host: {request.META['HTTP_HOST']}, "
                             f"time: {str(time)}, status code: {response.status_code}, body: {body}")
 

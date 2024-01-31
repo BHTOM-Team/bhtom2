@@ -114,7 +114,7 @@ class GetCpcsArchiveDataApiView(APIView):
             'dec': dec,
         }
         header = {
-            "correlation_id" : get_guid(),
+            "Correlation-ID" : get_guid(),
         }
         try:
             cpcs_archive_data = requests.post(settings.CPCS_URL + '/getArchiveData/', data=post_data,

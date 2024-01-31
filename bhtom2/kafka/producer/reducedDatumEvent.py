@@ -44,6 +44,6 @@ class ReducedDatumEventProducer:
         message_json = json.dumps(value)
         self.producer.produce(topic,
                               value=message_json,
-                              headers={"correlation_id": guid}
+                              headers={"Correlation-ID": guid}
                               )
         self.producer.poll()
