@@ -43,6 +43,6 @@ class CalibCreateEventProducer:
         message_json = json.dumps(value)
         self.producer.produce('Event_Calibration_File',
                               value=message_json,
-                              headers={"correlation_id": guid}
+                              headers={"Correlation-ID": guid}
                               )
         self.producer.poll()

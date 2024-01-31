@@ -26,7 +26,6 @@ from abc import ABC, abstractmethod
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.rest-view')
 
-
 class GetTargetListApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -40,6 +39,13 @@ class GetTargetListApi(views.APIView):
                 'raMax': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'decMin': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'decMax': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'importance': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'priority': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'lastMag': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'sunDistance': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'galacticLat': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'galacticLon': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'description': openapi.Schema(type=openapi.TYPE_STRING),
             },
             required=[]
         ),
@@ -61,6 +67,14 @@ class GetTargetListApi(views.APIView):
         raMax = request.data.get('raMax', None)
         decMin = request.data.get('decMin', None)
         decMax = request.data.get('decMax', None)
+        importance = request.data.get('importance', None)
+        priority = request.data.get('priority', None)
+        lastMag = request.data.get('lastMag', None)
+        sunDistance = request.data.get('sunDistance', None)
+        galacticLat = request.data.get('galacticLat', None)
+        galacticLon = request.data.get('galacticLon', None)
+        description = request.data.get('description', None)
+        
 
         try:
             if name is not None:
@@ -77,9 +91,29 @@ class GetTargetListApi(views.APIView):
             if decMax is not None:
                 decMax = float(decMax)
                 query &= Q(dec__lte=decMax)
+            if importance is not None:
+                importance = float(importance)
+                query &= Q(importance=importance)
+            if priority is not None:
+                priority = float(priority)
+                query &= Q(priority=priority)
+            if lastMag is not None:
+                lastMag = float(lastMag)
+                query &= Q(mag_last=lastMag)
+            if sunDistance is not None:
+                sunDistance = float(sunDistance)
+                query &= Q(sun_separation=sunDistance)
+            if galacticLat is not None:
+                galacticLat = float(galacticLat)
+                query &= Q(galactic_lat=galacticLat)
+            if galacticLon is not None:
+                galacticLon = float(galacticLon)
+                query &= Q(galactic_lng=galacticLon)
+            if description is not None:
+                query &= Q(description=description) 
         except ValueError as e:
             logger.error("Value error in targetList " + str(e))
-            return Response("Wrong format", status=404)
+            return Response("Wrong format", status=400)
 
         queryset = Target.objects.filter(query).order_by('created')
         serialized_queryset = serializers.serialize('json', queryset)

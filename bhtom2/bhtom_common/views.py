@@ -119,7 +119,7 @@ class ReloadFits(LoginRequiredMixin, View):
             token = Token.objects.get(user=user)
             headers = {
                 'Authorization': 'Token ' + token.key,
-                'correlation_id': get_guid()
+                'Correlation-ID': get_guid()
             }
         except Token.DoesNotExist:
             logger.error("Token not exist")
@@ -227,7 +227,7 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
             token = Token.objects.get(user=user)
             headers = {
                 'Authorization': 'Token ' + token.key,
-                'correlation_id': get_guid()
+                'Correlation-ID': get_guid()
             }
         except Token.DoesNotExist:
             logger.error("Token not exist")
