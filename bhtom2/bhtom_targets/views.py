@@ -250,6 +250,8 @@ class TargetListView(SingleTableMixin, PermissionListMixin, FilterView):
         kwargs = super().get_filterset_kwargs(filterset_class)
         if kwargs['data'] is None:
             kwargs['data'] = {'importance_min': '1'}
+            messages.success(self.request, 'Warning: Default filter applied. Showing targets with Importance>0 only')
+
         return kwargs
 
 class TargetUpdateView(LoginRequiredMixin, UpdateView):
