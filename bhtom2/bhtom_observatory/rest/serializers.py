@@ -95,6 +95,7 @@ class ObservatoryMatrixSerializers(serializers.ModelSerializer):
 class DataProductSerializer(serializers.ModelSerializer):
     observatory = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
+    target_name = serializers.SerializerMethodField()
 
     class Meta:
         model = DataProduct
@@ -107,3 +108,7 @@ class DataProductSerializer(serializers.ModelSerializer):
     def get_observatory(self, obj):
         observatory_name = obj.observatory.observatory.name
         return observatory_name
+    
+    def get_target_name(self, obj):
+        target_name = obj.target.name if obj.target else None
+        return target_name
