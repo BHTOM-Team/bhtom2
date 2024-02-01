@@ -52,9 +52,9 @@
     <dd class="col-sm-6">{{ target.mjd_last }}</dd>
     {% endif %}
 
-    {% if target.mag_last != None %}
-    <dt class="col-sm-6">{{ "Last G Mag" }}</dt>
-    <dd class="col-sm-6">{{ target.mag_last }}</dd>
+    {% if target.mag_last != None and target.filter_last != None %}
+    <dt class="col-sm-6">{{ "Last Mag/Filter" }}</dt>
+    <dd class="col-sm-6">{{ target.mag_last }} mag [{{ target.filter_last }}]</dd>
     {% endif %}
 
     {% if target.importance != None %}

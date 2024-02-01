@@ -119,11 +119,11 @@ class ReloadFits(LoginRequiredMixin, View):
             token = Token.objects.get(user=user)
             headers = {
                 'Authorization': 'Token ' + token.key,
-                'correlation_id': get_guid()
+                'Correlation-ID': get_guid()
             }
         except Token.DoesNotExist:
-            logger.error("Token not exist")
-            messages.error(self.request, "Token not exist")
+            logger.error("Token does not exist")
+            messages.error(self.request, "Token does not exist")
             return redirect(reverse('bhtom_common:list'))
 
         for data_id in data_ids:
@@ -227,7 +227,7 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
             token = Token.objects.get(user=user)
             headers = {
                 'Authorization': 'Token ' + token.key,
-                'correlation_id': get_guid()
+                'Correlation-ID': get_guid()
             }
         except Token.DoesNotExist:
             logger.error("Token not exist")

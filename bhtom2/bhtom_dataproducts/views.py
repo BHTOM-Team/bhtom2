@@ -112,7 +112,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
 
         headers = {
             'Authorization': 'Token ' + token,
-            'correlation_id': get_guid()
+            'Correlation-ID': get_guid()
         }
         # Make a POST request to upload-service with the extracted data
         try:
@@ -153,7 +153,7 @@ class FitsUploadAPIView(APIView):
         # Set headers for the POST request to upload-service
         headers = {
             'Authorization': authorization_header,
-            'correlation_id': get_guid(),
+            'Correlation-ID': get_guid(),
         }
 
         # Make a POST request to upload-service with the extracted data
@@ -424,7 +424,7 @@ class DataDetailsView(DetailView):
                     raise
 
                 context['observatory'] = observatory
-                context['owner'] = observatory_matrix.user
+                context['owner'] = observatory_matrix.user.first_name + ' ' + observatory_matrix.user.last_name
 
                 try:
                     calibration = Calibration_data.objects.get(dataproduct=data_product)
