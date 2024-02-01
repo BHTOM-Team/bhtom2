@@ -20,6 +20,7 @@ from django.db.models.functions.math import ACos, Cos, Radians, Pi, Sin
 from django.conf import settings
 import requests
 import json
+from django_guid import get_guid
 from math import radians
 from bhtom_base.bhtom_common.hooks import run_hook
 from astropy.coordinates import Angle
@@ -114,9 +115,12 @@ def import_targets(targets):
                         post_data = {
                         'terms': gaia_alerts_name,
                         'harvester': "Gaia Alerts"
-                        }            
+                        }       
+                        header = {
+                            "Correlation-ID" : get_guid(),
+                        }     
                         try:
-                            response = requests.post(settings.HARVESTER_URL + '/findTargetWithHarvester/', data=post_data)
+                            response = requests.post(settings.HARVESTER_URL + '/findTargetWithHarvester/', data=post_data, headers=header)
                             if response.status_code == 200:
                                 # Extract JSON from the response
                                 catalog_data = json.loads(response.text)

@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 import requests
 from django.conf import settings
 import json
+from django_guid import get_guid
 
 from .forms import CatalogQueryForm
 from bhtom_base.bhtom_catalogs.harvester import MissingDataException
@@ -35,7 +36,10 @@ class CatalogQueryView(FormView):
                 'terms': term,
                 'harvester': service
             }
-            response = requests.post(settings.HARVESTER_URL + '/findTargetWithHarvester/', data=post_data)
+            header = {
+                "Correlation-ID" : get_guid(),
+            }
+            response = requests.post(settings.HARVESTER_URL + '/findTargetWithHarvester/', data=post_data, headers=header)
             
             if response.status_code == 200:
                 # Extract JSON from the response
