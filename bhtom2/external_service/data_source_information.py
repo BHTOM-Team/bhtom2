@@ -6,7 +6,7 @@ class DataSource(Enum):
     GAIA_ALERTS = auto()
     CPCS = auto()
     ASASSN = auto()
-    OGLE_EWS= auto()
+    OGLE_EWS = auto()
     ZTF = auto()
     ATLAS = auto()
     AAVSO = auto()
@@ -23,12 +23,15 @@ class DataSource(Enum):
     DECAPS = auto()
     GAIA_DR3 = auto()
     GAIA_DR2 = auto()
-    KMT_NET= auto()
+    KMT_NET = auto()
+    LOFAR = auto()
+    twomass = auto()
+    PTF = auto()
  
 
 PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.GAIA_ALERTS: "Gaia Alerts",
-#    "GAIA": "Gaia",
+    #    "GAIA": "Gaia",
     DataSource.ZTF: "ZTF",
     DataSource.CPCS: "CPCS",
     DataSource.AAVSO: "AAVSO",
@@ -46,14 +49,17 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.FIRST: "FIRST",
     DataSource.PS1: "PS1",
     DataSource.DECAPS: "DECAPS",
-    DataSource.OGLE_EWS:"OGLE-EWS",
-    DataSource.ATLAS:"ATLAS",
-    DataSource.KMT_NET:"KMT-NET"
+    DataSource.OGLE_EWS: "OGLE-EWS",
+    DataSource.ATLAS: "ATLAS",
+    DataSource.KMT_NET: "KMT-NET",
+    DataSource.LOFAR: "LOFAR2m",
+    DataSource.twomass: "2MASS",
+    DataSource.PTF: "PTF"
 }
-
 
 def get_pretty_survey_name(source_name: DataSource) -> str:
     return PRETTY_SURVEY_NAME.get(source_name, str(source_name))
+
 
 
 TARGET_NAME_KEYS: Dict[DataSource, str] = {
@@ -76,9 +82,13 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.FIRST: "FIRST name",
     DataSource.PS1: "PS1 name",
     DataSource.DECAPS: "DECAPS name",
-    DataSource.ATLAS:"ATLAS url",
-    DataSource.KMT_NET:"KMT name"
+    DataSource.ATLAS: "ATLAS url",
+    DataSource.KMT_NET: "KMT name",
+    DataSource.LOFAR: "LOFAR2m name",
+    DataSource.twomass: "2MASS name",
+    DataSource.PTF: "PTF"
 }
+
 
 
 FILTERS: Dict[DataSource, List[str]] = {
