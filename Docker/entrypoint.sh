@@ -11,13 +11,6 @@ then
     echo "PostgreSQL started"
 fi
 
-#echo "Flushing manage.py..."
-#
-#while ! python manage.py flush --no-input 2>&1; do
-#  echo "Flushing manage.py..."
-#  sleep 3
-#done
-
 echo "Collecting static..."
 
 while ! python3 manage.py collectstatic --no-input 2>&1; do
@@ -25,17 +18,9 @@ while ! python3 manage.py collectstatic --no-input 2>&1; do
   sleep 3
 done
 
-#echo "Making migrations..."
-#
-#while ! python manage.py makemigrations 2>&1; do
-#  echo "making migrations..."
-#  sleep 3
-#done
-
 echo "Migrating..."
 
-# Wait for few minute and run db migration
-while ! python3 manage.py migrate  2>&1; do
+while ! python3 manage.py migrate 2>&1; do
    echo "Migration is in progress..."
    sleep 3
 done

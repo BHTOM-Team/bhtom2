@@ -24,12 +24,12 @@ def target_post_save(target, created=False, user=None):
 
             Comment.objects.create(
                 user_id=user.id,
-                user_name = user.username,
-                user_email = user.email,
+                user_name=user.username,
+                user_email=user.email,
                 object_pk=target.id,
                 content_type_id=12,
                 site_id=1,
-                is_public= True,
+                is_public=True,
                 comment=f"Target created by {full_name}({user.username}) on {target.created}",
             )
         except Exception as e :
