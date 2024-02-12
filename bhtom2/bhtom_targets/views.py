@@ -601,7 +601,7 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
 
         datums = ReducedDatum.objects.filter(target=target,
                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
-                                             )
+                                             ).filter(error__gt=0, active_flg=True)
 
         allobs = []
         allobs_nowise = []
