@@ -215,7 +215,7 @@ curl -X 'POST' \
 ### Request
 
 - **Method**: POST
-- **URL**: `api/observatory/getObservatoryList/`
+- **URL**: `observatory/getObservatoryList/`
 
 ### Parameters
 
@@ -251,7 +251,7 @@ The request header should include the following:
 
 ```bash
 curl -X 'POST' \
-  'https://bh-tom2.astrolabs.pl/api/observatory/getObservatoryList/' \
+  'https://bh-tom2.astrolabs.pl/observatory/getObservatoryList/' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Token <yourToken>' \
@@ -280,7 +280,7 @@ This API endpoint allows users to add observatory to their favourite list. Users
 ### Request
 
 - **Method**: POST
-- **URL**: `/api/create-observatory-matrix/`
+- **URL**: `/create-observatory-matrix/`
 
 ### Request Headers
 
@@ -305,7 +305,7 @@ This API endpoint allows users to add observatory to their favourite list. Users
 
 ```bash
 curl -X POST \
-  'https://bh-tom2.astrolabs.pl/api/observatory/addFavouriteObservatory/' \
+  'https://bh-tom2.astrolabs.pl/observatory/addFavouriteObservatory/' \
   -H 'Authorization: Token <yourToken>' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -322,7 +322,7 @@ curl -X POST \
 ### Request
 
 - **Method**: POST
-- **URL**: `api//observatory/create/`
+- **URL**: `/observatory/create/`
 
 ### Request Parameters
 
@@ -376,7 +376,7 @@ curl -X POST \
     "example_file": "observatory_example.txt",
     "comment": "This observatory is for calibration purposes."
   }' \
-  https://bh-tom2.astrolabs.pl/api/observatory/create/
+  https://bh-tom2.astrolabs.pl/observatory/create/
 ```
 
 ### Using Python Script
@@ -393,7 +393,7 @@ python create_observatory.py --name "My Observatory" --lon 45.12345 --lat -120.6
 ### Request
 
 - **Method**: POST
-- **URL**: `api/observatory/update/`
+- **URL**: `observatory/update/`
 
 ### Request Parameters
 
@@ -447,7 +447,7 @@ curl -X PATCH \
     "example_file": "new_observatory_example.txt",
     "comment": "Updated observatory information."
   }' \
-  https://bh-tom2.astrolabs.pl/api/observatory/update/
+  https://bh-tom2.astrolabs.pl/observatory/update/
 ```
 
 ### Using Python Script
@@ -466,7 +466,7 @@ python create_observatory.py --name "My Observatory" --lon 45.12345 --lat -120.6
 ## Request
 
 - **Method**: POST
-- **URL**: `api//observatory/getFavouriteObservatory/`
+- **URL**: `/observatory/getFavouriteObservatory/`
 
 ## Request Parameters
 
@@ -507,7 +507,7 @@ curl -X POST \
     "created_start": "2023-01-01T00:00:00Z",
     "created_end": "2023-12-31T23:59:59Z"
   }' \
-  https://bh-tom2.astrolabs.pl/api/observatory-matrix/get-matrix/
+  https://bh-tom2.astrolabs.pl/observatory-matrix/get-matrix/
 ```
 
 ### Using Python Script
@@ -525,7 +525,7 @@ python get_observatory_matrix.py --user "JohnDoe" --active_flg true --observator
 ### Request
 
 - **Method**: DELETE
-- **URL**: `api/observatory/deleteFavouriteObservatory/`
+- **URL**: `observatory/deleteFavouriteObservatory/`
 
 
 ### Request Parameters
@@ -555,7 +555,7 @@ curl -X DELETE \
   -d '{
     "observatory": "My Observatory"
   }' \
-  https://bh-tom2.astrolabs.pl/api/observatory-matrix/delete/
+  https://bh-tom2.astrolabs.pl/observatory-matrix/delete/
 ```
 
 ### Using Python Script
