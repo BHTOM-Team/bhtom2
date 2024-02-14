@@ -1027,3 +1027,13 @@ curl -X POST \
 
 Replace `<yourToken>` with your valid authentication token.
 
+# DATAPRODUCT API
+
+### List Data Products
+
+API for DataProduct list, lists uploaded instrumental or fits files and tracks the user who uploaded it
+
+```bash
+curl -X POST -H "Content-Type: application/json" -H "Authorization: Token <yourToken>" \
+  "https://bh-tom2.astrolabs.pl/common/api/data/" 
+```
