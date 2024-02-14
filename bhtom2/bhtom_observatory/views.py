@@ -3,14 +3,14 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import FormView, ListView, UpdateView, DeleteView, DetailView
 from django.contrib import messages
-
+from django.forms.models import inlineformset_factory
 from django.conf import settings
 from django.core.mail import send_mail
 from guardian.mixins import LoginRequiredMixin
 
 from bhtom2.bhtom_observatory.forms import ObservatoryCreationForm, ObservatoryUpdateForm, ObservatoryUserUpdateForm, \
-    ObservatoryUserCreationForm
-from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix
+    ObservatoryUserCreationForm, CameraCreationForm
+from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix, Camera
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_observatory.views')
@@ -22,7 +22,7 @@ class CreateObservatory(LoginRequiredMixin, FormView):
     success_url = reverse_lazy('bhtom_observatory:list')
 
     def form_valid(self, form):
-
+        
         try:
             active_flag = False
             if form.cleaned_data['calibration_flg'] != True:
@@ -33,13 +33,6 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 calibration_flg = form.cleaned_data['calibration_flg']
                 example_file = self.request.FILES.get('example_file')
                 altitude = form.cleaned_data['altitude']
-                gain = form.cleaned_data['gain']
-                readout_noise = form.cleaned_data['readout_noise']
-                binning = form.cleaned_data['binning']
-                saturation_level = form.cleaned_data['saturation_level']
-                pixel_scale = form.cleaned_data['pixel_scale']
-                readout_speed = form.cleaned_data['readout_speed']
-                pixel_size = form.cleaned_data['pixel_size']
                 approx_lim_mag = form.cleaned_data['approx_lim_mag']
                 filters = form.cleaned_data['filters']
                 comment = form.cleaned_data['comment']
@@ -51,13 +44,6 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 calibration_flg = form.cleaned_data['calibration_flg']
                 example_file = None
                 altitude = None
-                gain = None
-                readout_noise = None
-                binning = None
-                saturation_level = None
-                pixel_scale = None
-                readout_speed = None
-                pixel_size = None
                 approx_lim_mag = None
                 filters = None
                 comment = None
@@ -67,6 +53,7 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 prefix = name + "_CalibrationOnly"
             else:
                 prefix = name
+
         except TypeError as e:
             logger.error('CreateObservatory error: ' + str(e))
             messages.error(self.request, 'Error with creating the observatory')
@@ -83,21 +70,21 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 example_file=example_file,
                 user=user,
                 altitude=altitude,
-                gain=gain,
-                readout_noise=readout_noise,
-                binning=binning,
-                saturation_level=saturation_level,
-                pixel_scale=pixel_scale,
-                readout_speed=readout_speed,
-                pixel_size=pixel_size,
                 approx_lim_mag=approx_lim_mag,
                 filters=filters,
                 comment=comment
             )
 
             observatory.save()
-            logger.info('Create new obserwatory:  %s' % str(name))
-
+            cameras_formset = form.cleaned_data['cameras']
+        
+            # Validate and save the cameras formset
+            if cameras_formset.is_valid():
+                cameras_formset.instance = observatory
+                cameras_formset.save()
+            
+            logger.info('Create new obserwatory and camera:  %s' % str(name))
+          
         except Exception as e:
             logger.error('CreateObservatory error: ' + str(e))
             messages.error(self.request, 'Error with creating the observatory')

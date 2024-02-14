@@ -1,6 +1,7 @@
 from django import forms
+from django.forms import inlineformset_factory
 
-from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix
+from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix, Camera
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from django.forms.widgets import CheckboxInput
 
@@ -23,6 +24,15 @@ class ObservatoryChoiceField(forms.ModelChoiceField):
             return '{name} ({prefix})'.format(name=obj.name, prefix=obj.prefix)
 
 
+
+
+class CameraCreationForm(forms.ModelForm):
+    class Meta:
+        model = Camera
+        fields = ('camera_name','binning', 'gain', 'readout_noise',
+                  'saturation_level', 'pixel_scale', 'pixel_size', 'readout_speed')
+
+
 class ObservatoryCreationForm(forms.ModelForm):
     calibration_flg = forms.BooleanField(
         label='Only instrumental photometry file',
@@ -32,72 +42,53 @@ class ObservatoryCreationForm(forms.ModelForm):
     )
     example_file = forms.FileField(label='Sample fits*',
                                    help_text='Provide one sample fits per filter, clearly labelled.',
-                                   widget=forms.ClearableFileInput(
-                                       attrs={'multiple': True}
-                                   ))
-
-    gain = forms.FloatField(
-                            initial=None,
-                            label='Gain* [electrons/ADU]',
-                            widget=forms.NumberInput(attrs={'placeholder': '2.0'}))
-    readout_noise = forms.FloatField(
-                                     initial=None,
-                                     label='Readout noise* [electrons]',
-                                     widget=forms.NumberInput(attrs={'placeholder': '2'}))
-    binning = forms.FloatField(
-                               initial=None,
-                               label='Binning*',
-                               widget=forms.NumberInput(attrs={'placeholder': '1'}))
-    saturation_level = forms.FloatField(initial=None,
-                                        label='Saturation level* [ADU]',
-                                        widget=forms.NumberInput(attrs={'placeholder': '63000'}))
-    pixel_scale = forms.FloatField(
-                                   initial='',
-                                   label='Pixel scale* [arcsec/pixel]',
-                                   widget=forms.NumberInput(attrs={'placeholder': '0.8'}))
-    readout_speed = forms.FloatField(
-                                     initial=None,
-                                     label='Readout speed [ms/pixel] (if not known, pass 9999)*',
-                                     widget=forms.NumberInput(attrs={'placeholder': '3'}))
-    pixel_size = forms.FloatField(
-                                  initial=None,
-                                  label='Pixel size [um]',
-                                  widget=forms.NumberInput(attrs={'placeholder': '13.5'}))
+                                   widget=forms.ClearableFileInput(attrs={'multiple': True}))
     approx_lim_mag = forms.FloatField(
-                                      initial=None,
-                                      label='Approx. limit magnitude in V band* [mag]',
-                                      widget=forms.NumberInput(attrs={'placeholder': '18.0'}))
-
+        initial=None,
+        label='Approx. limit magnitude in V band* [mag]',
+        widget=forms.NumberInput(attrs={'placeholder': '18.0'})
+    )
     altitude = forms.FloatField(
-                                initial=None,
-                                label='Altitude [m]*',
-                                widget=forms.NumberInput(attrs={'placeholder': '0.0'}))
+        initial=None,
+        label='Altitude [m]*',
+        widget=forms.NumberInput(attrs={'placeholder': '0.0'})
+    )
     filters = forms.CharField(
-                              initial=None,
-                              label='Filters*',
-                              widget=forms.TextInput(attrs={'placeholder': 'V,R,I'}))
-    
+        initial=None,
+        label='Filters*',
+        widget=forms.TextInput(attrs={'placeholder': 'V,R,I'})
+    )
+#     cameras = inlineformset_factory(
+#         Observatory,
+#         Camera,
+#         form=CameraCreationForm,
+#         extra=1, 
+# )
+
+
     def __init__(self, *args, **kwargs):
         super(ObservatoryCreationForm, self).__init__(*args, **kwargs)
-        # Set the 'required' attribute of fields based on calibration_flg
         calibration_flag = self.fields['calibration_flg']
         for field_name in self.fields:
-            if field_name != 'calibration_flag':
+            if field_name != 'calibration_flg':
                 self.fields[field_name].required = not calibration_flag
         self.fields['name'].required = True
         self.fields['lon'].required = True
         self.fields['lat'].required = True
         self.fields['comment'].required = False
 
+        if calibration_flag != True:
+            self.fields['cameras'] =  inlineformset_factory(
+            Observatory,
+            Camera,
+            form=CameraCreationForm,
+            extra=1, 
+            )
+    
     class Meta:
         model = Observatory
-        fields = ('name', 'lon', 'lat',
-                  'calibration_flg', 'example_file',
-                  'gain', 'readout_noise', 'binning', 'saturation_level',
-                  'pixel_scale', 'readout_speed', 'pixel_size',
-                  'approx_lim_mag', 'filters', 'altitude',
-                  'comment')
-
+        fields = ('name', 'lon', 'lat', 'calibration_flg', 'example_file',
+                  'approx_lim_mag', 'filters', 'altitude', 'comment')
 
 class ObservatoryUpdateForm(forms.ModelForm):
     calibration_flg = forms.BooleanField(
