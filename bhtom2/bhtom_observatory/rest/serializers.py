@@ -94,17 +94,23 @@ class ObservatoryMatrixSerializers(serializers.ModelSerializer):
 
 class DataProductSerializer(serializers.ModelSerializer):
     observatory = serializers.SerializerMethodField()
-    user = serializers.SerializerMethodField()
+    user_name = serializers.SerializerMethodField()
     target_name = serializers.SerializerMethodField()
-
+    target = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+    
     class Meta:
         model = DataProduct
         fields = '__all__'
 
-    def get_user(self, obj):
-        user_name = obj.observatory.user.username
+    def get_user_name(self, obj):
+        user_name = obj.observatory.user.first_name + " " + obj.observatory.user.last_name
         return user_name
-
+    
+    def get_user(self, obj):
+        user = obj.observatory.user.username
+        return user
+    
     def get_observatory(self, obj):
         observatory_name = obj.observatory.observatory.name
         return observatory_name
@@ -112,3 +118,7 @@ class DataProductSerializer(serializers.ModelSerializer):
     def get_target_name(self, obj):
         target_name = obj.target.name if obj.target else None
         return target_name
+    
+    def get_target(self, obj):
+        target = obj.target.id if obj.target else None
+        return target

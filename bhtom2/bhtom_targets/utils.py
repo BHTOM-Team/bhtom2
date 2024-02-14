@@ -323,11 +323,11 @@ def update_targetList_cache():
                 logger.error('Failed to remove + ' + str(e))
                 continue
 
-    context = {}
-    target = Target.objects.all()
-    context['object_list'] = target
-    request = HttpRequest()
-    render(request, 'bhtom_targets/partials/target_table.html', context)
+    # context = {}
+    # target = Target.objects.all()
+    # context['object_list'] = target
+    # request = HttpRequest()
+    # render(request, 'bhtom_targets/partials/target_table.html', context)
 
 
 def update_targetDetails_cache():

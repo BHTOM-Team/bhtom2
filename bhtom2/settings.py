@@ -17,7 +17,7 @@ import tempfile
 
 from dotenv import dotenv_values
 
-from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS
+from bhtom2.external_service.data_source_information import DataSource, TARGET_NAME_KEYS, get_pretty_survey_name
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 
@@ -402,7 +402,7 @@ CREATE_TARGET_HIDDEN_FIELDS = [
 
 
 def generate_name_tuple(data_source: DataSource) -> tuple:
-    return data_source.name, f'{data_source.name} name'
+    return data_source.name, f'{get_pretty_survey_name(data_source)} name'
 
 
 SOURCE_CHOICES = [generate_name_tuple(ds) for ds in DataSource]

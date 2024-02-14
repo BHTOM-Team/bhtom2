@@ -196,7 +196,9 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, 'Target created, grabbing all the data for it. Please wait and refresh in about a minute...')
 
         logger.info('Target post save hook: %s created: %s' % (self.object, True))
-        run_hook('target_post_save', target=self.object, created=True, user=self.request.user)
+
+        if target_type == Target.SIDEREAL:
+            run_hook('target_post_save', target=self.object, created=True, user=self.request.user)
         return redirect(self.get_success_url())
 
     def get_form(self, *args, **kwargs):
@@ -599,7 +601,7 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
 
         datums = ReducedDatum.objects.filter(target=target,
                                              data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]
-                                             )
+                                             ).filter(error__gt=0, active_flg=True)
 
         allobs = []
         allobs_nowise = []
