@@ -74,7 +74,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         :rtype: str
         """
         obj = self.request.GET or self.request.POST
-        target_type = obj.get('type')
+        target_type = Target.SIDEREAL
         # If None or some invalid value, use default target type
         if target_type not in (Target.SIDEREAL, Target.NON_SIDEREAL):
             target_type = self.get_default_target_type()
@@ -123,10 +123,11 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         """
         target_type = self.get_target_type()
         self.initial['type'] = target_type
-        if target_type == Target.SIDEREAL:
-            return SiderealTargetCreateForm
-        else:
-            return NonSiderealTargetCreateForm
+        return SiderealTargetCreateForm
+        # if target_type == Target.SIDEREAL:
+        #
+        # else:
+        #     return NonSiderealTargetCreateForm
 
     def form_valid(self, form):
         """
@@ -250,6 +251,8 @@ class TargetListView(SingleTableMixin, PermissionListMixin, FilterView):
     #default filter sets importance_min=1
     def get_filterset_kwargs(self, filterset_class):
         kwargs = super().get_filterset_kwargs(filterset_class)
+        kwargs['data'] = {'type': 'SIDEREAL'}
+
         if kwargs['data'] is None:
             kwargs['data'] = {'importance_min': '1'}
             messages.success(self.request, 'Warning: Default filter applied. Showing targets with Importance>0 only')
