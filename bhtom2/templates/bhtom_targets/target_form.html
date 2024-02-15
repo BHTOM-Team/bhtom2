@@ -5,12 +5,12 @@
     {% if not object %}
         <h3>Create a Target</h3>
         <ul class="nav nav-tabs">
-        {% for k, v in type_choices %}
+
             <li class="nav-item">
                 <a class="nav-link {% if form.type.initial == k %} active {% endif %}"
                    href="{% url 'bhtom_targets:create' %}?type={{ k }}">{{ v }}</a>
             </li>
-        {% endfor %}
+
     {% else %}
         <h3> Update {{ object.name }}</h3>
 

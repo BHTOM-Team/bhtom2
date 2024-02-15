@@ -104,11 +104,11 @@ class DataProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_user_name(self, obj):
-        user_name = obj.observatory.user.username
+        user_name = obj.observatory.user.first_name + " " + obj.observatory.user.last_name
         return user_name
     
     def get_user(self, obj):
-        user = obj.observatory.user.id
+        user = obj.observatory.user.username
         return user
     
     def get_observatory(self, obj):
