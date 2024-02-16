@@ -20,6 +20,13 @@ class ObservatoryChoiceField(forms.ModelChoiceField):
         else:
             return '{name} ({prefix})'.format(name=obj.observatory.name, prefix=obj.observatory.prefix)
 
+class CameraChoiceField(forms.ModelChoiceField):
+
+    def label_from_instance(self, obj):
+        if obj.camera:
+            return obj.camera.camera_name
+      
+
 
 class GroupChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
@@ -85,6 +92,13 @@ class DataProductUploadForm(forms.Form):
 
         self.fields['observatory'] = ObservatoryChoiceField(
             queryset=ObservatoryMatrix.objects.filter(user=user, active_flg=True).order_by('observatory__name'),
+            widget=forms.Select(),
+            required=False,
+            
+        )
+
+        self.fields['camera'] = CameraChoiceField(
+            queryset=ObservatoryMatrix.objects.filter(user=user, active_flg=True).order_by('camera__camera_name'),
             widget=forms.Select(),
             required=False,
             

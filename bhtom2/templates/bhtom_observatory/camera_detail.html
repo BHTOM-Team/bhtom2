@@ -1,0 +1,143 @@
+{% extends 'bhtom_common/base.html' %}
+{% load comments bootstrap4 bhtom_common_extras targets_extras observation_extras dataproduct_extras static cache %}
+{% block title %}Observatory{% endblock %}
+{% block additional_css %}
+<link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
+<link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}">
+{% endblock %}
+{% bootstrap_javascript jquery='True' %}
+{% block content %}
+<h1>Observatory: {{ observatory.obsName }}</h1>
+{%if observatory.calibration_flg %}
+<div class="col-md-6">
+    <h2> (Only Instrumental photometry file)</h2>
+</div>
+{% else %}
+<div class="row obs-details-container">
+    <div class="col-md-12">
+        <h2>Observatory details</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        Longitude
+                    </td>
+                    <td>
+                        {{ camera.observatory.lon }} deg (West is positive)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Latitude
+                    </td>
+                    <td>
+                        {{ camera.observatory.lat }} deg (North is positive)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Altitude
+                    </td>
+                    <td>
+                        {{ camera.observatory.altitude }} m
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Approx. limit magnitude
+                    </td>
+                    <td>
+                        {{ camera.observatory.approx_lim_mag }} mag
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Filters
+                    </td>
+                    <td>
+                        {{ camera.observatory.filters }}
+                    </td>
+                </tr>
+            </tbody>
+
+        </table>
+    </div>
+    <div class="col-md-12">
+        <h2>Camera details</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        Camera name
+                    </td>
+                    <td>
+                        {{ camera.camera_name }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Gain
+                    </td>
+                    <td>
+                        {{ camera.gain }} [E/AUD]
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Readout Noise
+                    </td>
+                    <td>
+                        {{ camera.readout_noise }} [E]
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Binning
+                    </td>
+                    <td>
+                        {{ camera.binnig }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Saturation level
+                    </td>
+                    <td>
+                        {{ camera.observatory.filters }} [AUD]
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Pixel scale
+                    </td>
+                    <td>
+                        {{ camera.pixel_scale }} [ARCSECONDS/PIXEL]
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Readout speed
+                    </td>
+                    <td>
+                        {{ camera.readout_speed }} [MICROSECONDS/PIXEL]
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+

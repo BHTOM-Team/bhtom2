@@ -16,7 +16,7 @@ from bhtom_base.bhtom_dataproducts.models import DataProduct, DataProductGroup, 
 from bhtom_base.bhtom_targets.models import Target
 from .forms import DataProductUploadForm
 from ..bhtom_calibration.models import Calibration_data
-from ..bhtom_observatory.models import ObservatoryMatrix
+from ..bhtom_observatory.models import ObservatoryMatrix, Camera
 from bhtom2.bhtom_observatory.models import Observatory
 from bhtom2.external_service.connectWSDB import WSDBConnection
 from rest_framework.views import APIView
@@ -57,6 +57,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             observation_record = None
         dp_type = form.cleaned_data['data_product_type']
         observatoryMatrix = form.cleaned_data['observatory']
+        cameraMatrix = form.cleaned_data['camera']
         observation_filter = form.cleaned_data['filter']
         mjd = form.cleaned_data['mjd']
         match_dist = 0.5
@@ -85,8 +86,9 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         if dp_type == 'fits_file':
             try:
                 observatory = Observatory.objects.get(id=observatoryMatrix.observatory_id)
+                camera = Camera.objects.get(id=cameraMatrix.camera_id)
             except Exception as e:
-                messages.error(self.request, f"Observatory doesn't exist")
+                messages.error(self.request, f"Observatory or Camera doesn't exist")
                 return redirect(form.cleaned_data.get('referrer', '/'))
             if observatory.calibration_flg is True:
                 messages.error(self.request, 'Observatory can calibration only')
@@ -104,6 +106,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             'dry_run': dry_run,
             'no_plot': False,
             'observatory': observatoryMatrix,
+            'camera': cameraMatrix,
             'mjd': mjd,
             'group': group,
             'observer': observer,
@@ -417,13 +420,17 @@ class DataDetailsView(DetailView):
 
                 try:
                     observatory_matrix = ObservatoryMatrix.objects.get(id=data_product.observatory.id)
+                    camera_matrix = ObservatoryMatrix.objects.get(id=data_product.camera.id)
                     observatory = Observatory.objects.get(id=observatory_matrix.observatory.id)
-                except (ObservatoryMatrix.DoesNotExist, Observatory.DoesNotExist):
+                    camera = Camera.objects.get(id=camera_matrix.camera.id)
+
+                except (ObservatoryMatrix.DoesNotExist, Observatory.DoesNotExist, Camera.DoesNotExist):
                     logger.error("Observatory not found")
                     messages.error(self.request, 'Observatory not found')
                     raise
 
                 context['observatory'] = observatory
+                context['camera'] = camera
                 context['owner'] = observatory_matrix.user.first_name + ' ' + observatory_matrix.user.last_name
 
                 try:

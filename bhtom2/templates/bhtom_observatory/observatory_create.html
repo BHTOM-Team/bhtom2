@@ -25,10 +25,35 @@
   {% csrf_token %}
   {% bootstrap_form form %}
 
-  {{ form.cameras.management_form }}
-  {% for camera_form in form.cameras %}
-    {{ camera_form.as_p }}
-  {% endfor %}
+  <div id="alias-form-container">
+    <h3>Cameras</h3>
+    {{ cameras.management_form }}
+    {% for form in cameras %}
+            <div class="col-md-4">
+                {% bootstrap_field form.camera_name %}
+            </div>
+            <div class="col-md-4">
+                {% bootstrap_field form.binning %}
+            </div>
+            <div class="col-md-4">
+                {% bootstrap_field form.gain %}
+            </div>
+            <div class="col-md-4">
+              {% bootstrap_field form.readout_noise %}
+            </div>
+            <div class="col-md-4">
+              {% bootstrap_field form.saturation_level %}
+            </div>
+            <div class="col-md-4">
+              {% bootstrap_field form.pixel_scale %}
+            </div>
+            <div class="col-md-4">
+              {% bootstrap_field form.pixel_size %}
+            </div>
+            <div class="col-md-4">
+              {% bootstrap_field form.readout_speed %}
+            </div>
+    {% endfor %}
   
   {% buttons %}
   <button type="submit" class="btn btn-primary">

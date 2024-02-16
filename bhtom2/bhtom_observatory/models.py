@@ -49,11 +49,10 @@ class Observatory(models.Model):
         unique_together = (('name', 'lon', 'lat'),)
 
 
-
 class Camera(models.Model):
-    observatory = models.ForeignKey(Observatory, on_delete=models.SET_NULL, blank=True, null=True)
-    camera_name= models.CharField(max_length=255, verbose_name='Camera name', unique=True,null=False)
-    telescope = models.CharField(max_length=255, verbose_name='Telescope name',)
+    observatory = models.ForeignKey(Observatory, on_delete=models.CASCADE,  null=False )
+    camera_name = models.CharField(max_length=255, verbose_name='Camera name',  null=False)
+    telescope = models.CharField(max_length=255, verbose_name='Telescope name')
     gain = models.FloatField(null=True, blank=False, verbose_name='Gain [e/ADU]', default=2)
     readout_noise = models.FloatField(null=True, blank=False, verbose_name='Readout Noise [e]', default=2)
     binning = models.IntegerField(null=True, blank=False, default=1)
@@ -61,17 +60,17 @@ class Camera(models.Model):
     pixel_scale = models.FloatField(null=True, blank=False, verbose_name='Pixel Scale [arcseconds/pixel]', default=0.8)
     readout_speed = models.FloatField(null=True, verbose_name='Readout Speed [microseconds/pixel]', default=9999.0)
     pixel_size = models.FloatField(null=True, verbose_name='Pixel size [micrometers]', default=13.5)
-    origin =   models.CharField(max_length=255, verbose_name='Origin')
+    origin = models.CharField(max_length=255, verbose_name='Origin')
     date_time_keyword = models.CharField(max_length=255, verbose_name='Date & Time keyword', default="DATE-OBS")
     time_keyword = models.CharField(max_length=255, verbose_name='Time keyword', default="TIME-OBS")
     exposure_time_keyword = models.CharField(max_length=255, verbose_name='Exposure time keyword', default="EXPTIME")
-    mode_recodnition_keyword = models.CharField(max_length=255, verbose_name='Mode recognition keyword name')
-    additional_info = models.CharField(max_length=255, verbose_name='Additional info')
+    mode_recognition_keyword = models.CharField(max_length=255, verbose_name='Mode recognition keyword name', null=False, default='')
+    additional_info = models.CharField(max_length=255, verbose_name='Additional info', null=False, default='')
     created = models.DateTimeField(null=True, blank=False, editable=False, auto_now_add=True, db_index=True)
-    modified = models.DateTimeField(null=True, blank=True, editable=True, auto_now_add=True)
+    modified = models.DateTimeField(null=True, blank=True, editable=True, auto_now=True)
 
     def __str__(self):
-        return self.telescope
+        return self.camera_name
 
     class Meta:
         verbose_name_plural = "cameras"
@@ -80,6 +79,7 @@ class Camera(models.Model):
 class ObservatoryMatrix(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     observatory = models.ForeignKey(Observatory, on_delete=models.CASCADE)
+    camera = models.ForeignKey(Camera, on_delete=models.CASCADE)
     active_flg = models.BooleanField(default='True')
     comment = models.TextField(null=True, blank=True,
                                verbose_name="Comments (e.g. hyperlink to the observatory website, camera "
@@ -95,4 +95,4 @@ class ObservatoryMatrix(models.Model):
 
     class Meta:
         verbose_name_plural = "observatory matrix"
-        unique_together = (('user', 'observatory'),)
+        unique_together = (('user', 'camera', 'observatory'),)

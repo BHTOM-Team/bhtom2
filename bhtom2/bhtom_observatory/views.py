@@ -9,7 +9,7 @@ from django.core.mail import send_mail
 from guardian.mixins import LoginRequiredMixin
 
 from bhtom2.bhtom_observatory.forms import ObservatoryCreationForm, ObservatoryUpdateForm, ObservatoryUserUpdateForm, \
-    ObservatoryUserCreationForm, CameraCreationForm
+    ObservatoryUserCreationForm, CamerasFormSet
 from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix, Camera
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
@@ -20,9 +20,24 @@ class CreateObservatory(LoginRequiredMixin, FormView):
     template_name = 'bhtom_observatory/observatory_create.html'
     form_class = ObservatoryCreationForm
     success_url = reverse_lazy('bhtom_observatory:list')
+    def get_context_data(self, **kwargs):
+        """
+        Inserts certain form data into the context dict.
+
+        :returns: Dictionary with the following keys:
+
+                  `type_choices`: ``tuple``: Tuple of 2-tuples of strings containing available target types in the TOM
+
+                  `extra_form`: ``FormSet``: Django formset with fields for arbitrary key/value pairs
+        :rtype: dict
+        """
+        context = super(CreateObservatory, self).get_context_data(**kwargs)
+        context['cameras'] = CamerasFormSet()
+        return context
 
     def form_valid(self, form):
-        
+        cameras = CamerasFormSet(self.request.POST)
+
         try:
             active_flag = False
             if form.cleaned_data['calibration_flg'] != True:
@@ -75,19 +90,16 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 comment=comment
             )
 
-            observatory.save()
-            cameras_formset = form.cleaned_data['cameras']
-        
-            # Validate and save the cameras formset
-            if cameras_formset.is_valid():
-                cameras_formset.instance = observatory
-                cameras_formset.save()
-            
+            if cameras.is_valid():
+                super().form_valid(form)
+                observatory.save()
+                cameras.instance = observatory
+                cameras.save()
             logger.info('Create new obserwatory and camera:  %s' % str(name))
           
         except Exception as e:
             logger.error('CreateObservatory error: ' + str(e))
-            messages.error(self.request, 'Error with creating the observatory')
+            messages.error(self.request, 'Error with creating the observatory or camera')
             return redirect(self.get_success_url())
 
       
@@ -157,6 +169,14 @@ class DeleteObservatory(LoginRequiredMixin, DeleteView):
         return redirect(self.get_success_url())
 
 
+class CameraDetailView(LoginRequiredMixin, DetailView):
+    model = Camera
+    template_name = 'bhtom_observatory/observatory_detail.html'
+
+    # def get(self, request, *args, **kwargs):
+    #     observatory_id = kwargs.get('pk', None)
+    #     return redirect(reverse('observatory_detail', args=(observatory_id,)))
+
 class ObservatoryDetailView(LoginRequiredMixin, DetailView):
     model = Observatory
     template_name = 'bhtom_observatory/observatory_detail.html'
@@ -184,6 +204,7 @@ class CreateUserObservatory(LoginRequiredMixin, FormView):
 
         user = self.request.user
         observatoryId = form.cleaned_data['observatory']
+        camera = form.cleaned_data['camera']
         comment = form.cleaned_data['comment']
 
         if not observatoryId.active_flg:
@@ -194,13 +215,14 @@ class CreateUserObservatory(LoginRequiredMixin, FormView):
         try:
             observatoryUser = ObservatoryMatrix.objects.create(
                 user=user,
-                observatory=observatoryId,
+                observatory= observatoryId,
+                camera=camera,
                 active_flg=True,
                 comment=comment
             )
             observatoryUser.save()
 
-            logger.info('Create user observatory, %s, %s' % (observatoryId.name, str(user)))
+            logger.info('Create user observatory: %s camera: %s, %s' % (observatoryId.name  ,camera.camera_name, str(user)))
 
         except Exception as e:
             logger.error('Create user observatory error: ' + str(e))

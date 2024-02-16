@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import inlineformset_factory
+from django.forms import inlineformset_factory, BaseInlineFormSet
 
 from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix, Camera
 from bhtom2.utils.bhtom_logger import BHTOMLogger
@@ -24,6 +24,10 @@ class ObservatoryChoiceField(forms.ModelChoiceField):
             return '{name} ({prefix})'.format(name=obj.name, prefix=obj.prefix)
 
 
+class CameraChoiceField(forms.ModelChoiceField):
+
+    def label_from_instance(self, obj):
+            return obj.camera_name
 
 
 class CameraCreationForm(forms.ModelForm):
@@ -32,6 +36,23 @@ class CameraCreationForm(forms.ModelForm):
         fields = ('camera_name','binning', 'gain', 'readout_noise',
                   'saturation_level', 'pixel_scale', 'pixel_size', 'readout_speed')
 
+
+class NoDeleteInlineFormSet(BaseInlineFormSet):
+    def __init__(self, *args, **kwargs):
+        super(NoDeleteInlineFormSet, self).__init__(*args, **kwargs)
+        for form in self.forms:
+            form.fields['DELETE'].widget = forms.HiddenInput()
+
+    def should_delete(self, form):
+        return False
+
+CamerasFormSet = inlineformset_factory(
+        Observatory,
+        Camera,
+        form=CameraCreationForm,
+        extra=1,
+        formset=NoDeleteInlineFormSet, 
+    )
 
 class ObservatoryCreationForm(forms.ModelForm):
     calibration_flg = forms.BooleanField(
@@ -58,13 +79,6 @@ class ObservatoryCreationForm(forms.ModelForm):
         label='Filters*',
         widget=forms.TextInput(attrs={'placeholder': 'V,R,I'})
     )
-#     cameras = inlineformset_factory(
-#         Observatory,
-#         Camera,
-#         form=CameraCreationForm,
-#         extra=1, 
-# )
-
 
     def __init__(self, *args, **kwargs):
         super(ObservatoryCreationForm, self).__init__(*args, **kwargs)
@@ -76,19 +90,14 @@ class ObservatoryCreationForm(forms.ModelForm):
         self.fields['lon'].required = True
         self.fields['lat'].required = True
         self.fields['comment'].required = False
-
-        if calibration_flag != True:
-            self.fields['cameras'] =  inlineformset_factory(
-            Observatory,
-            Camera,
-            form=CameraCreationForm,
-            extra=1, 
-            )
-    
     class Meta:
         model = Observatory
         fields = ('name', 'lon', 'lat', 'calibration_flg', 'example_file',
                   'approx_lim_mag', 'filters', 'altitude', 'comment')
+
+
+
+
 
 class ObservatoryUpdateForm(forms.ModelForm):
     calibration_flg = forms.BooleanField(
@@ -174,7 +183,7 @@ class ObservatoryUserUpdateForm(forms.ModelForm):
 
 class ObservatoryUserCreationForm(forms.Form):
     observatory = forms.ChoiceField()
-
+    camera = forms.ChoiceField()
     comment = forms.CharField(
         widget=forms.Textarea,
         label="Comment",
@@ -182,17 +191,17 @@ class ObservatoryUserCreationForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user')
+        self.user = kwargs.pop('user')
         super(ObservatoryUserCreationForm, self).__init__(*args, **kwargs)
-
-        observatory = ObservatoryMatrix.objects.filter(user=user)
-        insTab = []
-        for ins in observatory:
-            insTab.append(ins.observatory.id)
-
         self.fields['observatory'] = ObservatoryChoiceField(
-
-            queryset=Observatory.objects.exclude(id__in=insTab).filter(active_flg=True).order_by('name'),
+            queryset=Observatory.objects.filter(active_flg=True).order_by('name'),
             widget=forms.Select(),
             required=True
         )
+        camera = ObservatoryMatrix.objects.filter(user=self.user)
+        #insTab = [ins.cameras.id for ins in cameras]  
+        self.fields['camera'] = CameraChoiceField(
+                queryset= Camera.objects.all(),
+                widget=forms.Select(),
+                required=True
+            )
