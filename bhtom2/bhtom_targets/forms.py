@@ -171,7 +171,8 @@ class SiderealTargetCreateForm(TargetForm):
         for field in REQUIRED_SIDEREAL_FIELDS:
             self.fields[field].required = True
         self.fields['epoch'].initial = 2000.0
-
+        self.fields['type'].initial = Target.SIDEREAL
+        self.fields['type'].disabled = True
         self.fields['classification']=CustomClassificationChoiceField(
             choices=CLASSIFICATION_TYPES,
             widget=forms.Select(),
@@ -235,8 +236,9 @@ class SiderealTargetCreateForm(TargetForm):
         # fields = ('name', 'type', 'ra', 'dec', 'epoch', 'parallax',
         #           'pm_ra', 'pm_dec', 'galactic_lng', 'galactic_lat',
         #           'distance', 'distance_err')
-        fields = ('name', 'ra', 'dec', 'epoch', 'classification', 'description', 'discovery_date', 'importance', 'cadence')
-    # class Meta(TargetForm.Meta):
+        fields = ('name', 'type', 'ra', 'dec', 'epoch', 'classification', 'description', 'discovery_date', 'importance', 'cadence')
+
+        # class Meta(TargetForm.Meta):
     #     fields = SIDEREAL_FIELDS
 
 
