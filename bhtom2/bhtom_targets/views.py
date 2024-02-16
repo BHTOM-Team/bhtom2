@@ -251,11 +251,13 @@ class TargetListView(SingleTableMixin, PermissionListMixin, FilterView):
     #default filter sets importance_min=1
     def get_filterset_kwargs(self, filterset_class):
         kwargs = super().get_filterset_kwargs(filterset_class)
-        kwargs['data'] = {'type': 'SIDEREAL'}
 
         if kwargs['data'] is None:
             kwargs['data'] = {'importance_min': '1'}
+            kwargs['data'].update({'type': 'SIDEREAL'})
             messages.success(self.request, 'Warning: Default filter applied. Showing targets with Importance>0 only')
+        else:
+            kwargs['data'].update({'type': 'SIDEREAL'})
 
         return kwargs
 

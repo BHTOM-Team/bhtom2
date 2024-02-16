@@ -4,18 +4,9 @@
 {% block content %}
     {% if not object %}
         <h3>Create a Target</h3>
-        <ul class="nav nav-tabs">
-
-            <li class="nav-item">
-                <a class="nav-link {% if form.type.initial == k %} active {% endif %}"
-                   href="{% url 'bhtom_targets:create' %}?type={{ k }}">{{ v }}</a>
-            </li>
-
     {% else %}
         <h3> Update {{ object.name }}</h3>
-
     {% endif %}
-</ul>
 
     <form method="post" class="form">
 
