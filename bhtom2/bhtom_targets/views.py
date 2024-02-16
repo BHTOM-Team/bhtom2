@@ -256,8 +256,6 @@ class TargetListView(SingleTableMixin, PermissionListMixin, FilterView):
             kwargs['data'] = {'importance_min': '1'}
             kwargs['data'].update({'type': 'SIDEREAL'})
             messages.success(self.request, 'Warning: Default filter applied. Showing targets with Importance>0 only')
-        else:
-            kwargs['data'].update({'type': 'SIDEREAL'})
 
         return kwargs
 
