@@ -29,28 +29,31 @@
     <h3>Cameras</h3>
     {{ cameras.management_form }}
     {% for form in cameras %}
-            <div class="col-md-4">
+            <div class="col-md-4 required-field" >
                 {% bootstrap_field form.camera_name %}
             </div>
-            <div class="col-md-4">
-                {% bootstrap_field form.binning %}
+            <div class="col-md-4 required-field">
+              {% bootstrap_field form.example_file %}
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 required-field">
+                {% bootstrap_field form.binning %}
+            </div> 
+            <div class="col-md-4 required-field">
                 {% bootstrap_field form.gain %}
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 required-field"> 
               {% bootstrap_field form.readout_noise %}
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 required-field">
               {% bootstrap_field form.saturation_level %}
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 required-field">
               {% bootstrap_field form.pixel_scale %}
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 required-field">
               {% bootstrap_field form.pixel_size %}
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 required-field">
               {% bootstrap_field form.readout_speed %}
             </div>
     {% endfor %}
@@ -64,5 +67,39 @@
     {% endif %}
   </button>
   {% endbuttons %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelector('form').addEventListener('submit', function(event) {
+          var requiredFields = document.querySelectorAll('.required-field');
+          var isValid = true;
+  
+          requiredFields.forEach(function(field) {
+              if (!isParentVisible(field) || !field.value.trim()) {
+                  field.style.border = '1px solid red';
+                  isValid = false;
+              } else {
+                  field.style.border = ''; // Reset border if field is filled and its parent is visible
+              }
+          });
+  
+          if (!isValid) {
+              event.preventDefault(); // Prevent form submission if any required visible field is empty
+          }
+      });
+  });
+  
+  // Function to check if the parent container of an element is visible
+  function isParentVisible(element) {
+      var parent = element.parentElement;
+      while (parent) {
+          if (parent.offsetWidth <= 0 || parent.offsetHeight <= 0) {
+              return false; // Parent container is not visible
+          }
+          parent = parent.parentElement;
+      }
+      return true; // All parent containers are visible
+  }
+  
+  </script>
 </form>
 {% endblock %}

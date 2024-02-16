@@ -34,9 +34,18 @@ class CreateObservatory(LoginRequiredMixin, FormView):
         context = super(CreateObservatory, self).get_context_data(**kwargs)
         context['cameras'] = CamerasFormSet()
         return context
+    
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        cameras = CamerasFormSet(request.POST, request.FILES)
+        
+        if form.is_valid() and cameras.is_valid():
+            return self.form_valid(form, cameras)
+        else:
+            return self.form_invalid(form, cameras)
 
     def form_valid(self, form):
-        cameras = CamerasFormSet(self.request.POST)
+        cameras = CamerasFormSet(self.request.POST,self.request.FILES)
 
         try:
             active_flag = False
@@ -46,7 +55,6 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 lon = form.cleaned_data['lon']
                 lat = form.cleaned_data['lat']
                 calibration_flg = form.cleaned_data['calibration_flg']
-                example_file = self.request.FILES.get('example_file')
                 altitude = form.cleaned_data['altitude']
                 approx_lim_mag = form.cleaned_data['approx_lim_mag']
                 filters = form.cleaned_data['filters']
@@ -57,7 +65,6 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 lon = form.cleaned_data['lon']
                 lat = form.cleaned_data['lat']
                 calibration_flg = form.cleaned_data['calibration_flg']
-                example_file = None
                 altitude = None
                 approx_lim_mag = None
                 filters = None
@@ -82,7 +89,6 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 active_flg=active_flag,
                 prefix=prefix,
                 calibration_flg=calibration_flg,
-                example_file=example_file,
                 user=user,
                 altitude=altitude,
                 approx_lim_mag=approx_lim_mag,
@@ -116,7 +122,9 @@ class CreateObservatory(LoginRequiredMixin, FormView):
 
         messages.success(self.request, '%s successfully created, observatory requires administrator approval' % str(name))
         return redirect(self.get_success_url())
-
+    
+    def form_invalid(self, form, cameras):
+        return self.render_to_response(self.get_context_data(form=form, cameras=cameras))
 
 class ObservatoryList(LoginRequiredMixin, ListView):
     template_name = 'bhtom_observatory/observatory_list.html'
@@ -169,13 +177,6 @@ class DeleteObservatory(LoginRequiredMixin, DeleteView):
         return redirect(self.get_success_url())
 
 
-class CameraDetailView(LoginRequiredMixin, DetailView):
-    model = Camera
-    template_name = 'bhtom_observatory/observatory_detail.html'
-
-    # def get(self, request, *args, **kwargs):
-    #     observatory_id = kwargs.get('pk', None)
-    #     return redirect(reverse('observatory_detail', args=(observatory_id,)))
 
 class ObservatoryDetailView(LoginRequiredMixin, DetailView):
     model = Observatory

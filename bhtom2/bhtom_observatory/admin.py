@@ -11,7 +11,7 @@ class CameraInline(admin.TabularInline):
 class ObservatoryAdmin(admin.ModelAdmin):
     model = Observatory
     inlines = [CameraInline]
-    list_display = ['name', 'lon', 'lat', 'example_file', 'active_flg']
+    list_display = ['name', 'lon', 'lat','active_flg']
 
     def activate_observatory(self, request, queryset):
         queryset.update(active_flg=True)
