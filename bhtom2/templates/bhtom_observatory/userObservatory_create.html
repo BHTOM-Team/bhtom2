@@ -4,32 +4,67 @@
 {% block content %}
 {{ users }}
 
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      var observatorySelect = document.getElementById('id_observatory');
+      var cameraSelect = document.getElementById('id_camera');
+      var userId = '{{ request.user.id }}'; // Get logged-in user's ID from Django template
+      
+      // Initially hide the camera select field
+      cameraSelect.style.display = 'none';
+      
+      observatorySelect.addEventListener('change', function() {
+          var observatoryId = this.value;
+          if (observatoryId) {
+              fetchCameras(observatoryId, userId);
+              cameraSelect.style.display = 'block'; // Show the camera select field when an observatory is selected
+          } else {
+              cameraSelect.style.display = 'none'; // Hide the camera select field when no observatory is selected
+          }
+      });
+  
+      function fetchCameras(observatoryId, userId) {
+          fetch(window.location.origin + '/observatory/get-cameras/' + observatoryId + '/' + userId)
+              .then(response => response.json())
+              .then(data => {
+                  cameraSelect.innerHTML = ''; // Clear previous options
+                  data.forEach(camera => {
+                      var option = document.createElement('option');
+                      option.value = camera.id;
+                      option.textContent = camera.camera_name;
+                      cameraSelect.appendChild(option);
+                  });
+              })
+              .catch(error => console.error('Error fetching cameras:', error));
+      }
+  });
+</script>
+
 {% if object %}
-<form action="{% url 'bhtom_observatory:userObservatory_update' object.id %}" enctype="multipart/form-data" method="POST">
+    <form action="{% url 'bhtom_observatory:userObservatory_update' object.id %}" enctype="multipart/form-data" method="POST">
 {% else %}
-  <h4> Add a new Observatory to your list.
-  </h4><p>
-      Here you can add a new observatory to your list in two ways.
-      <br>
-      You can choose an observatory from the list of already registered ones.
-      <br>
-      If your observatory is not yet registered you can create a new entry. 
+    <h4> Add a new Observatory to your list.</h4>
+    <p>
+        Here you can add a new observatory to your list in two ways.<br>
+        You can choose an observatory from the list of already registered ones.<br>
+        If your observatory is not yet registered you can create a new entry. 
     </p>
 
-<form action="{% url 'bhtom_observatory:userObservatory_create' %}" enctype="multipart/form-data" method="POST">
+    <form action="{% url 'bhtom_observatory:userObservatory_create' %}" enctype="multipart/form-data" method="POST">
 {% endif %}
+
 {% csrf_token %}
 {% bootstrap_form form %}
-{% buttons %}
-  {% if object %}
-    <button type="submit" class="btn btn-primary" title="Update">Update</button>
-  {% else %}
-    <button type="submit" class="btn btn-primary" title="Add this Observatory to my list"> Add to my list</button>
-    <p>
-      <hr>
-    <a href="{% url 'bhtom_observatory:create' %}" title="Create new Observatory (if not on the list)" class="btn btn-primary">Create new Observatory</a>
-  {% endif %}
 
+{% buttons %}
+    {% if object %}
+        <button type="submit" class="btn btn-primary" title="Update">Update</button>
+    {% else %}
+        <button type="submit" class="btn btn-primary" title="Add this Observatory to my list">Add to my list</button>
+        <hr>
+        <a href="{% url 'bhtom_observatory:create' %}" title="Create new Observatory (if not on the list)" class="btn btn-primary">Create new Observatory</a>
+    {% endif %}
 {% endbuttons %}
+
 </form>
 {% endblock %}

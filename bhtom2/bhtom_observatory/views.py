@@ -7,6 +7,8 @@ from django.forms.models import inlineformset_factory
 from django.conf import settings
 from django.core.mail import send_mail
 from guardian.mixins import LoginRequiredMixin
+from django.http import JsonResponse
+
 
 from bhtom2.bhtom_observatory.forms import ObservatoryCreationForm, ObservatoryUpdateForm, ObservatoryUserUpdateForm, \
     ObservatoryUserCreationForm, CamerasFormSet
@@ -263,3 +265,15 @@ class UpdateUserObservatory(LoginRequiredMixin, UpdateView):
         messages.success(self.request, 'Successfully updated')
         logger.info('Update user observatory, %s, %s' % (str(form.instance.observatory), str(self.request.user)))
         return redirect(self.get_success_url())
+
+
+
+def get_cameras(request, observatory_id, user_id):
+    try:
+        cameras = ObservatoryMatrix.objects.filter(user=user_id)
+        insTab = [ins.camera.id for ins in cameras]  
+        observatory_id = int(observatory_id)
+        cameras = Camera.objects.exclude(id__in=insTab).filter(observatory_id=observatory_id).values('id', 'camera_name')
+        return JsonResponse(list(cameras), safe=False)
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Invalid observatory ID'}, status=400)

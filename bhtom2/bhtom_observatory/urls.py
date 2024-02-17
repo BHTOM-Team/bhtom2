@@ -3,7 +3,7 @@ from django.urls import path
 from bhtom2.bhtom_observatory.rest.view import GetObservatoryApi, CreateObservatoryApi, UpdateObservatoryApi, \
     GetObservatoryMatrixApi, CreateObservatoryMatrixApi, DeleteObservatoryMatrixApi
 from bhtom2.bhtom_observatory.views import CreateObservatory, UpdateObservatory, DeleteObservatory, ObservatoryList, \
-    ObservatoryDetailView, DeleteUserObservatory, UpdateUserObservatory, CreateUserObservatory
+    ObservatoryDetailView, DeleteUserObservatory, UpdateUserObservatory, CreateUserObservatory, get_cameras
 
 app_name = 'bhtom2.bhtom_observatory'
 
@@ -15,6 +15,7 @@ urlpatterns = [
     path('addFavouriteObservatory/', CreateObservatoryMatrixApi.as_view()),
     path('deleteFavouriteObservatory/', DeleteObservatoryMatrixApi.as_view()),
 
+    path('get-cameras/<int:observatory_id>/<int:user_id>/', get_cameras, name='get_cameras'),
     path('create/', CreateObservatory.as_view(), name='create'),
     path('<int:pk>/update/', UpdateObservatory.as_view(), name='update'),
     path('<int:pk>/delete/', DeleteObservatory.as_view(), name='delete'),

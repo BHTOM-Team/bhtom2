@@ -160,8 +160,8 @@ class ObservatoryUserUpdateForm(forms.ModelForm):
 
 
 class ObservatoryUserCreationForm(forms.Form):
-    observatory = forms.ChoiceField()
-    camera = forms.ChoiceField()
+    observatory = forms.ChoiceField(widget=forms.Select(attrs={'id': 'observatory-select'}))
+    camera = forms.ChoiceField(widget=forms.Select(attrs={'id': 'camera-select'}))
     comment = forms.CharField(
         widget=forms.Textarea,
         label="Comment",
@@ -170,6 +170,7 @@ class ObservatoryUserCreationForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
+        observatory_id = kwargs.pop('observatory_id', None)
         super(ObservatoryUserCreationForm, self).__init__(*args, **kwargs)
         self.fields['observatory'] = ObservatoryChoiceField(
             queryset=Observatory.objects.filter(active_flg=True).order_by('name'),
@@ -183,3 +184,4 @@ class ObservatoryUserCreationForm(forms.Form):
                 widget=forms.Select(),
                 required=True
             )
+        self.fields['camera'].widget.attrs['data-observatory'] = observatory_id
