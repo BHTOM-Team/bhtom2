@@ -277,3 +277,14 @@ def get_cameras(request, observatory_id, user_id):
         return JsonResponse(list(cameras), safe=False)
     except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid observatory ID'}, status=400)
+    
+
+
+def get_favorite_cameras(request, observatory_id, user_id):
+    try:
+        obsMatrix = ObservatoryMatrix.objects.filter(user=user_id, observatory=observatory_id)
+        favorite_camera_ids = [obs.camera.id for obs in obsMatrix]
+        favorite_cameras = Camera.objects.filter(id__in=favorite_camera_ids).values('id', 'camera_name')
+        return JsonResponse(list(favorite_cameras), safe=False)
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Invalid observatory or user ID'}, status=400)

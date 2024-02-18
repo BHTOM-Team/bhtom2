@@ -14,11 +14,11 @@ logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_dataproducts.forms')
 class ObservatoryChoiceField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj):
-        if obj.observatory.calibration_flg:
-            return '{name} ({prefix}) (Only Instrumental photometry file)'.format(name=obj.observatory.name,
-                                                                                  prefix=obj.observatory.prefix)
+        if obj.calibration_flg:
+            return '{name} ({prefix}) (Only Instrumental photometry file)'.format(name=obj.name,
+                                                                                  prefix=obj.prefix)
         else:
-            return '{name} ({prefix})'.format(name=obj.observatory.name, prefix=obj.observatory.prefix)
+            return '{name} ({prefix})'.format(name=obj.name, prefix=obj.prefix)
 
 class CameraChoiceField(forms.ModelChoiceField):
 
@@ -67,7 +67,7 @@ class DataProductUploadForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        user = kwargs['initial']['user']
+        self.user = kwargs['initial']['user']
         filter = {}
         filter['no'] = 'Auto'
         catalogs = Catalogs.objects.filter(isActive=True)
@@ -85,20 +85,24 @@ class DataProductUploadForm(forms.Form):
         )
 
         self.fields['observer'] = forms.CharField(
-            initial=user.first_name + " " + user.last_name,
+            initial= self.user.first_name + " " +  self.user.last_name,
             required=False,
             label='Observer\'s Name *',
         )
 
         self.fields['observatory'] = ObservatoryChoiceField(
-            queryset=ObservatoryMatrix.objects.filter(user=user, active_flg=True).order_by('observatory__name'),
+            queryset=Observatory.objects.filter(
+                id__in=ObservatoryMatrix.objects.filter(
+                    user= self.user, 
+                    active_flg=True
+                ).values('observatory_id').distinct()
+            ).order_by('name'),
             widget=forms.Select(),
             required=False,
-            
         )
 
         self.fields['camera'] = CameraChoiceField(
-            queryset=ObservatoryMatrix.objects.filter(user=user, active_flg=True).order_by('camera__camera_name'),
+            queryset=ObservatoryMatrix.objects.filter(user= self.user, active_flg=True).order_by('camera__camera_name'),
             widget=forms.Select(),
             required=False,
             

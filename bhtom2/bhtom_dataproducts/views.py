@@ -37,8 +37,15 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
     View that handles manual upload of DataProducts. Requires authentication.
     """
     form_class = DataProductUploadForm
+    template_name = 'bhtom_dataproducts/partials/upload_dataproduct.html'
     MAX_FILES: int = 5
 
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user'] = self.request.user
+        return context
+    
     def get_form_kwargs(self):
         kwargs = super(DataProductUploadView, self).get_form_kwargs()
         kwargs['initial'] = {'user': self.request.user}
@@ -56,8 +63,8 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         else:
             observation_record = None
         dp_type = form.cleaned_data['data_product_type']
-        observatoryMatrix = form.cleaned_data['observatory']
-        cameraMatrix = form.cleaned_data['camera']
+        observatory = form.cleaned_data['observatory']
+        camera = form.cleaned_data['camera']
         observation_filter = form.cleaned_data['filter']
         mjd = form.cleaned_data['mjd']
         match_dist = 0.5
@@ -85,8 +92,8 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
 
         if dp_type == 'fits_file':
             try:
-                observatory = Observatory.objects.get(id=observatoryMatrix.observatory_id)
-                camera = Camera.objects.get(id=cameraMatrix.camera_id)
+                observatory = Observatory.objects.get(id=observatory.id)
+                camera = Camera.objects.get(id=camera.camera.id)
             except Exception as e:
                 messages.error(self.request, f"Observatory or Camera doesn't exist")
                 return redirect(form.cleaned_data.get('referrer', '/'))
@@ -105,8 +112,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             'comment': comment,
             'dry_run': dry_run,
             'no_plot': False,
-            'observatory': observatoryMatrix,
-            'camera': cameraMatrix,
+            'observatory': observatory.name + '_' + camera.camera_name,
             'mjd': mjd,
             'group': group,
             'observer': observer,
