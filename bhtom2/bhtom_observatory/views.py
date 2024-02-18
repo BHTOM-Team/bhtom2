@@ -8,6 +8,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from guardian.mixins import LoginRequiredMixin
 from django.http import JsonResponse
+from collections import defaultdict
 
 
 from bhtom2.bhtom_observatory.forms import ObservatoryCreationForm, ObservatoryUpdateForm, ObservatoryUserUpdateForm, \
@@ -137,16 +138,19 @@ class ObservatoryList(LoginRequiredMixin, ListView):
         context = super().get_context_data(*args, **kwargs)
         userObservatory = ObservatoryMatrix.objects.filter(user=self.request.user).order_by('observatory__name')
 
-        observatory_user_list = []
+        observatory_user_dict = defaultdict(list)
         for row in userObservatory:
-            observatory_user_list.append(
+            observatory_user_dict[row.observatory.name].append(
                 [row.id, row.active_flg, row.comment, Observatory.objects.get(id=row.observatory.id)])
+
+        observatory_user_list = []
+        for name, observatories in observatory_user_dict.items():
+            observatory_user_list.append(observatories[0])  # Add only the first observatory with the same name
 
         context['observatory_list'] = Observatory.objects.filter(active_flg=True).order_by('name')
         context['observatory_user_list'] = observatory_user_list
 
         return context
-
 
 class UpdateObservatory(LoginRequiredMixin, UpdateView):
     template_name = 'bhtom_observatory/observatory_create.html'
@@ -184,10 +188,30 @@ class ObservatoryDetailView(LoginRequiredMixin, DetailView):
     model = Observatory
     template_name = 'bhtom_observatory/observatory_detail.html'
 
-    # def get(self, request, *args, **kwargs):
-    #     observatory_id = kwargs.get('pk', None)
-    #     return redirect(reverse('observatory_detail', args=(observatory_id,)))
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        observatory = self.get_object()
+        cameras = Camera.objects.filter(observatory=observatory)
+        context['cameras'] = cameras
+        return context
+    
 
+ 
+class ObservatoryFavoriteDetailView(LoginRequiredMixin, DetailView):
+    model = Observatory
+    template_name = 'bhtom_observatory/observatory_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        observatory = self.get_object()
+        user = self.request.user
+        obsMatrix = ObservatoryMatrix.objects.filter(observatory=observatory, user=user)
+        
+        camera_ids = [obs.camera.id for obs in obsMatrix]
+        cameras = Camera.objects.filter(observatory=observatory, id__in=camera_ids)
+        
+        context['cameras'] = cameras
+        return context
 
 class CreateUserObservatory(LoginRequiredMixin, FormView):
     """

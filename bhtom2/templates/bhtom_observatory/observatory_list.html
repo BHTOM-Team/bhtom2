@@ -87,7 +87,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
               <td>{{ observatory.prefix}}</td>
               <td>{{ observatory.comment|truncatechars:30  }}</td>
               <td>
-                <a href="{% url 'bhtom_observatory:detail' pk=observatory.id %}" title="Observatory details" class="btn  btn-primary">Details</a>
+                <a href="{% url 'bhtom_observatory:detail-favorite' pk=observatory.id %}" title="Observatory details with favorite cameras" class="btn  btn-primary">Details</a>
               </td>
               <td>
                 <a href="{% url 'bhtom_observatory:userObservatory_update' pk=id %}" title="Update User observatory" class="btn  btn-primary">Edit</a>

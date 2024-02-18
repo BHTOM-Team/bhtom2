@@ -1,14 +1,19 @@
 {% extends 'bhtom_common/base.html' %}
 {% load comments bootstrap4 bhtom_common_extras targets_extras observation_extras dataproduct_extras static cache %}
+
 {% block title %}Observatory{% endblock %}
+
 {% block additional_css %}
 <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
 <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}">
 {% endblock %}
+
 {% bootstrap_javascript jquery='True' %}
+
 {% block content %}
-<h1>Observatory: {{ observatory.obsName }}</h1>
-{%if observatory.calibration_flg %}
+<h1>Observatory: {{ observatory.name }}</h1>
+
+{% if observatory.calibration_flg %}
 <div class="col-md-6">
     <h2> (Only Instrumental photometry file)</h2>
 </div>
@@ -58,66 +63,10 @@
                 </tr>
                 <tr>
                     <td>
-                        Binning
-                    </td>
-                    <td>
-                        {{ observatory.binning }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
                         Filters
                     </td>
                     <td>
                         {{ observatory.filters }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Gain
-                    </td>
-                    <td>
-                        {{ observatory.gain }} e/ADU
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Pixel scale
-                    </td>
-                    <td>
-                        {{ observatory.pixel_scale }} arcseconds/pixel
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Pixel size
-                    </td>
-                    <td>
-                        {{ observatory.pixel_size }} micrometers
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Readout speed
-                    </td>
-                    <td>
-                        {{ observatory.readout_speed }} microseconds/pixel
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Saturation level
-                    </td>
-                    <td>
-                        {{ observatory.saturation_level }} ADU
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Readout noise
-                    </td>
-                    <td>
-                        {{ observatory.readout_noise }} e
                     </td>
                 </tr>
                 <tr style="width: 50px;">
@@ -134,5 +83,61 @@
     </div>
 </div>
 {% endif %}
-{% endblock %}
 
+<div class="row">
+    <div class="col-md-12">
+        <h2>Cameras</h2>
+        {% for camera in cameras %}
+        <div class="camera-details">
+            <h3 style="color: white">{{ camera.camera_name }}</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <strong style="color: white">Camera Name:</strong>
+                    {{ camera.camera_name }}
+                </div>
+                <div class="col-md-4">
+                    <strong style="color: white">Example File:</strong>
+                    {{ camera.example_file }}
+                </div>
+                <div class="col-md-4">
+                    <strong style="color: white">Binning:</strong>
+                    {{ camera.binning }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <strong style="color: white">Gain:</strong>
+                    {{ camera.gain }}
+                </div>
+                <div class="col-md-4">
+                    <strong style="color: white">Readout Noise:</strong>
+                    {{ camera.readout_noise }}
+                </div>
+                <div class="col-md-4">
+                    <strong style="color: white">Saturation Level:</strong>
+                    {{ camera.saturation_level }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <strong style="color: white">Pixel Scale:</strong>
+                    {{ camera.pixel_scale }}
+                </div>
+                <div class="col-md-4">
+                    <strong style="color: white">Pixel Size:</strong>
+                    {{ camera.pixel_size }}
+                </div>
+                <div class="col-md-4">
+                    <strong style="color: white">Readout Speed:</strong>
+                    {{ camera.readout_speed }}
+                </div>
+            </div>
+        </div>
+        {% if not forloop.last %}
+        <hr>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
