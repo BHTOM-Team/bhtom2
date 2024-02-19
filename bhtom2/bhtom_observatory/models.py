@@ -68,7 +68,7 @@ class Camera(models.Model):
     time_keyword = models.CharField(max_length=255, verbose_name='Time keyword', default="TIME-OBS")
     exposure_time_keyword = models.CharField(max_length=255, verbose_name='Exposure time keyword', default="EXPTIME")
     mode_recognition_keyword = models.CharField(max_length=255, verbose_name='Mode recognition keyword name',  null=True, blank=True,  default='')
-    additional_info = models.CharField(max_length=255, verbose_name='Additional info', null=True,blank=True, default='')
+    additional_info = models.TextField(verbose_name='Additional info', null=True,blank=True, default='')
     created = models.DateTimeField(null=True, blank=False, editable=False, auto_now_add=True, db_index=True)
     modified = models.DateTimeField(null=True, blank=True, editable=True, auto_now=True)
 
