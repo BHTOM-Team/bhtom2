@@ -25,6 +25,7 @@ class Observatory(models.Model):
                                 MinValueValidator(-180.0, message="latitude must be greater than -90."),
                                 MaxValueValidator(180.0, message="latitude must be less than 90.")
                             ], db_index=True)
+    altitude = models.FloatField(null=True, blank=False, default=0.0, verbose_name="Altitude [m]")
     calibration_flg = models.BooleanField(default='False', verbose_name='Only instrumental photometry file',
                                           db_index=True)
     prefix = models.CharField(max_length=100, null=True, blank=True)
@@ -32,13 +33,12 @@ class Observatory(models.Model):
                                verbose_name="Comments (e.g. hyperlink to the observatory website, "
                                             "camera specifications, telescope info)")
     active_flg = models.BooleanField(default='False', db_index=True)
-    altitude = models.FloatField(null=True, blank=False, default=0.0, verbose_name="Altitude [m]")
     approx_lim_mag = models.FloatField(null=True, verbose_name="Approximate limit magnitude [mag]", default=18.0)
     filters = models.CharField(null=True, max_length=100, blank=True,
                                verbose_name="Filters (comma-separated list, as they are visible in " "FITS)",
                                default="V,R,I")
-    origin = models.CharField(max_length=255, blank=True, verbose_name='Origin')
-    telescope = models.CharField(max_length=255, blank=True, verbose_name='Telescope name')
+    origin = models.CharField(max_length=255, blank=True, null=True, verbose_name='Origin')
+    telescope = models.CharField(max_length=255, blank=True, null=True, verbose_name='Telescope name')
     aperture = models.FloatField(null=True, blank=True, default=0.0, verbose_name="Aperture [m]")
     focal_length = models.FloatField(null=True, blank=False, default=0.0, verbose_name="Focal length [mm]")
     seeing = models.FloatField(null=True, blank=True, default=0.0)
@@ -67,8 +67,8 @@ class Camera(models.Model):
     date_time_keyword = models.CharField(max_length=255, verbose_name='Date & Time keyword', default="DATE-OBS")
     time_keyword = models.CharField(max_length=255, verbose_name='Time keyword', default="TIME-OBS")
     exposure_time_keyword = models.CharField(max_length=255, verbose_name='Exposure time keyword', default="EXPTIME")
-    mode_recognition_keyword = models.CharField(max_length=255, verbose_name='Mode recognition keyword name',  null=True, default='')
-    additional_info = models.CharField(max_length=255, verbose_name='Additional info', null=True, default='')
+    mode_recognition_keyword = models.CharField(max_length=255, verbose_name='Mode recognition keyword name',  null=True, blank=True,  default='')
+    additional_info = models.CharField(max_length=255, verbose_name='Additional info', null=True,blank=True, default='')
     created = models.DateTimeField(null=True, blank=False, editable=False, auto_now_add=True, db_index=True)
     modified = models.DateTimeField(null=True, blank=True, editable=True, auto_now=True)
 
