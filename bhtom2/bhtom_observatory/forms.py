@@ -149,8 +149,8 @@ class ObservatoryUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Observatory
-        fields = ('name', 'lon', 'lat', 'calibration_flg',
-                  'approx_lim_mag', 'filters', 'altitude', 'comment')
+        fields = ('name', 'lon', 'lat','altitude','calibration_flg',
+                  'approx_lim_mag', 'filters', 'comment')
 
 
 class ObservatoryUserUpdateForm(forms.ModelForm):

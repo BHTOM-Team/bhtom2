@@ -28,20 +28,22 @@
   <div id="alias-form-container">
     <h3>Cameras</h3>
     {{ cameras.management_form }}
-    {% for form in cameras %}
-            <div class="col-md-4 required-field" >
-                {% bootstrap_field form.camera_name %}
+    <div id="camera-fields">
+      {% for form in cameras.forms %}
+          <div class="camera-form">
+            <div class="col-md-4 required-field">
+              {% bootstrap_field form.camera_name %}
             </div>
             <div class="col-md-4 required-field">
               {% bootstrap_field form.example_file %}
             </div>
             <div class="col-md-4 required-field">
-                {% bootstrap_field form.binning %}
-            </div> 
-            <div class="col-md-4 required-field">
-                {% bootstrap_field form.gain %}
+              {% bootstrap_field form.binning %}
             </div>
-            <div class="col-md-4 required-field"> 
+            <div class="col-md-4 required-field">
+              {% bootstrap_field form.gain %}
+            </div>
+            <div class="col-md-4 required-field">
               {% bootstrap_field form.readout_noise %}
             </div>
             <div class="col-md-4 required-field">
@@ -56,50 +58,40 @@
             <div class="col-md-4 required-field">
               {% bootstrap_field form.readout_speed %}
             </div>
-    {% endfor %}
-  
+            {% if object %}
+              <button type="button" class="btn btn-danger delete-camera">Delete</button>
+            {% endif %}
+          </div>
+      {% endfor %}
+    </div>
+    {% if object %}
+      <button type="button" class="btn btn-primary" id="add-camera">Add Camera</button>
+    {% endif %}
+  </div>
+
   {% buttons %}
   <button type="submit" class="btn btn-primary">
     {% if object %}
-    Update
+      Update
     {% else %}
-    Create Observatory
+      Create Observatory
     {% endif %}
   </button>
   {% endbuttons %}
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelector('form').addEventListener('submit', function(event) {
-          var requiredFields = document.querySelectorAll('.required-field');
-          var isValid = true;
-  
-          requiredFields.forEach(function(field) {
-              if (!isParentVisible(field) || !field.value.trim()) {
-                  field.style.border = '1px solid red';
-                  isValid = false;
-              } else {
-                  field.style.border = ''; // Reset border if field is filled and its parent is visible
-              }
-          });
-  
-          if (!isValid) {
-              event.preventDefault(); // Prevent form submission if any required visible field is empty
-          }
-      });
-  });
-  
-  // Function to check if the parent container of an element is visible
-  function isParentVisible(element) {
-      var parent = element.parentElement;
-      while (parent) {
-          if (parent.offsetWidth <= 0 || parent.offsetHeight <= 0) {
-              return false; // Parent container is not visible
-          }
-          parent = parent.parentElement;
-      }
-      return true; // All parent containers are visible
-  }
-  
-  </script>
+
 </form>
+<script>
+$(document).ready(function() {
+  $("#add-camera").click(function() {
+    var cameraForm = $(".camera-form:first").clone(true);
+    cameraForm.find("input[type='text'], input[type='file']").val("");
+    cameraForm.insertAfter(".camera-form:last");
+    cameraForm.append("<hr>"); 
+  });
+
+  $(document).on("click", ".delete-camera", function() {
+    $(this).closest(".camera-form").remove();
+  });
+});
+</script>
 {% endblock %}

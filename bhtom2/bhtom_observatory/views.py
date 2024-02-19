@@ -47,7 +47,7 @@ class CreateObservatory(LoginRequiredMixin, FormView):
         else:
             return self.form_invalid(form, cameras)
 
-    def form_valid(self, form):
+    def form_valid(self, form, cameras):
         cameras = CamerasFormSet(self.request.POST,self.request.FILES)
 
         try:
@@ -152,18 +152,38 @@ class ObservatoryList(LoginRequiredMixin, ListView):
 
         return context
 
+
 class UpdateObservatory(LoginRequiredMixin, UpdateView):
     template_name = 'bhtom_observatory/observatory_create.html'
     form_class = ObservatoryUpdateForm
     success_url = reverse_lazy('bhtom_observatory:list')
     model = Observatory
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['cameras'] = CamerasFormSet(self.request.POST, self.request.FILES, instance=self.object)
+        else:
+            context['cameras'] = CamerasFormSet(instance=self.object)
+        return context
+    
     @transaction.atomic
     def form_valid(self, form):
-        super().form_valid(form)
-        messages.success(self.request, 'Successfully updated %s' % form.cleaned_data['name'])
-        logger.info("Update observatory %s, user: %s" % (str(form.instance), str(self.request.user)))
-        return redirect(self.get_success_url())
+        context = self.get_context_data()
+        cameras = context['cameras']
+        if cameras.is_valid():
+            self.object = form.save()  # Save the observatory instance
+            cameras.instance = self.object  # Associate cameras with the observatory
+            cameras.save()  # Save cameras
+            messages.success(self.request, 'Successfully updated %s' % form.cleaned_data['name'])
+            logger.info("Update observatory %s, user: %s" % (str(form.instance), str(self.request.user)))
+            return super().form_valid(form)
+        else:
+            logger.error(cameras.errors)
+            cameras_errors = "\n".join([", ".join(errors) for errors in cameras.errors])
+            messages.error(self.request, f'Failed to update {form.cleaned_data["name"]}. Cameras errors: {cameras_errors}')
+            return self.render_to_response(self.get_context_data(form=form))
+        
 
 
 class DeleteObservatory(LoginRequiredMixin, DeleteView):
