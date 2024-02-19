@@ -31,6 +31,10 @@
     <div id="camera-fields">
       {% for form in cameras.forms %}
           <div class="camera-form">
+            {% if form.instance.pk %}
+              {{ form.id }}
+            {% endif %}
+            
             <div class="col-md-4 required-field">
               {% bootstrap_field form.camera_name %}
             </div>
@@ -58,9 +62,9 @@
             <div class="col-md-4 required-field">
               {% bootstrap_field form.readout_speed %}
             </div>
-            {% if object %}
+            {% comment %} {% if object %}
               <button type="button" class="btn btn-danger delete-camera">Delete</button>
-            {% endif %}
+            {% endif %} {% endcomment %}
           </div>
       {% endfor %}
     </div>
@@ -80,18 +84,44 @@
   {% endbuttons %}
 
 </form>
-<script>
-$(document).ready(function() {
+<script>$(document).ready(function() {
   $("#add-camera").click(function() {
-    var cameraForm = $(".camera-form:first").clone(true);
-    cameraForm.find("input[type='text'], input[type='file']").val("");
-    cameraForm.insertAfter(".camera-form:last");
-    cameraForm.append("<hr>"); 
+      var cameraForm = $(".camera-form:first").clone(true);
+      var totalForms = $('#id_camera_set-TOTAL_FORMS');
+      var formIdx = parseInt(totalForms.val());
+      
+      // Clear all input fields
+      cameraForm.find("input[type='text'], input[type='file']").val(null);
+      
+      cameraForm.find("input[type='text']").each(function() {
+          var field = $(this);
+          var fieldName = field.attr('name');
+          var fieldId = field.attr('id');
+          var newFieldName = fieldName.replace(/-\d+-/g, '-' + formIdx + '-');
+          var newFieldId = fieldId.replace(/-\d+-/g, '-' + formIdx + '-');
+          field.attr('name', newFieldName);
+          field.attr('id', newFieldId);
+      });
+      
+      cameraForm.find("input[type='file']").each(function() {
+          var field = $(this);
+          var fieldName = field.attr('name');
+          var fieldId = field.attr('id');
+          var newFieldName = fieldName.replace(/-\d+/g, '-' + formIdx);
+          var newFieldId = fieldId.replace(/-\d+/g, '-' + formIdx);
+          field.attr('name', newFieldName);
+          field.attr('id', newFieldId);
+      });
+      
+      cameraForm.insertAfter(".camera-form:last");
+      cameraForm.append("<hr>"); 
+      totalForms.val(formIdx + 1);
   });
-
-  $(document).on("click", ".delete-camera", function() {
-    $(this).closest(".camera-form").remove();
-  });
+  
+  {% comment %} $(document).on("click", ".delete-camera", function() {
+      $(this).closest(".camera-form").remove();
+  }); {% endcomment %}
 });
+
 </script>
 {% endblock %}

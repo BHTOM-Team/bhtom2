@@ -31,6 +31,7 @@ class CameraChoiceField(forms.ModelChoiceField):
 
 
 class CameraCreationForm(forms.ModelForm):
+    id = forms.CharField(widget=forms.HiddenInput)
     example_file = forms.FileField(
         label='Sample fits*',
         help_text='Provide one sample fits per filter, clearly labelled.',
@@ -45,7 +46,7 @@ class CameraCreationForm(forms.ModelForm):
 
     class Meta:
         model = Camera
-        fields = ('camera_name', 'example_file', 'binning', 'gain', 'readout_noise',
+        fields = ('id','camera_name', 'example_file', 'binning', 'gain', 'readout_noise',
                   'saturation_level', 'pixel_scale', 'pixel_size', 'readout_speed')
 
     def __init__(self, *args, **kwargs):
@@ -69,6 +70,13 @@ CamerasFormSet = inlineformset_factory(
         extra=1,
         formset=NoDeleteInlineFormSet, 
     )
+CamerasUpdateFormSet = inlineformset_factory(
+        Observatory,
+        Camera,
+        form=CameraCreationForm,
+        extra=0,
+    )
+
 
 class ObservatoryCreationForm(forms.ModelForm):
     calibration_flg = forms.BooleanField(

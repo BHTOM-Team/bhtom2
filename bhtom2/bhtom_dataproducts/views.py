@@ -89,13 +89,16 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             logger.error('upload max: %s %s' % (str(self.MAX_FILES), str(target)))
             messages.error(self.request, f'You can upload max. {self.MAX_FILES} files at once')
             return redirect(form.cleaned_data.get('referrer', '/'))
-
+        try:
+            camera = Camera.objects.get(id=camera.camera.id)
+        except Exception as e:
+                messages.error(self.request, f"Camera doesn't exist")
+                return redirect(form.cleaned_data.get('referrer', '/'))
         if dp_type == 'fits_file':
             try:
                 observatory = Observatory.objects.get(id=observatory.id)
-                camera = Camera.objects.get(id=camera.camera.id)
             except Exception as e:
-                messages.error(self.request, f"Observatory or Camera doesn't exist")
+                messages.error(self.request, f"Observatory doesn't exist")
                 return redirect(form.cleaned_data.get('referrer', '/'))
             if observatory.calibration_flg is True:
                 messages.error(self.request, 'Observatory can calibration only')
@@ -112,7 +115,8 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             'comment': comment,
             'dry_run': dry_run,
             'no_plot': False,
-            'observatory': observatory.name + '_' + camera.camera_name,
+            'observatory': observatory.name,
+            'camera': camera.camera_name,
             'mjd': mjd,
             'group': group,
             'observer': observer,

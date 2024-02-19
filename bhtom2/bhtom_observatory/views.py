@@ -3,7 +3,6 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import FormView, ListView, UpdateView, DeleteView, DetailView
 from django.contrib import messages
-from django.forms.models import inlineformset_factory
 from django.conf import settings
 from django.core.mail import send_mail
 from guardian.mixins import LoginRequiredMixin
@@ -12,7 +11,7 @@ from collections import defaultdict
 
 
 from bhtom2.bhtom_observatory.forms import ObservatoryCreationForm, ObservatoryUpdateForm, ObservatoryUserUpdateForm, \
-    ObservatoryUserCreationForm, CamerasFormSet
+    ObservatoryUserCreationForm, CamerasFormSet, CamerasUpdateFormSet
 from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix, Camera
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
@@ -162,9 +161,9 @@ class UpdateObservatory(LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.POST:
-            context['cameras'] = CamerasFormSet(self.request.POST, self.request.FILES, instance=self.object)
+            context['cameras'] = CamerasUpdateFormSet(self.request.POST, self.request.FILES, instance=self.object)
         else:
-            context['cameras'] = CamerasFormSet(instance=self.object)
+            context['cameras'] = CamerasUpdateFormSet(instance=self.object)
         return context
     
     @transaction.atomic
