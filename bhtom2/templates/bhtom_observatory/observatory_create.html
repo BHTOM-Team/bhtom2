@@ -4,7 +4,7 @@
 {% block title %}Create observatory{% endblock %}
 
 {% block content %}
-<script src="{% static 'bhtom_observatory/create_observatory.js' %}"></script>
+
 {{ users }}
 
 {% if object %}
@@ -86,58 +86,5 @@
   {% endbuttons %}
 
 </form>
-<script>
-  $(document).ready(function() {
-    $("#add-camera").click(function() {
-        var cameraForm = $(".camera-form:first").clone(true);
-        var totalForms = $('#id_camera_set-TOTAL_FORMS');
-        var formIdx = parseInt(totalForms.val());
-
-        // Clear all input fields
-        cameraForm.find("input[type='text'], input[type='number'], input[type='file']").val("");
-        
-        // Update the names and IDs of the cloned fields
-        cameraForm.find("input[type='text'], input[type='number'], input[type='file']").each(function() {
-            var field = $(this);
-            var fieldName = field.attr('name');
-            var fieldId = field.attr('id');
-            var newFieldName = fieldName.replace(/-\d+-/g, '-' + formIdx + '-');
-            var newFieldId = fieldId.replace(/-\d+/g, '-' + formIdx);
-            field.attr('name', newFieldName);
-            field.attr('id', newFieldId);
-        });
-        
-        // Insert the cloned form after the last camera form
-        cameraForm.insertAfter(".camera-form:last");
-        
-        // Add a line separator after the cloned form
-        $("<div class='line-separator'></div>").insertAfter(cameraForm);
-
-        // Increment the total forms count
-        totalForms.val(formIdx + 1);
-    });
-{% comment %} 
-
-function toggleCameraFields() {
-  var calibrationFlag = document.getElementById('id_calibration_flg');
-  var cameraFields = cameraForm.querySelectorAll('input[type="text"], input[type="number"], input[type="file"]');
-  for (var i = 0; i < cameraFields.length; i++) {
-    if (calibrationFlag.checked) {
-      cameraFields[i].disabled = true;
-      cameraFields[i].removeAttribute('required');
-      if (cameraFields[i].type === 'file') {
-        cameraFields[i].value = '{% static "bhtom_observatory/sample_for_calibration_only.csv" %}';
-      }
-    } else {
-      cameraFields[i].disabled = false;
-      cameraFields[i].setAttribute('required', true);
-    }
-  }
-}
-toggleCameraFields();
-document.getElementById('id_calibration_flg').addEventListener('change', toggleCameraFields); {% endcomment %}
-});
-
-
-</script>
+<script src="{% static 'bhtom_observatory/create_observatory.js' %}"></script>
 {% endblock %}

@@ -37,21 +37,14 @@ class CreateObservatory(LoginRequiredMixin, FormView):
         context['cameras'] = CamerasFormSet()
         return context
     
-    def post(self, request, *args, **kwargs):
-        form = self.get_form()
-        cameras = CamerasFormSet(request.POST, request.FILES)
-        
-        if form.is_valid() and cameras.is_valid():
-            return self.form_valid(form, cameras)
-        else:
-            return self.form_invalid(form, cameras)
 
-    def form_valid(self, form, cameras):
+    def form_valid(self, form):
         cameras = CamerasFormSet(self.request.POST,self.request.FILES)
 
         try:
             active_flag = False
             if form.cleaned_data['calibration_flg'] != True:
+                cameras.forms[0].empty_permitted = False
                 user = self.request.user
                 name = form.cleaned_data['name']
                 lon = form.cleaned_data['lon']
@@ -61,7 +54,11 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 approx_lim_mag = form.cleaned_data['approx_lim_mag']
                 filters = form.cleaned_data['filters']
                 comment = form.cleaned_data['comment']
+                aperture = form.cleaned_data['aperture']
+                focal_length = form.cleaned_data['focal_length']
+                telescope = form.cleaned_data['telescope']
             else:
+                cameras.forms[0].empty_permitted = True
                 user = self.request.user
                 name = form.cleaned_data['name']
                 lon = form.cleaned_data['lon']
@@ -70,6 +67,9 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 altitude = None
                 approx_lim_mag = None
                 filters = None
+                aperture = None
+                focal_length = None
+                telescope = None
                 comment = None
                 active_flag = True
                 
@@ -95,7 +95,10 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 altitude=altitude,
                 approx_lim_mag=approx_lim_mag,
                 filters=filters,
-                comment=comment
+                comment=comment,
+                aperture=aperture,
+                focal_length=focal_length,
+                telescope=telescope,
             )
 
             if cameras.is_valid():
@@ -124,9 +127,6 @@ class CreateObservatory(LoginRequiredMixin, FormView):
 
         messages.success(self.request, '%s successfully created, observatory requires administrator approval' % str(name))
         return redirect(self.get_success_url())
-    
-    def form_invalid(self, form, cameras):
-        return self.render_to_response(self.get_context_data(form=form, cameras=cameras))
 
 class ObservatoryList(LoginRequiredMixin, ListView):
     template_name = 'bhtom_observatory/observatory_list.html'

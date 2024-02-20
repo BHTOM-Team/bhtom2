@@ -113,10 +113,15 @@ class ObservatoryCreationForm(forms.ModelForm):
         self.fields['lon'].required = True
         self.fields['lat'].required = True
         self.fields['comment'].required = False
+        self.fields['aperture'].required = False
+        self.fields['focal_length'].required = False
+        self.fields['telescope'].required = False
+    
     class Meta:
         model = Observatory
-        fields = ('name', 'lon', 'lat', 'calibration_flg',
-                  'approx_lim_mag', 'filters', 'altitude', 'comment')
+        fields = ('name', 'lon', 'lat',
+                  'approx_lim_mag', 'filters', 'altitude','aperture','focal_length',
+                  'telescope', 'comment','calibration_flg')
 
 
 
@@ -155,11 +160,15 @@ class ObservatoryUpdateForm(forms.ModelForm):
         self.fields['lon'].required = True
         self.fields['lat'].required = True
         self.fields['comment'].required = False
+        self.fields['aperture'].required = False
+        self.fields['focal_length'].required = False
+        self.fields['telescope'].required = False
 
     class Meta:
         model = Observatory
-        fields = ('name', 'lon', 'lat','altitude','calibration_flg',
-                  'approx_lim_mag', 'filters', 'comment')
+        fields = ('name', 'lon', 'lat',
+                  'approx_lim_mag', 'filters', 'altitude','aperture','focal_length',
+                  'telescope', 'comment','calibration_flg')
 
 
 class ObservatoryUserUpdateForm(forms.ModelForm):
