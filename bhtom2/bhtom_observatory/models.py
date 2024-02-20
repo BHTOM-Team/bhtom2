@@ -10,7 +10,9 @@ def sanitize_folder_name(name):
 
 
 def example_file_path(instance, filename):
-    return 'fits/exampleObservatoryFile/{0}/{1}'.format(sanitize_folder_name(instance.camera_name), sanitize_folder_name(filename))
+    return 'fits/exampleObservatoryFile/{0}/{1}'.format(sanitize_folder_name(instance.camera_name),
+                                                        sanitize_folder_name(filename))
+
 
 class Observatory(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
@@ -28,11 +30,9 @@ class Observatory(models.Model):
     altitude = models.FloatField(null=True, blank=False, default=0.0, verbose_name="Altitude [m]")
     calibration_flg = models.BooleanField(default='False', verbose_name='Only instrumental photometry file',
                                           db_index=True)
-    prefix = models.CharField(max_length=100, null=True, blank=True)
     comment = models.TextField(null=True, blank=True,
                                verbose_name="Comments (e.g. hyperlink to the observatory website, "
                                             "camera specifications, telescope info)")
-    active_flg = models.BooleanField(default='False', db_index=True)
     approx_lim_mag = models.FloatField(null=True, verbose_name="Approximate limit magnitude [mag]", default=18.0)
     filters = models.CharField(null=True, max_length=100, blank=True,
                                verbose_name="Filters (comma-separated list, as they are visible in " "FITS)",
@@ -54,8 +54,10 @@ class Observatory(models.Model):
 
 
 class Camera(models.Model):
-    observatory = models.ForeignKey(Observatory, on_delete=models.CASCADE,  null=False )
-    camera_name = models.CharField(max_length=255, verbose_name='Camera name',  null=False)
+    observatory = models.ForeignKey(Observatory, on_delete=models.CASCADE, null=False)
+    camera_name = models.CharField(max_length=255, verbose_name='Camera name', null=False)
+    active_flg = models.BooleanField(default='False', db_index=True)
+    prefix = models.CharField(max_length=100, null=True, blank=True, unique=True)
     gain = models.FloatField(null=True, blank=False, verbose_name='Gain [e/ADU]', default=2)
     example_file = models.FileField(upload_to=example_file_path, null=True, blank=False, verbose_name='Sample fits')
     readout_noise = models.FloatField(null=True, blank=False, verbose_name='Readout Noise [e]', default=2)
@@ -67,8 +69,9 @@ class Camera(models.Model):
     date_time_keyword = models.CharField(max_length=255, verbose_name='Date & Time keyword', default="DATE-OBS")
     time_keyword = models.CharField(max_length=255, verbose_name='Time keyword', default="TIME-OBS")
     exposure_time_keyword = models.CharField(max_length=255, verbose_name='Exposure time keyword', default="EXPTIME")
-    mode_recognition_keyword = models.CharField(max_length=255, verbose_name='Mode recognition keyword name',  null=True, blank=True,  default='')
-    additional_info = models.TextField(verbose_name='Additional info', null=True,blank=True, default='')
+    mode_recognition_keyword = models.CharField(max_length=255, verbose_name='Mode recognition keyword name', null=True,
+                                                blank=True, default='')
+    additional_info = models.TextField(verbose_name='Additional info', null=True, blank=True, default='')
     created = models.DateTimeField(null=True, blank=False, editable=False, auto_now_add=True, db_index=True)
     modified = models.DateTimeField(null=True, blank=True, editable=True, auto_now=True)
 
@@ -77,11 +80,11 @@ class Camera(models.Model):
 
     class Meta:
         verbose_name_plural = "cameras"
-        unique_together = (('camera_name', 'observatory'),)
+        unique_together = (('observatory', 'camera_name'),)
+
 
 class ObservatoryMatrix(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    observatory = models.ForeignKey(Observatory, on_delete=models.CASCADE)
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE)
     active_flg = models.BooleanField(default='True')
     comment = models.TextField(null=True, blank=True,
@@ -94,8 +97,8 @@ class ObservatoryMatrix(models.Model):
     last_file_process = models.DateTimeField(null=True, blank=True, editable=True)
 
     def __str__(self):
-        return self.observatory.name
+        return self.camera.observatory.name
 
     class Meta:
         verbose_name_plural = "observatory matrix"
-        unique_together = (('user', 'camera', 'observatory'),)
+        unique_together = (('user', 'camera'),)
