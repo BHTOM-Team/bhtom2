@@ -35,7 +35,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
           <table class="table table-striped sortable">
           <thead>
             <tr>
-              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Observatory API ID (ONAME)</th><th>Comment</th><th>Only Instrumental photometry file</th>
+              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Comment</th><th>Only Instrumental photometry file</th>
               <th>Details</th>
               {% if request.user.is_superuser %}
               <th>Update</th><th>Delete</th>
@@ -48,7 +48,6 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
               <td>{{ observatory.name }}</td>
               <td>{{ observatory.lon }}</td>
               <td>{{ observatory.lat }}</td>
-              <td>{{ observatory.prefix }}</td>
               <td>
                 {{ observatory.comment|truncatechars:30  }}
               </td>
@@ -73,27 +72,25 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
        <table class="table table-striped sortable">
           <thead>
             <tr>
-              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Active</th><th>Observatory API ID (ONAME)</th><th>Comment</th><th>Details</th>
-              <th style="pointer-events:none">Update</th><th style="pointer-events:none">Delete</th>
+              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Comment</th><th>Details</th>
+              {% comment %} <th style="pointer-events:none">Update</th>{% endcomment %}<th style="pointer-events:none">Delete</th>
             </tr>
           </thead>
           <tbody>
-            {% for id, active_flg, comment, observatory in observatory_user_list %}
+            {% for observatory in observatory_user_list %}
             <tr>
               <td>{{ observatory.name }}</td>
               <td>{{ observatory.lon }}</td>
               <td>{{ observatory.lat }}</td>
-              <td>{% if active_flg %} True {%else%} False{% endif %}</td>
-              <td>{{ observatory.prefix}}</td>
               <td>{{ observatory.comment|truncatechars:30  }}</td>
               <td>
                 <a href="{% url 'bhtom_observatory:detail-favorite' pk=observatory.id %}" title="Observatory details with favorite cameras" class="btn  btn-primary">Details</a>
               </td>
+              {% comment %} <td>
+                <a href="{% url 'bhtom_observatory:userObservatory_update' pk=observatory.id %}" title="Update User observatory" class="btn  btn-primary">Edit</a>
+              </td> {% endcomment %}
               <td>
-                <a href="{% url 'bhtom_observatory:userObservatory_update' pk=id %}" title="Update User observatory" class="btn  btn-primary">Edit</a>
-              </td>
-              <td>
-                <a href="{% url 'bhtom_observatory:userObservatory_delete' pk=id %}" title="Delete User observatory" class="btn  btn-danger">Delete</a>
+                <a href="{% url 'bhtom_observatory:userObservatory_delete' pk=observatory.id%}" title="Delete User observatory" class="btn  btn-danger">Delete</a>
               </td>
             </tr>
             {% endfor %}

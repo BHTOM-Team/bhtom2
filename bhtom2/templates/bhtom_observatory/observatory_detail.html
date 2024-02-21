@@ -34,7 +34,7 @@
                         Longitude
                     </td>
                     <td>
-                        {{ observatory.lon }} deg (West is positive)
+                        {{ observatory.lon }} deg (East is positive)
                     </td>
                 </tr>
                 <tr>
@@ -93,43 +93,43 @@
             <div class="row">
                 <div class="col-md-4">
                     <strong style="color: white">Camera Name:</strong>
-                    {{ camera.camera_name }}
+                    <span style="color: white">{{ camera.camera_name }}</span>
                 </div>
                 <div class="col-md-4">
                     <strong style="color: white">Example File:</strong>
-                    {{ camera.example_file }}
+                    <span style="color: white">{{ camera.example_file }}</span>
                 </div>
                 <div class="col-md-4">
                     <strong style="color: white">Binning:</strong>
-                    {{ camera.binning }}
+                    <span style="color: white">{{ camera.binning }}</span>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-4">
                     <strong style="color: white">Gain:</strong>
-                    {{ camera.gain }}
+                    <span style="color: white">{{ camera.gain }}</span>
                 </div>
                 <div class="col-md-4">
                     <strong style="color: white">Readout Noise:</strong>
-                    {{ camera.readout_noise }}
+                    <span style="color: white">{{ camera.readout_noise }}</span>
                 </div>
                 <div class="col-md-4">
                     <strong style="color: white">Saturation Level:</strong>
-                    {{ camera.saturation_level }}
+                    <span style="color: white">{{ camera.saturation_level }}</span>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-4">
                     <strong style="color: white">Pixel Scale:</strong>
-                    {{ camera.pixel_scale }}
+                    <span style="color: white">{{ camera.pixel_scale }}</span>
                 </div>
                 <div class="col-md-4">
                     <strong style="color: white">Pixel Size:</strong>
-                    {{ camera.pixel_size }}
+                    <span style="color: white">{{ camera.pixel_size }}</span>
                 </div>
                 <div class="col-md-4">
                     <strong style="color: white">Readout Speed:</strong>
-                    {{ camera.readout_speed }}
+                    <span style="color: white">{{ camera.readout_speed }}</span>
                 </div>
             </div>
         </div>
@@ -139,5 +139,6 @@
         {% endfor %}
     </div>
 </div>
+
 
 {% endblock %}

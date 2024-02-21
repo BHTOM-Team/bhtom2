@@ -40,9 +40,7 @@ class CreateObservatory(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         cameras = CamerasFormSet(self.request.POST,self.request.FILES)
-
         try:
-            active_flag = False
             if form.cleaned_data['calibration_flg'] != True:
                 cameras.forms[0].empty_permitted = False
                 user = self.request.user
@@ -57,6 +55,7 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 aperture = form.cleaned_data['aperture']
                 focal_length = form.cleaned_data['focal_length']
                 telescope = form.cleaned_data['telescope']
+                active_flg = False
             else:
                 cameras.forms[0].empty_permitted = True
                 user = self.request.user
@@ -71,13 +70,7 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 focal_length = None
                 telescope = None
                 comment = None
-                active_flag = True
-                
-            if calibration_flg is True:
-                prefix = name + "_CalibrationOnly"
-            else:
-                prefix = name
-
+                active_flg = True
         except TypeError as e:
             logger.error('CreateObservatory error: ' + str(e))
             messages.error(self.request, 'Error with creating the observatory')
@@ -88,8 +81,6 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 name=name,
                 lon=lon,
                 lat=lat,
-                active_flg=active_flag,
-                prefix=prefix,
                 calibration_flg=calibration_flg,
                 user=user,
                 altitude=altitude,
@@ -100,14 +91,24 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 focal_length=focal_length,
                 telescope=telescope,
             )
-
-            if cameras.is_valid():
+            if form.cleaned_data['calibration_flg'] != True:   
+                if cameras.is_valid():
+                    super().form_valid(form)
+                    observatory.save()
+                    cameras.instance = observatory
+                    for camera_form in cameras:
+                        camera = camera_form.save(commit=False)
+                        camera.observatory = observatory                   
+                        camera.user = user                   
+                        camera.save()
+            else:
                 super().form_valid(form)
                 observatory.save()
-                cameras.instance = observatory
-                cameras.save()
+                camera = Camera(observatory=observatory, user=user, camera_name="Only instrumental photometry file camera",active_flg= True)
+                camera.active_flg= True
+                camera.save()
+
             logger.info('Create new obserwatory and camera:  %s' % str(name))
-          
         except Exception as e:
             logger.error('CreateObservatory error: ' + str(e))
             messages.error(self.request, 'Error with creating the observatory or camera')
@@ -128,29 +129,28 @@ class CreateObservatory(LoginRequiredMixin, FormView):
         messages.success(self.request, '%s successfully created, observatory requires administrator approval' % str(name))
         return redirect(self.get_success_url())
 
+
 class ObservatoryList(LoginRequiredMixin, ListView):
     template_name = 'bhtom_observatory/observatory_list.html'
     model = Observatory
-    strict = False
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        userObservatory = ObservatoryMatrix.objects.filter(user=self.request.user).order_by('observatory__name')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
-        observatory_user_dict = defaultdict(list)
-        for row in userObservatory:
-            observatory_user_dict[row.observatory.name].append(
-                [row.id, row.active_flg, row.comment, Observatory.objects.get(id=row.observatory.id)])
 
-        observatory_user_list = []
-        for name, observatories in observatory_user_dict.items():
-            observatory_user_list.append(observatories[0])  # Add only the first observatory with the same name
+        active_obs_id = Camera.objects.filter(active_flg=True).values_list("observatory_id", flat=True)
 
-        context['observatory_list'] = Observatory.objects.filter(active_flg=True).order_by('name')
-        context['observatory_user_list'] = observatory_user_list
+        # Get observatories related to active cameras
+        observatories_with_active_cameras = Observatory.objects.filter(id__in=active_obs_id)
+        context['observatory_list'] = observatories_with_active_cameras
+        
+        user_cameras = ObservatoryMatrix.objects.filter(user=self.request.user).values_list('camera__id', flat=True)
+        user_active_obs_id = Camera.objects.filter(id__in=user_cameras, active_flg=True).values_list('observatory_id',flat=True)
+        user_observatories = Observatory.objects.filter(id__in=user_active_obs_id)
+        context['observatory_user_list'] = user_observatories
 
         return context
-
+    
 
 class UpdateObservatory(LoginRequiredMixin, UpdateView):
     template_name = 'bhtom_observatory/observatory_create.html'
@@ -170,15 +170,24 @@ class UpdateObservatory(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         context = self.get_context_data()
         cameras = context['cameras']
+        user = self.request.user
         if cameras.is_valid():
-            self.object = form.save()  # Save the observatory instance
-            cameras.instance = self.object  # Associate cameras with the observatory
-            cameras.save()  # Save cameras
+            super().form_valid(form)
+            cameras.instance = self.object
+            for camera_form in cameras:
+                camera = camera_form.save(commit=False)
+                camera.observatory = self.object                     
+                camera.user = user                       
+                camera.save()
+
+        # if cameras.is_valid():
+        #     self.object = form.save()  # Save the observatory instance
+        #     cameras.instance = self.object  # Associate cameras with the observatory
+        #     cameras.save()  # Save cameras
             messages.success(self.request, 'Successfully updated %s' % form.cleaned_data['name'])
             logger.info("Update observatory %s, user: %s" % (str(form.instance), str(self.request.user)))
             return super().form_valid(form)
         else:
-            logger.error(cameras.errors)
             cameras_errors = "\n".join([", ".join(errors) for errors in cameras.errors])
             messages.error(self.request, f'Failed to update {form.cleaned_data["name"]}. Cameras errors: {cameras_errors}')
             return self.render_to_response(self.get_context_data(form=form))
@@ -224,10 +233,8 @@ class ObservatoryFavoriteDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         observatory = self.get_object()
         user = self.request.user
-        obsMatrix = ObservatoryMatrix.objects.filter(observatory=observatory, user=user)
-        
-        camera_ids = [obs.camera.id for obs in obsMatrix]
-        cameras = Camera.objects.filter(observatory=observatory, id__in=camera_ids)
+        user_cameras = ObservatoryMatrix.objects.filter(user=user).values_list('camera__id', flat=True)
+        cameras = Camera.objects.filter(observatory=observatory, id__in=user_cameras)
         
         context['cameras'] = cameras
         return context
@@ -253,15 +260,9 @@ class CreateUserObservatory(LoginRequiredMixin, FormView):
         camera = form.cleaned_data['camera']
         comment = form.cleaned_data['comment']
 
-        if not observatoryId.active_flg:
-            logger.error('observatory is not active')
-            messages.error(self.request, 'Error with creating the user observatory')
-            return redirect(self.get_success_url())
-
         try:
             observatoryUser = ObservatoryMatrix.objects.create(
                 user=user,
-                observatory= observatoryId,
                 camera=camera,
                 active_flg=True,
                 comment=comment
@@ -281,20 +282,17 @@ class CreateUserObservatory(LoginRequiredMixin, FormView):
 
 class DeleteUserObservatory(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('bhtom_observatory:list')
-    model = ObservatoryMatrix
+    model = Observatory
     template_name = 'bhtom_observatory/userObservatory_delete.html'
 
-    def get_object(self, queryset=None):
-        obj = super(DeleteUserObservatory, self).get_object()
-        return obj
-
     @transaction.atomic
-    def form_valid(self, form):
-        super().form_valid(form)
-        messages.success(self.request, 'Successfully delete')
-        logger.info('Delete user observatory, %s, %s' % (str(self.object), str(self.request.user)))
-        return redirect(self.get_success_url())
 
+    def form_valid(self, form):
+        observatory_id = self.kwargs.get('pk')
+        ObservatoryMatrix.objects.filter(camera__observatory_id=observatory_id).delete()
+        messages.success(self.request, 'Successfully deleted')
+        return redirect(self.get_success_url())
+    
 
 class UpdateUserObservatory(LoginRequiredMixin, UpdateView):
     template_name = 'bhtom_observatory/userObservatory_create.html'
@@ -306,28 +304,27 @@ class UpdateUserObservatory(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         super().form_valid(form)
         messages.success(self.request, 'Successfully updated')
-        logger.info('Update user observatory, %s, %s' % (str(form.instance.observatory), str(self.request.user)))
+        logger.info('Update user observatory, %s, %s' % (str(form.instance.camera), str(self.request.user)))
         return redirect(self.get_success_url())
+
 
 
 
 def get_cameras(request, observatory_id, user_id):
     try:
-        cameras = ObservatoryMatrix.objects.filter(user=user_id)
-        insTab = [ins.camera.id for ins in cameras]  
+        user_cameras = ObservatoryMatrix.objects.filter(user=user_id).values_list('camera__id', flat=True)
         observatory_id = int(observatory_id)
-        cameras = Camera.objects.exclude(id__in=insTab).filter(observatory_id=observatory_id).values('id', 'camera_name')
+        cameras = Camera.objects.exclude(id__in=user_cameras).filter(observatory_id=observatory_id).values('id', 'camera_name')
+        
         return JsonResponse(list(cameras), safe=False)
     except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid observatory ID'}, status=400)
-    
-
 
 def get_favorite_cameras(request, observatory_id, user_id):
     try:
-        obsMatrix = ObservatoryMatrix.objects.filter(user=user_id, observatory=observatory_id)
-        favorite_camera_ids = [obs.camera.id for obs in obsMatrix]
-        favorite_cameras = Camera.objects.filter(id__in=favorite_camera_ids).values('id', 'camera_name')
+        user_cameras = ObservatoryMatrix.objects.filter(user=user_id).values_list('camera__id', flat=True)
+        observatory_id = int(observatory_id)
+        favorite_cameras = Camera.objects.filter(id__in=user_cameras,observatory_id= observatory_id).values('id', 'camera_name')
         return JsonResponse(list(favorite_cameras), safe=False)
     except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid observatory or user ID'}, status=400)

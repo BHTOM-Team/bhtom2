@@ -32,8 +32,11 @@ $(document).ready(function() {
     function toggleCameraFields() {
       var calibrationFlag = document.getElementById('id_calibration_flg');
       var addButton = document.getElementById('add-camera')
+      var camera_fields = document.getElementById('camera-fields')
       $(".camera-form").each(function() {
         var cameraFields = $(this).find('input[type="text"], input[type="number"], input[type="file"]');
+
+        
         if(addButton){
             if(calibrationFlag.checked){
               addButton.disabled = true;
@@ -42,15 +45,24 @@ $(document).ready(function() {
               addButton.disabled = false;
             }
         }
+
+        if(camera_fields){
+          if(calibrationFlag.checked){
+            camera_fields.style.display = 'none'
+          }
+          else{
+            camera_fields.style.display = 'block'
+          }
+        }
         for (var i = 0; i < cameraFields.length; i++) {
           if (calibrationFlag.checked) {
-            cameraFields[i].disabled = true;
             cameraFields[i].removeAttribute('required');
           } else {
-            cameraFields[i].disabled = false;
             cameraFields[i].setAttribute('required', true);
           }
         }
+        
+
       });
     }
     
@@ -58,33 +70,33 @@ $(document).ready(function() {
     function toggleObservatoryFields() {
       var calibrationFlag = document.getElementById('id_calibration_flg');
       var observatoryFields = [
-        { id: 'id_approx_lim_mag', label: 'Approx. limit magnitude in V band* [mag]' },
-        { id: 'id_filters', label: 'Filters*' },
-        { id: 'id_altitude', label: 'Altitude [m]*' },
-        { id: 'id_aperture', label: 'Aperture [m]' },
-        { id: 'id_focal_length', label: 'Focal length [mm]' },
-        { id: 'id_telescope', label: 'Telescope name' },
-        { id: 'id_comment', label: 'Comments (e.g. hyperlink to the observatory website, camera specifications, telescope info)' }
+          { id: 'id_approx_lim_mag', label: 'Approx. limit magnitude in V band* [mag]' },
+          { id: 'id_filters', label: 'Filters*' },
+          { id: 'id_altitude', label: 'Altitude [m]*' },
+          { id: 'id_aperture', label: 'Aperture [m]' },
+          { id: 'id_focal_length', label: 'Focal length [mm]' },
+          { id: 'id_telescope', label: 'Telescope name' },
+          { id: 'id_comment', label: 'Comments (e.g. hyperlink to the observatory website, camera specifications, telescope info)' }
       ];
-    
-
-
-
+  
       observatoryFields.forEach(function(field) {
-        var inputField = document.getElementById(field.id);
-        var label = document.querySelector('label[for="' + field.id + '"]');
-    
-        if (calibrationFlag.checked) {
-          label.style.display = 'none'; 
-          inputField.style.display = 'none'; 
-          inputField.removeAttribute('required');
-        } else {
-          inputField.style.display = 'block'; 
-          label.style.display = 'block'; 
-          inputField.setAttribute('required', true);
-        }
+          var inputField = document.getElementById(field.id);
+          var label = document.querySelector('label[for="' + field.id + '"]');
+  
+          if (calibrationFlag.checked) {
+              label.style.display = 'none'; 
+              inputField.style.display = 'none'; 
+              inputField.removeAttribute('required');
+          } else {
+              inputField.style.display = 'block'; 
+              label.style.display = 'block'; 
+              if (field.id !== 'id_aperture' && field.id !== 'id_focal_length' && field.id !== 'id_telescope' && field.id !== 'id_comment') {
+                  inputField.setAttribute('required', true);
+              }
+          }
       });
-    }
+  }
+  
     
     function toggleFields() {
       toggleCameraFields();

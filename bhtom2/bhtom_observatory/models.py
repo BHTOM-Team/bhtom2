@@ -54,6 +54,7 @@ class Observatory(models.Model):
 
 
 class Camera(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     observatory = models.ForeignKey(Observatory, on_delete=models.CASCADE, null=False)
     camera_name = models.CharField(max_length=255, verbose_name='Camera name', null=False)
     active_flg = models.BooleanField(default='False', db_index=True)

@@ -7,12 +7,6 @@ class CameraInline(admin.TabularInline):
     model = Camera
     extra = 0
 
-
-class ObservatoryAdmin(admin.ModelAdmin):
-    model = Observatory
-    inlines = [CameraInline]
-    list_display = ['name', 'lon', 'lat','altitude','active_flg']
-
     def activate_observatory(self, request, queryset):
         queryset.update(active_flg=True)
 
@@ -22,9 +16,16 @@ class ObservatoryAdmin(admin.ModelAdmin):
     actions = [activate_observatory, disable_observatory]
 
 
+
+
+class ObservatoryAdmin(admin.ModelAdmin):
+    model = Observatory
+    inlines = [CameraInline]
+    list_display = ['name', 'lon', 'lat','altitude']
+
 class ObservatoryMatrixAdmin(admin.ModelAdmin):
     model = ObservatoryMatrix
-    list_display = ['observatory', 'camera', 'user', 'active_flg']
+    list_display = ['camera', 'user', 'active_flg']
     exclude = ['seeing']
     def activate_observatory(self, request, queryset):
         queryset.update(active_flg=True)

@@ -10,18 +10,15 @@ logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_observatory-forms')
 
 class CustomCheckboxInput(CheckboxInput):
     def render(self, name, value, attrs=None, renderer=None):
-        attrs = attrs or {}
-        attrs['onclick'] = 'CheckCalibrationFlag();'  # Add an onclick event
         return super().render(name, value, attrs, renderer)
     
 class ObservatoryChoiceField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj):
         if obj.calibration_flg:
-            return '{name} ({prefix}) (Only Instrumental photometry file)'.format(name=obj.name,
-                                                                                  prefix=obj.prefix)
+            return '{name} (Only Instrumental photometry file)'.format(name=obj.name,)
         else:
-            return '{name} ({prefix})'.format(name=obj.name, prefix=obj.prefix)
+            return '{name} '.format(name=obj.name)
 
 
 class CameraChoiceField(forms.ModelChoiceField):
@@ -190,13 +187,16 @@ class ObservatoryUserCreationForm(forms.Form):
         self.user = kwargs.pop('user')
         observatory_id = kwargs.pop('observatory_id', None)
         super(ObservatoryUserCreationForm, self).__init__(*args, **kwargs)
+
+        active_observatory_ids = set(Camera.objects.filter(active_flg=True).values_list('observatory_id', flat=True))
+        active_observatories = Observatory.objects.filter(id__in=active_observatory_ids).order_by('name')
+        
         self.fields['observatory'] = ObservatoryChoiceField(
-            queryset=Observatory.objects.filter(active_flg=True).order_by('name'),
+            queryset=active_observatories,
             widget=forms.Select(),
             required=True
         )
-        camera = ObservatoryMatrix.objects.filter(user=self.user)
-        #insTab = [ins.cameras.id for ins in cameras]  
+
         self.fields['camera'] = CameraChoiceField(
                 queryset= Camera.objects.all(),
                 widget=forms.Select(),
