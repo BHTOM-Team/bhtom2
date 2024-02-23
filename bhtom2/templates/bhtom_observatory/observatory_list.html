@@ -35,7 +35,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
           <table class="table table-striped sortable">
           <thead>
             <tr>
-              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Comment</th><th>Only Instrumental photometry file</th>
+              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Observatory(ONAME)</th><th>Comment</th><th>Only Instrumental photometry file</th>
               <th>Details</th>
               {% if request.user.is_superuser %}
               <th>Update</th><th>Delete</th>
@@ -48,6 +48,13 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
               <td>{{ observatory.name }}</td>
               <td>{{ observatory.lon }}</td>
               <td>{{ observatory.lat }}</td>
+              <td>
+                {% if observatory.id in prefix_obs %}
+                  {{ prefix_obs|get_item:observatory.id }}
+                {% else %}
+                    No data available
+                {% endif %}
+             </td>
               <td>
                 {{ observatory.comment|truncatechars:30  }}
               </td>
@@ -72,7 +79,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
        <table class="table table-striped sortable">
           <thead>
             <tr>
-              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Comment</th><th>Details</th>
+              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Observatory(ONAME)</th><th>Comment</th><th>Details</th>
               {% comment %} <th style="pointer-events:none">Update</th>{% endcomment %}<th style="pointer-events:none">Delete</th>
             </tr>
           </thead>
@@ -82,6 +89,13 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
               <td>{{ observatory.name }}</td>
               <td>{{ observatory.lon }}</td>
               <td>{{ observatory.lat }}</td>
+              <td>
+                {% if observatory.id in prefix_user_obs %}
+                {{ prefix_user_obs|get_item:observatory.id }}
+                {% else %}
+                    No data available
+                {% endif %}
+             </td>
               <td>{{ observatory.comment|truncatechars:30  }}</td>
               <td>
                 <a href="{% url 'bhtom_observatory:detail-favorite' pk=observatory.id %}" title="Observatory details with favorite cameras" class="btn  btn-primary">Details</a>

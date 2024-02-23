@@ -72,11 +72,11 @@ $(document).ready(function() {
       var observatoryFields = [
           { id: 'id_approx_lim_mag', label: 'Approx. limit magnitude in V band* [mag]' },
           { id: 'id_filters', label: 'Filters*' },
-          { id: 'id_altitude', label: 'Altitude [m]*' },
-          { id: 'id_aperture', label: 'Aperture [m]' },
-          { id: 'id_focal_length', label: 'Focal length [mm]' },
-          { id: 'id_telescope', label: 'Telescope name' },
-          { id: 'id_comment', label: 'Comments (e.g. hyperlink to the observatory website, camera specifications, telescope info)' }
+          // { id: 'id_altitude', label: 'Altitude [m]*' },
+          // { id: 'id_aperture', label: 'Aperture [m]' },
+          // { id: 'id_focal_length', label: 'Focal length [mm]' },
+          // { id: 'id_telescope', label: 'Telescope name' },
+          // { id: 'id_comment', label: 'Comments (e.g. hyperlink to the observatory website, camera specifications, telescope info)' }
       ];
   
       observatoryFields.forEach(function(field) {

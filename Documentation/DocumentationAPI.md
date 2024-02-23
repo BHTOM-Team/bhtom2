@@ -289,6 +289,7 @@ This API endpoint allows users to add observatory to their favourite list. Users
 ### Request Body
 
 - `observatory` (string, required): The name of the observatory.
+- `camera` (string, required): The name of the observatory camera.
 - `comment` (string, optional): An optional comment.
 
 ### Example Request Body
@@ -296,6 +297,7 @@ This API endpoint allows users to add observatory to their favourite list. Users
 ```json
 {
   "observatory": "Observatory Name",
+  "camera": "Camera Name",
   "comment": "This is an optional comment."
 }
 ```
@@ -310,6 +312,7 @@ curl -X POST \
   -H 'Content-Type: application/json' \
   -d '{
     "observatory": "Observatory Name",
+    "camera": "Camera Name",
     "comment": "This is an optional comment."
   }'
 ```
@@ -474,7 +477,7 @@ The request to retrieve observatory matrix data can include the following parame
 
 - `user` (string, optional): Filter observatory matrix data by the username of the user associated with the observatory.
 - `active_flg` (boolean, optional): Filter observatory matrix data by the active flag, indicating whether the observatory is active.
-- `observatory` (string, optional): Filter observatory matrix data by the observatory name or identifier.
+- `camera` (string, optional): Filter observatory matrix data by the camera name or identifier.
 - `created_start` (string, datetime format, optional): Filter observatory matrix data to include only records created on or after the specified date and time.
 - `created_end` (string, datetime format, optional): Filter observatory matrix data to include only records created on or before the specified date and time.
 
@@ -484,7 +487,7 @@ The request to retrieve observatory matrix data can include the following parame
 {
     "user": "JohnDoe",
     "active_flg": true,
-    "observatory": "My Observatory",
+    "camera": "My Camera",
     "created_start": "2023-01-01T00:00:00Z",
     "created_end": "2023-12-31T23:59:59Z"
 }
@@ -503,7 +506,7 @@ curl -X POST \
   -d '{
     "user": "JohnDoe",
     "active_flg": true,
-    "observatory": "My Observatory",
+    "camera": "My Camera",
     "created_start": "2023-01-01T00:00:00Z",
     "created_end": "2023-12-31T23:59:59Z"
   }' \
@@ -515,7 +518,7 @@ curl -X POST \
 You can use a Python script to retrieve observatory matrix data:
 
 ```bash
-python get_observatory_matrix.py --user "JohnDoe" --active_flg true --observatory "My Observatory" --created_start "2023-01-01T00:00:00Z" --created_end "2023-12-31T23:59:59Z" --token <yourToken>
+python get_observatory_matrix.py --user "JohnDoe" --active_flg true --camera "My Camera" --created_start "2023-01-01T00:00:00Z" --created_end "2023-12-31T23:59:59Z" --token <yourToken>
 ```
 
 ## 6. Delete Favourite Observatory
@@ -532,13 +535,15 @@ python get_observatory_matrix.py --user "JohnDoe" --active_flg true --observator
 
 The request to delete an observatory matrix record should include the following parameter in the request body:
 
-- `observatory` (string, required): The name or identifier of the observatory for which you want to delete the matrix record.
+- `observatory` (string, required): The name or identifier of the observatory for which you want to delete the matrix 
+- `camera` (string, required): The name or identifier of the observatory camera for which you want to delete the matrix record.
 
 ### Example Request Body
 
 ```json
 {
-    "observatory": "My Observatory"
+    "observatory": "My Observatory",
+    "camera": "Observatory Camera"
 }
 ```
 
@@ -553,7 +558,8 @@ curl -X DELETE \
   -H "Authorization: Token <yourToken>" \
   -H "Content-Type: application/json" \
   -d '{
-    "observatory": "My Observatory"
+    "observatory": "My Observatory",
+    "camera": "My Camera"
   }' \
   https://bh-tom2.astrolabs.pl/api/observatory-matrix/delete/
 ```
@@ -562,7 +568,7 @@ curl -X DELETE \
 
 You can use a Python script to delete an observatory matrix record:
 ```bash
-python delete_observatory_matrix.py --observatory "My Observatory" --token <yourToken>"
+python delete_observatory_matrix.py --observatory "My Observatory" --camera "My Camera" --token <yourToken>"
 ```
 
 # DATA DOWNLOAD API

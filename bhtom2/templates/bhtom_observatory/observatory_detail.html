@@ -89,7 +89,7 @@
         <h2>Cameras</h2>
         {% for camera in cameras %}
         <div class="camera-details">
-            <h3 style="color: white">{{ camera.camera_name }}</h3>
+            <h3 style="color: white">Prefix: {{ camera.prefix }}</h3>
             <div class="row">
                 <div class="col-md-4">
                     <strong style="color: white">Camera Name:</strong>
@@ -133,7 +133,10 @@
                 </div>
             </div>
         </div>
+      
         {% if not forloop.last %}
+        <hr>
+            <div class="line-separator"></div>
         <hr>
         {% endif %}
         {% endfor %}

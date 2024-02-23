@@ -73,6 +73,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         observer = form.cleaned_data['observer']
         # group = form.cleaned_data['group']
         group = None
+        prefix = None
         user = self.request.user
         files = self.request.FILES.getlist('files')
         data_product_files = {}
@@ -89,16 +90,18 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             logger.error('upload max: %s %s' % (str(self.MAX_FILES), str(target)))
             messages.error(self.request, f'You can upload max. {self.MAX_FILES} files at once')
             return redirect(form.cleaned_data.get('referrer', '/'))
-        try:
-            camera = Camera.objects.get(id=camera.id)
-            observatory = Observatory.objects.get(id=observatory.id)
-        except Camera.DoesNotExist:
-                messages.error(self.request, f"Camera doesn't exist")
-                return redirect(form.cleaned_data.get('referrer', '/'))
-        except Observatory.DoesNotExist: 
-                messages.error(self.request, f"Observatory doesn't exist")
-                return redirect(form.cleaned_data.get('referrer', '/'))
-        
+        if dp_type == 'photometry' or dp_type == 'fits_file':
+            try:
+                camera = Camera.objects.get(id=camera.id)
+                observatory = Observatory.objects.get(id=observatory.id)
+                prefix = camera.prefix
+            except Camera.DoesNotExist:
+                    messages.error(self.request, f"Camera doesn't exist")
+                    return redirect(form.cleaned_data.get('referrer', '/'))
+            except Observatory.DoesNotExist: 
+                    messages.error(self.request, f"Observatory doesn't exist")
+                    return redirect(form.cleaned_data.get('referrer', '/'))
+
         if dp_type == 'fits_file' and  observatory.calibration_flg is True:
             messages.error(self.request, 'Observatory can calibration only')
             return redirect(form.cleaned_data.get('referrer', '/'))
@@ -114,8 +117,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             'comment': comment,
             'dry_run': dry_run,
             'no_plot': False,
-            'observatory': observatory.name,
-            'camera': camera.camera_name,
+            'observatory_prefix': prefix,
             'mjd': mjd,
             'group': group,
             'observer': observer,

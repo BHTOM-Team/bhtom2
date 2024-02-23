@@ -47,7 +47,7 @@ class Observatory(models.Model):
 
     def __str__(self):
         return self.name
-
+    
     class Meta:
         verbose_name_plural = "observatories"
         unique_together = (('name', 'lon', 'lat'),)

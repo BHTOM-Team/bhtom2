@@ -97,14 +97,14 @@ class DataProductUploadForm(forms.Form):
         self.fields['observatory'] = ObservatoryChoiceField(
             queryset=user_observatories,
             widget=forms.Select(),
-            required=True,
+            required=False,
             label='Observatory*'
         )
 
         self.fields['camera'] = CameraChoiceField(
             queryset=user_active_cameras,
             widget=forms.Select(),
-            required=True,
+            required=False,
             label='Camera*'
             
         )

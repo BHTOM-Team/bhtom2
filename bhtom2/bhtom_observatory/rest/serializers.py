@@ -3,18 +3,35 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from django.contrib.auth.models import User
-from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix
+from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix, Camera
 
 from bhtom_base.bhtom_dataproducts.models import DataProduct
 
+
+class CameraSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Camera
+        fields = ('id', 'user', 'observatory', 'camera_name', 'active_flg', 'prefix', 'gain', 'example_file',
+          'readout_noise', 'binning', 'saturation_level', 'pixel_scale', 'readout_speed', 'pixel_size',
+          'date_time_keyword', 'time_keyword', 'exposure_time_keyword', 'mode_recognition_keyword',
+          'additional_info', 'created', 'modified')
+        
+        read_only_fields = ['created', 'modified']
+        extra_kwargs = {'created_start': {'read_only': True},
+                        'created_end': {'read_only': True}}
+
+    def validate(self, data):
+        unknown = set(self.initial_data) - set(self.fields)
+        if unknown:
+            raise serializers.ValidationError("Unknown field(s): {}".format(", ".join(unknown)))
+        return data
 
 
 class ObservatorySerializers(serializers.ModelSerializer):
     class Meta:
         model = Observatory
-        fields = ('id', 'name', 'lon', 'lat', 'altitude', 'calibration_flg', 'prefix', 'example_file', 'comment',
-                  'active_flg', 'gain', 'readout_noise', 'binning', 'saturation_level', 'pixel_scale', 'readout_speed',
-                  'pixel_size', 'approx_lim_mag', 'filters', 'created', 'modified')
+        fields = ('id', 'name', 'lon', 'lat', 'altitude', 'calibration_flg', 'comment',
+                   'approx_lim_mag', 'filters', 'created', 'modified')
         read_only_fields = ['created', 'modified']
         extra_kwargs = {'created_start': {'read_only': True},
                         'created_end': {'read_only': True}}
@@ -31,17 +48,7 @@ class ObservatorySerializers(serializers.ModelSerializer):
         instance.lat = validated_data.get('lat', instance.lat)
         instance.altitude = validated_data.get('altitude', instance.altitude)
         instance.calibration_flg = validated_data.get('calibration_flg', instance.calibration_flg)
-        instance.prefix = validated_data.get('prefix', instance.prefix)
-        instance.example_file = validated_data.get('example_file', instance.example_file)
         instance.comment = validated_data.get('comment', instance.comment)
-        instance.active_flg = validated_data.get('active_flg', instance.active_flg)
-        instance.gain = validated_data.get('gain', instance.gain)
-        instance.readout_noise = validated_data.get('readout_noise', instance.readout_noise)
-        instance.binning = validated_data.get('binning', instance.binning)
-        instance.saturation_level = validated_data.get('saturation_level', instance.saturation_level)
-        instance.pixel_scale = validated_data.get('pixel_scale', instance.pixel_scale)
-        instance.readout_speed = validated_data.get('readout_speed', instance.readout_speed)
-        instance.pixel_size = validated_data.get('pixel_size', instance.pixel_size)
         instance.approx_lim_mag = validated_data.get('approx_lim_mag', instance.approx_lim_mag)
         instance.filters = validated_data.get('filters', instance.filters)
         instance.modified = timezone.now()
@@ -51,11 +58,11 @@ class ObservatorySerializers(serializers.ModelSerializer):
 
 
 class ObservatoryMatrixSerializers(serializers.ModelSerializer):
-    observatory_field = ObservatorySerializers(source='observatory', read_only=True)
+    camera_field = ObservatorySerializers(source='camera', read_only=True)
 
     class Meta:
         model = ObservatoryMatrix
-        fields = ('id', 'user', 'observatory', 'observatory_field', 'active_flg', 'comment', 'created', 'modified')
+        fields = ('id', 'user', 'camera', 'camera_field', 'active_flg', 'comment', 'created', 'modified')
         read_only_fields = ['created', 'modified']
         extra_kwargs = {'created_start': {'read_only': True},
                         'created_end': {'read_only': True}}
@@ -67,23 +74,23 @@ class ObservatoryMatrixSerializers(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        observatoryId = validated_data.get('observatory', None)
+        cameraId = validated_data.get('camera', None)
 
-        if observatoryId is None:
-            raise serializers.ValidationError("Observatory is required")
+        if cameraId is None:
+            raise serializers.ValidationError("Camera is required")
 
-        observatoryRow = Observatory.objects.get(id=observatoryId.id)
-        if not observatoryRow.active_flg:
-            raise serializers.ValidationError("Observatory is not active")
+        cameraRow = Camera.objects.get(id=cameraId.id)
+        if not cameraRow.active_flg:
+            raise serializers.ValidationError("Camera is not active")
 
         observatoryMatrix = ObservatoryMatrix.objects.create(**validated_data)
         return observatoryMatrix
 
     def update(self, instance, validated_data):
 
-        observatory_active_flg = instance.observatory.active_flg
-        if not observatory_active_flg and instance.active_flg:
-            raise serializers.ValidationError("Observatory is not active")
+        camera_active_flg = instance.camera.active_flg
+        if not camera_active_flg and instance.active_flg:
+            raise serializers.ValidationError("Camera is not active")
 
         instance.active_flg = validated_data.get('active_flg', instance.active_flg)
         instance.comment = validated_data.get('comment', instance.comment)
@@ -93,7 +100,7 @@ class ObservatoryMatrixSerializers(serializers.ModelSerializer):
         return instance
 
 class DataProductSerializer(serializers.ModelSerializer):
-    observatory = serializers.SerializerMethodField()
+    camera = serializers.SerializerMethodField()
     user_name = serializers.SerializerMethodField()
     target_name = serializers.SerializerMethodField()
     target = serializers.SerializerMethodField()
@@ -104,16 +111,16 @@ class DataProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_user_name(self, obj):
-        user_name = obj.observatory.user.first_name + " " + obj.observatory.user.last_name
+        user_name = obj.camera.user.first_name + " " + obj.camera.user.last_name
         return user_name
     
     def get_user(self, obj):
-        user = obj.observatory.user.username
+        user = obj.camera.user.username
         return user
     
-    def get_observatory(self, obj):
-        observatory_name = obj.observatory.observatory.name
-        return observatory_name
+    def get_camera(self, obj):
+        camera_name = obj.camera.camera_name
+        return camera_name
     
     def get_target_name(self, obj):
         target_name = obj.target.name if obj.target else None
