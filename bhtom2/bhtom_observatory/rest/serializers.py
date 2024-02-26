@@ -33,7 +33,7 @@ class CameraSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Unknown field(s): {}".format(", ".join(unknown)))
         return data
     
-    
+
 class ObservatorySerializers(serializers.ModelSerializer):
     class Meta:
         model = Observatory
@@ -118,15 +118,15 @@ class DataProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_user_name(self, obj):
-        user_name = obj.camera.user.first_name + " " + obj.camera.user.last_name
+        user_name = obj.observatory.user.first_name + " " + obj.observatory.user.last_name
         return user_name
     
     def get_user(self, obj):
-        user = obj.camera.user.username
+        user = obj.observatory.user.username
         return user
     
     def get_camera(self, obj):
-        camera_name = obj.camera.camera_name
+        camera_name = obj.observatory.camera.prefix
         return camera_name
     
     def get_target_name(self, obj):

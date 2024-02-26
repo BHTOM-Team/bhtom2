@@ -119,6 +119,18 @@ class CreateObservatoryApi(views.APIView):
                     'approx_lim_mag':request.data.get('approx_lim_mag'),
                     'filters': request.data.get('filters'),
         }
+        camera_name= request.data.get('camera_name', None)
+        example_file= request.data.get('example_file',None)
+        gain= request.data.get('gain',None)
+        readout_noise= request.data.get('readout_noise',None)
+        binning= request.data.get('binning',None)
+        saturation_level= request.data.get('saturation_level',None)
+        pixel_scale= request.data.get('pixel_scale',None)
+        readout_speed= request.data.get('readout_speed',None)
+        pixel_size= request.data.get('pixel_size',None)
+        
+        if camera_name is None:
+           return Response("camera name can not be None", status=404)
 
         serializer_obs = ObservatorySerializers(data=obsData)
 
@@ -126,32 +138,21 @@ class CreateObservatoryApi(views.APIView):
             instance_obs = serializer_obs.create(serializer_obs.data)
             instance_obs.user = request.user
             instance_obs.save()
-
-            cameraData = { 'camera_name': request.data.get('camera_name'),
-                    'example_file': request.data.get('example_file'),
-                    'gain': request.data.get('gain'),
-                    'readout_noise': request.data.get('readout_noise'),
-                    'binning': request.data.get('binning'),
-                    'saturation_level': request.data.get('saturation_level'),
-                    'pixel_scale': request.data.get('pixel_scale'),
-                    'readout_speed': request.data.get('readout_speed'),
-                    'pixel_size': request.data.get('pixel_size'),
-                    'observatory': instance_obs
-            }
-
-            serializer_camera = CameraSerializer(data=cameraData)
-
-            if serializer_camera.is_valid():
-                serializer_camera = serializer_camera.create(serializer_camera.data)
-
-                serializer_camera.observatory = instance_obs
-                serializer_camera.user = request.user
-                serializer_camera.prefix = instance_obs.name + "_" + serializer_camera.camera_name
-                serializer_camera.save()
-                return Response({'Status': 'created'}, status=201)
-            else:
-                return Response(serializer_camera.errors, status=404)
-
+            camera = Camera(camera_name=camera_name, 
+                                example_file=example_file,
+                                gain=gain,
+                                readout_noise=readout_noise,
+                                binning=binning,
+                                saturation_level=saturation_level, 
+                                pixel_scale=pixel_scale,
+                                readout_speed=readout_speed,
+                                pixel_size=pixel_size,
+                                observatory=instance_obs,
+                                user=request.user,
+                                prefix=instance_obs.name + "_" + camera_name)
+            camera.save()
+            return Response({'Status': 'created'}, status=201)
+  
         return Response(serializer_obs.errors, status=404)
 
 
@@ -167,16 +168,8 @@ class UpdateObservatoryApi(views.APIView):
                 'lon': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'lat': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'calibration_flg': openapi.Schema(type=openapi.TYPE_BOOLEAN, format=openapi.FORMAT_INT32),
-                'example_file': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'comment': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'altitude': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
-                'gain': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
-                'readout_noise': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
-                'binning': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
-                'saturation_level': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
-                'pixel_scale': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
-                'readout_speed': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
-                'pixel_size': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'approx_lim_mag': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'filters': openapi.Schema(type=openapi.TYPE_STRING),
             },

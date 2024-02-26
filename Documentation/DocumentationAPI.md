@@ -406,16 +406,8 @@ The request to update an observatory should include the following parameters in 
 - `lon` (number, float, optional): The new longitude coordinate of the observatory.
 - `lat` (number, float, optional): The new latitude coordinate of the observatory.
 - `calibration_flg` (boolean, optional): A flag indicating whether the observatory is for calibration purposes only.
-- `example_file` (string, optional): A new example file associated with the observatory.
 - `comment` (string, optional): New additional comments or notes about the observatory.
 - `altitude` (number, float, optional): The new altitude of the observatory.
-- `gain` (number, float, optional): The new gain setting of the observatory's equipment.
-- `readout_noise` (number, float, optional): The new readout noise of the observatory's equipment.
-- `binning` (number, float, optional): The new binning factor used in observations.
-- `saturation_level` (number, float, optional): The new saturation level of the equipment.
-- `pixel_scale` (number, float, optional): The new pixel scale of the observatory's equipment.
-- `readout_speed` (number, float, optional): The new readout speed of the equipment.
-- `pixel_size` (number, float, optional): The new pixel size of the equipment.
 - `approx_lim_mag` (number, float, optional): The new approximate limiting magnitude of the observatory.
 - `filters` (string, optional): The new filters used in observations.
 
@@ -427,7 +419,6 @@ The request to update an observatory should include the following parameters in 
     "lon": 45.12345,
     "lat": -120.67890,
     "calibration_flg": true,
-    "example_file": "new_observatory_example.txt",
     "comment": "Updated observatory information."
 }
 ```
@@ -447,7 +438,6 @@ curl -X PATCH \
     "lon": 45.12345,
     "lat": -120.67890,
     "calibration_flg": true,
-    "example_file": "new_observatory_example.txt",
     "comment": "Updated observatory information."
   }' \
   https://bh-tom2.astrolabs.pl/api/observatory/update/
@@ -458,7 +448,7 @@ curl -X PATCH \
 You can use a Python script to update observatory information:
 
 ```bash
-python create_observatory.py --name "My Observatory" --lon 45.12345 --lat -120.67890 --calibration_flg --example_file "observatory_example.txt" --comment "This observatory is for calibration purposes" --token <yourToken> 
+python create_observatory.py --name "My Observatory" --lon 45.12345 --lat -120.67890 --calibration_flg  --comment "This observatory is for calibration purposes" --token <yourToken> 
 ```
 
 ## 5. Get Favourite Observatory
