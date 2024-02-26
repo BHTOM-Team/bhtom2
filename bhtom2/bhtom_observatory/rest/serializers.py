@@ -9,13 +9,20 @@ from bhtom_base.bhtom_dataproducts.models import DataProduct
 
 
 class CameraSerializer(serializers.ModelSerializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.context.get('request') and self.context['request'].method == 'POST':
+            # Set required fields for POST requests
+            self.fields['camera_name'].required = True
+            self.fields['observatory'].required = True
+            self.fields['user'].required = True
+
     class Meta:
         model = Camera
         fields = ('id', 'user', 'observatory', 'camera_name', 'active_flg', 'prefix', 'gain', 'example_file',
-          'readout_noise', 'binning', 'saturation_level', 'pixel_scale', 'readout_speed', 'pixel_size',
-          'date_time_keyword', 'time_keyword', 'exposure_time_keyword', 'mode_recognition_keyword',
-          'additional_info', 'created', 'modified')
-        
+                  'readout_noise', 'binning', 'saturation_level', 'pixel_scale', 'readout_speed', 'pixel_size',
+                  'date_time_keyword', 'time_keyword', 'exposure_time_keyword', 'mode_recognition_keyword',
+                  'additional_info', 'created', 'modified')
         read_only_fields = ['created', 'modified']
         extra_kwargs = {'created_start': {'read_only': True},
                         'created_end': {'read_only': True}}
@@ -25,8 +32,8 @@ class CameraSerializer(serializers.ModelSerializer):
         if unknown:
             raise serializers.ValidationError("Unknown field(s): {}".format(", ".join(unknown)))
         return data
-
-
+    
+    
 class ObservatorySerializers(serializers.ModelSerializer):
     class Meta:
         model = Observatory

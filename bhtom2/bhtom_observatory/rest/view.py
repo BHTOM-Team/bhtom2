@@ -3,6 +3,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from rest_framework import views
 from django.core import serializers
+from django.db import transaction
 
 import logging
 from django.db.models import Q
@@ -106,6 +107,8 @@ class CreateObservatoryApi(views.APIView):
         ),
     ],
     )
+    
+    @transaction.atomic
     def post(self, request, *args, **kwargs):
         obsData = { 'name': request.data.get('name'),
                     'lon':request.data.get('lon'),
@@ -116,7 +119,15 @@ class CreateObservatoryApi(views.APIView):
                     'approx_lim_mag':request.data.get('approx_lim_mag'),
                     'filters': request.data.get('filters'),
         }
-        cameraData = { 'camera_name': request.data.get('camera_name'),
+
+        serializer_obs = ObservatorySerializers(data=obsData)
+
+        if serializer_obs.is_valid():
+            instance_obs = serializer_obs.create(serializer_obs.data)
+            instance_obs.user = request.user
+            instance_obs.save()
+
+            cameraData = { 'camera_name': request.data.get('camera_name'),
                     'example_file': request.data.get('example_file'),
                     'gain': request.data.get('gain'),
                     'readout_noise': request.data.get('readout_noise'),
@@ -125,18 +136,10 @@ class CreateObservatoryApi(views.APIView):
                     'pixel_scale': request.data.get('pixel_scale'),
                     'readout_speed': request.data.get('readout_speed'),
                     'pixel_size': request.data.get('pixel_size'),
-        }
+                    'observatory': instance_obs
+            }
 
-
-        serializer_obs = ObservatorySerializers(data=obsData)
-        serializer_camera = CameraSerializer(data=cameraData)
-
-      
-        if serializer_obs.is_valid():
-            instance_obs = serializer_obs.create(serializer_obs.data)
-            instance_obs.user = request.user
-            instance_obs.save()
-            
+            serializer_camera = CameraSerializer(data=cameraData)
 
             if serializer_camera.is_valid():
                 serializer_camera = serializer_camera.create(serializer_camera.data)

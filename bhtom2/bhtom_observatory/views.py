@@ -178,10 +178,6 @@ class ObservatoryList(LoginRequiredMixin, ListView):
         context['prefix_user_obs'] = prefix_user_obs
         context['observatory_user_list'] = user_observatories
 
-
-
-        logger.error("HEEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRRRRRRRRrrr")
-        logger.error(context['prefix_user_obs'])
         return context
     
 
@@ -257,16 +253,14 @@ class ObservatoryDetailView(LoginRequiredMixin, DetailView):
  
 class ObservatoryFavoriteDetailView(LoginRequiredMixin, DetailView):
     model = Observatory
-    template_name = 'bhtom_observatory/observatory_detail.html'
+    template_name = 'bhtom_observatory/userObservatory_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         observatory = self.get_object()
         user = self.request.user
-        user_cameras = ObservatoryMatrix.objects.filter(user=user,active_flg=True).values_list('camera__id', flat=True)
-        cameras = Camera.objects.filter(observatory=observatory, id__in=user_cameras)
-        
-        context['cameras'] = cameras
+        obsMatrix = ObservatoryMatrix.objects.filter(user=user,active_flg=True, camera__observatory=observatory)
+        context['obsMatrix'] = obsMatrix
         return context
 
 class CreateUserObservatory(LoginRequiredMixin, FormView):
@@ -312,18 +306,20 @@ class CreateUserObservatory(LoginRequiredMixin, FormView):
 
 class DeleteUserObservatory(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('bhtom_observatory:list')
-    model = Observatory
+    model = ObservatoryMatrix
     template_name = 'bhtom_observatory/userObservatory_delete.html'
 
-    @transaction.atomic
+    def get_object(self, queryset=None):
+        obj = super(DeleteUserObservatory, self).get_object()
+        return obj
 
+    @transaction.atomic
     def form_valid(self, form):
-        observatory_id = self.kwargs.get('pk')
-        ObservatoryMatrix.objects.filter(camera__observatory_id=observatory_id).delete()
+        super().form_valid(form)
         messages.success(self.request, 'Successfully deleted')
+        logger.info("Delete observatory %s, user: %s" % (str(self.request), str(self.request.user)))
         return redirect(self.get_success_url())
     
-
 class UpdateUserObservatory(LoginRequiredMixin, UpdateView):
     template_name = 'bhtom_observatory/userObservatory_create.html'
     form_class = ObservatoryUserUpdateForm

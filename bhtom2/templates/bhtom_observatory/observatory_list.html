@@ -80,7 +80,6 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
           <thead>
             <tr>
               <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Observatory(ONAME)</th><th>Comment</th><th>Details</th>
-              {% comment %} <th style="pointer-events:none">Update</th>{% endcomment %}<th style="pointer-events:none">Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -99,12 +98,6 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
               <td>{{ observatory.comment|truncatechars:30  }}</td>
               <td>
                 <a href="{% url 'bhtom_observatory:detail-favorite' pk=observatory.id %}" title="Observatory details with favorite cameras" class="btn  btn-primary">Details</a>
-              </td>
-              {% comment %} <td>
-                <a href="{% url 'bhtom_observatory:userObservatory_update' pk=observatory.id %}" title="Update User observatory" class="btn  btn-primary">Edit</a>
-              </td> {% endcomment %}
-              <td>
-                <a href="{% url 'bhtom_observatory:userObservatory_delete' pk=observatory.id%}" title="Delete User observatory" class="btn  btn-danger">Delete</a>
               </td>
             </tr>
             {% endfor %}

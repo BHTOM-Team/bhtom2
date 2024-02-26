@@ -1,0 +1,155 @@
+{% extends 'bhtom_common/base.html' %}
+{% load comments bootstrap4 bhtom_common_extras targets_extras observation_extras dataproduct_extras static cache %}
+
+{% block title %}Observatory{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
+<link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}">
+{% endblock %}
+
+{% bootstrap_javascript jquery='True' %}
+
+{% block content %}
+<h1>Observatory: {{ observatory.name }}</h1>
+
+{% if observatory.calibration_flg %}
+<div class="col-md-6">
+    <h2> (Only Instrumental photometry file)</h2>
+</div>
+{% else %}
+<div class="row obs-details-container">
+    <div class="col-md-12">
+        <h2>Observatory details</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        Longitude
+                    </td>
+                    <td>
+                        {{ observatory.lon }} deg (East is positive)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Latitude
+                    </td>
+                    <td>
+                        {{ observatory.lat }} deg (North is positive)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Altitude
+                    </td>
+                    <td>
+                        {{ observatory.altitude }} m
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Approx. limit magnitude
+                    </td>
+                    <td>
+                        {{ observatory.approx_lim_mag }} mag
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Filters
+                    </td>
+                    <td>
+                        {{ observatory.filters }}
+                    </td>
+                </tr>
+                <tr style="width: 50px;">
+                    <td>
+                        Comment
+                    </td>
+                    <td><div class="multiline-text">
+                        {{ observatory.comment }}
+                    </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-12">
+        <h2>Cameras</h2>
+        {% for matrix in obsMatrix %}
+        <div class="camera-details">
+            <h3 style="color: white">Prefix: {{ matrix.camera.prefix }}</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <strong style="color: white">Camera Name:</strong>
+                    <span style="color: white">{{ matrix.camera.camera_name }}</span>
+                </div>
+                <div class="col-md-4">
+                    <strong style="color: white">Example File:</strong>
+                    <span style="color: white">{{ matrix.camera.example_file }}</span>
+                </div>
+                <div class="col-md-4">
+                    <strong style="color: white">Binning:</strong>
+                    <span style="color: white">{{ matrix.camera.binning }}</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <strong style="color: white">Gain:</strong>
+                    <span style="color: white">{{ matrix.camera.gain }}</span>
+                </div>
+                <div class="col-md-4">
+                    <strong style="color: white">Readout Noise:</strong>
+                    <span style="color: white">{{ matrix.camera.readout_noise }}</span>
+                </div>
+                <div class="col-md-4">
+                    <strong style="color: white">Saturation Level:</strong>
+                    <span style="color: white">{{ matrix.camera.saturation_level }}</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <strong style="color: white">Pixel Scale:</strong>
+                    <span style="color: white">{{ matrix.camera.pixel_scale }}</span>
+                </div>
+                <div class="col-md-4">
+                    <strong style="color: white">Pixel Size:</strong>
+                    <span style="color: white">{{ matrix.camera.pixel_size }}</span>
+                </div>
+                <div class="col-md-4">
+                    <strong style="color: white">Readout Speed:</strong>
+                    <span style="color: white">{{ matrix.camera.readout_speed }}</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <strong style="color: white">Comment:</strong>
+                    <span style="color: white">{{ matrix.comment }}</span>
+                </div>
+            </div>
+            <a href="{% url 'bhtom_observatory:userObservatory_update' pk=matrix.id %}" title="Update User observatory" class="btn  btn-primary">Edit</a>
+            <a href="{% url 'bhtom_observatory:userObservatory_delete' pk=matrix.id%}" title="Delete User observatory" class="btn  btn-danger">Delete</a>
+        </div>
+      
+        {% if not forloop.last %}
+        <hr>
+            <div class="line-separator"></div>
+        <hr>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+
+{% endblock %}
