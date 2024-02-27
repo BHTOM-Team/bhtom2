@@ -431,17 +431,13 @@ class DataDetailsView(DetailView):
 
                 try:
                     observatory_matrix = ObservatoryMatrix.objects.get(id=data_product.observatory.id)
-                    camera_matrix = ObservatoryMatrix.objects.get(id=data_product.camera.id)
-                    observatory = Observatory.objects.get(id=observatory_matrix.observatory.id)
-                    camera = Camera.objects.get(id=camera_matrix.camera.id)
-
-                except (ObservatoryMatrix.DoesNotExist, Observatory.DoesNotExist, Camera.DoesNotExist):
+                except (ObservatoryMatrix.DoesNotExist):
                     logger.error("Observatory not found")
                     messages.error(self.request, 'Observatory not found')
                     raise
 
-                context['observatory'] = observatory
-                context['camera'] = camera
+                context['observatory'] = observatory_matrix.camera.observatory
+                context['camera'] = observatory_matrix.camera
                 context['owner'] = observatory_matrix.user.first_name + ' ' + observatory_matrix.user.last_name
 
                 try:
