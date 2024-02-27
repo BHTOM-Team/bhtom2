@@ -9,6 +9,7 @@ function dataProductSelect() {
     var mjd = document.getElementById("mjd");
     var dryRun = document.getElementById("id_dryRun");
     var observatory = document.getElementById("id_observatory");
+    var camera = document.getElementById("id_camera");
     var filter = document.getElementById("id_filter");
     var observer = document.getElementById("id_observer");
 
@@ -16,6 +17,7 @@ function dataProductSelect() {
 
         mjd.setAttribute("required", true);
         observatory.setAttribute("required", true);
+        camera.setAttribute("required", true);
         filter.setAttribute("required", true);
         observer.setAttribute("required", true);
 
@@ -28,6 +30,7 @@ function dataProductSelect() {
     if (photometry_non_detaction === true) {
         mjd.setAttribute("required", true);
         observatory.setAttribute("required", true);
+        camera.setAttribute("required", true);
         filter.setAttribute("required", true);
         observer.setAttribute("required", true);
 
@@ -41,6 +44,7 @@ function dataProductSelect() {
     if (fits_file === true) {
 
         observatory.setAttribute("required", true);
+        camera.setAttribute("required", true);
         filter.setAttribute("required", true);
         observer.removeAttribute("required");
         mjd.removeAttribute("required");
@@ -55,6 +59,7 @@ function dataProductSelect() {
     if (spectroscopy === true) {
         observer.setAttribute("required",true);
         observatory.removeAttribute("required");
+        camera.removeAttribute("required");
         filter.removeAttribute("required");
         mjd.removeAttribute("required");
         dryRun.removeAttribute("required");

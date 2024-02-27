@@ -1,35 +1,90 @@
 {% extends 'bhtom_common/base.html' %}
 {% load bootstrap4 static %}
+
 {% block title %}Create observatory{% endblock %}
-<script src="{% static 'bhtom_observatory/create_observatory.js' %}"></script>
+
 {% block content %}
-<script src="{% static 'bhtom_observatory/create_observatory.js' %}"></script>
+
 {{ users }}
+
 {% if object %}
 <form action="{% url 'bhtom_observatory:update' object.id %}" enctype="multipart/form-data" method="POST">
-  {% else %}
-  <h4> Create a new Observatory. </h4>
-  <br>
-  <p>
-    Please fill the form below, check BHTOM manual for details.
-    Your entry has to be then activated by the Administrator.
-  </p>
-  <p>
-    The sample fits file is necessary for new observatories for verification of the automatic photometric processing.
-    Please refer to the BHTOM Manual or get in touch.
-  </p>
-  <form action="{% url 'bhtom_observatory:create' %}" enctype="multipart/form-data" method="POST">
-    {% endif %}
-    {% csrf_token %}
-    {% bootstrap_form form %}
-    {% buttons %}
-    <button type="submit" class="btn btn-primary">
-      {% if object %}
-      Update
-      {% else %}
-      Create Observatory
+{% else %}
+<h4>Create a new Observatory.</h4>
+<br>
+<p>
+  Please fill the form below, check BHTOM manual for details.
+  Your entry has to be then activated by the Administrator.
+</p>
+<p>
+  The sample fits file is necessary for new observatories for verification of the automatic photometric processing.
+  Please refer to the BHTOM Manual or get in touch.
+</p>
+<form action="{% url 'bhtom_observatory:create' %}" enctype="multipart/form-data" method="POST">
+{% endif %}
+  {% csrf_token %}
+  {% bootstrap_form form %}
+
+  <div id="alias-form-container">
+    <h3>Cameras</h3>
+    {{ cameras.management_form }}
+    <div id="camera-fields">
+      {% for form in cameras.forms %}
+          <div class="camera-form">
+            {% if form.instance.pk %}
+              {{ form.id }}
+            {% endif %}
+            
+            <div class="col-md-4 required-field">
+              {% bootstrap_field form.camera_name %}
+            </div>
+            <div class="col-md-4 required-field">
+              {% bootstrap_field form.example_file %}
+            </div>
+            <div class="col-md-4 required-field">
+              {% bootstrap_field form.binning %}
+            </div>
+            <div class="col-md-4 required-field">
+              {% bootstrap_field form.gain %}
+            </div>
+            <div class="col-md-4 required-field">
+              {% bootstrap_field form.readout_noise %}
+            </div>
+            <div class="col-md-4 required-field">
+              {% bootstrap_field form.saturation_level %}
+            </div>
+            <div class="col-md-4 required-field">
+              {% bootstrap_field form.pixel_scale %}
+            </div>
+            <div class="col-md-4 required-field">
+              {% bootstrap_field form.pixel_size %}
+            </div>
+            <div class="col-md-4 required-field">
+              {% bootstrap_field form.readout_speed %}
+            </div>
+            <hr>
+              <div class="line-separator"></div>
+            <hr>
+          </div>
+          
+          {% endfor %}
+    </div>
+    {% if object %}
+      <button type="button" class="btn btn-primary" id="add-camera">Add Camera</button>
+      <hr>
       {% endif %}
-    </button>
-    {% endbuttons %}
-  </form>
-  {% endblock %}
+  </div>
+
+  {% buttons %}
+  <button type="submit" class="btn btn-primary">
+    {% if object %}
+      Update
+    {% else %}
+      Create Observatory
+    {% endif %}
+  </button>
+  {% endbuttons %}
+
+</form>
+<script src="{% static 'bhtom_observatory/create_observatory.js' %}"></script>
+{% endblock %}

@@ -33,3 +33,12 @@
     <input type="submit" class="btn btn-primary" value="Upload" name="data_product_form_from_user">
     {% endbuttons %}
 </form>
+
+
+<script>
+    var userId;
+    document.addEventListener("DOMContentLoaded", function() {
+        userId = '{{ data_product_form_from_user.initial.user.id }}'; 
+    });
+</script>
+<script src="{% static 'bhtom_observatory/get_favorite_cameras.js' %}"></script>

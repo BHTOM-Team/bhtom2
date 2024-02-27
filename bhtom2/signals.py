@@ -7,7 +7,7 @@ from bhtom2.utils.coordinate_utils import fill_galactic_coordinates
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.core.mail import send_mail
-from bhtom2.bhtom_observatory.models import Observatory
+from bhtom2.bhtom_observatory.models import Observatory,Camera
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: Signals')
 
@@ -36,20 +36,20 @@ def send_activation_email(sender, instance, **kwargs):
                 logger.error('Activate user error, error while send mail: ' + str(e))
 
 
-@receiver(pre_save, sender=Observatory)
-def Observatory_pre_save(sender, instance, **kwargs):
+@receiver(pre_save, sender=Camera)
+def Camera_pre_save(sender, instance, **kwargs):
     try:
-        observatory_old = Observatory.objects.get(id=instance.pk)
-    except Observatory.DoesNotExist:
-        observatory_old = None
+        camera_old = Camera.objects.get(id=instance.pk)
+    except Camera.DoesNotExist:
+        camera_old = None
 
-    if observatory_old is not None:
-        if observatory_old.active_flg is False and instance.active_flg is True and observatory_old.user_id is not None:
+    if camera_old is not None:
+        if camera_old.active_flg is False and instance.active_flg is True and camera_old.user_id is not None:
             try:
-                user = User.objects.get(id=observatory_old.user_id)
+                user = User.objects.get(id=camera_old.user_id)
                 send_mail(settings.EMAILTEXT_ACTIVATEOBSERVATORY_TITLE, settings.EMAILTEXT_ACTIVATEOBSERVATORY,
                           settings.EMAIL_HOST_USER,
                           [user.email], fail_silently=False)
-                logger.info('Activate observatory' + instance.name + ', Send mail: ' + user.email)
+                logger.info('Activate camera' + instance.camera_name + ', Send mail: ' + user.email)
             except Exception as e:
-                logger.info('Activate observatory error: ' + str(e))
+                logger.info('Activate camera error: ' + str(e))

@@ -87,51 +87,59 @@
 <div class="row">
     <div class="col-md-12">
         <h2>Cameras</h2>
-        {% for camera in cameras %}
+        {% for matrix in obsMatrix %}
         <div class="camera-details">
-            <h3 style="color: white">Prefix: {{ camera.prefix }}</h3>
+            <h3 style="color: white">Prefix: {{ matrix.camera.prefix }}</h3>
             <div class="row">
                 <div class="col-md-4">
                     <strong style="color: white">Camera Name:</strong>
-                    <span style="color: white">{{ camera.camera_name }}</span>
+                    <span style="color: white">{{ matrix.camera.camera_name }}</span>
                 </div>
                 <div class="col-md-4">
                     <strong style="color: white">Example File:</strong>
-                    <span style="color: white">{{ camera.example_file }}</span>
+                    <span style="color: white">{{ matrix.camera.example_file }}</span>
                 </div>
                 <div class="col-md-4">
                     <strong style="color: white">Binning:</strong>
-                    <span style="color: white">{{ camera.binning }}</span>
+                    <span style="color: white">{{ matrix.camera.binning }}</span>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-4">
                     <strong style="color: white">Gain:</strong>
-                    <span style="color: white">{{ camera.gain }}</span>
+                    <span style="color: white">{{ matrix.camera.gain }}</span>
                 </div>
                 <div class="col-md-4">
                     <strong style="color: white">Readout Noise:</strong>
-                    <span style="color: white">{{ camera.readout_noise }}</span>
+                    <span style="color: white">{{ matrix.camera.readout_noise }}</span>
                 </div>
                 <div class="col-md-4">
                     <strong style="color: white">Saturation Level:</strong>
-                    <span style="color: white">{{ camera.saturation_level }}</span>
+                    <span style="color: white">{{ matrix.camera.saturation_level }}</span>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-4">
                     <strong style="color: white">Pixel Scale:</strong>
-                    <span style="color: white">{{ camera.pixel_scale }}</span>
+                    <span style="color: white">{{ matrix.camera.pixel_scale }}</span>
                 </div>
                 <div class="col-md-4">
                     <strong style="color: white">Pixel Size:</strong>
-                    <span style="color: white">{{ camera.pixel_size }}</span>
+                    <span style="color: white">{{ matrix.camera.pixel_size }}</span>
                 </div>
                 <div class="col-md-4">
                     <strong style="color: white">Readout Speed:</strong>
-                    <span style="color: white">{{ camera.readout_speed }}</span>
+                    <span style="color: white">{{ matrix.camera.readout_speed }}</span>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <strong style="color: white">Comment:</strong>
+                    <span style="color: white">{{ matrix.comment }}</span>
+                </div>
+            </div>
+            <a href="{% url 'bhtom_observatory:userObservatory_update' pk=matrix.id %}" title="Update User observatory" class="btn  btn-primary">Edit</a>
+            <a href="{% url 'bhtom_observatory:userObservatory_delete' pk=matrix.id%}" title="Delete User observatory" class="btn  btn-danger">Delete</a>
         </div>
       
         {% if not forloop.last %}

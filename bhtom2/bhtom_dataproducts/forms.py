@@ -4,7 +4,7 @@ from django.conf import settings
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_observations.models import ObservationRecord
 from bhtom_base.bhtom_targets.models import Target
-from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix
+from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix, Camera
 from bhtom2.bhtom_calibration.models import Catalogs
 from bhtom_base.bhtom_dataproducts.models import DataProductGroup_user
 
@@ -14,11 +14,16 @@ logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_dataproducts.forms')
 class ObservatoryChoiceField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj):
-        if obj.observatory.calibration_flg:
-            return '{name} ({prefix}) (Only Instrumental photometry file)'.format(name=obj.observatory.name,
-                                                                                  prefix=obj.observatory.prefix)
+        if obj.calibration_flg:
+            return '{name} (Only Instrumental photometry file)'.format(name=obj.name)
         else:
-            return '{name} ({prefix})'.format(name=obj.observatory.name, prefix=obj.observatory.prefix)
+            return '{name}'.format(name=obj.name)
+
+class CameraChoiceField(forms.ModelChoiceField):
+
+    def label_from_instance(self, obj):
+            return obj.camera_name
+      
 
 
 class GroupChoiceField(forms.ModelChoiceField):
@@ -60,7 +65,7 @@ class DataProductUploadForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        user = kwargs['initial']['user']
+        self.user = kwargs['initial']['user']
         filter = {}
         filter['no'] = 'Auto'
         catalogs = Catalogs.objects.filter(isActive=True)
@@ -74,19 +79,33 @@ class DataProductUploadForm(forms.Form):
         self.fields['mjd'] = forms.FloatField(
             widget=forms.NumberInput(attrs={'id': 'mjd'}),
             required=False,
-            label="MJD OBS *",
+            label="MJD OBS *"
         )
 
         self.fields['observer'] = forms.CharField(
-            initial=user.first_name + " " + user.last_name,
+            initial= self.user.first_name + " " +  self.user.last_name,
             required=False,
-            label='Observer\'s Name *',
+            label='Observer\'s Name *'
         )
 
+        user_cameras = ObservatoryMatrix.objects.filter(user=self.user).values_list('camera__id', flat=True)
+        user_active_cameras = Camera.objects.filter(id__in=user_cameras, active_flg=True)
+        users_obs_id = Camera.objects.filter(id__in=user_cameras, active_flg=True).values_list('observatory_id', flat=True)
+
+
+        user_observatories = Observatory.objects.filter(id__in=users_obs_id)
         self.fields['observatory'] = ObservatoryChoiceField(
-            queryset=ObservatoryMatrix.objects.filter(user=user, active_flg=True).order_by('observatory__name'),
+            queryset=user_observatories,
             widget=forms.Select(),
             required=False,
+            label='Observatory*'
+        )
+
+        self.fields['camera'] = CameraChoiceField(
+            queryset=user_active_cameras,
+            widget=forms.Select(),
+            required=False,
+            label='Camera*'
             
         )
         self.fields['filter'] = forms.ChoiceField(

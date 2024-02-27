@@ -16,7 +16,7 @@ from bhtom_base.bhtom_dataproducts.models import DataProduct, DataProductGroup, 
 from bhtom_base.bhtom_targets.models import Target
 from .forms import DataProductUploadForm
 from ..bhtom_calibration.models import Calibration_data
-from ..bhtom_observatory.models import ObservatoryMatrix
+from ..bhtom_observatory.models import ObservatoryMatrix, Camera
 from bhtom2.bhtom_observatory.models import Observatory
 from bhtom2.external_service.connectWSDB import WSDBConnection
 from rest_framework.views import APIView
@@ -37,8 +37,15 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
     View that handles manual upload of DataProducts. Requires authentication.
     """
     form_class = DataProductUploadForm
+    template_name = 'bhtom_dataproducts/partials/upload_dataproduct.html'
     MAX_FILES: int = 5
 
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user'] = self.request.user
+        return context
+    
     def get_form_kwargs(self):
         kwargs = super(DataProductUploadView, self).get_form_kwargs()
         kwargs['initial'] = {'user': self.request.user}
@@ -56,7 +63,8 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         else:
             observation_record = None
         dp_type = form.cleaned_data['data_product_type']
-        observatoryMatrix = form.cleaned_data['observatory']
+        observatory = form.cleaned_data['observatory']
+        camera = form.cleaned_data['camera']
         observation_filter = form.cleaned_data['filter']
         mjd = form.cleaned_data['mjd']
         match_dist = 0.5
@@ -65,6 +73,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         observer = form.cleaned_data['observer']
         # group = form.cleaned_data['group']
         group = None
+        prefix = None
         user = self.request.user
         files = self.request.FILES.getlist('files')
         data_product_files = {}
@@ -81,16 +90,21 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             logger.error('upload max: %s %s' % (str(self.MAX_FILES), str(target)))
             messages.error(self.request, f'You can upload max. {self.MAX_FILES} files at once')
             return redirect(form.cleaned_data.get('referrer', '/'))
-
-        if dp_type == 'fits_file':
+        if dp_type == 'photometry' or dp_type == 'fits_file':
             try:
-                observatory = Observatory.objects.get(id=observatoryMatrix.observatory_id)
-            except Exception as e:
-                messages.error(self.request, f"Observatory doesn't exist")
-                return redirect(form.cleaned_data.get('referrer', '/'))
-            if observatory.calibration_flg is True:
-                messages.error(self.request, 'Observatory can calibration only')
-                return redirect(form.cleaned_data.get('referrer', '/'))
+                camera = Camera.objects.get(id=camera.id)
+                observatory = Observatory.objects.get(id=observatory.id)
+                prefix = camera.prefix
+            except Camera.DoesNotExist:
+                    messages.error(self.request, f"Camera doesn't exist")
+                    return redirect(form.cleaned_data.get('referrer', '/'))
+            except Observatory.DoesNotExist: 
+                    messages.error(self.request, f"Observatory doesn't exist")
+                    return redirect(form.cleaned_data.get('referrer', '/'))
+
+        if dp_type == 'fits_file' and  observatory.calibration_flg is True:
+            messages.error(self.request, 'Observatory can calibration only')
+            return redirect(form.cleaned_data.get('referrer', '/'))
 
         if group is not None:
             group = group.group.name
@@ -103,7 +117,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             'comment': comment,
             'dry_run': dry_run,
             'no_plot': False,
-            'observatory': observatoryMatrix,
+            'observatory_prefix': prefix,
             'mjd': mjd,
             'group': group,
             'observer': observer,
@@ -417,13 +431,17 @@ class DataDetailsView(DetailView):
 
                 try:
                     observatory_matrix = ObservatoryMatrix.objects.get(id=data_product.observatory.id)
+                    camera_matrix = ObservatoryMatrix.objects.get(id=data_product.camera.id)
                     observatory = Observatory.objects.get(id=observatory_matrix.observatory.id)
-                except (ObservatoryMatrix.DoesNotExist, Observatory.DoesNotExist):
+                    camera = Camera.objects.get(id=camera_matrix.camera.id)
+
+                except (ObservatoryMatrix.DoesNotExist, Observatory.DoesNotExist, Camera.DoesNotExist):
                     logger.error("Observatory not found")
                     messages.error(self.request, 'Observatory not found')
                     raise
 
                 context['observatory'] = observatory
+                context['camera'] = camera
                 context['owner'] = observatory_matrix.user.first_name + ' ' + observatory_matrix.user.last_name
 
                 try:

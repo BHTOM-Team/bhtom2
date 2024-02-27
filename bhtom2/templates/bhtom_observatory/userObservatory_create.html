@@ -1,35 +1,36 @@
 {% extends 'bhtom_common/base.html' %}
-{% load bootstrap4 %}
+{% load bootstrap4 static %}
 {% block title %}Add observatory{% endblock %}
 {% block content %}
 {{ users }}
-
 {% if object %}
-<form action="{% url 'bhtom_observatory:userObservatory_update' object.id %}" enctype="multipart/form-data" method="POST">
+    <form action="{% url 'bhtom_observatory:userObservatory_update' object.id %}" enctype="multipart/form-data" method="POST">
 {% else %}
-  <h4> Add a new Observatory to your list.
-  </h4><p>
-      Here you can add a new observatory to your list in two ways.
-      <br>
-      You can choose an observatory from the list of already registered ones.
-      <br>
-      If your observatory is not yet registered you can create a new entry. 
+    <h4> Add a new Observatory to your list.</h4>
+    <p>
+        Here you can add a new observatory to your list in two ways.<br>
+        You can choose an observatory from the list of already registered ones.<br>
+        If your observatory is not yet registered you can create a new entry. 
     </p>
 
-<form action="{% url 'bhtom_observatory:userObservatory_create' %}" enctype="multipart/form-data" method="POST">
+    <form action="{% url 'bhtom_observatory:userObservatory_create' %}" enctype="multipart/form-data" method="POST">
 {% endif %}
+
 {% csrf_token %}
 {% bootstrap_form form %}
-{% buttons %}
-  {% if object %}
-    <button type="submit" class="btn btn-primary" title="Update">Update</button>
-  {% else %}
-    <button type="submit" class="btn btn-primary" title="Add this Observatory to my list"> Add to my list</button>
-    <p>
-      <hr>
-    <a href="{% url 'bhtom_observatory:create' %}" title="Create new Observatory (if not on the list)" class="btn btn-primary">Create new Observatory</a>
-  {% endif %}
 
+{% buttons %}
+    {% if object %}
+        <button type="submit" class="btn btn-primary" title="Update">Update</button>
+    {% else %}
+        <button type="submit" class="btn btn-primary" title="Add this Observatory to my list">Add to my list</button>
+        <hr>
+        <a href="{% url 'bhtom_observatory:create' %}" title="Create new Observatory (if not on the list)" class="btn btn-primary">Create new Observatory</a>
+    {% endif %}
 {% endbuttons %}
 </form>
+<script>
+    var userId = '{{ request.user.id }}';
+</script>
+<script src="{% static 'bhtom_observatory/get_cameras.js' %}"></script>
 {% endblock %}

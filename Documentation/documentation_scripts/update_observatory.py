@@ -22,7 +22,6 @@ if __name__ == "__main__":
     parser.add_argument("--lon", type=float, help="New longitude coordinate")
     parser.add_argument("--lat", type=float, help="New latitude coordinate")
     parser.add_argument("--calibration_flg", action="store_true", help="Flag for calibration purposes")
-    parser.add_argument("--example_file", help="New example file associated with the observatory")
     parser.add_argument("--comment", help="New additional comments or notes")
 
     args = parser.parse_args()
@@ -31,7 +30,6 @@ if __name__ == "__main__":
         "lon": args.lon,
         "lat": args.lat,
         "calibration_flg": args.calibration_flg,
-        "example_file": args.example_file,
         "comment": args.comment,
     }
 
