@@ -840,7 +840,6 @@ def microlensing_for_target_parallax(context, target, sel, init_t0, init_te, ini
         return {
             'selected_filters': selected_filters,
             'sel': sel,
-            'error_message': error_message,
             'target': target,
             'plot_div': div,
             'init_t0': init_t0,
