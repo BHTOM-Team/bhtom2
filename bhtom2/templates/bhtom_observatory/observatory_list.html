@@ -50,7 +50,10 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
               <td>{{ observatory.lat }}</td>
               <td>
                 {% if observatory.id in prefix_obs %}
-                  {{ prefix_obs|get_item:observatory.id }}
+                  {% for item in prefix_obs|get_item:observatory.id %}
+                      {{ item }}
+                      {% if not forloop.last %},{% endif %}
+                  {% endfor %}
                 {% else %}
                     No data available
                 {% endif %}
@@ -90,7 +93,10 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
               <td>{{ observatory.lat }}</td>
               <td>
                 {% if observatory.id in prefix_user_obs %}
-                {{ prefix_user_obs|get_item:observatory.id }}
+                  {% for item in prefix_user_obs|get_item:observatory.id %}
+                      {{ item }}
+                      {% if not forloop.last %},{% endif %}
+                  {% endfor %}
                 {% else %}
                     No data available
                 {% endif %}
