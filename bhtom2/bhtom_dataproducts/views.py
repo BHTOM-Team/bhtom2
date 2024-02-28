@@ -117,7 +117,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             'comment': comment,
             'dry_run': dry_run,
             'no_plot': False,
-            'observatory_prefix': prefix,
+            'observatory_name': prefix,
             'mjd': mjd,
             'group': group,
             'observer': observer,
