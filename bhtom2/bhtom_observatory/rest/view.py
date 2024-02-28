@@ -65,7 +65,7 @@ class GetObservatoryApi(views.APIView):
             query &= Q(created__lte=created_end)
 
         queryset = Observatory.objects.filter(query).order_by('created')
-        serialized_queryset = serializers.serialize('json', queryset)
+        serialized_queryset =  self.serializer_class(queryset,many=True).data
         return Response(serialized_queryset, status=200)
 
 

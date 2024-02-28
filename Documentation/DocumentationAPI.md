@@ -77,7 +77,7 @@ or
 
 - `--token token`: authentication token for the BHTOM user, which will be associated to the data points uploaded
 - `--target target`: Target destination for the uploaded files
-- `--observatory observatory`: name of the observatory/facility
+- `--observatory_name observatory`: ONAME (prefix name of observatory/camera)
 
 <!-- - `<files>`: Comma-separated list of files to be uploaded -->
 <!-- TODO: LW: check photometry vs SExtractor, we need both: WILL BE ADDED -->
@@ -95,7 +95,7 @@ or
 ### Example Usage 1
 
 ```bash
-python upload_files_script.py --token 123_my_user_name_token_456 --observatory "my telescope" --target Gaia22bpl --directory path_to_files/
+python upload_files_script.py --token 123_my_user_name_token_456 --observatory_name"my telescope" --target Gaia22bpl --directory path_to_files/
 ```
 
 ### Example Usage 2

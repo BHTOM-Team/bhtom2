@@ -35,14 +35,22 @@ class CameraSerializer(serializers.ModelSerializer):
     
 
 class ObservatorySerializers(serializers.ModelSerializer):
+    cameras = serializers.SerializerMethodField()
+
+
     class Meta:
         model = Observatory
         fields = ('id', 'name', 'lon', 'lat', 'altitude', 'calibration_flg', 'comment',
-                   'approx_lim_mag', 'filters', 'created', 'modified')
+                   'approx_lim_mag', 'filters', 'created', 'modified', 'cameras' )
         read_only_fields = ['created', 'modified']
         extra_kwargs = {'created_start': {'read_only': True},
                         'created_end': {'read_only': True}}
-
+    
+    def get_cameras(self, obj):
+        cameras = Camera.objects.filter(observatory=obj)
+        serializer = CameraSerializer(cameras, many=True)
+        return serializer.data
+    
     def validate(self, data):
         unknown = set(self.initial_data) - set(self.fields)
         if unknown:
@@ -112,7 +120,8 @@ class DataProductSerializer(serializers.ModelSerializer):
     target_name = serializers.SerializerMethodField()
     target = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
-    
+    observatory_name = serializers.SerializerMethodField()
+    observatory = serializers.SerializerMethodField()
     class Meta:
         model = DataProduct
         fields = '__all__'
@@ -136,3 +145,12 @@ class DataProductSerializer(serializers.ModelSerializer):
     def get_target(self, obj):
         target = obj.target.id if obj.target else None
         return target
+    
+       
+    def get_observatory_name(self, obj):
+        observatory_name = obj.observatory.camera.observatory.name
+        return observatory_name
+    
+    def get_observatory(self, obj):
+        observatory= obj.observatory.camera.observatory.id
+        return observatory

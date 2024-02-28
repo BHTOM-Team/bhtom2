@@ -156,7 +156,9 @@ class ObservatoryList(LoginRequiredMixin, ListView):
                 camera = Camera.objects.get(observatory=observatory)
                 prefix_obs[observatory.id] = camera.prefix
             else:
-                prefix_obs[observatory.id] = "Check details"
+                cameras = Camera.objects.filter(observatory=observatory)
+                onames = [camera.prefix for camera in cameras]
+                prefix_obs[observatory.id] = onames
 
         context['observatory_list'] = observatories_with_active_cameras
         context['prefix_obs'] = prefix_obs
@@ -174,7 +176,9 @@ class ObservatoryList(LoginRequiredMixin, ListView):
                 obsMatrix = ObservatoryMatrix.objects.get(user=self.request.user, camera__observatory= obs)
                 prefix_user_obs[obs.id] = obsMatrix.camera.prefix
             else:
-                prefix_user_obs[obs.id] = "Check details" 
+                obsMatrix = ObservatoryMatrix.objects.filter(user=self.request.user, camera__observatory= obs)
+                onames = [obs.camera.prefix for obs in obsMatrix]
+                prefix_user_obs[obs.id] = onames
         context['prefix_user_obs'] = prefix_user_obs
         context['observatory_user_list'] = user_observatories
 
