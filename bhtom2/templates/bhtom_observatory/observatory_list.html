@@ -2,8 +2,8 @@
 {% load comments bootstrap4 bhtom_common_extras targets_extras observation_extras dataproduct_extras static cache %}
 {% block title %}Observatory {% endblock %}
 {% block additional_css %}
-    <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
-    <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}">
+    {% comment %} <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}"> {% endcomment %}
+    {% comment %} <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}"> {% endcomment %}
 {% endblock %}
 
 {% bootstrap_javascript jquery='True' %}
@@ -32,7 +32,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
       <div class="tab-pane" id="all">
         <script type="text/javascript" src="{% static 'bhtom/sorttable.js' %}"></script>
         <a href="{% url 'bhtom_observatory:userObservatory_create' %}" title="Add new observatory" class="btn btn-outline-primary">Add new observatory</a>
-          <table class="table table-striped sortable">
+          <table id="observatories-table" class="table table-hover sortable">
           <thead>
             <tr>
               <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Observatory(ONAME)</th><th>Comment</th><th>Only Instrumental photometry file</th>
@@ -79,7 +79,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
         </table>
       </div>
       <div class="tab-pane active" id="user">
-       <table class="table table-striped sortable">
+       <table  id="user-observatories-table" class="table table-hover sortable">
           <thead>
             <tr>
               <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Observatory(ONAME)</th><th>Comment</th><th>Details</th>
@@ -113,4 +113,20 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
   </div>
     </div>
 </div>
+
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.js"></script>
+<script>
+  $(document).ready(function() {
+      $('#observatories-table').DataTable({
+          "paging": false,
+          "searching": false
+      });
+      $('#user-observatories-table').DataTable({
+        "paging": false,
+        "searching": false
+    });
+  });
+  </script>
+  
+
 {% endblock %}
