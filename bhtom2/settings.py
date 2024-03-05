@@ -333,7 +333,7 @@ TARGET_TYPE = 'SIDEREAL'
 # longer be valid, and may cause issues unless the offending records are modified.
 DATA_PRODUCT_TYPES = {
     'photometry': ('photometry', ' Photometry - SExtractor format'),
-    'photometry_nondetection': ('photometry_nondetection', 'Photometry - Non-Detections'),
+    'photometry_csv': ('photometry_csv', 'Photometry - CSV'),
     'fits_file': ('fits_file', 'FITS File'),
     'spectroscopy': ('spectroscopy', 'Spectroscopy'),
     # 'image_file': ('image_file', 'Image File')
