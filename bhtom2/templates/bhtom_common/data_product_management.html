@@ -33,7 +33,9 @@
                             <h4>Delay: 7 days</h4>
                             <div class="mb-3"> 
                                 <button type="submit" class="btn btn-outline-primary" name="reload">Reload Photometry</button> 
+                                <button type="submit" class="btn btn-outline-primary ml-1" name="update">Reload Fits</button>
                             </div>
+
                             <table id="photometry-table" class="table table-hover">
                                 <thead>
                                 <tr>
@@ -159,9 +161,8 @@
                     <div class="tab-pane" id="fits_s">
                         <form id="data-form" action="{% url 'bhtom_common:reload_s_fits' %}" method="POST">
                             {% csrf_token %}
-                            <h4>Delay: 7 days</h4>
+                            <h4>Delay: 3 days</h4>
                             <div class="mb-3">
-                            
                                 <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Restart Fits
                                 </button>
                             </div>
