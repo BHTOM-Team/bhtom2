@@ -1,10 +1,9 @@
 function dataProductSelect() {
 
     var photometry = document.getElementById("id_data_product_type_0").checked;
-    var photometry_non_detaction = document.getElementById("id_data_product_type_1").checked;
+    var photometry_csv = document.getElementById("id_data_product_type_1").checked;
     var fits_file = document.getElementById("id_data_product_type_2").checked;
     var spectroscopy = document.getElementById("id_data_product_type_3").checked;
-    // var image = document.getElementById("id_data_product_type_4").checked;
 
     var mjd = document.getElementById("mjd");
     var dryRun = document.getElementById("id_dryRun");
@@ -24,21 +23,25 @@ function dataProductSelect() {
         mjd.parentElement.style.display = "block";
         dryRun.parentElement.style.display = "block";
         observatory.parentElement.style.display = "block";
+        camera.parentElement.style.display = "block";
         filter.parentElement.style.display = "block";
         observer.parentElement.style.display = "block";
     } 
-    if (photometry_non_detaction === true) {
-        mjd.setAttribute("required", true);
+    if (photometry_csv === true) {
         observatory.setAttribute("required", true);
         camera.setAttribute("required", true);
-        filter.setAttribute("required", true);
         observer.setAttribute("required", true);
 
-        mjd.parentElement.style.display = "block";
-        dryRun.parentElement.style.display = "block";
+        mjd.removeAttribute("required");
+        filter.removeAttribute("required");
+        dryRun.removeAttribute("required");
+
+        mjd.parentElement.style.display = "none";
+        dryRun.parentElement.style.display = "none";
         observatory.parentElement.style.display = "block";
-        filter.parentElement.style.display = "block";
+        filter.parentElement.style.display = "none";
         observer.parentElement.style.display = "block";
+        camera.parentElement.style.display = "block";
     }
 
     if (fits_file === true) {
@@ -46,12 +49,13 @@ function dataProductSelect() {
         observatory.setAttribute("required", true);
         camera.setAttribute("required", true);
         filter.setAttribute("required", true);
-        observer.removeAttribute("required");
+        observer.setAttribute("required", true);
         mjd.removeAttribute("required");
 
         mjd.parentElement.style.display = "none";
         dryRun.parentElement.style.display = "block";
         observatory.parentElement.style.display = "block";
+        camera.parentElement.style.display = "block";
         filter.parentElement.style.display = "block";
         observer.parentElement.style.display = "block";
     }
@@ -67,31 +71,10 @@ function dataProductSelect() {
         mjd.parentElement.style.display = "none";
         dryRun.parentElement.style.display = "none";
         observatory.parentElement.style.display = "none";
+        camera.parentElement.style.display = "none";
         filter.parentElement.style.display = "none";
         observer.parentElement.style.display = "block";
 
     }
-
-    // if (data_type_photometry_asas === true) {
-
-    //     mjd.removeAttribute("required");
-    //     ExpTime.removeAttribute("required");
-    //     matchDist.removeAttribute("required");
-    //     observatory.removeAttribute("required");
-    //     filter.removeAttribute("required");
-    //     observer.removeAttribute("required");
-    //     facility.removeAttribute("required");
-
-    //     mjd.parentElement.style.display = "none";
-    //     ExpTime.parentElement.style.display = "none";
-    //     matchDist.parentElement.style.display = "none";
-    //     dryRun.parentElement.style.display = "none";
-    //     observatory.parentElement.style.display = "none";
-    //     filter.parentElement.style.display = "none";
-    //     observer.parentElement.style.display = "none";
-    //     facility.parentElement.style.display = "none";
-
-    // }
-
 }
 

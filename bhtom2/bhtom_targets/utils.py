@@ -133,14 +133,11 @@ def import_targets(targets):
                         ra: str = catalog_data["ra"]
                         dec: str = catalog_data["dec"]
                         disc: str = catalog_data["discovery_date"]
-                        description: str = catalog_data["classification"]
-                        importance = str(9.99)  # by default importing from Gaia Alerts gets 9.99
-                        cadence = str(1.0)  # default cadence
-
-                        if 'type' in target_fields:
-                            targetType = target_fields['type']
-                        else:
-                            targetType = Target.SIDEREAL
+                        
+                        description = target_fields.get('description', '')
+                        importance = target_fields.get('importance', str(9.99)) # if not provided by user default is 9.99
+                        cadence = target_fields.get('cadence', str(1.0)) # if not provided by user default is 1.0
+                        targetType = target_fields.get('type', Target.SIDEREAL)
 
                         target_fields = {"name": gaia_alerts_name, "ra": ra, "dec": dec, "epoch": 2000.0,
                                          "discovery_date": disc, "importance": importance, "cadence": cadence,

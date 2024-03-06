@@ -2,9 +2,13 @@
 {% load bootstrap4 bhtom_common_extras static %}
 {% block title %}Admin Data{% endblock %}
 {% block additional_css %}
-    <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
-    <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}">
+    {% comment %} <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}"> {% endcomment %}
+    {% comment %} <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css"> {% endcomment %}
 {% endblock %}
+
+{% bootstrap_javascript jquery='True' %}
+
 {% block content %}
     {% if request.user.is_staff %}
 
@@ -27,12 +31,13 @@
                         <form id="data-form" action="{% url 'bhtom_common:reload_photometry' %}" method="POST">
                             {% csrf_token %}
                             <h4>Delay: 7 days</h4>
-                            <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Reload Photometry
-                            </button>
-                            <table class="table table-hover sortable">
+                            <div class="mb-3"> 
+                                <button type="submit" class="btn btn-outline-primary" name="reload">Reload Photometry</button> 
+                            </div>
+                            <table id="photometry-table" class="table table-hover">
                                 <thead>
                                 <tr>
-                                    <th></th>
+                                    <th><input type="checkbox" id="selectAllPhotometry" onclick="toggleSelectAllPhotometry('selected-photometry')"></th>
                                     <th>Data</th>
                                     <th>Created</th>
                                     <th>Observatory</th>
@@ -41,7 +46,6 @@
                                     <th>Data Type</th>
                                     <th>Status</th>
                                     <th>Status Message</th>
-                                    <th></th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -76,7 +80,6 @@
                                             {% endif %}
                                         </td>
                                         <td>{{ data.calibData.status_message }}</td>
-                                        <td></td>
 
                                     </tr>
                                 {% empty %}
@@ -93,16 +96,17 @@
                     <div class="tab-pane active" id="fits">
                         <form id="data-form" action="{% url 'bhtom_common:reload_fits' %}" method="POST">
                             {% csrf_token %}
-
-                            <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Reload Fits
-                            </button>
-                            <button type="submit" class="btn btn-outline-primary ml-1" name="update">Update Fits
-                            </button>
-
-                            <table class="table table-hover sortable">
+                            <div class="mb-3">
+                            
+                                <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Reload Fits
+                                </button>
+                                <button type="submit" class="btn btn-outline-primary ml-1" name="update">Update Fits
+                                </button>
+                            </div>
+                            <table id="fits-error-table" class="table table-hover">
                                 <thead>
                                 <tr>
-                                    <th></th>
+                                    <th><input type="checkbox" id="selectAllFits" onclick="toggleSelectAllFitsError('selected-fits')"></th>
                                     <th>Data</th>
                                     <th>Created</th>
                                     <th>Observatory</th>
@@ -156,12 +160,15 @@
                         <form id="data-form" action="{% url 'bhtom_common:reload_s_fits' %}" method="POST">
                             {% csrf_token %}
                             <h4>Delay: 7 days</h4>
-                            <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Restart Fits
-                            </button>
-                            <table class="table table-hover sortable">
+                            <div class="mb-3">
+                            
+                                <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Restart Fits
+                                </button>
+                            </div>
+                            <table id="fits-table"  class="table table-hover">
                                 <thead>
                                 <tr>
-                                    <th></th>
+                                    <th><input type="checkbox" id="selectAllFitsS" onclick="toggleSelectAllFitsS('selected-s-fits')"></th>
                                     <th>Data</th>
                                     <th>Created</th>
                                     <th>Observatory</th>
@@ -215,13 +222,42 @@
             </div>
         </div>
     {% endif %}
-{% endblock %}
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#photometry-table').DataTable({ "searching": false});
+            $('#fits-error-table').DataTable({ "searching": false});
+            $('#fits-table').DataTable({ "searching": false});
+        });
+    </script>
+    <script>
+        function toggleSelectAllPhotometry(checkboxName) {
+            var checkboxes = document.getElementsByName(checkboxName);
+            var selectAllCheckbox = document.getElementById('selectAllPhotometry');
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = selectAllCheckbox.checked;
+            }
+        }
+        function toggleSelectAllFitsError(checkboxName) {
+            var checkboxes = document.getElementsByName(checkboxName);
+            var selectAllCheckbox = document.getElementById('selectAllFits');
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = selectAllCheckbox.checked;
+            }
+        }
+        function toggleSelectAllFitsS(checkboxName) {
+            var checkboxes = document.getElementsByName(checkboxName);
+            var selectAllCheckbox = document.getElementById('selectAllFitsS');
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = selectAllCheckbox.checked;
+            }
+        }
 
-<script language="JavaScript">
-    function single_select() {
-        count_selected();
-        document.getElementById("optionSelectAll").innerHTML = "";
-        document.getElementById("selectPage").checked = false;
-        document.getElementById("isSelectAll").value = "False";
-    }
-</script>
+        function single_select() {
+            count_selected();
+            document.getElementById("optionSelectAll").innerHTML = "";
+            document.getElementById("selectPage").checked = false;
+            document.getElementById("isSelectAll").value = "False";
+        }
+    </script>
+{% endblock %}
