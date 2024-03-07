@@ -72,6 +72,9 @@
                                             {% if  data.calibData.status == "P" %}
                                                 IN PROGRESS
                                             {% endif %}
+                                            {% if fits.status == "R" %}
+                                                Send to calibration
+                                            {% endif %}
                                             {% if  data.calibData.status == "S" %}
                                                 SUCCESS
                                             {% endif %}
@@ -136,6 +139,9 @@
                                             {% if fits.status == "P" %}
                                                 IN PROGRESS
                                             {% endif %}
+                                            {% if fits.status == "R" %}
+                                                Send to calibration
+                                            {% endif %}
                                             {% if fits.status == "S" %}
                                                 SUCCESS
                                             {% endif %}
@@ -197,6 +203,9 @@
                                             {% endif %}
                                             {% if fits.status == "P" %}
                                                 IN PROGRESS
+                                            {% endif %}
+                                            {% if fits.status == "R" %}
+                                                Send to calibration
                                             {% endif %}
                                             {% if fits.status == "S" %}
                                                 SUCCESS

@@ -76,6 +76,9 @@
                                 {% if product.status == "P" %}
                                 IN PROGRESS
                                 {% endif %}
+                                {% if fits.status == "R" %}
+                                    Sent to calibration
+                                {% endif %}
                                 {% if product.status == "S" %}
                                 SUCCESS
                                 {% endif %}
@@ -153,6 +156,9 @@
                                         {% endif %}
                                         {% if product.status == "P" %}
                                         IN PROGRESS
+                                        {% endif %}
+                                        {% if fits.status == "R" %}
+                                            Send to calibration
                                         {% endif %}
                                         {% if product.status == "S" %}
                                         SUCCESS

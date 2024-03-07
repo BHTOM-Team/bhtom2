@@ -77,6 +77,11 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         user = self.request.user
         files = self.request.FILES.getlist('files')
         data_product_files = {}
+
+        if dp_type == 'spectroscopy' or dp_type == 'photometry_csv':
+            observatory_input = form.cleaned_data['observatory_input']
+            observatory = observatory_input
+            
         for index, file_obj in enumerate(files):
             # Add each file to the dictionary with a unique key
             data_product_files[f'file_{index}'] = (file_obj.name, file_obj)
@@ -90,7 +95,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             logger.error('upload max: %s %s' % (str(self.MAX_FILES), str(target)))
             messages.error(self.request, f'You can upload max. {self.MAX_FILES} files at once')
             return redirect(form.cleaned_data.get('referrer', '/'))
-        if dp_type == 'photometry' or dp_type == 'fits_file' or 'photometry_csv':
+        if dp_type == 'photometry' or dp_type == 'fits_file':
             try:
                 camera = Camera.objects.get(id=camera.id)
                 observatory = Observatory.objects.get(id=observatory.id)
