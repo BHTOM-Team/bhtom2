@@ -142,7 +142,7 @@ class ReloadFits(LoginRequiredMixin, View):
 
             try:
                 response = requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
-                if response.status_code == 201:
+                if response.status_code != 201:
                     messages.error(self.request, 'Error while sending file to the ccdphot')
                     return redirect(reverse('bhtom_common:list'))
 
@@ -321,7 +321,7 @@ class ReloadPhotometryWithFits(LoginRequiredMixin, View):
 
             try:
                 response = requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
-                if response.status_code == 201:
+                if response.status_code != 201:
                     messages.error(self.request, 'Error while sending file to the ccdphot, id:' + str(data.id))
             except Exception as e:
                 logger.error("Error in connect to upload service: " + str(e))
