@@ -141,7 +141,11 @@ class ReloadFits(LoginRequiredMixin, View):
             }
 
             try:
-                requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
+                response = requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
+                if response.status_code == 201:
+                    messages.error(self.request, 'Error while sending file to the ccdphot')
+                    return redirect(reverse('bhtom_common:list'))
+
             except Exception as e:
                 logger.error("Error in connect to upload service: " + str(e))
                 messages.error(self.request, 'Error in connect to upload service.')
@@ -281,7 +285,9 @@ class ReloadPhotometry(LoginRequiredMixin, View):
 class ReloadPhotometryWithFits(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
-        fitsId = self.request.GET.get('data', '')
+
+        fitsId = self.request.GET.get('data', '').split(',')
+
         user = request.user
         logger.debug("Start ReloadFits, data: %s, user: %s" % (str(fitsId), str(request.user)))
 
@@ -300,24 +306,23 @@ class ReloadPhotometryWithFits(LoginRequiredMixin, View):
             messages.error(self.request, "Token does not exist")
             return redirect(reverse('bhtom_common:list'))
 
-        for data_id in fitsId:
-            try:
-                dataProduct = DataProduct.objects.get(id=data_id)
-            except DataProduct.DoesNotExist:
-                logger.error("DataProduct not Exist, data: " + str(data_id))
-                messages.error(self.request, 'DataProduct not Exist')
-                continue
+        try:
+            dataProducts = DataProduct.objects.filter(id__in=fitsId)
+        except DataProduct.DoesNotExist:
+            logger.error("DataProduct not Exist")
+            messages.error(self.request, 'DataProduct not Exist')
+            return redirect(reverse('bhtom_common:list'))
 
-            if dataProduct.data_product_type != 'fits_file':
-                messages.error(self.request, str(dataProduct.data) + ' has wrong type')
-                continue
+        for data in dataProducts:
 
             post_data = {
-                'dataId': data_id
+                'dataId': data.id
             }
 
             try:
-                requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
+                response = requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
+                if response.status_code == 201:
+                    messages.error(self.request, 'Error while sending file to the ccdphot, id:' + str(data.id))
             except Exception as e:
                 logger.error("Error in connect to upload service: " + str(e))
                 messages.error(self.request, 'Error in connect to upload service.')
