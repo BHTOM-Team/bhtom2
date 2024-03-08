@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 from django.db import transaction
 import requests
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q
+
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django_guid import get_guid
@@ -31,7 +31,6 @@ from drf_yasg import openapi
 from django.db.models import Q
 from bhtom2.bhtom_observatory.rest.serializers import DataProductSerializer
 
-
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_common.views')
 
 
@@ -56,17 +55,14 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
 
-        context['fits_file'] = DataProduct.objects.filter(data_product_type='fits_file') \
-            .exclude(status='S')\
-            .exclude(fits_data__isnull=True) \
-            .exclude(fits_data='') \
-            .order_by('-created')
+        context['fits_file'] = CCDPhotJob.objects \
+            .exclude(status='F') \
+            .exclude(status='D') \
+            .exclude(dataProduct__fits_data__isnull=True) \
+            .exclude(dataProduct__fits_data='') \
+            .order_by('-job_id')
 
-        days_delay = timezone.now() - timedelta(days=7)
-
-        dataProduct = DataProduct.objects.filter(Q(photometry_data__isnull=False) & Q(created__gte=days_delay)) \
-            .exclude(status='S') \
-            .order_by('-created')
+        days_delay = timezone.now() - timedelta(days=3)
 
         context['fits_s_file'] = DataProduct.objects.filter(Q(created__gte=days_delay) &
                                                             Q(data_product_type='fits_file') &
@@ -75,12 +71,19 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
 
         context['photometry_data'] = []
 
-        for data in dataProduct:
+        days_delay_error = timezone.now() - timedelta(days=7)
+
+        ccdphot = CCDPhotJob.objects.filter((Q(status='F') | Q(status='D')) &
+                                            ~Q(dataProduct__fits_data__isnull=True) &
+                                            ~Q(dataProduct__fits_data='') &
+                                            Q(dataProduct__created__gte=days_delay_error)).order_by('-job_id')
+
+        for data in ccdphot:
             try:
-                calib_data = Calibration_data.objects.get(dataproduct=data)
+                calib_data = Calibration_data.objects.get(dataproduct=data.dataProduct)
             except Calibration_data.DoesNotExist:
                 data = {
-                    'dataProduct': data,
+                    'dataProduct': data.dataProduct,
                     'calibData': None
                 }
                 context['photometry_data'].append(data)
@@ -91,7 +94,7 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
 
             try:
                 data = {
-                    'dataProduct': data,
+                    'dataProduct': data.dataProduct,
                     'calibData': calib_data
                 }
                 context['photometry_data'].append(data)
@@ -103,6 +106,7 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
 
 
 class ReloadFits(LoginRequiredMixin, View):
+
     def post(self, request, *args, **kwargs):
         data_ids = request.POST.getlist('selected-fits')
         user = request.user
@@ -111,6 +115,10 @@ class ReloadFits(LoginRequiredMixin, View):
         if not request.user.is_staff:
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
+
+        if len(data_ids) == 0:
+            messages.error(self.request, 'Data is empty!')
+            return redirect(reverse('bhtom_common:list'))
 
         if 'update' in request.POST:
             return HttpResponseRedirect(reverse('bhtom_common:update_fits') + f'?data={",".join(data_ids)}')
@@ -142,6 +150,59 @@ class ReloadFits(LoginRequiredMixin, View):
         return redirect(reverse('bhtom_common:list'))
 
 
+class UpdateFits(LoginRequiredMixin, FormView):
+    model = DataProduct
+    form_class = UpdateFitsForm
+    template_name = 'bhtom_common/fits_update.html'
+    success_url = reverse_lazy('bhtom_common:list')
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        fitsId = self.request.GET.get('data', '')
+
+        context['fitsId'] = fitsId
+        fits = DataProduct.objects.filter(id__in=fitsId.split(','))
+        context['fitsName'] = [fit.get_file_name() for fit in fits]
+        return context
+
+    def form_valid(self, form):
+        logger.info("Start update Fits by Admin")
+
+        fitsId = self.request.GET.get('data', '').split(',')
+        delete_fits = form.cleaned_data['delete_fits']
+        status = form.cleaned_data['status']
+        status_message = form.cleaned_data['status_message']
+
+        dataProducts = DataProduct.objects.filter(id__in=fitsId)
+
+        for data in dataProducts:
+            if delete_fits:
+                try:
+                    base_path = settings.DATA_FILE_PATH
+                    url_result = base_path + str(data.fits_data)
+                    os.remove(url_result)
+                    data.fits_data = ''
+                    logger.info("Delete fits from disk: " + str(data.data))
+                except Exception as e:
+                    logger.warning("Error in delete fits: " + str(e))
+                    messages.warning(self.request, str(e))
+                    continue
+
+            if status_message:
+                ccdphot = CCDPhotJob.objects.get(dataProduct=data)
+                ccdphot.status = status
+                ccdphot.status_message = status_message
+                logger.info("Set status message: " + str(data.data))
+                ccdphot.save()
+
+            data.status = status
+            data.save()
+
+        messages.success(self.request,
+                         'successfully created, observatory requires administrator approval')
+        return redirect(self.get_success_url())
+
+
 class ReloadPhotometry(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         data_ids = request.POST.getlist('selected-photometry')
@@ -152,6 +213,13 @@ class ReloadPhotometry(LoginRequiredMixin, View):
         if not request.user.is_staff:
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
+
+        if len(data_ids) == 0:
+            messages.error(self.request, 'Data is empty!')
+            return redirect(reverse('bhtom_common:list'))
+
+        if 'update' in request.POST:
+            return HttpResponseRedirect(reverse('bhtom_common:reload_photometry_fits') + f'?data={",".join(data_ids)}')
 
         for data_id in data_ids:
             try:
@@ -170,7 +238,7 @@ class ReloadPhotometry(LoginRequiredMixin, View):
                 logger.error("Calibration_data not exist, data: %s, type: %s"
                              % (str(data_id), str(dataProduct.data_product_type)))
 
-                if dataProduct.data_product_type is 'fits_file':
+                if dataProduct.data_product_type == 'fits_file':
                     try:
                         ccdphotJob = CCDPhotJob.objects.get(dataProduct=dataProduct)
 
@@ -209,10 +277,58 @@ class ReloadPhotometry(LoginRequiredMixin, View):
         return redirect(reverse('bhtom_common:list'))
 
 
+class ReloadPhotometryWithFits(LoginRequiredMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        fitsId = self.request.GET.get('data', '')
+        user = request.user
+        logger.debug("Start ReloadFits, data: %s, user: %s" % (str(fitsId), str(request.user)))
+
+        if not request.user.is_staff:
+            logger.error("The user is not an admin")
+            return redirect(reverse('home'))
+
+        try:
+            token = Token.objects.get(user=user)
+            headers = {
+                'Authorization': 'Token ' + token.key,
+                'Correlation-ID': get_guid()
+            }
+        except Token.DoesNotExist:
+            logger.error("Token does not exist")
+            messages.error(self.request, "Token does not exist")
+            return redirect(reverse('bhtom_common:list'))
+
+        for data_id in fitsId:
+            try:
+                dataProduct = DataProduct.objects.get(id=data_id)
+            except DataProduct.DoesNotExist:
+                logger.error("DataProduct not Exist, data: " + str(data_id))
+                messages.error(self.request, 'DataProduct not Exist')
+                continue
+
+            if dataProduct.data_product_type != 'fits_file':
+                messages.error(self.request, str(dataProduct.data) + ' has wrong type')
+                continue
+
+            post_data = {
+                'dataId': data_id
+            }
+
+            try:
+                requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
+            except Exception as e:
+                logger.error("Error in connect to upload service: " + str(e))
+                messages.error(self.request, 'Error in connect to upload service.')
+                return redirect(reverse('bhtom_common:list'))
+
+        messages.success(self.request, 'Send file to ccdphot')
+        return redirect(reverse('bhtom_common:list'))
+
+
 class DeletePointAndRestartProcess(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
-        calibration_copy, reducedDatum_copy= None, None
         data_ids = request.POST.getlist('selected-s-fits')
         user = request.user
         success = False
@@ -222,6 +338,10 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
         if not user.is_staff:
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
+
+        if len(data_ids) == 0:
+            messages.error(self.request, 'Data is empty!')
+            return redirect(reverse('bhtom_common:list'))
 
         try:
             token = Token.objects.get(user=user)
@@ -247,27 +367,29 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
                 messages.error(self.request, 'DataProduct not Exist.')
                 continue
 
+            calib_deleted = True
+            reducedDatum_deleted = True
+
             try:
-                calib_deleted = False
-                reducedDatum_deleted = False
                 with transaction.atomic():
                     try:
                         calib = Calibration_data.objects.get(dataproduct=dataProduct)
                         calib.delete()
                         calib_deleted = True
                     except Calibration_data.DoesNotExist:
-                        calib_deleted = True  
+                        pass
                     except Exception as e:
+                        calib_deleted = False
                         logger.error("Error in delete Calibration_data: " + str(e))
                         messages.error(self.request, 'Error in delete Calibration_data.')
 
                     try:
                         reducedDatum = ReducedDatum.objects.get(data_product=dataProduct)
                         reducedDatum.delete()
-                        reducedDatum_deleted = True
                     except ReducedDatum.DoesNotExist:
-                        reducedDatum_deleted = True 
+                        pass
                     except Exception as e:
+                        reducedDatum_deleted = False
                         logger.error("Error in delete ReducedDatum: " + str(e))
                         messages.error(self.request, 'Error in delete ReducedDatum.')
 
@@ -284,66 +406,16 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
                     dataProduct.save()
                     requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
                     success = True
-                    
+
                 except Exception as e:
                     logger.error("Error in connect to upload service: " + str(e))
                     messages.error(self.request, 'Error in connect to upload service.')
                     return redirect(reverse('bhtom_common:list'))
-                
+
         if success:
             messages.success(self.request, 'Send file to ccdphot')
-            
+
         return redirect(reverse('bhtom_common:list'))
-
-
-class UpdateFits(LoginRequiredMixin, FormView):
-    model = DataProduct
-    form_class = UpdateFitsForm
-    template_name = 'bhtom_common/fits_update.html'
-    success_url = reverse_lazy('bhtom_common:list')
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        fitsId = self.request.GET.get('data', '')
-        context['fitsId'] = fitsId
-        fits = DataProduct.objects.filter(id__in=fitsId.split(','))
-        context['fitsName'] = [fit.get_file_name() for fit in fits]
-        return context
-
-    def form_valid(self, form):
-        logger.info("Start update Fits by Admin")
-
-        fitsId = self.request.GET.get('data', '').split(',')
-        delete_fits = form.cleaned_data['delete_fits']
-        status = form.cleaned_data['status']
-        status_message = form.cleaned_data['status_message']
-
-        dataProducts = DataProduct.objects.filter(id__in=fitsId)
-
-        for data in dataProducts:
-            if delete_fits:
-                try:
-                    base_path = settings.DATA_FILE_PATH
-                    url_result = base_path + str(data.fits_data)
-                    os.remove(url_result)
-                    data.fits_data = ''
-                    logger.info("Delete fits from disk: " + str(data.data))
-                except Exception as e:
-                    logger.error("Error in delete fits: " + str(e))
-                    continue
-            if status_message:
-                ccdphot = CCDPhotJob.objects.get(dataProduct=data)
-                ccdphot.status = status
-                ccdphot.status_message = status_message
-                logger.info("Set status message: " + str(data.data))
-                ccdphot.save()
-
-            data.status = status
-            data.save()
-
-        messages.success(self.request,
-                         'successfully created, observatory requires administrator approval')
-        return redirect(self.get_success_url())
 
 
 class GetDataProductApi(views.APIView):
@@ -366,13 +438,13 @@ class GetDataProductApi(views.APIView):
         ),
         manual_parameters=[
             openapi.Parameter(
-            name='Authorization',
-            in_=openapi.IN_HEADER,
-            type=openapi.TYPE_STRING,
-            required=True,
-            description='Token <Your Token>'
-        ),
-    ],
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
     )
     def post(self, request):
         query = Q()
@@ -395,5 +467,5 @@ class GetDataProductApi(views.APIView):
             query &= Q(created__lte=created_end)
 
         queryset = DataProduct.objects.filter(query).order_by('created')
-        serialized_queryset = self.serializer_class(queryset,many=True).data
+        serialized_queryset = self.serializer_class(queryset, many=True).data
         return Response(serialized_queryset, status=200)

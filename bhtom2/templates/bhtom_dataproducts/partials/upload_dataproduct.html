@@ -39,6 +39,9 @@
     var userId;
     document.addEventListener("DOMContentLoaded", function() {
         userId = '{{ data_product_form_from_user.initial.user.id }}'; 
+        var observatory_input = document.getElementById("id_observatory_input");
+        observatory_input.parentElement.style.display = "none";
+        observatory_input.removeAttribute("required");
     });
 </script>
 <script src="{% static 'bhtom_observatory/get_favorite_cameras.js' %}"></script>

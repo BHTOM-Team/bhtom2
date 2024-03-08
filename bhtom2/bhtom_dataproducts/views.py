@@ -29,6 +29,7 @@ from django.contrib import messages
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.mixins import LoginRequiredMixin
 from bhtom2.bhtom_dataproducts.utils import map_data_from_cpcs
+
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_dataproducts.views')
 
 
@@ -40,12 +41,11 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
     template_name = 'bhtom_dataproducts/partials/upload_dataproduct.html'
     MAX_FILES: int = 5
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user'] = self.request.user
         return context
-    
+
     def get_form_kwargs(self):
         kwargs = super(DataProductUploadView, self).get_form_kwargs()
         kwargs['initial'] = {'user': self.request.user}
@@ -77,6 +77,11 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         user = self.request.user
         files = self.request.FILES.getlist('files')
         data_product_files = {}
+
+        if dp_type == 'spectroscopy' or dp_type == 'photometry_csv':
+            observatory_input = form.cleaned_data['observatory_input']
+            observatory = observatory_input
+
         for index, file_obj in enumerate(files):
             # Add each file to the dictionary with a unique key
             data_product_files[f'file_{index}'] = (file_obj.name, file_obj)
@@ -85,7 +90,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
                 logger.error('upload max for photometry: %s %s' % (1, str(target)))
                 messages.error(self.request, f'You can upload max. 1 file at once for photometry type')
                 return redirect(form.cleaned_data.get('referrer', '/'))
-        
+
         if len(data_product_files) > self.MAX_FILES:
             logger.error('upload max: %s %s' % (str(self.MAX_FILES), str(target)))
             messages.error(self.request, f'You can upload max. {self.MAX_FILES} files at once')
@@ -96,13 +101,15 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
                 observatory = Observatory.objects.get(id=observatory.id)
                 prefix = camera.prefix
             except Camera.DoesNotExist:
-                    messages.error(self.request, f"Camera doesn't exist")
-                    return redirect(form.cleaned_data.get('referrer', '/'))
-            except Observatory.DoesNotExist: 
-                    messages.error(self.request, f"Observatory doesn't exist")
-                    return redirect(form.cleaned_data.get('referrer', '/'))
+                messages.error(self.request, f"Camera doesn't exist")
+                return redirect(form.cleaned_data.get('referrer', '/'))
+            except Observatory.DoesNotExist:
+                messages.error(self.request, f"Observatory doesn't exist")
+                return redirect(form.cleaned_data.get('referrer', '/'))
+        elif dp_type in ('spectroscopy', 'photometry_csv'):
+            prefix = observatory
 
-        if dp_type == 'fits_file' and  observatory.calibration_flg is True:
+        if dp_type == 'fits_file' and observatory.calibration_flg is True:
             messages.error(self.request, 'Observatory can calibration only')
             return redirect(form.cleaned_data.get('referrer', '/'))
 
@@ -489,45 +496,49 @@ class CpcsArchiveData(LoginRequiredMixin, View):
         try:
             wsdb = WSDBConnection()
 
-            try: 
+            try:
                 cpcs_alerts = wsdb.run_query("SELECT * FROM cpcs_alerts")
                 columns_alert = ['id', 'ivorn', 'ra', 'dec', 'url', 'published', 'comment']
-                context["cpcs_alerts"] = map_data_from_cpcs(columns_alert,cpcs_alerts)
+                context["cpcs_alerts"] = map_data_from_cpcs(columns_alert, cpcs_alerts)
             except Exception as e:
                 logger.error("Error loading data cpcs_alerts from wsdb: " + str(e))
                 context["cpcs_alerts"] = []
 
-            try: 
+            try:
                 cpcs_archive_calib = wsdb.run_query("SELECT * FROM cpcs_archive_calibrations")
-                columns_calib =  ['id', 'ra', 'dec', 'observation_target_name', 'observer', 'facility', 'mjd', 'mag', 'mag_err', 'exp_time',
-                                'zeropoint', 'outlier_fraction', 'scatter', 'npoints', 'created', 'filter', 'survey', 'match_distance', 'processing_time',
-                                'data', 'observatory_lon', 'observatory_lat', 'observatory_filter', 'source']
-                context["cpcs_archive_calib"] = map_data_from_cpcs(columns_calib,cpcs_archive_calib)
-            
+                columns_calib = ['id', 'ra', 'dec', 'observation_target_name', 'observer', 'facility', 'mjd', 'mag',
+                                 'mag_err', 'exp_time',
+                                 'zeropoint', 'outlier_fraction', 'scatter', 'npoints', 'created', 'filter', 'survey',
+                                 'match_distance', 'processing_time',
+                                 'data', 'observatory_lon', 'observatory_lat', 'observatory_filter', 'source']
+                context["cpcs_archive_calib"] = map_data_from_cpcs(columns_calib, cpcs_archive_calib)
+
             except Exception as e:
                 logger.error("Error loading data cpcs_archive_calib from wsdb: " + str(e))
                 context["cpcs_archive_calib"] = []
 
-            try: 
+            try:
                 cpcs_catalogs = wsdb.run_query("SELECT * FROM cpcs_catalogs")
                 columns_catalog = ['id', 'name', 'filters']
-                context["cpcs_catalogs"] = map_data_from_cpcs(columns_catalog,cpcs_catalogs)
+                context["cpcs_catalogs"] = map_data_from_cpcs(columns_catalog, cpcs_catalogs)
             except Exception as e:
                 logger.error("Error loading data cpcs_catalogs from wsdb: " + str(e))
                 context["cpcs_catalogs"] = []
 
-            try: 
+            try:
                 cpcs_followup = wsdb.run_query("SELECT * FROM cpcs_followup")
-                columns_followup = ['id', 'alert_id', 'observatory_id', 'mjd_obs', 'mag', 'mag_err', 'calib_err', 'catalog_id', 'filter_id',
-                                    'comment', 'npoints', 'match_dist', 'isfits', 'force_filter', 'exp_time', 'calib_date', 'is_archive']
+                columns_followup = ['id', 'alert_id', 'observatory_id', 'mjd_obs', 'mag', 'mag_err', 'calib_err',
+                                    'catalog_id', 'filter_id',
+                                    'comment', 'npoints', 'match_dist', 'isfits', 'force_filter', 'exp_time',
+                                    'calib_date', 'is_archive']
 
-                context["cpcs_followup"] = map_data_from_cpcs(columns_followup,cpcs_followup)
+                context["cpcs_followup"] = map_data_from_cpcs(columns_followup, cpcs_followup)
             except Exception as e:
                 logger.error("Error loading data cpcs_followup from wsdb: " + str(e))
                 context["cpcs_followup"] = []
 
-            try: 
-                cpcs_observatories= wsdb.run_query("SELECT * FROM cpcs_observatories")
+            try:
+                cpcs_observatories = wsdb.run_query("SELECT * FROM cpcs_observatories")
                 columns_obs = ['id', 'name', 'lon', 'lat', 'hashtag', 'filters', 'is_admin', 'allow_upload']
 
                 context["cpcs_observatories"] = map_data_from_cpcs(columns_obs, cpcs_observatories)
@@ -538,4 +549,3 @@ class CpcsArchiveData(LoginRequiredMixin, View):
         except Exception as e:
             logger.error("Error connecting to wsdb")
         return context
-

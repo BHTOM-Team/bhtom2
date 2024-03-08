@@ -100,6 +100,12 @@ class DataProductUploadForm(forms.Form):
             required=False,
             label='Observatory*'
         )
+        
+        self.fields['observatory_input'] =forms.CharField(
+            required=False,
+            label='Observatory*'
+        )
+
 
         self.fields['camera'] = CameraChoiceField(
             queryset=user_active_cameras,
