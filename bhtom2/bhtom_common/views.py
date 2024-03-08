@@ -58,6 +58,7 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
         context['fits_file'] = CCDPhotJob.objects \
             .exclude(status='F') \
             .exclude(status='D') \
+            .exclude(dataProduct__status='S') \
             .exclude(dataProduct__fits_data__isnull=True) \
             .exclude(dataProduct__fits_data='') \
             .order_by('-job_id')
