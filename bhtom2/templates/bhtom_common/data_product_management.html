@@ -124,30 +124,30 @@
                                 {% for fits in fits_file %}
                                     <tr>
                                         <td><label>
-                                            <input type="checkbox" name="selected-fits" value="{{ fits.id }}"
+                                            <input type="checkbox" name="selected-fits" value="{{ fits.dataProduct.id }}"
                                                    onClick="single_select()"/>
                                         </label></td>
 
-                                        <td>{{ fits.data }}</td>
-                                        <td>{{ fits.created }}</td>
-                                        <td>{{ fits.observatory }}</td>
-                                        <td><a href="{% url 'bhtom_targets:detail' fits.target.name %}">
-                                            {{ fits.target.name }}</a></td>
-                                        <td>{{ fits.user.first_name }} {{ fits.user.last_name }}</td>
+                                        <td>{{ fits.dataProduct.data }}</td>
+                                        <td>{{ fits.dataProduct.created }}</td>
+                                        <td>{{ fits.dataProduct.observatory }}</td>
+                                        <td><a href="{% url 'bhtom_targets:detail' fits.dataProduct.target.name %}">
+                                            {{ fits.dataProduct.target.name }}</a></td>
+                                        <td>{{ fits.dataProduct.user.first_name }} {{ fits.dataProduct.user.last_name }}</td>
                                         <td>
-                                            {% if fits.status == "C" %}
+                                            {% if fits.dataProduct.status == "C" %}
                                                 TO DO
                                             {% endif %}
-                                            {% if fits.status == "P" %}
+                                            {% if fits.dataProduct.status == "P" %}
                                                 IN PROGRESS
                                             {% endif %}
-                                            {% if fits.status == "R" %}
+                                            {% if fits.dataProduct.status == "R" %}
                                                 Send to calibration
                                             {% endif %}
-                                            {% if fits.status == "S" %}
+                                            {% if fits.dataProduct.status == "S" %}
                                                 SUCCESS
                                             {% endif %}
-                                            {% if fits.status == "E" %}
+                                            {% if fits.dataProduct.status == "E" %}
                                                 ERROR
                                             {% endif %}
                                         </td>

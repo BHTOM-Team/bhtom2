@@ -55,12 +55,12 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
 
-        context['fits_file'] = DataProduct.objects.filter(data_product_type='fits_file') \
-            .exclude(status='S') \
-            .exclude(fits_data__isnull=True) \
-            .exclude(photometry_data__isnull=True) \
-            .exclude(fits_data='') \
-            .order_by('-created')
+        context['fits_file'] = CCDPhotJob.objects \
+            .exclude(status='F') \
+            .exclude(status='D') \
+            .exclude(dataProduct__fits_data__isnull=True) \
+            .exclude(dataProduct__fits_data='') \
+            .order_by('-job_id')
 
         days_delay = timezone.now() - timedelta(days=3)
 
@@ -72,16 +72,18 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
         context['photometry_data'] = []
 
         days_delay_error = timezone.now() - timedelta(days=7)
-        dataProduct = DataProduct.objects.filter(Q(photometry_data__isnull=False) & Q(created__gte=days_delay_error)) \
-            .exclude(status='S') \
-            .order_by('-created')
 
-        for data in dataProduct:
+        ccdphot = CCDPhotJob.objects.filter((Q(status='F') | Q(status='D')) &
+                                            ~Q(dataProduct__fits_data__isnull=True) &
+                                            ~Q(dataProduct__fits_data='') &
+                                            Q(dataProduct__created__gte=days_delay_error)).order_by('-job_id')
+
+        for data in ccdphot:
             try:
-                calib_data = Calibration_data.objects.get(dataproduct=data)
+                calib_data = Calibration_data.objects.get(dataproduct=data.dataProduct)
             except Calibration_data.DoesNotExist:
                 data = {
-                    'dataProduct': data,
+                    'dataProduct': data.dataProduct,
                     'calibData': None
                 }
                 context['photometry_data'].append(data)
@@ -92,7 +94,7 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
 
             try:
                 data = {
-                    'dataProduct': data,
+                    'dataProduct': data.dataProduct,
                     'calibData': calib_data
                 }
                 context['photometry_data'].append(data)
@@ -236,7 +238,7 @@ class ReloadPhotometry(LoginRequiredMixin, View):
                 logger.error("Calibration_data not exist, data: %s, type: %s"
                              % (str(data_id), str(dataProduct.data_product_type)))
 
-                if dataProduct.data_product_type is 'fits_file':
+                if dataProduct.data_product_type == 'fits_file':
                     try:
                         ccdphotJob = CCDPhotJob.objects.get(dataProduct=dataProduct)
 
@@ -298,6 +300,17 @@ class ReloadPhotometryWithFits(LoginRequiredMixin, View):
             return redirect(reverse('bhtom_common:list'))
 
         for data_id in fitsId:
+            try:
+                dataProduct = DataProduct.objects.get(id=data_id)
+            except DataProduct.DoesNotExist:
+                logger.error("DataProduct not Exist, data: " + str(data_id))
+                messages.error(self.request, 'DataProduct not Exist')
+                continue
+
+            if dataProduct.data_product_type != 'fits_file':
+                messages.error(self.request, str(dataProduct.data) + ' has wrong type')
+                continue
+
             post_data = {
                 'dataId': data_id
             }
