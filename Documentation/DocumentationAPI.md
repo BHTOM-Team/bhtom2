@@ -1029,6 +1029,41 @@ Replace `<yourToken>` with your valid authentication token.
 
 API for DataProduct list, lists uploaded instrumental or fits files and tracks the user who uploaded it
 
+
+
+### Request
+- **Method**: POST
+- **URL**: `targets/cleanTargetDetailsCache/`
+
+- Token Authentication: You must include a valid authentication token in the request headers.
+
+
+### Example Request Body
+
+```json
+{
+    "data_product_type": "photometry",
+    "status": "Dataproduct status",
+    "fits_data": "test",
+    "created_start": "2024-01-01",
+    "created_end": "2024-01-02"
+}
+
+### Example Request
+
+You can make a POST request using the `curl` command or any HTTP client that supports POST requests.
+
+### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Authorization: Token <yourToken>" \
+  "https://bh-tom2.astrolabs.pl/targets/cleanTargetDetailsCache/"
+```
+
+Replace `<yourToken>` with your valid authentication token.
+
+
 ```bash
 curl -X POST -H "Content-Type: application/json" -H "Authorization: Token <yourToken>" \
   "https://bh-tom2.astrolabs.pl/common/api/data/" 
