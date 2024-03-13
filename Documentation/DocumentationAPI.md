@@ -688,6 +688,7 @@ The request to create a new Sidereal target should include the following paramet
 - `classification` (string): The classification or type of the target.
 - `discovery_date` (string, datetime format): The date and time of the target's discovery.
 - `importance` (number): A numerical value representing the importance or priority of the target.
+- `description` (stringr): Your description to target.
 - `cadence` (number): A numerical value representing the cadence or frequency of observations for the target.
 
 ### Example Request Body
@@ -701,7 +702,8 @@ The request to create a new Sidereal target should include the following paramet
     "classification": "Star",
     "discovery_date": "2023-09-28T10:00:00Z",
     "importance": 5,
-    "cadence": 24
+    "cadence": 24,
+    "description": "TEST"
 }
 ```
 

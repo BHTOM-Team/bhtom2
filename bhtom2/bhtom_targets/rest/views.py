@@ -134,6 +134,7 @@ class TargetCreateApi(views.APIView):
                 'dec': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'epoch': openapi.Schema(type=openapi.TYPE_NUMBER),
                 'classification': openapi.Schema(type=openapi.TYPE_STRING),
+                'description': openapi.Schema(type=openapi.TYPE_STRING),
                 'discovery_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'importance': openapi.Schema(type=openapi.TYPE_NUMBER),
                 'cadence': openapi.Schema(type=openapi.TYPE_NUMBER),
