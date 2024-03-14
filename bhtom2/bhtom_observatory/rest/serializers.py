@@ -115,11 +115,11 @@ class ObservatoryMatrixSerializers(serializers.ModelSerializer):
         return instance
 
 class DataProductSerializer(serializers.ModelSerializer):
-    camera = serializers.SerializerMethodField()
     user_name = serializers.SerializerMethodField()
     target_name = serializers.SerializerMethodField()
     target = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
+    camera = serializers.SerializerMethodField()
     observatory_name = serializers.SerializerMethodField()
     observatory = serializers.SerializerMethodField()
     class Meta:
@@ -127,16 +127,20 @@ class DataProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_user_name(self, obj):
-        user_name = obj.observatory.user.first_name + " " + obj.observatory.user.last_name
+        user_name = obj.user.first_name + " " + obj.user.last_name
         return user_name
     
     def get_user(self, obj):
-        user = obj.observatory.user.username
+        user = obj.user.username
         return user
     
     def get_camera(self, obj):
-        camera_name = obj.observatory.camera.prefix
-        return camera_name
+        camera = None
+        try:
+            camera = obj.observatory.camera.prefix
+        except Exception as e:
+            camera = None
+        return camera
     
     def get_target_name(self, obj):
         target_name = obj.target.name if obj.target else None
@@ -148,9 +152,17 @@ class DataProductSerializer(serializers.ModelSerializer):
     
        
     def get_observatory_name(self, obj):
-        observatory_name = obj.observatory.camera.observatory.name
+        observatory_name = None
+        try:
+            observatory_name  =  obj.observatory.camera.observatory.name
+        except Exception as e:
+            observatory_name = None
         return observatory_name
     
     def get_observatory(self, obj):
-        observatory= obj.observatory.camera.observatory.id
+        observatory = None
+        try:
+            observatory  =  obj.observatory.camera.observatory.id
+        except Exception as e:
+            observatory = None
         return observatory
