@@ -1,23 +1,16 @@
 {% extends 'bhtom_common/base.html' %}
 {% load bootstrap4 bhtom_common_extras static %}
-{% block title %}Admin Data{% endblock %}
-{% block additional_css %}
-    {% comment %} <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
-    <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}"> {% endcomment %}
-    {% comment %} <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css"> {% endcomment %}
-{% endblock %}
 
-{% bootstrap_javascript jquery='True' %}
+{% block title %}Admin Data{% endblock %}
+
 
 {% block content %}
     {% if request.user.is_staff %}
-
         <div class="row">
             <div class="col-md-12">
                 <ul class="nav nav-tabs" id="tabs">
                     <li class="nav-item">
-                        <span class="nav-link" data-target="#photometry"
-                              data-toggle="tab">Photometry File</span>
+                        <span class="nav-link" data-target="#photometry" data-toggle="tab">Photometry File</span>
                     </li>
                     <li class="nav-item">
                         <span class="nav-link active" data-target="#fits" data-toggle="tab">FIts File Error</span>
@@ -28,202 +21,164 @@
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane" id="photometry">
-                        <form id="data-form" action="{% url 'bhtom_common:reload_photometry' %}" method="POST">
+                        <form id="photometry-form" action="{% url 'bhtom_common:reload_photometry' %}" method="POST">
                             {% csrf_token %}
-                            <h4>Delay: 30 days</h4>
+                            <input type="hidden" id="selected-photometry-ids" name="selected-photometry-ids" value="">
+                            <h4>Delay: 7 days</h4>
                             <div class="mb-3"> 
-                                <button type="submit" class="btn btn-outline-primary" name="reload">Reload Photometry</button> 
-                                <button type="submit" class="btn btn-outline-primary ml-1" name="update">Reload Fits</button>
+                                <button type="submit" class="btn btn-outline-primary" name="reload-photometry">Reload Photometry</button> 
+                                <button type="submit" class="btn btn-outline-primary ml-1" name="update-photometry">Reload Fits</button>
                             </div>
 
                             <table id="photometry-table" class="table table-hover">
                                 <thead>
-                                <tr>
-                                    <th><input type="checkbox" id="selectAllPhotometry" onclick="toggleSelectAllPhotometry('selected-photometry')"></th>
-                                    <th>Data</th>
-                                    <th>Created</th>
-                                    <th>Observatory</th>
-                                    <th>Target</th>
-                                    <th>User</th>
-                                    <th>Data Type</th>
-                                    <th>Status</th>
-                                    <th>Status Message</th>
-                                </tr>
+                                    <tr>
+                                        <th><input type="checkbox" id="selected-photometry-checkbox" onclick="toggleSelectAll('selected-photometry')"></th>
+                                        <th>Data</th>
+                                        <th>Created</th>
+                                        <th>Observatory</th>
+                                        <th>Target</th>
+                                        <th>User</th>
+                                        <th>Data Type</th>
+                                        <th>Status</th>
+                                        <th>Status Message</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                {% for data in photometry_data %}
-                                    <tr>
-                                        <td><label>
-                                            <input type="checkbox" name="selected-photometry"
-                                                   value="{{ data.dataProduct.id }}"
-                                                   onClick="single_select()"/>
-                                        </label></td>
-
-                                        <td>{{ data.dataProduct.data }}</td>
-                                        <td>{{ data.calibData.created }}</td>
-                                        <td>{{ data.dataProduct.observatory }}</td>
-                                        <td><a href="{% url 'bhtom_targets:detail' data.dataProduct.target.name %}">
-                                            {{ data.dataProduct.target.name }}</a></td>
-                                        <td>{{ data.dataProduct.user.first_name }} {{ data.dataProduct.user.last_name }}</td>
-                                        <td>{{ data.dataProduct.data_product_type }}</td>
-
-                                        <td>
-                                            {% if  data.calibData.status == "C" %}
-                                                TO DO
-                                            {% endif %}
-                                            {% if  data.calibData.status == "P" %}
-                                                IN PROGRESS
-                                            {% endif %}
-                                            {% if fits.status == "R" %}
-                                                Send to calibration
-                                            {% endif %}
-                                            {% if  data.calibData.status == "S" %}
-                                                SUCCESS
-                                            {% endif %}
-                                            {% if  data.calibData.status == "E" %}
-                                                ERROR
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ data.calibData.status_message }}</td>
-
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="5">
-                                            No data yet.
-                                        </td>
-                                    </tr>
-                                {% endfor %}
+                                    {% for data in photometry_data %}
+                                        <tr>
+                                            <td><input type="checkbox" name="selected-photometry" value="{{ data.dataProduct.id }}"></td>
+                                            <td>{{ data.dataProduct.data }}</td>
+                                            <td>{{ data.calibData.created }}</td>
+                                            <td>{{ data.dataProduct.observatory }}</td>
+                                            <td><a href="{% url 'bhtom_targets:detail' data.dataProduct.target.name %}">{{ data.dataProduct.target.name }}</a></td>
+                                            <td>{{ data.dataProduct.user.first_name }} {{ data.dataProduct.user.last_name }}</td>
+                                            <td>{{ data.dataProduct.data_product_type }}</td>
+                                            <td>
+                                                {% if data.calibData.status == "C" %}
+                                                    TO DO
+                                                {% elif data.calibData.status == "P" %}
+                                                    IN PROGRESS
+                                                {% elif data.calibData.status == "R" %}
+                                                    Send to calibration
+                                                {% elif data.calibData.status == "S" %}
+                                                    SUCCESS
+                                                {% elif data.calibData.status == "E" %}
+                                                    ERROR
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ data.calibData.status_message }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="9">No data yet.</td>
+                                        </tr>
+                                    {% endfor %}
                                 </tbody>
                             </table>
                         </form>
                     </div>
                     <div class="tab-pane active" id="fits">
-                        <form id="data-form" action="{% url 'bhtom_common:reload_fits' %}" method="POST">
+                        <form id="fits-form" action="{% url 'bhtom_common:reload_fits' %}" method="POST">
                             {% csrf_token %}
+                            <input type="hidden" id="selected-fits-ids" name="selected-fits-ids" value="">
                             <div class="mb-3">
-                            
-                                <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Reload Fits
-                                </button>
-                                <button type="submit" class="btn btn-outline-primary ml-1" name="update">Update Fits
-                                </button>
+                                <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Reload Fits</button>
+                                <button type="submit" class="btn btn-outline-primary ml-1" name="update">Update Fits</button>
+                                <button type="submit" class="btn btn-outline-primary ml-1" name="test_reload">Test Reload Fits</button>
                             </div>
                             <table id="fits-error-table" class="table table-hover">
                                 <thead>
-                                <tr>
-                                    <th><input type="checkbox" id="selectAllFits" onclick="toggleSelectAllFitsError('selected-fits')"></th>
-                                    <th>Data</th>
-                                    <th>Created</th>
-                                    <th>Observatory</th>
-                                    <th>Target</th>
-                                    <th>User</th>
-                                    <th>Status</th>
-                                </tr>
+                                    <tr>
+                                        <th><input type="checkbox" id="selected-fits-checkbox" onclick="toggleSelectAll('selected-fits')"></th>
+                                        <th>Data</th>
+                                        <th>Created</th>
+                                        <th>Observatory</th>
+                                        <th>Target</th>
+                                        <th>User</th>
+                                        <th>Status</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                {% for fits in fits_file %}
-                                    <tr>
-                                        <td><label>
-                                            <input type="checkbox" name="selected-fits" value="{{ fits.dataProduct.id }}"
-                                                   onClick="single_select()"/>
-                                        </label></td>
-
-                                        <td>{{ fits.dataProduct.data }}</td>
-                                        <td>{{ fits.dataProduct.created }}</td>
-                                        <td>{{ fits.dataProduct.observatory }}</td>
-                                        <td><a href="{% url 'bhtom_targets:detail' fits.dataProduct.target.name %}">
-                                            {{ fits.dataProduct.target.name }}</a></td>
-                                        <td>{{ fits.dataProduct.user.first_name }} {{ fits.dataProduct.user.last_name }}</td>
-                                        <td>
-                                            {% if fits.dataProduct.status == "C" %}
-                                                TO DO
-                                            {% endif %}
-                                            {% if fits.dataProduct.status == "P" %}
-                                                IN PROGRESS
-                                            {% endif %}
-                                            {% if fits.dataProduct.status == "R" %}
-                                                Send to calibration
-                                            {% endif %}
-                                            {% if fits.dataProduct.status == "S" %}
-                                                SUCCESS
-                                            {% endif %}
-                                            {% if fits.dataProduct.status == "E" %}
-                                                ERROR
-                                            {% endif %}
-                                        </td>
-
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="5">
-                                            No data yet.
-                                        </td>
-                                    </tr>
-                                {% endfor %}
+                                    {% for fits in fits_file %}
+                                        <tr>
+                                            <td><input type="checkbox" name="selected-fits" value="{{ fits.dataProduct.id }}"></td>
+                                            <td>{{ fits.dataProduct.data }}</td>
+                                            <td>{{ fits.dataProduct.created }}</td>
+                                            <td>{{ fits.dataProduct.observatory }}</td>
+                                            <td><a href="{% url 'bhtom_targets:detail' fits.dataProduct.target.name %}">{{ fits.dataProduct.target.name }}</a></td>
+                                            <td>{{ fits.dataProduct.user.first_name }} {{ fits.dataProduct.user.last_name }}</td>
+                                            <td>
+                                                {% if fits.dataProduct.status == "C" %}
+                                                    TO DO
+                                                {% elif fits.dataProduct.status == "P" %}
+                                                    IN PROGRESS
+                                                {% elif fits.dataProduct.status == "R" %}
+                                                    Send to calibration
+                                                {% elif fits.dataProduct.status == "S" %}
+                                                    SUCCESS
+                                                {% elif fits.dataProduct.status == "E" %}
+                                                    ERROR
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="7">No data yet.</td>
+                                        </tr>
+                                    {% endfor %}
                                 </tbody>
                             </table>
                         </form>
                     </div>
                     <div class="tab-pane" id="fits_s">
-                        <form id="data-form" action="{% url 'bhtom_common:reload_s_fits' %}" method="POST">
+                        <form id="s-fits-form" action="{% url 'bhtom_common:reload_s_fits' %}" method="POST">
                             {% csrf_token %}
-                            <h4>Delay: 2 days</h4>
+                            <input type="hidden" id="selected-s-fits-ids" name="selected-s-fits-ids" value="">
+                            <h4>Delay: 3 days</h4>
                             <div class="mb-3">
-                                <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Restart Fits
-                                </button>
+                                <button type="submit" class="btn btn-outline-primary ml-1" name="reload-fits-s">Restart Fits</button>
                             </div>
-                            <table id="fits-table"  class="table table-hover">
+                            <table id="fits-table" class="table table-hover">
                                 <thead>
-                                <tr>
-                                    <th><input type="checkbox" id="selectAllFitsS" onclick="toggleSelectAllFitsS('selected-s-fits')"></th>
-                                    <th>Data</th>
-                                    <th>Created</th>
-                                    <th>Observatory</th>
-                                    <th>Target</th>
-                                    <th>User</th>
-                                    <th>Status</th>
-                                </tr>
+                                    <tr>
+                                        <th><input type="checkbox" id="selected-s-fits-checkbox" onclick="toggleSelectAll('selected-s-fits')"></th>
+                                        <th>Data</th>
+                                        <th>Created</th>
+                                        <th>Observatory</th>
+                                        <th>Target</th>
+                                        <th>User</th>
+                                        <th>Status</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                {% for fits in fits_s_file %}
-                                    <tr>
-                                        <td><label>
-                                            <input type="checkbox" name="selected-s-fits" value="{{ fits.id }}"
-                                                   onClick="single_select()"/>
-                                        </label></td>
-
-                                        <td>{{ fits.data }}</td>
-                                        <td>{{ fits.created }}</td>
-                                        <td>{{ fits.observatory }}</td>
-                                        <td><a href="{% url 'bhtom_targets:detail' fits.target.name %}">
-                                            {{ fits.target.name }}</a></td>
-                                        <td>{{ fits.user.first_name }}{{ fits.user.last_name }}</td>
-                                        <td>
-                                            {% if fits.status == "C" %}
-                                                TO DO
-                                            {% endif %}
-                                            {% if fits.status == "P" %}
-                                                IN PROGRESS
-                                            {% endif %}
-                                            {% if fits.status == "R" %}
-                                                Send to calibration
-                                            {% endif %}
-                                            {% if fits.status == "S" %}
-                                                SUCCESS
-                                            {% endif %}
-                                            {% if fits.status == "E" %}
-                                                ERROR
-                                            {% endif %}
-                                        </td>
-
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="5">
-                                            No data yet.
-                                        </td>
-                                    </tr>
-                                {% endfor %}
+                                    {% for fits in fits_s_file %}
+                                        <tr>
+                                            <td><input type="checkbox" name="selected-s-fits" value="{{ fits.id }}"></td>
+                                            <td>{{ fits.data }}</td>
+                                            <td>{{ fits.created }}</td>
+                                            <td>{{ fits.observatory }}</td>
+                                            <td><a href="{% url 'bhtom_targets:detail' fits.target.name %}">{{ fits.target.name }}</a></td>
+                                            <td>{{ fits.user.first_name }}{{ fits.user.last_name }}</td>
+                                            <td>
+                                                {% if fits.status == "C" %}
+                                                    TO DO
+                                                {% elif fits.status == "P" %}
+                                                    IN PROGRESS
+                                                {% elif fits.status == "R" %}
+                                                    Send to calibration
+                                                {% elif fits.status == "S" %}
+                                                    SUCCESS
+                                                {% elif fits.status == "E" %}
+                                                    ERROR
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="7">No data yet.</td>
+                                        </tr>
+                                    {% endfor %}
                                 </tbody>
                             </table>
                         </form>
@@ -235,39 +190,113 @@
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('#photometry-table').DataTable({ "searching": false});
-            $('#fits-error-table').DataTable({ "searching": false});
-            $('#fits-table').DataTable({ "searching": false});
+            $('#fits-error-table').DataTable({ "searching": false });
         });
-    </script>
-    <script>
-        function toggleSelectAllPhotometry(checkboxName) {
+        $(document).ready(function() {
+            $('#fits-table').DataTable({ "searching": false });
+        });
+        $(document).ready(function() {
+            $('#photometry-table').DataTable({ "searching": false });
+        });
+
+        function toggleSelectAll(checkboxName) {
             var checkboxes = document.getElementsByName(checkboxName);
-            var selectAllCheckbox = document.getElementById('selectAllPhotometry');
+            var selectAllCheckbox = document.getElementById(checkboxName + '-checkbox');
+            var currentPageIndex = parseInt(document.querySelector('.paginate_button.current').innerText);
+
             for (var i = 0; i < checkboxes.length; i++) {
-                checkboxes[i].checked = selectAllCheckbox.checked;
+                checkboxes[i].checked = selectAllCheckbox.checked
             }
-        }
-        function toggleSelectAllFitsError(checkboxName) {
-            var checkboxes = document.getElementsByName(checkboxName);
-            var selectAllCheckbox = document.getElementById('selectAllFits');
-            for (var i = 0; i < checkboxes.length; i++) {
-                checkboxes[i].checked = selectAllCheckbox.checked;
+            var nextButton = document.getElementsByClassName('paginate_button next');
+            var hasNextPage = nextButton !== null;
+        
+            // While there's a next page got ot the next page
+            while (hasNextPage && !nextButton[0].classList.contains('disabled')) {
+                nextButton[0].click(); 
+            
+                checkboxes = document.getElementsByName(checkboxName);
+                for (var j = 0; j < checkboxes.length; j++) {
+                    checkboxes[j].checked = selectAllCheckbox.checked
+                }
+                // Check if there's another "Next" button
+                nextButton =  document.getElementsByClassName('paginate_button next');
+                hasNextPage = nextButton !== null;
             }
-        }
-        function toggleSelectAllFitsS(checkboxName) {
-            var checkboxes = document.getElementsByName(checkboxName);
-            var selectAllCheckbox = document.getElementById('selectAllFitsS');
-            for (var i = 0; i < checkboxes.length; i++) {
-                checkboxes[i].checked = selectAllCheckbox.checked;
+            
+            var previousButton =  document.getElementsByClassName('paginate_button previous');
+            while (previousButton !== null && !previousButton[0].classList.contains('disabled') ) {
+                previousButton[0].click(); 
+                checkboxes = document.getElementsByName(checkboxName); 
+                for (var k = 0; k < checkboxes.length; k++) {
+                        checkboxes[k].checked = selectAllCheckbox.checked
+                }
+                previousButton =  document.getElementsByClassName('paginate_button previous');
             }
         }
 
-        function single_select() {
-            count_selected();
-            document.getElementById("optionSelectAll").innerHTML = "";
-            document.getElementById("selectPage").checked = false;
-            document.getElementById("isSelectAll").value = "False";
+        function updateHiddenField(checkboxName) {
+            var selectedIds = [];
+            var checkboxes = document.getElementsByName(checkboxName);
+            var currentPageIndex = parseInt(document.querySelector('.paginate_button.current').innerText);
+
+            for (var i = 0; i < checkboxes.length; i++) {
+                if(checkboxes[i].checked){
+                    selectedIds.push(checkboxes[i].value); 
+                }
+            }
+            var nextButton = document.getElementsByClassName('paginate_button next');
+            var hasNextPage = nextButton !== null;
+        
+            // While there's a next page got ot the next page
+            while (hasNextPage && !nextButton[0].classList.contains('disabled')) {
+                nextButton[0].click(); 
+            
+                checkboxes = document.getElementsByName(checkboxName);
+                for (var j = 0; j < checkboxes.length; j++) {
+                    if(checkboxes[j].checked){
+                        selectedIds.push(checkboxes[j].value); 
+                    }
+                }
+                // Check if there's another "Next" button
+                nextButton =  document.getElementsByClassName('paginate_button next');
+                hasNextPage = nextButton !== null;
+            }
+            
+            var previousButton =  document.getElementsByClassName('paginate_button previous');
+            while (previousButton !== null && !previousButton[0].classList.contains('disabled') ) {
+                previousButton[0].click(); 
+                checkboxes = document.getElementsByName(checkboxName); 
+                for (var k = 0; k < checkboxes.length; k++) {
+                    if (!selectedIds.includes(checkboxes[k].value)) {
+                        if(checkboxes[k].checked){
+                            selectedIds.push(checkboxes[k].value); 
+                        }
+                    }
+                }
+                previousButton =  document.getElementsByClassName('paginate_button previous');
+            }
+            $('#' + checkboxName + '-ids').val(selectedIds.join(','));  
         }
+
+        $('button[name="reload-photometry"]').click(function() {
+            updateHiddenField('selected-photometry');
+        });
+
+        $('button[name="update-photometry"]').click(function() {
+            updateHiddenField('selected-photometry');
+        });
+        $('button[name="reload"]').click(function() {
+            updateHiddenField('selected-fits');
+        });
+      
+        $('button[name="update"]').click(function() {
+            updateHiddenField('selected-fits');
+        });
+        $('button[name="test_reload"]').click(function() {
+            updateHiddenField('selected-fits');
+        });
+        $('button[name="reload-fits-s"]').click(function() {
+            updateHiddenField('selected-s-fits');
+        });
     </script>
 {% endblock %}

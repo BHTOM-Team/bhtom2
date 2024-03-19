@@ -14,9 +14,9 @@ from .views import TargetCreateView, TargetUpdateView, TargetGenerateTargetDescr
 from bhtom_base.bhtom_common.api_router import SharedAPIRootRouter
 
 router = SharedAPIRootRouter()
-router.register(r'targets', TargetViewSet, 'targets')
-router.register(r'targetextra', TargetExtraViewSet, 'targetextra')
-router.register(r'targetname', TargetNameViewSet, 'targetname')
+# router.register(r'targets', TargetViewSet, 'targets')
+# router.register(r'targetextra', TargetExtraViewSet, 'targetextra')
+# router.register(r'targetname', TargetNameViewSet, 'targetname')
 
 app_name = 'targets'
 
