@@ -18,8 +18,9 @@
     <br>
     <b>You can upload up to 5 files at once.</b>
     <br>
-<p>You can also use a python script for external fits upload: <a
-        href="{% static 'bhtom_common/upload_files_script.py' %}">data upload script</a></p>
+<p>You can also use a python script for external fits upload, 
+    <a href="https://github.com/BHTOM-Team/bhtom2/blob/bhtom2-dev/Documentation/DocumentationAPI.md" target="_blank" rel="noopener noreferrer">see the BHTOM's API documentation</a>
+</p>
 </p>
 <form method="POST" action="{% url 'bhtom_dataproducts:upload_data_ui'%}" enctype="multipart/form-data">
     {% csrf_token %}
