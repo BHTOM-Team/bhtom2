@@ -10,7 +10,7 @@ from bhtom_base.bhtom_targets.models import Target
 class TargetsSerializers(serializers.ModelSerializer):
     class Meta:
         model = Target
-        fields = ('name', 'ra', 'dec', 'epoch', 'classification', 'discovery_date', 'importance', 'cadence')
+        fields = ('name', 'ra', 'dec', 'epoch','description', 'classification', 'discovery_date', 'importance', 'cadence')
 
     def validate(self, data):
         unknown = set(self.initial_data) - set(self.fields)

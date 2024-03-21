@@ -55,12 +55,13 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
 
-        context['fits_file'] = DataProduct.objects.filter(data_product_type='fits_file') \
-            .exclude(status='S') \
-            .exclude(fits_data__isnull=True) \
-            .exclude(photometry_data__isnull=True) \
-            .exclude(fits_data='') \
-            .order_by('-created')
+        context['fits_file'] = CCDPhotJob.objects \
+            .exclude(status='F') \
+            .exclude(status='D') \
+            .exclude(dataProduct__status='S') \
+            .exclude(dataProduct__fits_data__isnull=True) \
+            .exclude(dataProduct__fits_data='') \
+            .order_by('-job_id')
 
         days_delay = timezone.now() - timedelta(days=3)
 
@@ -72,16 +73,18 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
         context['photometry_data'] = []
 
         days_delay_error = timezone.now() - timedelta(days=7)
-        dataProduct = DataProduct.objects.filter(Q(photometry_data__isnull=False) & Q(created__gte=days_delay_error)) \
-            .exclude(status='S') \
-            .order_by('-created')
 
-        for data in dataProduct:
+        ccdphot = CCDPhotJob.objects.filter((Q(status='F') | Q(status='D')) &
+                                            ~Q(dataProduct__fits_data__isnull=True) &
+                                            ~Q(dataProduct__fits_data='') &
+                                            Q(dataProduct__created__gte=days_delay_error)).order_by('-job_id')
+
+        for data in ccdphot:
             try:
-                calib_data = Calibration_data.objects.get(dataproduct=data)
+                calib_data = Calibration_data.objects.get(dataproduct=data.dataProduct)
             except Calibration_data.DoesNotExist:
                 data = {
-                    'dataProduct': data,
+                    'dataProduct': data.dataProduct,
                     'calibData': None
                 }
                 context['photometry_data'].append(data)
@@ -92,7 +95,7 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
 
             try:
                 data = {
-                    'dataProduct': data,
+                    'dataProduct': data.dataProduct,
                     'calibData': calib_data
                 }
                 context['photometry_data'].append(data)
@@ -106,7 +109,13 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
 class ReloadFits(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
-        data_ids = request.POST.getlist('selected-fits')
+        data_ids_str = request.POST.get('selected-fits-ids', '')
+        if data_ids_str != '':
+            data_ids = data_ids_str.split(',')
+        else:
+            messages.error(self.request, 'Data is empty!')
+            return redirect(reverse('bhtom_common:list'))
+
         user = request.user
         logger.debug("Start ReloadFits, data: %s, user: %s" % (str(data_ids), str(request.user)))
 
@@ -114,9 +123,6 @@ class ReloadFits(LoginRequiredMixin, View):
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
 
-        if len(data_ids) == 0:
-            messages.error(self.request, 'Data is empty!')
-            return redirect(reverse('bhtom_common:list'))
 
         if 'update' in request.POST:
             return HttpResponseRedirect(reverse('bhtom_common:update_fits') + f'?data={",".join(data_ids)}')
@@ -136,9 +142,15 @@ class ReloadFits(LoginRequiredMixin, View):
             post_data = {
                 'dataId': data_id
             }
-
             try:
-                requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
+                if 'test_reload' in request.POST:
+                    response = requests.post(settings.UPLOAD_SERVICE_URL + '/testReloadFits/', data=post_data, headers=headers)
+                else:
+                    response = requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
+                if response.status_code != 201:
+                    messages.error(self.request, 'Error while sending file to the ccdphot')
+                    return redirect(reverse('bhtom_common:list'))
+
             except Exception as e:
                 logger.error("Error in connect to upload service: " + str(e))
                 messages.error(self.request, 'Error in connect to upload service.')
@@ -146,6 +158,7 @@ class ReloadFits(LoginRequiredMixin, View):
 
         messages.success(self.request, 'Send file to ccdphot')
         return redirect(reverse('bhtom_common:list'))
+
 
 
 class UpdateFits(LoginRequiredMixin, FormView):
@@ -203,7 +216,14 @@ class UpdateFits(LoginRequiredMixin, FormView):
 
 class ReloadPhotometry(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
-        data_ids = request.POST.getlist('selected-photometry')
+        data_ids_str = request.POST.get('selected-photometry-ids', '')
+        if data_ids_str != '':
+            data_ids = data_ids_str.split(',')
+        else:
+            messages.error(self.request, 'Data is empty!')
+            return redirect(reverse('bhtom_common:list'))
+
+
         success = False
 
         logger.debug("Start ReloadPhotometry, data: %s, user: %s" % (str(data_ids), str(request.user)))
@@ -216,7 +236,7 @@ class ReloadPhotometry(LoginRequiredMixin, View):
             messages.error(self.request, 'Data is empty!')
             return redirect(reverse('bhtom_common:list'))
 
-        if 'update' in request.POST:
+        if 'update-photometry' in request.POST:
             return HttpResponseRedirect(reverse('bhtom_common:reload_photometry_fits') + f'?data={",".join(data_ids)}')
 
         for data_id in data_ids:
@@ -236,7 +256,7 @@ class ReloadPhotometry(LoginRequiredMixin, View):
                 logger.error("Calibration_data not exist, data: %s, type: %s"
                              % (str(data_id), str(dataProduct.data_product_type)))
 
-                if dataProduct.data_product_type is 'fits_file':
+                if dataProduct.data_product_type == 'fits_file':
                     try:
                         ccdphotJob = CCDPhotJob.objects.get(dataProduct=dataProduct)
 
@@ -278,7 +298,9 @@ class ReloadPhotometry(LoginRequiredMixin, View):
 class ReloadPhotometryWithFits(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
-        fitsId = self.request.GET.get('data', '')
+
+        fitsId = self.request.GET.get('data', '').split(',')
+
         user = request.user
         logger.debug("Start ReloadFits, data: %s, user: %s" % (str(fitsId), str(request.user)))
 
@@ -297,13 +319,23 @@ class ReloadPhotometryWithFits(LoginRequiredMixin, View):
             messages.error(self.request, "Token does not exist")
             return redirect(reverse('bhtom_common:list'))
 
-        for data_id in fitsId:
+        try:
+            dataProducts = DataProduct.objects.filter(id__in=fitsId)
+        except DataProduct.DoesNotExist:
+            logger.error("DataProduct not Exist")
+            messages.error(self.request, 'DataProduct not Exist')
+            return redirect(reverse('bhtom_common:list'))
+
+        for data in dataProducts:
+
             post_data = {
-                'dataId': data_id
+                'dataId': data.id
             }
 
             try:
-                requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
+                response = requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
+                if response.status_code != 201:
+                    messages.error(self.request, 'Error while sending file to the ccdphot, id:' + str(data.id))
             except Exception as e:
                 logger.error("Error in connect to upload service: " + str(e))
                 messages.error(self.request, 'Error in connect to upload service.')
@@ -316,7 +348,13 @@ class ReloadPhotometryWithFits(LoginRequiredMixin, View):
 class DeletePointAndRestartProcess(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
-        data_ids = request.POST.getlist('selected-s-fits')
+        data_ids_str = request.POST.get('selected-s-fits-ids', '')
+        if data_ids_str != '':
+            data_ids = data_ids_str.split(',')
+        else:
+            messages.error(self.request, 'Data is empty!')
+            return redirect(reverse('bhtom_common:list'))
+
         user = request.user
         success = False
 
