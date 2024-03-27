@@ -91,7 +91,8 @@ or
 <!-- - `--no_plot`: if true, no calibration plot will be generated. The default setting is false. -->
 - `--mjd <mjd>`: Modified Julian Date (float) [note MJD=JD-2400000.5], required for single photometry file
 - `--observer <observer>`: Name of the observer to be associated with the datapoint(s). Note that by default the token's owner name will be used as a an observer. Selecting this option overwrites the name from the token.
-
+match_dist
+ `--match_dist <match_dist>`: Matching Radius.
 ### Example Usage 1
 
 ```bash
