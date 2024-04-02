@@ -109,7 +109,13 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
 class ReloadFits(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
-        data_ids = request.POST.getlist('selected-fits')
+        data_ids_str = request.POST.get('selected-fits-ids', '')
+        if data_ids_str != '':
+            data_ids = data_ids_str.split(',')
+        else:
+            messages.error(self.request, 'Data is empty!')
+            return redirect(reverse('bhtom_common:list'))
+
         user = request.user
         logger.debug("Start ReloadFits, data: %s, user: %s" % (str(data_ids), str(request.user)))
 
@@ -117,9 +123,6 @@ class ReloadFits(LoginRequiredMixin, View):
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
 
-        if len(data_ids) == 0:
-            messages.error(self.request, 'Data is empty!')
-            return redirect(reverse('bhtom_common:list'))
 
         if 'update' in request.POST:
             return HttpResponseRedirect(reverse('bhtom_common:update_fits') + f'?data={",".join(data_ids)}')
@@ -139,9 +142,11 @@ class ReloadFits(LoginRequiredMixin, View):
             post_data = {
                 'dataId': data_id
             }
-
             try:
-                response = requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
+                if 'test_reload' in request.POST:
+                    response = requests.post(settings.UPLOAD_SERVICE_URL + '/testReloadFits/', data=post_data, headers=headers)
+                else:
+                    response = requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
                 if response.status_code != 201:
                     messages.error(self.request, 'Error while sending file to the ccdphot')
                     return redirect(reverse('bhtom_common:list'))
@@ -153,6 +158,7 @@ class ReloadFits(LoginRequiredMixin, View):
 
         messages.success(self.request, 'Send file to ccdphot')
         return redirect(reverse('bhtom_common:list'))
+
 
 
 class UpdateFits(LoginRequiredMixin, FormView):
@@ -210,7 +216,14 @@ class UpdateFits(LoginRequiredMixin, FormView):
 
 class ReloadPhotometry(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
-        data_ids = request.POST.getlist('selected-photometry')
+        data_ids_str = request.POST.get('selected-photometry-ids', '')
+        if data_ids_str != '':
+            data_ids = data_ids_str.split(',')
+        else:
+            messages.error(self.request, 'Data is empty!')
+            return redirect(reverse('bhtom_common:list'))
+
+
         success = False
 
         logger.debug("Start ReloadPhotometry, data: %s, user: %s" % (str(data_ids), str(request.user)))
@@ -223,7 +236,7 @@ class ReloadPhotometry(LoginRequiredMixin, View):
             messages.error(self.request, 'Data is empty!')
             return redirect(reverse('bhtom_common:list'))
 
-        if 'update' in request.POST:
+        if 'update-photometry' in request.POST:
             return HttpResponseRedirect(reverse('bhtom_common:reload_photometry_fits') + f'?data={",".join(data_ids)}')
 
         for data_id in data_ids:
@@ -335,7 +348,13 @@ class ReloadPhotometryWithFits(LoginRequiredMixin, View):
 class DeletePointAndRestartProcess(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
-        data_ids = request.POST.getlist('selected-s-fits')
+        data_ids_str = request.POST.get('selected-s-fits-ids', '')
+        if data_ids_str != '':
+            data_ids = data_ids_str.split(',')
+        else:
+            messages.error(self.request, 'Data is empty!')
+            return redirect(reverse('bhtom_common:list'))
+
         user = request.user
         success = False
 
