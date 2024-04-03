@@ -231,7 +231,8 @@
             });
         });
         
-
+        var selectedIds = [];
+    
         function toggleSelectAll(checkboxName) {
             var checkboxes = document.getElementsByName(checkboxName);
             var selectAllCheckbox = document.getElementById(checkboxName + '-checkbox');
@@ -253,55 +254,32 @@
                 }
             }
         }
-
+    
         function updateHiddenField(checkboxName) {
-            var selectedIds = [];
+            selectedIds = [];
             var checkboxes = document.getElementsByName(checkboxName);
-            var currentPageIndex = parseInt(document.querySelector('.paginate_button.current').innerText);
-
-            for (var i = 0; i < checkboxes.length; i++) {
-                if(checkboxes[i].checked){
-                    selectedIds.push(checkboxes[i].value); 
-                }
-            }
-            var nextButton = document.getElementsByClassName('paginate_button next');
-            var hasNextPage = nextButton !== null;
-        
-            // While there's a next page got ot the next page
-            while (hasNextPage && !nextButton[0].classList.contains('disabled')) {
-                nextButton[0].click(); 
-            
+            var pageButtons = document.querySelectorAll('.paginate_button');
+            for (var pageIndex = 0; pageIndex < pageButtons.length; pageIndex++) {
+                goToPage(pageIndex); // Go to each page to collect selected IDs
                 checkboxes = document.getElementsByName(checkboxName);
                 for (var j = 0; j < checkboxes.length; j++) {
-                    if(checkboxes[j].checked){
-                        selectedIds.push(checkboxes[j].value); 
-                    }
-                }
-                // Check if there's another "Next" button
-                nextButton =  document.getElementsByClassName('paginate_button next');
-                hasNextPage = nextButton !== null;
-            }
-            
-            var previousButton =  document.getElementsByClassName('paginate_button previous');
-            while (previousButton !== null && !previousButton[0].classList.contains('disabled') ) {
-                previousButton[0].click(); 
-                checkboxes = document.getElementsByName(checkboxName); 
-                for (var k = 0; k < checkboxes.length; k++) {
-                    if (!selectedIds.includes(checkboxes[k].value)) {
-                        if(checkboxes[k].checked){
-                            selectedIds.push(checkboxes[k].value); 
+                    if (checkboxes[j].checked) {
+                        var id = checkboxes[j].value;
+                        if (!selectedIds.includes(id)) {
+                            selectedIds.push(id);
                         }
                     }
                 }
-                previousButton =  document.getElementsByClassName('paginate_button previous');
             }
-            $('#' + checkboxName + '-ids').val(selectedIds.join(','));  
+        
+            $('#' + checkboxName + '-ids').val(selectedIds.join(','));
         }
-
+        
+    
         $('button[name="reload-photometry"]').click(function() {
             updateHiddenField('selected-photometry');
         });
-
+    
         $('button[name="update-photometry"]').click(function() {
             updateHiddenField('selected-photometry');
         });
@@ -319,4 +297,5 @@
             updateHiddenField('selected-s-fits');
         });
     </script>
+    
 {% endblock %}
