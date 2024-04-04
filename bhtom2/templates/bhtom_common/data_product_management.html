@@ -24,7 +24,7 @@
                         <form id="photometry-form" action="{% url 'bhtom_common:reload_photometry' %}" method="POST">
                             {% csrf_token %}
                             <input type="hidden" id="selected-photometry-ids" name="selected-photometry-ids" value="">
-                            <h4>Delay: 7 days</h4>
+                            <h4>Delay: 30 days</h4>
                             <div class="mb-3"> 
                                 <button type="submit" class="btn btn-outline-primary" name="reload-photometry">Reload Photometry</button> 
                                 <button type="submit" class="btn btn-outline-primary ml-1" name="update-photometry">Reload Fits</button>
@@ -33,7 +33,7 @@
                             <table id="photometry-table" class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th class="sort"><input type="checkbox" id="selected-photometry-checkbox" onclick="toggleSelectAll('selected-photometry')"></th>
+                                        <th class="sort"><input type="checkbox" id="selected-photometry-checkbox" onclick="toggleSelectAll('selected-photometry','photometry-table')"></th>
                                         <th>Data</th>
                                         <th>Created</th>
                                         <th>Observatory</th>
@@ -90,7 +90,7 @@
                             <table id="fits-error-table" class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th class="sort"><input type="checkbox" id="selected-fits-checkbox" onclick="toggleSelectAll('selected-fits')"></th>
+                                        <th class="sort"><input type="checkbox" id="selected-fits-checkbox" onclick="toggleSelectAll('selected-fits','fits-error-table')"></th>
                                         <th>Data</th>
                                         <th>Created</th>
                                         <th>Observatory</th>
@@ -135,14 +135,14 @@
                         <form id="s-fits-form" action="{% url 'bhtom_common:reload_s_fits' %}" method="POST">
                             {% csrf_token %}
                             <input type="hidden" id="selected-s-fits-ids" name="selected-s-fits-ids" value="">
-                            <h4>Delay: 3 days</h4>
+                            <h4>Delay: 2 days</h4>
                             <div class="mb-3">
                                 <button type="submit" class="btn btn-outline-primary ml-1" name="reload-fits-s">Restart Fits</button>
                             </div>
                             <table id="fits-table" class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th class="sort"><input type="checkbox" id="selected-s-fits-checkbox" onclick="toggleSelectAll('selected-s-fits')"></th>
+                                        <th class="sort"><input type="checkbox" id="selected-s-fits-checkbox" onclick="toggleSelectAll('selected-s-fits','fits-table')"></th>
                                         <th>Data</th>
                                         <th>Created</th>
                                         <th>Observatory</th>
@@ -233,7 +233,7 @@
         
         var selectedIds = [];
     
-        function toggleSelectAll(checkboxName) {
+        function toggleSelectAll(checkboxName,tableName) {
             var checkboxes = document.getElementsByName(checkboxName);
             var selectAllCheckbox = document.getElementById(checkboxName + '-checkbox');
             var currentPageIndex = parseInt(document.querySelector('.paginate_button.current').innerText);
@@ -242,25 +242,26 @@
                 checkboxes[i].checked = selectAllCheckbox.checked;
             }
         
-            goToPage(currentPageIndex);
+            goToPage(currentPageIndex,tableName);
         }
-        
-        function goToPage(pageIndex) {
-            var pageButtons = document.querySelectorAll('.paginate_button');
+
+        function goToPage(pageIndex, tableName) {
+            var pageButtons = document.querySelectorAll('a.paginate_button[aria-controls="' + tableName + '"]');
             for (var i = 0; i < pageButtons.length; i++) {
-                if (pageButtons[i].innerText === pageIndex.toString()) {
+                if (pageButtons[i].innerText.trim() === pageIndex.toString()) {
                     pageButtons[i].click();
                     break;
                 }
             }
         }
+        
     
-        function updateHiddenField(checkboxName) {
+        function updateHiddenField(checkboxName, tableName) {
             selectedIds = [];
             var checkboxes = document.getElementsByName(checkboxName);
-            var pageButtons = document.querySelectorAll('.paginate_button');
-            for (var pageIndex = 0; pageIndex < pageButtons.length; pageIndex++) {
-                goToPage(pageIndex); // Go to each page to collect selected IDs
+            var pageButtons = document.querySelectorAll('a.paginate_button[aria-controls="' + tableName + '"]');
+            for (var pageIndex = 1; pageIndex < pageButtons.length; pageIndex++) {
+                goToPage(pageIndex,tableName);
                 checkboxes = document.getElementsByName(checkboxName);
                 for (var j = 0; j < checkboxes.length; j++) {
                     if (checkboxes[j].checked) {
@@ -273,28 +274,27 @@
             }
         
             $('#' + checkboxName + '-ids').val(selectedIds.join(','));
-        }
-        
-    
+        } 
+
         $('button[name="reload-photometry"]').click(function() {
-            updateHiddenField('selected-photometry');
+            updateHiddenField('selected-photometry', "photometry-table");
         });
     
         $('button[name="update-photometry"]').click(function() {
-            updateHiddenField('selected-photometry');
+            updateHiddenField('selected-photometry', "photometry-table");
         });
         $('button[name="reload"]').click(function() {
-            updateHiddenField('selected-fits');
+            updateHiddenField('selected-fits','fits-error-table');
         });
       
         $('button[name="update"]').click(function() {
-            updateHiddenField('selected-fits');
+            updateHiddenField('selected-fits','fits-error-table');
         });
         $('button[name="test_reload"]').click(function() {
-            updateHiddenField('selected-fits');
+            updateHiddenField('selected-fits','fits-error-table');
         });
         $('button[name="reload-fits-s"]').click(function() {
-            updateHiddenField('selected-s-fits');
+            updateHiddenField('selected-s-fits','fits-table');
         });
     </script>
     
