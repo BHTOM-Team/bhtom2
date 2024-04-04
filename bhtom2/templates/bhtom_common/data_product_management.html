@@ -24,7 +24,7 @@
                         <form id="photometry-form" action="{% url 'bhtom_common:reload_photometry' %}" method="POST">
                             {% csrf_token %}
                             <input type="hidden" id="selected-photometry-ids" name="selected-photometry-ids" value="">
-                            <h4>Delay: 7 days</h4>
+                            <h4>Delay: 30 days</h4>
                             <div class="mb-3"> 
                                 <button type="submit" class="btn btn-outline-primary" name="reload-photometry">Reload Photometry</button> 
                                 <button type="submit" class="btn btn-outline-primary ml-1" name="update-photometry">Reload Fits</button>
@@ -135,7 +135,7 @@
                         <form id="s-fits-form" action="{% url 'bhtom_common:reload_s_fits' %}" method="POST">
                             {% csrf_token %}
                             <input type="hidden" id="selected-s-fits-ids" name="selected-s-fits-ids" value="">
-                            <h4>Delay: 3 days</h4>
+                            <h4>Delay: 2 days</h4>
                             <div class="mb-3">
                                 <button type="submit" class="btn btn-outline-primary ml-1" name="reload-fits-s">Restart Fits</button>
                             </div>
