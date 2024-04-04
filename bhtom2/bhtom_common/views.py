@@ -63,7 +63,7 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
             .exclude(dataProduct__fits_data='') \
             .order_by('-job_id')
 
-        days_delay = timezone.now() - timedelta(days=3)
+        days_delay = timezone.now() - timedelta(days=2)
 
         context['fits_s_file'] = DataProduct.objects.filter(Q(created__gte=days_delay) &
                                                             Q(data_product_type='fits_file') &
@@ -72,7 +72,7 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
 
         context['photometry_data'] = []
 
-        days_delay_error = timezone.now() - timedelta(days=7)
+        days_delay_error = timezone.now() - timedelta(days=30)
 
         ccdphot = CCDPhotJob.objects.filter((Q(status='F') | Q(status='D')) &
                                             ~Q(dataProduct__fits_data__isnull=True) &
