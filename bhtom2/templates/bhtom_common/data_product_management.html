@@ -258,6 +258,7 @@
     
         function updateHiddenField(checkboxName, tableName) {
             selectedIds = [];
+            var currentPageIndex = parseInt(document.querySelector('.paginate_button.current').innerText);
             var checkboxes = document.getElementsByName(checkboxName);
             var pageButtons = document.querySelectorAll('a.paginate_button[aria-controls="' + tableName + '"]');
             for (var pageIndex = 1; pageIndex < pageButtons.length; pageIndex++) {
@@ -272,7 +273,8 @@
                     }
                 }
             }
-        
+            goToPage(currentPageIndex,tableName);
+            
             $('#' + checkboxName + '-ids').val(selectedIds.join(','));
         } 
 
