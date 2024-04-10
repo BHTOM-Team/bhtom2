@@ -48,7 +48,7 @@
                                     {% for data in photometry_data %}
                                         <tr>
                                             <td><input type="checkbox" name="selected-photometry" value="{{ data.dataProduct.id }}"></td>
-                                            <td>{{ data.dataProduct.data }}</td>
+                                            <td><a href="/data/{{ data.dataProduct.data }}">{{ data.dataProduct.data  }}</a></td>
                                             <td>{{ data.calibData.created }}</td>
                                             <td>{{ data.dataProduct.observatory }}</td>
                                             <td><a href="{% url 'bhtom_targets:detail' data.dataProduct.target.name %}">{{ data.dataProduct.target.name }}</a></td>
@@ -103,7 +103,7 @@
                                     {% for fits in fits_file %}
                                         <tr>
                                             <td><input type="checkbox" name="selected-fits" value="{{ fits.dataProduct.id }}"></td>
-                                            <td>{{ fits.dataProduct.data }}</td>
+                                            <td><a href="/data/{{ fits.dataProduct.data }}">{{ fits.dataProduct.data  }}</a></td>
                                             <td>{{ fits.dataProduct.created }}</td>
                                             <td>{{ fits.dataProduct.observatory }}</td>
                                             <td><a href="{% url 'bhtom_targets:detail' fits.dataProduct.target.name %}">{{ fits.dataProduct.target.name }}</a></td>
@@ -155,7 +155,7 @@
                                     {% for fits in fits_s_file %}
                                         <tr>
                                             <td><input type="checkbox" name="selected-s-fits" value="{{ fits.id }}"></td>
-                                            <td>{{ fits.data }}</td>
+                                            <td><a href="/data/{{ fits.data }}">{{ fits.data  }}</a></td>
                                             <td>{{ fits.created }}</td>
                                             <td>{{ fits.observatory }}</td>
                                             <td><a href="{% url 'bhtom_targets:detail' fits.target.name %}">{{ fits.target.name }}</a></td>
@@ -192,6 +192,7 @@
         $(document).ready(function() {
             $('#fits-error-table').DataTable({
                 "searching": false,
+                "paging": false,
                 "columnDefs": [{
                     "targets": [0], // First column
                     "orderable": false // Disable sorting
@@ -206,6 +207,7 @@
         $(document).ready(function() {
             $('#fits-table').DataTable({
                 "searching": false,
+                "paging": false,
                 "columnDefs": [{
                     "targets": [0], // First column
                     "orderable": false // Disable sorting
@@ -220,6 +222,7 @@
         $(document).ready(function() {
             $('#photometry-table').DataTable({
                 "searching": false,
+                "paging": false,
                 "columnDefs": [{
                     "targets": [0], // First column
                     "orderable": false // Disable sorting
@@ -236,16 +239,15 @@
         function toggleSelectAll(checkboxName,tableName) {
             var checkboxes = document.getElementsByName(checkboxName);
             var selectAllCheckbox = document.getElementById(checkboxName + '-checkbox');
-            var currentPageIndex = parseInt(document.querySelector('.paginate_button.current').innerText);
-        
             for (var i = 0; i < checkboxes.length; i++) {
                 checkboxes[i].checked = selectAllCheckbox.checked;
             }
-        
-            goToPage(currentPageIndex,tableName);
         }
 
-        function goToPage(pageIndex, tableName) {
+
+
+        {% comment %} Version with paging {% endcomment %}
+        {% comment %} function goToPage(pageIndex, tableName) {
             var pageButtons = document.querySelectorAll('a.paginate_button[aria-controls="' + tableName + '"]');
             for (var i = 0; i < pageButtons.length; i++) {
                 if (pageButtons[i].innerText.trim() === pageIndex.toString()) {
@@ -254,9 +256,9 @@
                 }
             }
         }
-        
-    
-        function updateHiddenField(checkboxName, tableName) {
+     {% endcomment %}
+
+        {% comment %} function updateHiddenField(checkboxName, tableName) {
             selectedIds = [];
             var currentPageIndex = parseInt(document.querySelector('.paginate_button.current').innerText);
             var checkboxes = document.getElementsByName(checkboxName);
@@ -276,8 +278,21 @@
             goToPage(currentPageIndex,tableName);
             
             $('#' + checkboxName + '-ids').val(selectedIds.join(','));
-        } 
+        }  {% endcomment %}
 
+        function updateHiddenField(checkboxName, tableName) {
+            selectedIds = [];
+            var checkboxes = document.getElementsByName(checkboxName);
+                for (var j = 0; j < checkboxes.length; j++) {
+                    if (checkboxes[j].checked) {
+                        var id = checkboxes[j].value;
+                        if (!selectedIds.includes(id)) {
+                            selectedIds.push(id);
+                        }
+                    }
+                }
+            $('#' + checkboxName + '-ids').val(selectedIds.join(','));
+        } 
         $('button[name="reload-photometry"]').click(function() {
             updateHiddenField('selected-photometry', "photometry-table");
         });
@@ -298,6 +313,7 @@
         $('button[name="reload-fits-s"]').click(function() {
             updateHiddenField('selected-s-fits','fits-table');
         });
+
     </script>
     
 {% endblock %}
