@@ -75,3 +75,23 @@ def update_priority(target):
         update_targetList_cache()
     except Exception as e:
         logger.error("Clean cache error: %s" % str(e))
+
+
+def update_force_reducedDatum(target):
+
+    try:
+        brokers = get_brokers()
+        for broker in brokers:
+            try:
+                brokerCadence = BrokerCadence.objects.get(target_id=target.id, broker_name=broker)
+                brokerCadence.last_update = None
+                brokerCadence.save()
+            except BrokerCadence.DoesNotExist:
+                logger.debug("BrokerCadence not exist, broker: %s" % broker)
+            except Exception as e:
+                logger.error(str(e))
+
+            ReducedDatumEventProducer().send_message(kafkaTopic.updateReducedDatum, target, broker, isNew=True)
+        logger.info("Send update reducedDatum Event, %s" % str(target.name))
+    except Exception as e:
+        logger.error("Error reducedDatum Event, %s" % str(e))
