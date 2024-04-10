@@ -6,10 +6,12 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.views.generic.edit import CreateView, UpdateView
 
 from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm, TargetLatexDescriptionForm
+from bhtom2.bhtom_targets.hooks import update_force_reducedDatum
 from bhtom2.bhtom_targets.utils import import_targets
 from bhtom2.external_service.data_source_information import get_pretty_survey_name
 from bhtom2.utils.bhtom_logger import BHTOMLogger
@@ -24,7 +26,7 @@ from bhtom2.bhtom_targets.utils import check_duplicate_source_names, check_for_e
     check_for_existing_coords, get_nonempty_names_from_queryset, coords_to_degrees
 from guardian.shortcuts import get_objects_for_user, get_groups_with_perms
 
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 from django.urls import reverse
 from abc import ABC, abstractmethod
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -683,4 +685,26 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
             'filter_counts': filter_counts
         })
         return self.render_to_response(context)
+
+
+class UpdateReducedDatum(LoginRequiredMixin, RedirectView):
+
+        """
+        View that handles the updating of reduced data tied to a ``DataProduct`` that was automatically ingested from a
+        broker. Requires authentication.
+        """
+
+        def get(self, request, *args, **kwargs):
+            """
+            Method that handles the GET requests for this view. Calls the management command to update the reduced data and
+            adds a hint using the messages framework about automation.
+            """
+            target_id = kwargs.get('pk', None)
+            target = Target.objects.get(pk=target_id)
+            update_force_reducedDatum(target)
+            messages.success(
+                request,
+                'Reduced datum will be updated.')
+
+            return HttpResponseRedirect(reverse('targets:detail', kwargs={'pk': target.id}))
 
