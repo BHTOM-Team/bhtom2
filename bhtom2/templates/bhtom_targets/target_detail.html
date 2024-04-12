@@ -88,10 +88,16 @@
 
                     <div class="row menu-row">
                         <div class="col-lg-6">
-                            <button onclick="download_photometry()" class="btn btn-primary" role="button">Download
-                                photometry data
+                            <button onclick="download_photometry()" class="btn btn-primary" role="button">
+                                Download photometry data
                             </button>
+                            {% if request.user.is_superuser or request.user.is_staff %}
+                              <button onclick="update_reduceDatum()" class="btn btn-primary" role="button">
+                                  Check for new data
+                            </button>
+                            {% endif %}
                         </div>
+
                         <div class="col-lg-6 text-right">
                             <button onclick="download_radio()" class="btn btn-primary" role="button">Download radio
                                 data
@@ -236,6 +242,9 @@
     <script type="text/javascript">
         function download_photometry() {
             window.open('{% url "targets:download_photometry_data" target.id %}')
+        }
+        function update_reduceDatum() {
+            window.open('{% url "targets:update-reduced-data" target.id %}')
         }
 
         function download_radio() {

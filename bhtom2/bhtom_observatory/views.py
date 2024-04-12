@@ -338,13 +338,11 @@ class UpdateUserObservatory(LoginRequiredMixin, UpdateView):
         return redirect(self.get_success_url())
 
 
-
-
 def get_cameras(request, observatory_id, user_id):
     try:
         user_cameras = ObservatoryMatrix.objects.filter(user=user_id).values_list('camera__id', flat=True)
         observatory_id = int(observatory_id)
-        cameras = Camera.objects.exclude(id__in=user_cameras).filter(observatory_id=observatory_id,  active_flg=True).values('id', 'camera_name')
+        cameras = Camera.objects.exclude(id__in=user_cameras).filter(observatory_id=observatory_id,  active_flg=True).values('id', 'camera_name').order_by('camera_name')
         
         return JsonResponse(list(cameras), safe=False)
     except (ValueError, TypeError):
@@ -354,7 +352,7 @@ def get_favorite_cameras(request, observatory_id, user_id):
     try:
         user_cameras = ObservatoryMatrix.objects.filter(user=user_id).values_list('camera__id', flat=True)
         observatory_id = int(observatory_id)
-        favorite_cameras = Camera.objects.filter(id__in=user_cameras,observatory_id= observatory_id,  active_flg=True).values('id', 'camera_name')
+        favorite_cameras = Camera.objects.filter(id__in=user_cameras, observatory_id=observatory_id,  active_flg=True).values('id', 'camera_name').order_by('camera_name')
         return JsonResponse(list(favorite_cameras), safe=False)
     except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid observatory or user ID'}, status=400)

@@ -52,7 +52,7 @@ def get_constel(ra:float, dec:float):
 def get_response(prompt):
     openai.api_key = API_KEY
     
-    model_engine = "text-davinci-003"
+    model_engine = "davinci-002"
 
     try:
         # Generate a response
@@ -66,7 +66,8 @@ def get_response(prompt):
         )
         # extracting useful part of response
         response = completion.choices[0].text
-    except:
+    except Exception as e:
+        logger.error(str(e))
         response="  Error in AI..."
 
 #removes first 2x /n which are present in all responses
