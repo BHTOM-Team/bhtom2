@@ -52,7 +52,7 @@ def get_constel(ra:float, dec:float):
 def get_response(prompt):
     openai.api_key = API_KEY
     
-    model_engine = "text-davinci-003"
+    model_engine = "davinci-002"
 
     try:
         # Generate a response
