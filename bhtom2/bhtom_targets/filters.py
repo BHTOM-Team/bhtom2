@@ -173,29 +173,6 @@ class TargetFilter(django_filters.FilterSet):
 
     # hide target grouping list if user not logged in
 
-    def validate_cone_search(self, value):
-        """
-        Validate the format of the cone search input value.
-        """
-        try:
-            ra, dec, radius = value.split(',')
-            float(ra)
-            float(dec)
-            float(radius)
-        except ValueError:
-            raise django_filters.ValidationError('Invalid input format. Please provide RA, Dec, and radius separated by commas.')
-    
-    def validate_cone_search_target(self, value):
-        """
-        Validate the format of the cone search input value.
-        """
-        try:
-            target_name, radius = value.split(',')
-            radius = float(radius)
-        except ValueError:
-                raise django_filters.ValidationError('Invalid input format for target_cone_search. Please provide Target Name and radius separated by a comma.')
-
-
     def get_target_list_queryset(request):
         if request.user.is_authenticated:
             return TargetList.objects.all()
@@ -205,10 +182,10 @@ class TargetFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(method='filter_name', label='Name')
 
     cone_search = django_filters.CharFilter(method='filter_cone_search', label='Cone Search',
-                                            help_text='RA, Dec, Search Radius (degrees)', validators=[validate_cone_search])
+                                            help_text='RA, Dec, Search Radius (degrees)')
 
     target_cone_search = django_filters.CharFilter(method='filter_cone_search', label='Cone Search (Target)',
-                                                   help_text='Target Name, Search Radius (degrees)',validators=[validate_cone_search_target])
+                                                   help_text='Target Name, Search Radius (degrees)')
 
     ra: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_ra', label='RA')
     dec: django_filters.RangeFilter = django_filters.NumericRangeFilter(method='filter_dec', label='Dec')

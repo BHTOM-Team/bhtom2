@@ -131,6 +131,25 @@
                     setPaginationStyle();
                 });
             }
+
+            $('#id_cone_search').on('input', function() {
+                var inputVal = $(this).val().trim();
+                var isValid = /^[\w\s]+,\s*[\w\s]+,\s*[\w\s]+$/g.test(inputVal);
+                if (!isValid) {
+                    $(this).css('color', 'red');
+                } else {
+                    $(this).css('color', ''); // Reset color
+                }
+            });
+            $('#id_target_cone_search').on('input', function() {
+                var inputVal = $(this).val().trim();
+                var isValid = /^[\w\s]+,\s*[\w\s]+$/g.test(inputVal);
+                if (!isValid) {
+                    $(this).css('color', 'red');
+                } else {
+                    $(this).css('color', ''); // Reset color
+                }
+            });
         });
     </script>
 {% endblock %}
