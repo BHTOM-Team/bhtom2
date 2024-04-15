@@ -172,6 +172,12 @@ class UpdateObservatoryApi(views.APIView):
                 'altitude': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'approx_lim_mag': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'filters': openapi.Schema(type=openapi.TYPE_STRING),
+                'origin': openapi.Schema(type=openapi.TYPE_STRING), 
+                'telescope':openapi.Schema(type=openapi.TYPE_STRING),
+                'aperture':openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'focal_length':openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'seeing':openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+
             },
             required=['name']
         ),

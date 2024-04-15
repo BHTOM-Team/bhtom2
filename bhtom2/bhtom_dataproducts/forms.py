@@ -93,7 +93,7 @@ class DataProductUploadForm(forms.Form):
         users_obs_id = Camera.objects.filter(id__in=user_cameras, active_flg=True).values_list('observatory_id', flat=True)
 
 
-        user_observatories = Observatory.objects.filter(id__in=users_obs_id)
+        user_observatories = Observatory.objects.filter(id__in=users_obs_id).order_by('name')
         self.fields['observatory'] = ObservatoryChoiceField(
             queryset=user_observatories,
             widget=forms.Select(),

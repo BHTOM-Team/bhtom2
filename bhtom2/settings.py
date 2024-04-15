@@ -57,6 +57,9 @@ DATA_FILE_PATH = secret.get('DATA_FILE_PATH', './data/')
 DATA_PLOT_PATH = secret.get('DATA_PLOT_PATH', '../data/')
 DATA_TARGET_PATH = secret.get('DATA_TARGET_PATH', '../data/')
 
+DELETE_FITS_FILE_DAY = int(secret.get('DELETE_FITS_FILE_DAY',3))
+DELETE_FITS_ERROR_FILE_DAY = int(secret.get('DELETE_FITS_ERROR_FILE_DAY',30))
+
 
 CSRF_TRUSTED_ORIGINS = [] + list(secret.get("CSRF_TRUSTED_ORIGINS", 'localhost').split(','))
 

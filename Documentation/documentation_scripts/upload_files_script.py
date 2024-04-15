@@ -23,7 +23,7 @@ filter_name = 'GaiaSP/any'  #force filter to which your data should be calibrate
 dry_run = 'False' #'True' if you just want to test the upload and do not store the observation in the database
 comment = '' #comment about the observation, data processing, etc.
 mjd = '' # Time of the observation in MJD, only needed for photometry uploads
-
+match_dist = ''
 
 # Create the parser
 parser = argparse.ArgumentParser(description="Process some parameters.")
@@ -40,6 +40,7 @@ parser.add_argument('--comment', default=None, help='Comment about the observati
 parser.add_argument('--mjd', default=None, help='Time of the observation in MJD, only needed for photometry uploads')
 parser.add_argument('--data_product_type', default='', help='Data product type')
 parser.add_argument('--observer', default=None, help='Name of the observer to be associated to the data. Note this overwrites the name from the token, used as default.')
+parser.add_argument('--match_dist', default=None, help='Matching Radius.')
 
 # Parse the arguments
 args = parser.parse_args()
@@ -56,6 +57,7 @@ comment = args.comment
 mjd = args.mjd
 data_product_type = args.data_product_type
 observer = args.observer
+match_dist = args.match_dist
 
 # Check if directory or filename is provided
 if directory is not None:
@@ -76,7 +78,7 @@ for file in file_list:
             'filter': filter_name,
             'data_product_type': data_product_type,
             'dry_run': dry_run,
-            'observatory': observatory_name
+            'observatory': observatory_name,
         }
         if comment is not None:
             data['comment'] = comment
@@ -84,6 +86,8 @@ for file in file_list:
             data['mjd'] = mjd
         if observer is not None:
             data['observer'] = observer
+        if match_dist is not None:
+            data['match_dist'] = match_dist
 
         response = requests.post(
             url='https://uploadsvc2.astrolabs.pl/upload/',

@@ -63,7 +63,7 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
             .exclude(dataProduct__fits_data='') \
             .order_by('-job_id')
 
-        days_delay = timezone.now() - timedelta(days=3)
+        days_delay = timezone.now() - timedelta(days=settings.DELETE_FITS_FILE_DAY)
 
         context['fits_s_file'] = DataProduct.objects.filter(Q(created__gte=days_delay) &
                                                             Q(data_product_type='fits_file') &
@@ -72,7 +72,7 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
 
         context['photometry_data'] = []
 
-        days_delay_error = timezone.now() - timedelta(days=7)
+        days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
 
         ccdphot = CCDPhotJob.objects.filter((Q(status='F') | Q(status='D')) &
                                             ~Q(dataProduct__fits_data__isnull=True) &
@@ -456,6 +456,7 @@ class GetDataProductApi(views.APIView):
                 'data_product_type': openapi.Schema(type=openapi.TYPE_STRING),
                 'status': openapi.Schema(type=openapi.TYPE_STRING),
                 'fits_data': openapi.Schema(type=openapi.TYPE_STRING),
+                'camera': openapi.Schema(type=openapi.TYPE_STRING),
                 'created_start': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'created_end': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
             },
@@ -477,6 +478,7 @@ class GetDataProductApi(views.APIView):
         data_product_type = self.request.data.get('data_product_type', None)
         status = self.request.data.get('status', None)
         fits_data = self.request.data.get('fits_data', None)
+        camera = self.request.data.get('camera', None)
         created_start = self.request.data.get('created_start', None)
         created_end = self.request.data.get('created_end', None)
 
@@ -484,6 +486,8 @@ class GetDataProductApi(views.APIView):
             query &= Q(data_product_type=data_product_type)
         if status is not None:
             query &= Q(status=status)
+        if camera is not None:
+            query &= Q(observatory__camera__prefix=camera)
         if fits_data is not None:
             query &= Q(fits_data=fits_data)
         if created_start is not None:

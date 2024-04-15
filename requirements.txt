@@ -40,7 +40,7 @@ specutils==1.5.0
 sphinx>=4.0
 lxml==4.9.1
 crispy-bootstrap4>=2022.1
-openai>=0.27.3
+openai==0.28.0
 drf_yasg==1.21.6 #swagger
 MulensModel>=2.15.0
 aiokafka==0.8.1

@@ -11,13 +11,13 @@ def sanitize_folder_name(name):
 
 def example_file_path(instance, filename):
     return 'fits/exampleObservatoryFile/{0}/{1}'.format(sanitize_folder_name(instance.camera_name),
-                                                        sanitize_folder_name(filename))
+                                                        filename)
 
 
 class Observatory(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name='Observatory name', unique=True)
-    lon = models.FloatField(null=False, blank=False, verbose_name='Longitude (West is positive) [deg]',
+    lon = models.FloatField(null=False, blank=False, verbose_name='Longitude (East is positive) [deg]',
                             validators=[
                                 MinValueValidator(-180.0, message="longitude must be greater than -180."),
                                 MaxValueValidator(180.0, message="longitude must be less than 180.")

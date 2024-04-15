@@ -52,7 +52,7 @@ def get_constel(ra:float, dec:float):
 def get_response(prompt):
     openai.api_key = API_KEY
     
-    model_engine = "text-davinci-003"
+    model_engine = "davinci-002"
 
     try:
         # Generate a response
@@ -66,7 +66,8 @@ def get_response(prompt):
         )
         # extracting useful part of response
         response = completion.choices[0].text
-    except:
+    except Exception as e:
+        logger.error(str(e))
         response="  Error in AI..."
 
 #removes first 2x /n which are present in all responses
@@ -113,7 +114,11 @@ def latex_text_target_prompt(target:Target):
     if (target.discovery_date):
         discdate=str(target.discovery_date)
 
-        datetime_object = datetime.strptime(discdate, "%Y-%m-%d %H:%M:%S%z")
+        try:
+            datetime_object = datetime.strptime(discdate, "%Y-%m-%d %H:%M:%S%z")
+        except(ValueError):
+            datetime_object = datetime.strptime(discdate, "%Y-%m-%d %H:%M:%S.%f%z")
+
         date=datetime_object.strftime('%Y-%m-%d %H:%M')
 
         human_readable_create_date = target.created.strftime('%Y-%m-%d %H:%M')

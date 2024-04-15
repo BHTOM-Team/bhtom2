@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db.models import Q
 import django_filters
 
+from django.core.exceptions import ValidationError
 from bhtom_base.bhtom_targets.models import Target, TargetList
 from bhtom_base.bhtom_targets.utils import cone_search_filter
 
@@ -144,9 +145,16 @@ class TargetFilter(django_filters.FilterSet):
         or the RA/DEC from the named target.
         """
         if name == 'cone_search':
-            ra, dec, radius = value.split(',')
+            try:
+                ra, dec, radius = value.split(',')
+            except ValueError:
+                raise ValueError('Invalid input format for cone_search. Please provide RA, DEC, and radius separated by commas.')
+
         elif name == 'target_cone_search':
-            target_name, radius = value.split(',')
+            try:
+                target_name, radius = value.split(',')
+            except ValueError:
+                raise ValueError('Invalid input format for cone_search. Please provide RA, DEC, and radius separated by commas.')
             targets = Target.objects.filter(
                 Q(name__icontains=target_name) | Q(aliases__name__icontains=target_name)
             ).distinct()
@@ -164,6 +172,7 @@ class TargetFilter(django_filters.FilterSet):
         return cone_search_filter(queryset, ra, dec, radius)
 
     # hide target grouping list if user not logged in
+
     def get_target_list_queryset(request):
         if request.user.is_authenticated:
             return TargetList.objects.all()
