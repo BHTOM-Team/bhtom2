@@ -211,7 +211,7 @@ curl -X 'POST' \
     
     This API endpoint allows users to get the list of observatories registered in the system.
 
-    <!-- TOKEN is requaired! -->
+    <!-- TOKEN is required! -->
 
 ### Request
 
