@@ -11,7 +11,7 @@ def sanitize_folder_name(name):
 
 def example_file_path(instance, filename):
     return 'fits/exampleObservatoryFile/{0}/{1}'.format(sanitize_folder_name(instance.camera_name),
-                                                        sanitize_folder_name(filename))
+                                                        filename)
 
 
 class Observatory(models.Model):
