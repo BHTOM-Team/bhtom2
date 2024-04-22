@@ -5,6 +5,7 @@ import django_filters
 from django.core.exceptions import ValidationError
 from bhtom_base.bhtom_targets.models import Target, TargetList
 from bhtom_base.bhtom_targets.utils import cone_search_filter
+from django.contrib import messages
 
 CLASSIFICATION_TYPES = settings.CLASSIFICATION_TYPES
 
@@ -147,14 +148,21 @@ class TargetFilter(django_filters.FilterSet):
         if name == 'cone_search':
             try:
                 ra, dec, radius = value.split(',')
+                ra = float(ra)
+                dec = float(dec)
+                radius = float(radius)
             except ValueError:
-                raise ValueError('Invalid input format for cone_search. Please provide RA, DEC, and radius separated by commas.')
-
+              messages.error(self.request, 'Invalid input format for cone_search. Please provide RA, DEC, and radius separated by commas.')
+              return queryset
+                
         elif name == 'target_cone_search':
             try:
                 target_name, radius = value.split(',')
+                radius = float(radius)
             except ValueError:
-                raise ValueError('Invalid input format for cone_search. Please provide RA, DEC, and radius separated by commas.')
+                messages.error(self.request,   'Invalid input format for target_cone_search. Please provide Target Name and radius separated by commas.')
+                return queryset
+            
             targets = Target.objects.filter(
                 Q(name__icontains=target_name) | Q(aliases__name__icontains=target_name)
             ).distinct()
@@ -166,35 +174,10 @@ class TargetFilter(django_filters.FilterSet):
         else:
             return queryset
 
-        ra = float(ra)
-        dec = float(dec)
 
         return cone_search_filter(queryset, ra, dec, radius)
 
     # hide target grouping list if user not logged in
-
-    def validate_cone_search(self, value):
-        """
-        Validate the format of the cone search input value.
-        """
-        try:
-            ra, dec, radius = value.split(',')
-            float(ra)
-            float(dec)
-            float(radius)
-        except ValueError:
-            raise django_filters.ValidationError('Invalid input format. Please provide RA, Dec, and radius separated by commas.')
-    
-    def validate_cone_search_target(self, value):
-        """
-        Validate the format of the cone search input value.
-        """
-        try:
-            target_name, radius = value.split(',')
-            radius = float(radius)
-        except ValueError:
-                raise django_filters.ValidationError('Invalid input format for target_cone_search. Please provide Target Name and radius separated by a comma.')
-
 
     def get_target_list_queryset(request):
         if request.user.is_authenticated:
@@ -205,10 +188,10 @@ class TargetFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(method='filter_name', label='Name')
 
     cone_search = django_filters.CharFilter(method='filter_cone_search', label='Cone Search',
-                                            help_text='RA, Dec, Search Radius (degrees)', validators=[validate_cone_search])
+                                            help_text='RA, Dec, Search Radius (degrees)')
 
     target_cone_search = django_filters.CharFilter(method='filter_cone_search', label='Cone Search (Target)',
-                                                   help_text='Target Name, Search Radius (degrees)',validators=[validate_cone_search_target])
+                                                   help_text='Target Name, Search Radius (degrees)')
 
     ra: django_filters.RangeFilter = django_filters.RangeFilter(method='filter_ra', label='RA')
     dec: django_filters.RangeFilter = django_filters.NumericRangeFilter(method='filter_dec', label='Dec')

@@ -2,22 +2,26 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import User
 import re
-
+import os
 
 def sanitize_folder_name(name):
     # Replace special characters with underscores
     return re.sub(r'[^a-zA-Z0-9_]', '_', name)
 
+def sanitize_file_name(name):
+    name_without_extension, extension = os.path.splitext(name)
+    sanitized_name = re.sub(r'[^a-zA-Z0-9_]', '_', name_without_extension)
+    return sanitized_name + extension
 
 def example_file_path(instance, filename):
     return 'fits/exampleObservatoryFile/{0}/{1}'.format(sanitize_folder_name(instance.camera_name),
-                                                        sanitize_folder_name(filename))
+                                                        sanitize_file_name(filename))
 
 
 class Observatory(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name='Observatory name', unique=True)
-    lon = models.FloatField(null=False, blank=False, verbose_name='Longitude (West is positive) [deg]',
+    lon = models.FloatField(null=False, blank=False, verbose_name='Longitude (East is positive) [deg]',
                             validators=[
                                 MinValueValidator(-180.0, message="longitude must be greater than -180."),
                                 MaxValueValidator(180.0, message="longitude must be less than 180.")

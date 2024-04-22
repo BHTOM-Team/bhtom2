@@ -211,7 +211,7 @@ curl -X 'POST' \
     
     This API endpoint allows users to get the list of observatories registered in the system.
 
-    <!-- TOKEN is requaired! -->
+    <!-- TOKEN is required! -->
 
 ### Request
 
@@ -1036,7 +1036,7 @@ API for DataProduct list, lists uploaded instrumental or fits files and tracks t
 
 ### Request
 - **Method**: POST
-- **URL**: `targets/cleanTargetDetailsCache/`
+- **URL**: `common/api/data/`
 
 - Token Authentication: You must include a valid authentication token in the request headers.
 
@@ -1048,6 +1048,7 @@ API for DataProduct list, lists uploaded instrumental or fits files and tracks t
     "data_product_type": "photometry",
     "status": "Dataproduct status",
     "fits_data": "test",
+    "camera" : "BIALKOW_ANDOR-DW432", 
     "created_start": "2024-01-01",
     "created_end": "2024-01-02"
 }
@@ -1061,7 +1062,7 @@ You can make a POST request using the `curl` command or any HTTP client that sup
 ```bash
 curl -X POST \
   -H "Authorization: Token <yourToken>" \
-  "https://bh-tom2.astrolabs.pl/targets/cleanTargetDetailsCache/"
+  "https://bh-tom2.astrolabs.pl/common/api/data/"
 ```
 
 Replace `<yourToken>` with your valid authentication token.
