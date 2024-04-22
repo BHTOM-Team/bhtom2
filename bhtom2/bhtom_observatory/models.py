@@ -2,16 +2,20 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import User
 import re
-
+import os
 
 def sanitize_folder_name(name):
     # Replace special characters with underscores
     return re.sub(r'[^a-zA-Z0-9_]', '_', name)
 
+def sanitize_file_name(name):
+    name_without_extension, extension = os.path.splitext(name)
+    sanitized_name = re.sub(r'[^a-zA-Z0-9_]', '_', name_without_extension)
+    return sanitized_name + extension
 
 def example_file_path(instance, filename):
     return 'fits/exampleObservatoryFile/{0}/{1}'.format(sanitize_folder_name(instance.camera_name),
-                                                        filename)
+                                                        sanitize_file_name(filename))
 
 
 class Observatory(models.Model):
