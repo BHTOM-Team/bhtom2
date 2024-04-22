@@ -150,6 +150,7 @@ class TargetFilter(django_filters.FilterSet):
                 ra, dec, radius = value.split(',')
                 ra = float(ra)
                 dec = float(dec)
+                radius = float(radius)
             except ValueError:
               messages.error(self.request, 'Invalid input format for cone_search. Please provide RA, DEC, and radius separated by commas.')
               return queryset
@@ -157,6 +158,7 @@ class TargetFilter(django_filters.FilterSet):
         elif name == 'target_cone_search':
             try:
                 target_name, radius = value.split(',')
+                radius = float(radius)
             except ValueError:
                 messages.error(self.request,   'Invalid input format for target_cone_search. Please provide Target Name and radius separated by commas.')
                 return queryset
