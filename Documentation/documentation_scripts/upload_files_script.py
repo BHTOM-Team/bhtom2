@@ -38,7 +38,7 @@ parser.add_argument('--filter_name', default='GaiaSP/any', help='Force filter to
 parser.add_argument('--dry_run', default='False', help='\'True\' if you just want to test the upload and do not store the observation in the database')
 parser.add_argument('--comment', default=None, help='Comment about the observation, data processing, etc.')
 parser.add_argument('--mjd', default=None, help='Time of the observation in MJD, only needed for photometry uploads')
-parser.add_argument('--data_product_type', default='', help='Data product type')
+#parser.add_argument('--data_product_type', default='', help='Data product type')
 parser.add_argument('--observer', default=None, help='Name of the observer to be associated to the data. Note this overwrites the name from the token, used as default.')
 parser.add_argument('--match_dist', default=None, help='Matching Radius.')
 
@@ -55,7 +55,7 @@ filter_name = args.filter_name
 dry_run = args.dry_run
 comment = args.comment
 mjd = args.mjd
-data_product_type = args.data_product_type
+#data_product_type = args.data_product_type - commenting, because this is hard coded in the script
 observer = args.observer
 match_dist = args.match_dist
 
