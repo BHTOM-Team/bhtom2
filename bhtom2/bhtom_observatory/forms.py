@@ -1,4 +1,8 @@
+import re
+
+import bleach
 from django import forms
+from django.forms import ValidationError
 from django.forms import inlineformset_factory, BaseInlineFormSet
 
 from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix, Camera
@@ -6,6 +10,21 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 from django.forms.widgets import CheckboxInput
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_observatory-forms')
+
+
+def validate_data(value):
+    cleaned_name = bleach.clean(value, tags=[], attributes={}, protocols=[], strip=True)
+
+    if value != cleaned_name:
+        logger.error("----------Error in validate data, detect html code------------")
+        raise ValidationError("Invalid data format.")
+
+    pattern = r'^[a-zA-Z0-9\-_+. :?\'"&apos;&#39;()@!]*$'
+    match = re.match(pattern, value)
+    if not match:
+        invalid_chars = re.findall(r'[^a-zA-Z0-9\-_+. :?\'"&apos;&#39;()@!]', value)
+        invalid_chars_str = ', '.join(invalid_chars)
+        raise ValidationError("Illegal sign: " + str(invalid_chars_str))
 
 
 class CustomCheckboxInput(CheckboxInput):
@@ -40,7 +59,6 @@ class CameraCreationForm(forms.ModelForm):
         widget=forms.TextInput()
     )
 
-
     class Meta:
         model = Camera
         fields = ('id','camera_name', 'example_file', 'binning', 'gain', 'readout_noise',
@@ -51,6 +69,14 @@ class CameraCreationForm(forms.ModelForm):
         for field_name in self.fields:
             self.fields[field_name].required = True 
         self.fields['example_file'].required = False 
+
+    def clean_camera_name(self):
+        cleaned_data = self.clean()
+        camera_name = cleaned_data.get('camera_name', '')
+        if camera_name is not None:
+            validate_data(camera_name)
+        return camera_name
+
 
 class NoDeleteInlineFormSet(BaseInlineFormSet):
     def __init__(self, *args, **kwargs):
@@ -120,8 +146,26 @@ class ObservatoryCreationForm(forms.ModelForm):
                   'approx_lim_mag', 'filters', 'altitude','aperture','focal_length',
                   'telescope', 'comment','calibration_flg')
 
+    def clean_name(self):
+        cleaned_data = self.clean()
+        name = cleaned_data.get('name', '')
+        if name is not None:
+            validate_data(str(name))
+        return name
 
+    def clean_telescope(self):
+        cleaned_data = self.clean()
+        telescope = cleaned_data.get('telescope', '')
+        if telescope is not None:
+            validate_data(str(telescope))
+        return telescope
 
+    def clean_comment(self):
+        cleaned_data = self.clean()
+        comment = cleaned_data.get('comment', '')
+        if comment is not None:
+            validate_data(str(comment))
+        return comment
 
 
 class ObservatoryUpdateForm(forms.ModelForm):
