@@ -2,7 +2,9 @@
 {% load bootstrap4 static %}
 
 {% block title %}Create observatory{% endblock %}
-
+{% block additional_css %}
+    <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
+{% endblock %}
 {% block content %}
 
 {{ users }}
@@ -88,3 +90,4 @@
 </form>
 <script src="{% static 'bhtom_observatory/create_observatory.js' %}"></script>
 {% endblock %}
+

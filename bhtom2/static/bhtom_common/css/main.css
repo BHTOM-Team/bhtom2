@@ -151,3 +151,6 @@ div.dataTables_paginate {
   margin: 10px 0;
 }
 
+.custom-label {
+  color: white;
+}

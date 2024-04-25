@@ -32,7 +32,7 @@ class CameraCreationForm(forms.ModelForm):
     example_file = forms.FileField(
         label='Sample fits*',
         help_text='Provide one sample fits per filter, clearly labelled.',
-        widget=forms.ClearableFileInput(attrs={'multiple': True}),
+        widget=forms.ClearableFileInput(attrs={'multiple': True, 'class': 'custom-label'}),
     )
     camera_name = forms.CharField(
         initial="Default",
