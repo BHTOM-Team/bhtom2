@@ -19,15 +19,12 @@ def validate_data(value):
         logger.error("----------Error in validate data, detect html code------------")
         raise ValidationError("Invalid data format.")
 
-    pattern = r'^[a-zA-Z0-9\-_+. :?\'"&apos;&#39;()@!]*$~'
+    pattern = r'^[a-zA-Z0-9\-_+., :?\'"&apos;&#39;()@!~]*$'
     match = re.match(pattern, value)
     if not match:
-        invalid_chars = re.findall(pattern, value)
-        invalid_chars_str = ', '.join(invalid_chars)
+        invalid_chars = re.findall(r'[^a-zA-Z0-9\-_+., :?\'"&apos;&#39;()@!~]', value)
+        invalid_chars_str = ', '.join(set(invalid_chars))
         raise ValidationError("Illegal sign: " + str(invalid_chars_str))
-
-    if 'http' in value or '<script>' in value:
-        raise forms.ValidationError("Invalid data format.")
 
 class CustomCheckboxInput(CheckboxInput):
     def render(self, name, value, attrs=None, renderer=None):
