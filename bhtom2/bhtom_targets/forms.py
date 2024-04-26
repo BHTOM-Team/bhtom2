@@ -1,4 +1,8 @@
+import re
+
+import bleach
 from django import forms
+from django.contrib.auth import logout
 from django.forms import inlineformset_factory, HiddenInput
 from django.conf import settings
 from django.contrib.auth.models import Group
@@ -137,6 +141,34 @@ class TargetForm(forms.ModelForm):
                     remove_perm('bhtom_targets.delete_target', group, instance)
 
         return instance
+
+    def clean_name(self):
+        cleaned_data = self.clean()
+        name = cleaned_data.get('name', '')
+        if name is not None:
+            self.validate_data(name)
+        return name
+
+    def clean_description(self):
+        cleaned_data = self.clean()
+        description = cleaned_data.get('description', '')
+        if description is not None:
+            self.validate_data(description)
+        return description
+
+    def validate_data(self, value):
+        cleaned_name = bleach.clean(value, tags=[], attributes={}, protocols=[], strip=True)
+
+        if value != cleaned_name:
+            logger.error("----------Error in validate data, detect html code------------")
+            raise ValidationError("Invalid data format.")
+
+        pattern = r'^[a-zA-Z0-9\-_+. :?\'"&apos;&#39;()@!]*$'
+        match = re.match(pattern, value)
+        if not match:
+            invalid_chars = re.findall(r'[^a-zA-Z0-9\-_+. :?\'"&apos;&#39;()@!]', value)
+            invalid_chars_str = ', '.join(invalid_chars)
+            raise ValidationError("Illegal sign: " + str(invalid_chars_str))
 
     class Meta:
         abstract = True
