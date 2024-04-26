@@ -36,7 +36,13 @@ class CreateObservatory(LoginRequiredMixin, FormView):
         context['cameras'] = CamerasFormSet()
         return context
     
-
+    def form_invalid(self, form):
+        context = self.get_context_data(form=form)
+        if not form.is_valid():
+            cameras_formset = CamerasFormSet(self.request.POST, self.request.FILES, instance=form.instance)
+            context['cameras'] = cameras_formset
+        return self.render_to_response(context)
+    
     def form_valid(self, form):
         cameras = CamerasFormSet(self.request.POST,self.request.FILES)
         try:
