@@ -32,7 +32,7 @@ class CameraCreationForm(forms.ModelForm):
     example_file = forms.FileField(
         label='Sample fits*',
         help_text='Provide one sample fits per filter, clearly labelled.',
-        widget=forms.ClearableFileInput(attrs={'multiple': True, 'class': 'custom-label'}),
+        widget=forms.ClearableFileInput(attrs={'multiple': False, 'class': 'custom-label'}),
     )
     camera_name = forms.CharField(
         initial="Default",
@@ -46,6 +46,7 @@ class CameraCreationForm(forms.ModelForm):
         fields = ('id','camera_name', 'example_file', 'binning', 'gain', 'readout_noise',
                   'saturation_level', 'pixel_scale', 'pixel_size', 'readout_speed')
 
+    
     def __init__(self, *args, **kwargs):
         super(CameraCreationForm, self).__init__(*args, **kwargs)
         for field_name in self.fields:
@@ -113,7 +114,7 @@ class ObservatoryCreationForm(forms.ModelForm):
         self.fields['aperture'].required = False
         self.fields['focal_length'].required = False
         self.fields['telescope'].required = False
-    
+
     class Meta:
         model = Observatory
         fields = ('name', 'lon', 'lat',
