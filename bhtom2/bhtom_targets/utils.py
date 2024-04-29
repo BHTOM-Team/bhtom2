@@ -339,7 +339,7 @@ def update_targetDetails_cache():
 
 def get_brokers():
     try:
-        response = requests.get(settings.HARVESTER_URL + '/getAliasesBrokerList/')
+        response = requests.get(settings.HARVESTER_URL + '/getBrokerList/')
         harvesters = response.json()  # Parse the response as JSON
     except Exception as e:
         logger.error("Error in harvester-service: " + str(e))
