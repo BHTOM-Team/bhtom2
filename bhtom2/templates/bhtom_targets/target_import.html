@@ -13,24 +13,31 @@ description, epoch_of_elements, mean_anomaly, arg_of_perihelion, eccentricity,
 lng_asc_node, inclination, mean_daily_motion, semimajor_axis, epoch_of_perihelion,
 ephemeris_period, ephemeris_period_err, ephemeris_epoch, ephemeris_epoch_err, perihdist
 </pre>
+   <h6>List of available classifications:</h6>
+<pre style="color: grey;">
+ Be-star outburst, AGN, BL Lac, CV, CEPH, EB, Galaxy, LPV, LBV, M-dwarf flare,
+ Microlensing Event, Nova, Peculiar Supernova, QSO, RCrB, RR Lyrae Variable,
+ SSO, Star, SN, Supernova imposter, Symbiotic star, TDE, Variable star-other,
+ XRB, YSO
+</pre>
 <h6>CSV file format examples:</h6>
 <pre style="color: grey;">
-name, type, ra, dec, redshift, distance, classification
-mytarget, SIDERAL, 123.12, -12.34, 2.35, 1.0
+name,       type,       ra,         dec,        redshift,   distance,   classification
+mytarget,   SIDERAL,    123.12,     -12.34,     2.35,       1.0         Star
 </pre>
 <hr style="border-top: 1px solid grey;">
 <pre style="color: grey;">
-name, ra, dec
-mytarget, 123.12, -12.34
+name,       ra,         dec
+mytarget,   123.12,     -12.34
 </pre>
 <hr style="border-top: 1px solid grey;">
 <pre style="color: grey;">
-name, GAIA_ALERTS_name
-mytarget, Gaia20dup
+name,       GAIA_ALERTS_name
+mytarget,   Gaia20dup
 </pre>
 <pre style="color: grey;">
-name, GAIA_ALERTS_name, cadence
-mytarget, Gaia20dup, 3
+name,       GAIA_ALERTS_name,   cadence
+mytarget,   Gaia20dup,          3
 </pre>
 <p style="font-size: small; color: white;">
 In these special cases, the Gaia Alerts harvester will gather all information from Gaia Alerts, but any extra columns in the CSV file with corresponding fields will replace those read from Gaia Alerts.

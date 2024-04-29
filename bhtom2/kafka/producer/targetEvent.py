@@ -26,7 +26,7 @@ class TargetCreateEventProducer:
         try:
             self.producer = Producer(conf)
         except KafkaError as e:
-            logger.error("Kafka Procucer error: " + str(e))
+            logger.error("Kafka Producer error: " + str(e))
 
     def send_message(self, topic, target):
         if self.producer is None:
