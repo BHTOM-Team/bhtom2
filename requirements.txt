@@ -47,3 +47,4 @@ aiokafka==0.8.1
 django_guid==3.3.1
 gunicorn==21.2.0
 gevent==23.9.1
+bleach==6.1.0

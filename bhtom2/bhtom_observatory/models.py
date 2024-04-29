@@ -1,3 +1,5 @@
+import bleach
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import User
@@ -11,14 +13,30 @@ def sanitize_folder_name(name):
 def sanitize_file_name(name):
     name_without_extension, extension = os.path.splitext(name)
     sanitized_name = re.sub(r'[^a-zA-Z0-9_]', '_', name_without_extension)
-    return sanitized_name + extension
+    cleaned_name = bleach.clean(sanitized_name, tags=[], attributes={}, protocols=[], strip=True)
+    return cleaned_name + extension
 
 def example_file_path(instance, filename):
     return 'fits/exampleObservatoryFile/{0}/{1}'.format(sanitize_folder_name(instance.camera_name),
                                                         sanitize_file_name(filename))
 
+class CleanData(models.Model):
+    class Meta:
+        abstract = True
 
-class Observatory(models.Model):
+    def clean(self):
+        super().clean()
+
+        char_fields = [field for field in self._meta.get_fields() if isinstance(field, (models.CharField, models.TextField))]
+
+        for value in char_fields:
+            field_value = getattr(self, value.name)
+            if field_value is not None:
+                cleaned_name = bleach.clean(field_value, tags=[], attributes={}, protocols=[], strip=True)
+                if field_value != cleaned_name:
+                    raise ValidationError("Invalid data format.")
+
+class Observatory(CleanData):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=255, verbose_name='Observatory name', unique=True)
     lon = models.FloatField(null=False, blank=False, verbose_name='Longitude (East is positive) [deg]',
@@ -57,7 +75,7 @@ class Observatory(models.Model):
         unique_together = (('name', 'lon', 'lat'),)
 
 
-class Camera(models.Model):
+class Camera(CleanData):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     observatory = models.ForeignKey(Observatory, on_delete=models.CASCADE, null=False)
     camera_name = models.CharField(max_length=255, verbose_name='Camera name', null=False)
@@ -87,8 +105,7 @@ class Camera(models.Model):
         verbose_name_plural = "cameras"
         unique_together = (('observatory', 'camera_name'),)
 
-
-class ObservatoryMatrix(models.Model):
+class ObservatoryMatrix(CleanData):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE)
     active_flg = models.BooleanField(default='True')
