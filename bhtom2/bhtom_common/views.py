@@ -74,6 +74,9 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
 
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
 
+        context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
+        context['delay_fits'] = settings.DELETE_FITS_FILE_DAY
+        
         ccdphot = CCDPhotJob.objects.filter((Q(status='F') | Q(status='D')) &
                                             ~Q(dataProduct__fits_data__isnull=True) &
                                             ~Q(dataProduct__fits_data='') &
