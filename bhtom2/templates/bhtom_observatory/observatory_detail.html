@@ -1,6 +1,5 @@
 {% extends 'bhtom_common/base.html' %}
-{% load comments bootstrap4 bhtom_common_extras targets_extras observation_extras dataproduct_extras static cache %}
-
+{% load comments bootstrap4 bhtom_common_extras targets_extras observation_extras dataproduct_extras static cache custom_filter_basename %}
 {% block title %}Observatory{% endblock %}
 
 {% block additional_css %}
@@ -97,7 +96,7 @@
                 </div>
                 <div class="col-md-4">
                     <strong style="color: white">Example File:</strong>
-                    <span style="color: white">{{ camera.example_file }}</span>
+                    <span style="color: white">{{ camera.example_file.name|filename }}</span>
                 </div>
                 <div class="col-md-4">
                     <strong style="color: white">Binning:</strong>

@@ -464,16 +464,21 @@ class DataDetailsView(DetailView):
 
         except Exception as e:
             logger.error(str(e))
-            return HttpResponseRedirect(reverse('bhtom_dataproducts:list_all'))
+            context['error_message'] = "An error occurred while processing the data."
+            return context
 
         return context
 
     def get(self, request, *args, **kwargs):
         try:
             context = self.get_context_data(**kwargs)
+            if 'error_message' in context:
+                messages.error(request, context['error_message'])
+                return HttpResponseRedirect(reverse('bhtom_dataproducts:list_all'))
         except Exception as e:
             logger.error("Error in DataDetailsView: " + str(e))
-            return HttpResponseRedirect(reverse('bhtom_dataproducts:list'))  # Replace with your desired URL
+            return HttpResponseRedirect(reverse('bhtom_dataproducts:list_all'))
+            
         return self.render_to_response(context)
 
 
