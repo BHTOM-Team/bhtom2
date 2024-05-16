@@ -88,16 +88,16 @@
                         
                         </tr>
                         <tr>
-                            <td>Exposure time</td>
-                            {% if calibration.expTime != None %}
-                                <td>{{ calibration.expTime }}</td>
+                            <td>Calib Survey/Filter</td>
+                            {% if calibration.use_catalog.survey != None %}
+                                <td>{{ calibration.use_catalog.survey }}/{{calibration.use_catalog.filters}}</td>
                             {% else %}
                                 <td></td>
                             {% endif %}
                         
                         </tr>
                         <tr>
-                            <td>Calib Filter</td>
+                            <td>Standardised to</td>
                             <td>{{ calibration.best_filter }}</td>
                         </tr>
                     
