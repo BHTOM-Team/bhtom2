@@ -157,16 +157,17 @@ class TargetForm(forms.ModelForm):
         return description
 
     def validate_data(self, value):
-        cleaned_name = bleach.clean(value, tags=[], attributes={}, protocols=[], strip=True)
+        field_value = value.replace('\r', '')
+        cleaned_name = bleach.clean(field_value, tags=[], attributes={}, protocols=[], strip=True)
 
-        if value != cleaned_name:
+        if field_value != cleaned_name:
             logger.error("----------Error in validate data, detect html code------------")
             raise ValidationError("Invalid data format.")
 
-        pattern = r'^[a-zA-Z0-9\-_+., :?\'"&apos;&#39;()@!~]*$'
+        pattern = r'^[a-zA-Z0-9\-_+., :?\'"&apos;&#39;()@!~\r\n]*$'
         match = re.match(pattern, value)
         if not match:
-            invalid_chars = re.findall(r'[^a-zA-Z0-9\-_+., :?\'"&apos;&#39;()@!~]', value)
+            invalid_chars = re.findall(r'[^a-zA-Z0-9\-_+., :?\'"&apos;&#39;()@!~\r\n]', value)
             invalid_chars_str = ', '.join(set(invalid_chars))
             raise ValidationError("Illegal sign: " + str(invalid_chars_str))
 
