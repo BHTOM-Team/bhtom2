@@ -41,6 +41,16 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
     template_name = 'bhtom_dataproducts/partials/upload_dataproduct.html'
     MAX_FILES: int = 5
 
+    def get(self, request, *args, **kwargs):
+        # Check if the request is a GET request without any form data
+        if not request.GET:
+            messages.error(self.request, 'Please provide a valid form')
+            return HttpResponseRedirect(reverse('bhtom_targets:list'))
+        
+
+        # If the request contains form data, proceed with the regular GET handler
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user'] = self.request.user
@@ -67,7 +77,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         camera = form.cleaned_data['camera']
         observation_filter = form.cleaned_data['filter']
         mjd = form.cleaned_data['mjd']
-        match_dist = 0.5
+        match_dist = 2.0
         dry_run = form.cleaned_data['dryRun']
         comment = form.cleaned_data['comment']
         observer = form.cleaned_data['observer']
@@ -154,6 +164,10 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         """
         Adds errors to Django messaging framework in the case of an invalid form and redirects to the previous page.
         """
+        if not form.is_bound:
+            messages.error(self.request, 'Please provide a valid form: {}'.format(form.errors.as_json()))
+            return redirect(form.cleaned_data.get('referrer', '/'))
+        
         # TODO: Format error messages in a more human-readable way
         messages.error(self.request, 'There was a problem uploading your file: {}'.format(form.errors.as_json()))
         return redirect(form.cleaned_data.get('referrer', '/'))
@@ -405,7 +419,7 @@ class DataDetailsView(DetailView):
 
     def get_context_data(self, **kwargs):
         logger.debug("Start preparation data details")
-
+        error_message =  "An error occurred while processing the data."
         try:
             try:
                 context = {}
@@ -415,11 +429,11 @@ class DataDetailsView(DetailView):
                 context['target'] = target
             except DataProduct.DoesNotExist:
                 logger.error("DataProduct not found")
-                messages.error(self.request, 'Data not found')
+                error_message = 'Data not found'
                 raise
             except Target.DoesNotExist:
                 logger.error("Target not found")
-                messages.error(self.request, 'Target not found')
+                error_message = 'Target not found'
                 raise
 
             if data_product.data_product_type == "fits_file":
@@ -427,7 +441,7 @@ class DataDetailsView(DetailView):
                     ccdphot = CCDPhotJob.objects.get(job_id=data_product.id)
                 except CCDPhotJob.DoesNotExist:
                     logger.error("CCDPhotJob not found: data" + str(data_product.id))
-                    messages.error(self.request, 'Data not found')
+                    error_message = 'Data not found'
                     raise
 
                 context['fits_data'] = data_product.fits_data.split('/')[-1]
@@ -440,7 +454,7 @@ class DataDetailsView(DetailView):
                     observatory_matrix = ObservatoryMatrix.objects.get(id=data_product.observatory.id)
                 except (ObservatoryMatrix.DoesNotExist):
                     logger.error("Observatory not found")
-                    messages.error(self.request, 'Observatory not found')
+                    error_message = 'Observatory not found'
                     raise
 
                 context['observatory'] = observatory_matrix.camera.observatory
@@ -464,16 +478,21 @@ class DataDetailsView(DetailView):
 
         except Exception as e:
             logger.error(str(e))
-            return HttpResponseRedirect(reverse('bhtom_dataproducts:list_all'))
+            context['error_message'] = error_message
+            return context
 
         return context
 
     def get(self, request, *args, **kwargs):
         try:
             context = self.get_context_data(**kwargs)
+            if 'error_message' in context:
+                messages.error(request, context['error_message'])
+                return HttpResponseRedirect(reverse('bhtom_dataproducts:list_all'))
         except Exception as e:
             logger.error("Error in DataDetailsView: " + str(e))
-            return HttpResponseRedirect(reverse('bhtom_dataproducts:list'))  # Replace with your desired URL
+            return HttpResponseRedirect(reverse('bhtom_dataproducts:list_all'))
+            
         return self.render_to_response(context)
 
 

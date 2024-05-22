@@ -1,12 +1,12 @@
 {% load targets_extras %}
 
 <div class="text" style="font-family: 'Montserrat', sans-serif">
-    <h1>Microlensing model for <b style="color:#1b6d85">{{ target|safe }}</b></h1>
+    <h1>Microlensing model for <b style="color:#1b6d85">{{ target }}</b></h1>
       <p style="font-size: small; text-align: justify">Gravitational microlensing model using MulensModel (Poleski&Yee 2018)</p>
       <hr>
   </div>
   <div class="light-curve" style="font-family: 'Montserrat', sans-serif">
-      <p style="color: #ba2121">{{ error_message|safe }}</p>
+      <p style="color: #ba2121">{{ error_message }}</p>
 
       <p>Fit initial values:</p>
       <form method="get">
