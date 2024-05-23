@@ -220,18 +220,21 @@ class DataProductListAllView(LoginRequiredMixin, FilterView):
         :returns: Set of ``DataProduct`` objects
         :rtype: QuerySet
         """
-
         dataProductGroup = DataProductGroup.objects.filter(private=True)
 
         if settings.TARGET_PERMISSIONS_ONLY:
-            return super().get_queryset().filter(
+            queryset = super().get_queryset().filter(
                 target__in=get_objects_for_user(self.request.user, 'bhtom_targets.view_target'),
             ).exclude(
                 group__in=dataProductGroup
-            ).order_by('created')
+            )
         else:
-            return get_objects_for_user(self.request.user, 'bhtom_dataproducts.view_dataproduct').order_by('created')
+            queryset = get_objects_for_user(self.request.user, 'bhtom_dataproducts.view_dataproduct')
 
+        # Order by 'created' descending to show the newest first
+        return queryset.order_by('-created')
+    
+    
     def get_context_data(self, *args, **kwargs):
         """
         Adds the set of ``DataProductGroup`` objects to the context dictionary.
