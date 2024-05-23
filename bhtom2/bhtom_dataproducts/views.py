@@ -234,7 +234,7 @@ class DataProductListAllView(LoginRequiredMixin, FilterView):
         # Order by 'created' descending to show the newest first
         return queryset.order_by('-created')
     
-    
+
     def get_context_data(self, *args, **kwargs):
         """
         Adds the set of ``DataProductGroup`` objects to the context dictionary.
@@ -276,9 +276,9 @@ class DataProductListUserView(LoginRequiredMixin, FilterView):
                 user=self.request.user
             ).exclude(
                 group__in=dataProductGroup
-            ).order_by('created')
+            ).order_by('-created')
         else:
-            return get_objects_for_user(self.request.user, 'bhtom_dataproducts.view_dataproduct').order_by('created')
+            return get_objects_for_user(self.request.user, 'bhtom_dataproducts.view_dataproduct').order_by('-created')
 
     def get_context_data(self, *args, **kwargs):
         """
