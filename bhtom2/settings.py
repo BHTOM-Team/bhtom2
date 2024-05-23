@@ -94,7 +94,8 @@ EMAIL_USE_TLS = secret.get('EMAIL_USE_TLS', True)
 EMAIL_HOST_USER = TOMEMAIL
 EMAIL_HOST_PASSWORD = TOMEMAILPASSWORD
 
-
+PASSWORD_RESET_EMAIL_TEMPLATE = 'registration/password_reset_email.txt'
+PASSWORD_RESET_SUBJECT_TEMPLATE = 'registration/password_reset_subject.txt'
 # Application definition
 
 INSTALLED_APPS = [
@@ -489,3 +490,4 @@ DJANGO_GUID = {
 }
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB (adjust as needed)
+
