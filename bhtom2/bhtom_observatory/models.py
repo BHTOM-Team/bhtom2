@@ -1,3 +1,5 @@
+import difflib
+
 import bleach
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -5,6 +7,11 @@ from django.db import models
 from django.contrib.auth.models import User
 import re
 import os
+
+from bhtom2.utils.bhtom_logger import BHTOMLogger
+
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_observatory-model')
+
 
 def sanitize_folder_name(name):
     # Replace special characters with underscores
@@ -29,12 +36,15 @@ class CleanData(models.Model):
 
         char_fields = [field for field in self._meta.get_fields() if isinstance(field, (models.CharField, models.TextField))]
 
-        for value in char_fields:
-            field_value = getattr(self, value.name)
+        for char_field in char_fields:
+            field_value = getattr(self, char_field.name)
             if field_value is not None:
-                cleaned_name = bleach.clean(field_value, tags=[], attributes={}, protocols=[], strip=True)
-                if field_value != cleaned_name:
-                    raise ValidationError("Invalid data format.")
+                value = field_value.replace('\r', '')
+                cleaned_value = bleach.clean(value, tags=[], attributes={}, protocols=[], strip=True)
+                if value != cleaned_value:
+                    output_list = [li for li in difflib.ndiff(value, cleaned_value) if li[0] != ' ']
+                    logger.debug(f"Field '{char_field}' changed from '{field_value}' to '{cleaned_value}', {output_list}")
+                    raise ValidationError(f"Invalid data format. Field: '{char_field.verbose_name}', Invalid chars: {output_list}.")
 
 class Observatory(CleanData):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
@@ -53,8 +63,7 @@ class Observatory(CleanData):
     calibration_flg = models.BooleanField(default='False', verbose_name='Only instrumental photometry file',
                                           db_index=True)
     comment = models.TextField(null=True, blank=True,
-                               verbose_name="Comments (e.g. hyperlink to the observatory website, "
-                                            "camera specifications, telescope info)")
+                               verbose_name="Comments (e.g. camera specifications, telescope info)")
     approx_lim_mag = models.FloatField(null=True, verbose_name="Approximate limit magnitude [mag]", default=18.0)
     filters = models.CharField(null=True, max_length=100, blank=True,
                                verbose_name="Filters (comma-separated list, as they are visible in " "FITS)",
