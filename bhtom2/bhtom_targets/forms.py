@@ -281,7 +281,7 @@ class SiderealTargetCreateForm(TargetForm):
             existing_target = Target.objects.get(name=name)
             target_url = reverse('bhtom_targets:detail', args=[existing_target.pk])
             error_message = format_html(
-                'Target with this Name already exists. View it <a href="{}">{}</a>.',
+                'Target with this name already exists: <a href="{}">{}</a>.',
                 target_url, existing_target.name
             )
             raise ValidationError(error_message)
