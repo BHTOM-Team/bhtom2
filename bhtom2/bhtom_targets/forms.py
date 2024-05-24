@@ -8,7 +8,8 @@ from django.conf import settings
 from django.contrib.auth.models import Group
 from guardian.shortcuts import assign_perm, get_groups_with_perms, remove_perm
 from datetime import datetime, timezone
-
+from django.urls import reverse
+from django.utils.html import format_html
 from astropy.coordinates import Angle
 from astropy import units as u
 from django.forms import ValidationError
@@ -273,7 +274,18 @@ class SiderealTargetCreateForm(TargetForm):
 
         # class Meta(TargetForm.Meta):
     #     fields = SIDEREAL_FIELDS
-
+    
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if Target.objects.filter(name=name).exists():
+            existing_target = Target.objects.get(name=name)
+            target_url = reverse('bhtom_targets:detail', args=[existing_target.pk])
+            error_message = format_html(
+                'Target with this Name already exists. View it <a href="{}">{}</a>.',
+                target_url, existing_target.name
+            )
+            raise ValidationError(error_message)
+        return name
 
 class NonSiderealTargetCreateForm(TargetForm):
     def __init__(self, *args, **kwargs):
