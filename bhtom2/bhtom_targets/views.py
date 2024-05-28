@@ -178,7 +178,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
                     for t in existing_targets
                 ]
                 link_list = format_html(', '.join(links))
-                form.add_error(None, format_html("Source found already at these coordinates (rad 3 arcsec): {}. Existing target: {}", ccnames, link_list))
+                form.add_error(None, format_html("Source found already at these coordinates (rad 3 arcsec): {}", link_list))
                 return super().form_invalid(form)
 
         # Check if the form, extras and names are all valid:
