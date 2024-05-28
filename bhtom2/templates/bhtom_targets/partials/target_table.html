@@ -27,7 +27,7 @@
                     <input type="checkbox" name="selected-target" value="{{ target.id }}" onClick="single_select()" />
                 </label></td>
             <td>
-                <a href="{% url 'targets:detail' target.name %}" title="{{ target.name }}">{{ target.name }}</a>
+                <a href="{% url 'targets:detail' target.pk %}" title="{{ target.name }}">{{ target.name }}</a>
             </td>
 
             <td>{{ target.ra|deg_to_sexigesimal:"hms" }}</td>

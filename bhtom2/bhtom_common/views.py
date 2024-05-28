@@ -19,7 +19,7 @@ from bhtom2.bhtom_common.forms import UpdateFitsForm
 from bhtom2.kafka.producer.calibEvent import CalibCreateEventProducer
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from django_tables2.views import SingleTableMixin
-from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, CCDPhotJob
+from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, CCDPhotJob, SpectroscopyDatum
 from django.contrib import messages
 
 from rest_framework import views
@@ -462,6 +462,7 @@ class GetDataProductApi(views.APIView):
                 'camera': openapi.Schema(type=openapi.TYPE_STRING),
                 'created_start': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'created_end': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+                'mjd': openapi.Schema(type=openapi.TYPE_STRING),
             },
             required=[]
         ),
@@ -484,6 +485,7 @@ class GetDataProductApi(views.APIView):
         camera = self.request.data.get('camera', None)
         created_start = self.request.data.get('created_start', None)
         created_end = self.request.data.get('created_end', None)
+        mjd = self.request.data.get('mjd', None)
 
         if data_product_type is not None:
             query &= Q(data_product_type=data_product_type)
@@ -497,7 +499,9 @@ class GetDataProductApi(views.APIView):
             query &= Q(created__gte=created_start)
         if created_end is not None:
             query &= Q(created__lte=created_end)
+        if mjd is not None:
+            query &= (Q(spectroscopydatum__mjd=mjd) | Q(calibration_data__mjd=mjd))
 
-        queryset = DataProduct.objects.filter(query).order_by('created')
+        queryset = DataProduct.objects.filter(query).distinct().order_by('created')
         serialized_queryset = self.serializer_class(queryset, many=True).data
         return Response(serialized_queryset, status=200)
