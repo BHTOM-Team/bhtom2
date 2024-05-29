@@ -43,6 +43,7 @@ services:
       - targets:/data/targets
       - fits_data:/data/fits
       - static:/_static
+      - cache:/cache
     ports:
       - "7010:8000"
     depends_on:
@@ -240,6 +241,7 @@ services:
       - .graylog.env
     volumes:
       - es_data:/usr/share/elasticsearch/data
+      - log_els:/usr/share/elasticsearch/logs
     environment:
       - http.host=0.0.0.0
       - discovery.type=single-node
@@ -302,6 +304,12 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/bhtom_db
+  cache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/cache
   mongo_data:
     driver: local
     driver_opts:
@@ -326,6 +334,12 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/log
+  log_els:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/log/elasticsearch
   plots:
     driver: local
     driver_opts:

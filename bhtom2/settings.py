@@ -318,15 +318,15 @@ LOGGING = {
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(BASE_DIR, 'bhtom2/cache')
+        'LOCATION': os.path.join(BASE_DIR, 'cache')
     },
     'targetList': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(BASE_DIR, 'bhtom2/cache/targetList')
+        'LOCATION': os.path.join(BASE_DIR, 'cache/targetList')
     },
     'targetDetails': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(BASE_DIR, 'bhtom2/cache/targetDetails')
+        'LOCATION': os.path.join(BASE_DIR, 'cache/targetDetails')
     }
 }
 
