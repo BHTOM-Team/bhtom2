@@ -174,7 +174,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
                 ccnames = ' '.join(coords_names)
                 existing_targets = Target.objects.filter(ra=ra, dec=dec)
                 links = [
-                    format_html('<a href="{}">{}</a>', reverse('bhtom_targets:detail', args=[t.pk]), t.name)
+                    format_html('<a href="{}">{}</a>', reverse('bhtom_targets:detail', args=[t.id]), t.name)
                     for t in existing_targets
                 ]
                 link_list = format_html(', '.join(links))
