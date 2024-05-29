@@ -33,8 +33,8 @@ class TargetCreateEventProducer:
             self.initialize_producer()
 
         value = {
-            "targetId": target.id,
-            "name": target.name,
+            "target_id": target.id,
+            "target": target.name,
             "ra": target.ra,
             "dec": target.dec,
             "radius": 0.5

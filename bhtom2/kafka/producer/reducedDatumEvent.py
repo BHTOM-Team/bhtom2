@@ -33,10 +33,10 @@ class ReducedDatumEventProducer:
             self.initialize_producer()
 
         value = {
-            "name": target.name,
+            "target": target.name,
             "broker": broker,
-            "setTargetName": isNew,
-            "plotForce": plotForce
+            "target_alias_flg": isNew,
+            "plot_force": plotForce
         }
 
         guid = get_guid()
