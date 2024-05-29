@@ -279,7 +279,7 @@ class SiderealTargetCreateForm(TargetForm):
         name = self.cleaned_data.get('name')
         if Target.objects.filter(name=name).exists():
             existing_target = Target.objects.get(name=name)
-            target_url = reverse('bhtom_targets:detail', args=[existing_target.pk])
+            target_url = reverse('bhtom_targets:detail', args=[existing_target.id])
             error_message = format_html(
                 'Target with this name already exists: <a href="{}">{}</a>.',
                 target_url, existing_target.name
