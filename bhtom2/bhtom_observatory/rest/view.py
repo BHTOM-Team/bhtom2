@@ -292,9 +292,9 @@ class CreateObservatoryMatrixApi(views.APIView):
             observatoryRow = Observatory.objects.get(name=observatoryName)
             cameraRow = Camera.objects.get(camera_name=cameraName, observatory=observatoryRow)
         except Observatory.DoesNotExist:
-              return Response("Observatory with this name does mot exist", status=404)
+              return Response("Observatory with this name does does not exist. Use the full name as listed in BHTOM/Observatories.", status=404)
         except Camera.DoesNotExist:
-              return Response("Camera with this name does mot exist for this observatory", status=404)
+              return Response("Camera with this name does not exist. Use the full name.", status=404)
         if not cameraRow.active_flg:
             return Response("Observatory is not active", status=404)
 
