@@ -108,7 +108,7 @@ class Camera(CleanData):
     modified = models.DateTimeField(null=True, blank=True, editable=True, auto_now=True)
 
     def __str__(self):
-        return self.camera_name
+        return self.prefix
 
     class Meta:
         verbose_name_plural = "cameras"
