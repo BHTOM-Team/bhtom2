@@ -267,6 +267,7 @@ class CreateObservatoryMatrixApi(views.APIView):
                 'observatory': openapi.Schema(type=openapi.TYPE_STRING),
                 'camera': openapi.Schema(type=openapi.TYPE_STRING),
                 'comment': openapi.Schema(type=openapi.TYPE_STRING),
+                'oname': openapi.Schema(type=openapi.TYPE_STRING),
             },
             required=['observatory', 'camera']
         ),
@@ -283,30 +284,36 @@ class CreateObservatoryMatrixApi(views.APIView):
     def post(self, request, *args, **kwargs):
         observatoryName = request.data.get('observatory', None)
         cameraName = request.data.get('camera', None)
-        if observatoryName is None:
-            return Response("Observatory is required", status=404)
-        if cameraName is None:
-            return Response("Camera is required", status=404)
+        oname = request.data.get('oname', None)
 
+        if not (oname or (observatoryName and cameraName)):
+            return Response("Either (Observatory and Camera) or ONAME is required", status=404)
         try:
-            observatoryRow = Observatory.objects.get(name=observatoryName)
-            cameraRow = Camera.objects.get(camera_name=cameraName, observatory=observatoryRow)
+            if oname:
+                cameraRow = Camera.objects.get(prefix=oname)
+            else:
+                observatoryRow = Observatory.objects.get(name=observatoryName)
+                cameraRow = Camera.objects.get(camera_name=cameraName, observatory=observatoryRow)
         except Observatory.DoesNotExist:
-              return Response("Observatory with this name does mot exist", status=404)
+            return Response("Observatory with this name does not exist", status=404)
         except Camera.DoesNotExist:
-              return Response("Camera with this name does mot exist for this observatory", status=404)
+            return Response("Camera with this name does not exist for this observatory", status=404)
+
         if not cameraRow.active_flg:
             return Response("Observatory is not active", status=404)
 
         try:
+            if ObservatoryMatrix.objects.filter(user=request.user, camera=cameraRow, active_flg=True).exists():
+                return Response("This observatory already exists in yours favourite list", status=404)
             obsMatrix = ObservatoryMatrix(
                 user=request.user,
-                observatory=cameraRow,
+                camera=cameraRow,
                 active_flg=True
             )
             obsMatrix.save()
         except Exception as e:
-            logger.error("Error in create user observatory/camera: " + str(e))
+            logger.error("Error in creating user observatory/camera: " + str(e))
+            return Response("Error in creating user observatory/camera: " + str(e), status=400)
 
         return Response({"Status": "Created"}, status=201)
 

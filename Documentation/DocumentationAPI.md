@@ -276,12 +276,12 @@ curl -X 'POST' \
 ## 2. Add Favourite Observatory
 <!-- /observatory/addFavouriteObservatory/ -->
 
-This API endpoint allows users to add observatory to their favourite list. Users must provide the observatory name, and can include an optional comment.
+This API endpoint allows users to add observatory to their favourite list. Users must provide the (observatory name and camera name) or simply provide oname, and can include an optional comment.
 
 ### Request
 
 - **Method**: POST
-- **URL**: `/create-observatory-matrix/`
+- **URL**: `/addFavouriteObservatory/`
 
 ### Request Headers
 
@@ -292,6 +292,7 @@ This API endpoint allows users to add observatory to their favourite list. Users
 - `observatory` (string, required): The name of the observatory.
 - `camera` (string, required): The name of the observatory camera.
 - `comment` (string, optional): An optional comment.
+- `oname` ((string, required if observatory or camera is not provided): The short name of observatory/camera ONAME.)
 
 ### Example Request Body
 
@@ -299,12 +300,15 @@ This API endpoint allows users to add observatory to their favourite list. Users
 {
   "observatory": "Observatory Name",
   "camera": "Camera Name",
-  "comment": "This is an optional comment."
+  "comment": "This is an optional comment.",
+  "oname": "The short name of observatory/camera ONAME"
 }
 ```
 
 
 ### Example Request
+
+#### Use with observatory and camera name:
 
 ```bash
 curl -X POST \
@@ -314,6 +318,18 @@ curl -X POST \
   -d '{
     "observatory": "Observatory Name",
     "camera": "Camera Name",
+    "comment": "This is an optional comment."
+  }'
+```
+#### Or use with ONAME:
+
+```bash
+curl -X POST \
+  'https://bh-tom2.astrolabs.pl/observatory/addFavouriteObservatory/' \
+  -H 'Authorization: Token <yourToken>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "oname": "ONAME",
     "comment": "This is an optional comment."
   }'
 ```
