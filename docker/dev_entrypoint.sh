@@ -11,31 +11,17 @@ then
     echo "PostgreSQL started"
 fi
 
-#echo "Flushing manage.py..."
-#
-#while ! python manage.py flush --no-input 2>&1; do
-#  echo "Flushing manage.py..."
-#  sleep 3
-#done
-
 echo "Collecting static..."
 
-while ! python3 manage.py collectstatic --no-input 2>&1; do
+while ! python manage.py collectstatic --no-input 2>&1; do
   echo "Collecting static..."
   sleep 3
 done
 
-#echo "Making migrations..."
-#
-#while ! python manage.py makemigrations 2>&1; do
-#  echo "making migrations..."
-#  sleep 3
-#done
-
 echo "Migrating..."
 
-# Wait for few minute and run db migration
-while ! python3 manage.py migrate  2>&1; do
+# Wait for few minute and run db migraiton
+while ! python manage.py migrate  2>&1; do
    echo "Migration is in progress..."
    sleep 3
 done
@@ -46,9 +32,8 @@ python3 manage.py add_admin
 echo "Add catalogs if not yet created..."
 python3 manage.py add_catalogs
 
-echo "Django docker is fully configured."
+echo "Local django is fully configured."
 echo "Running server..."
 
 python3 manage.py runserver 0.0.0.0:8000
-
 exec "$@"

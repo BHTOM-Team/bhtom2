@@ -33,7 +33,7 @@ services:
       - bhtom_db
     build:
       context: ..
-      dockerfile: Docker/web_Dockerfile
+      dockerfile: docker/web_Dockerfile
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=scram-sha-256"
     restart: on-failure

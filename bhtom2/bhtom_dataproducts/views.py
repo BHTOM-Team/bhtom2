@@ -400,7 +400,7 @@ class photometry_download(LoginRequiredMixin, View):
                 return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
         try:
-            address = settings.DATA_TARGET_PATH + format(dataProduct.photometry_data)
+            address = settings.DATA_TARGETS_PATH + format(dataProduct.photometry_data)
 
             logger.debug('Photometry download address: ' + address)
             open(address, 'r')
@@ -470,7 +470,7 @@ class DataDetailsView(DetailView):
 
                     if calibration.calibration_plot:
                         try:
-                            with open(settings.DATA_PLOT_PATH + calibration.calibration_plot, "rb") as image_file:
+                            with open(settings.DATA_PLOTS_PATH + calibration.calibration_plot, "rb") as image_file:
                                 encoded_string = base64.b64encode(image_file.read())
                                 context['cpcs_plot'] = encoded_string.decode("utf-8")
                         except IOError as e:

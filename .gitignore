@@ -162,7 +162,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 
 bhtom2/.bhtom.env
-Docker/.bhtom.env
+docker/.bhtom.env
 .env
 _static
 __pycache__/

@@ -1,0 +1,24 @@
+FROM python:3.8-slim-buster
+
+EXPOSE 8000
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONBUFFERED 1
+
+COPY requirements.txt /requirements.txt
+COPY manage.py /manage.py
+COPY docker/dev_entrypoint.sh /dev_entrypoint.sh
+
+COPY bhtom2 /bhtom2
+COPY bhtom_base /bhtom_base
+COPY bhtom_custom_registration /bhtom_custom_registration
+COPY docker/.env /bhtom2/.bhtom.env
+
+RUN pwd
+RUN apt update
+RUN apt install -y libpq-dev
+RUN apt install -y gcc g++
+
+RUN python -m pip install -r requirements.txt
+
+CMD ["sh", "dev_entrypoint.sh"]

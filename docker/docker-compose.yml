@@ -26,7 +26,7 @@ services:
     container_name: bhtom
     build:
       context: ..
-      dockerfile: Docker/web_Dockerfile
+      dockerfile: docker/dev_web_Dockerfile
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
     restart: always

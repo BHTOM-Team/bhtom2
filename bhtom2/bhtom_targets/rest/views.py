@@ -303,7 +303,7 @@ class GetPlotsApiView(views.APIView):
         targetNames = request.data['targetNames']
         results = {}
         try:
-            base_path = settings.DATA_PLOT_PATH
+            base_path = settings.DATA_PLOTS_PATH
             for target_name in targetNames:
 
                 target = Target.objects.get(name=target_name)
@@ -348,7 +348,7 @@ class GetPlotsObsApiView(views.APIView):
         targetNames = request.data['targetNames']
         results = {}
         try:
-            base_path = settings.DATA_PLOT_PATH
+            base_path = settings.DATA_PLOTS_PATH
             for target_name in targetNames:
 
                 target = Target.objects.get(name=target_name)

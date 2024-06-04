@@ -7,12 +7,12 @@ ENV PYTHONBUFFERED 1
 
 COPY requirements.txt /requirements.txt
 COPY manage.py /manage.py
-COPY Docker/entrypoint.sh /entrypoint.sh
+COPY docker/entrypoint.sh /entrypoint.sh
 
 COPY bhtom2 /bhtom2
 COPY bhtom_base /bhtom_base
 COPY bhtom_custom_registration /bhtom_custom_registration
-COPY Docker/.env /bhtom2/.bhtom.env
+COPY docker/.env /bhtom2/.bhtom.env
 
 RUN pwd
 RUN apt update
