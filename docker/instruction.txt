@@ -1,4 +1,5 @@
 Instruction is only for local environments (docker-compose)
+Folders migrations should be empty (posible conflict)
 
 1. Create structure:
     - data_store
