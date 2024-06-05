@@ -1,5 +1,5 @@
 import psycopg2
-from bhtom2 import settings
+from settings import settings
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom2.exceptions.external_service import InvalidExternalServiceStatusException
 

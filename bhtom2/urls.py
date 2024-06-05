@@ -18,7 +18,7 @@ from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from django.conf.urls.static import static
 
-from bhtom2 import settings
+from settings import settings
 from bhtom2.views import BrokerQueryListView
 
 schema_view = get_schema_view(

@@ -42,7 +42,7 @@ services:
       - plots:/data/plots
       - targets:/data/targets
       - fits_data:/data/fits
-      - static:/_static
+      - static:/bhtom/_static
       - cache:/data/cache
     ports:
       - "7010:8000"

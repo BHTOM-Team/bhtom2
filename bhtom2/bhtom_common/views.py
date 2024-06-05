@@ -13,7 +13,7 @@ from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import ListView, FormView
 
-from bhtom2 import settings
+from settings import settings
 from bhtom2.bhtom_calibration.models import Calibration_data
 from bhtom2.bhtom_common.forms import UpdateFitsForm
 from bhtom2.kafka.producer.calibEvent import CalibCreateEventProducer
