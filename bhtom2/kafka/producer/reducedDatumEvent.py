@@ -7,10 +7,10 @@ import json
 from django_guid import get_guid
 from dotenv import dotenv_values
 
-from bhtom2 import settings
+from settings import settings
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
-secret = dotenv_values(os.path.join(settings.BASE_DIR, 'bhtom2/.bhtom.env'))
+secret = dotenv_values(os.path.join(settings.BASE_DIR, 'settings/.bhtom.env'))
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: kafka.reducedDatum_event')
 

@@ -32,7 +32,7 @@ from abc import ABC, abstractmethod
 from django.utils.html import format_html
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic import View
-from bhtom2 import settings
+from settings import settings
 from django_filters.views import FilterView
 from django_tables2.views import SingleTableMixin
 from django.views.generic.detail import DetailView

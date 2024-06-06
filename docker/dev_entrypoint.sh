@@ -20,6 +20,12 @@ done
 
 echo "Migrating..."
 
+# Wait for few minute and run makemigrations
+while ! python manage.py makemigrations  2>&1; do
+   echo "Make migrations..."
+   sleep 3
+done
+
 # Wait for few minute and run db migraiton
 while ! python manage.py migrate  2>&1; do
    echo "Migration is in progress..."

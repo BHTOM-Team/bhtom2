@@ -24,7 +24,7 @@ from bhtom2.external_service.data_source_information import DataSource, TARGET_N
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Environment variables
-secret = dotenv_values(os.path.join(BASE_DIR, 'bhtom2/.bhtom.env'))
+secret = dotenv_values(os.path.join(BASE_DIR, 'settings/.bhtom.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
@@ -53,7 +53,6 @@ DATA_FITS_PATH = DATA_MEDIA_PATH + secret.get('DATA_FITS_PATH', '/data')
 DATA_TARGETS_PATH = DATA_MEDIA_PATH + secret.get('DATA_TARGETS_PATH', '/data')
 DATA_PLOTS_PATH = secret.get('DATA_PLOTS_PATH', '/data')
 DATA_CACHE_PATH = secret.get('DATA_CACHE_PATH', '/data')
-
 DELETE_FITS_FILE_DAY = int(secret.get('DELETE_FITS_FILE_DAY', 3))
 DELETE_FITS_ERROR_FILE_DAY = int(secret.get('DELETE_FITS_ERROR_FILE_DAY', 30))
 
@@ -320,11 +319,11 @@ CACHES = {
     },
     'targetList': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(DATA_CACHE_PATH, '/targetList')
+        'LOCATION': DATA_CACHE_PATH + '/targetList'
     },
     'targetDetails': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(DATA_CACHE_PATH, '/targetDetails')
+        'LOCATION': DATA_CACHE_PATH + '/targetDetails'
     }
 }
 

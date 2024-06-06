@@ -38,12 +38,12 @@ services:
       - "POSTGRES_HOST_AUTH_METHOD=scram-sha-256"
     restart: on-failure
     volumes:
-      - log:/log
+      - log:/data/log
       - plots:/data/plots
       - targets:/data/targets
       - fits_data:/data/fits
-      - static:/_static
-      - cache:/cache
+      - static:/bhtom/_static
+      - cache:/data/cache
     ports:
       - "7010:8000"
     depends_on:
