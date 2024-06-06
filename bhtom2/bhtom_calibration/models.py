@@ -20,7 +20,7 @@ class Calibration_data(models.Model):
 
     id = models.AutoField(db_index=True, primary_key=True)
     dataproduct = models.ForeignKey(DataProduct, on_delete=models.CASCADE)
-    use_catalog = models.ForeignKey(Catalogs, on_delete=models.CASCADE, null=True)
+    use_catalog = models.ForeignKey(Catalogs, on_delete=models.CASCADE, null=True,blank=True)
     status = models.CharField(max_length=1, choices=STATUS, default='C', db_index=True)
     status_message = models.TextField(null=True, blank=True)
     mjd = models.FloatField(null=False, blank=False)
