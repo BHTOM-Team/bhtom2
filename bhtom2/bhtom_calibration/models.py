@@ -43,6 +43,7 @@ class Calibration_data(models.Model):
     no_plot = models.BooleanField(default=True)
     calibration_plot = models.TextField(null=True, blank=True)
     number_tries = models.IntegerField(null=False, default=0)
+    calibration_log = models.URLField(null=True, blank=True, default=None)
 
     class Meta:
         verbose_name = 'cpcs processing file'
