@@ -115,6 +115,60 @@ The script will display the response from the API with a list of uploaded files 
 - The `requests` library (install with `pip install requests`)
 
 
+# CALIBRATION FILE UPLOAD API
+
+### Description
+This API facilitates programmable batch file calibration file to the **BHTOM system**. It offers a command-line interface for uploading files along with their associated meta data.
+
+<!-- Please note, an authentication `TOKEN` is required to use this script. -->
+
+### Endpoint
+
+- **Method**: POST
+- **URL**: `/calibFile`
+
+
+### Request Headers
+
+- `accept: application/json`: Specify the desired response format as JSON.
+- `Authorization: Token 10f21fe7308f06f7e23ccb7848da554c2271be49`: Authentication token for the API.
+- `Content-Type: application/json`: Specify the format of the request payload as JSON.
+- `X-CSRFToken: uUz2fRnXhPuvD9YuuiDW9cD1LsajeaQnE4hwtEAfR00SgV9bD5HCe5i8n4m4KcOr`: CSRF token for security.
+
+### Request Body
+
+  -  `photometry_file `: TYPE_FILE
+  -  `ra`: FORMAT_FLOAT
+  -  `dec`: FORMAT_FLOAT
+  -  `match_dist`: FORMAT_FLOAT
+  -  `survey`: TYPE_STRING
+  -  `filter`: TYPE_STRING
+  -  `no_plot`: TYPE_BOOLEAN
+  -  `image_format`: TYPE_STRING
+
+### Example Request
+
+```bash
+curl -X 'POST' \
+  'https://uploadsvc2.astrolabs.pl/calibFile/' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Token <yourToken>' \
+  -H 'Content-Type: application/json' \
+  -H 'X-CSRFToken: uUz2fRnXhPuvD9YuuiDW9cD1LsajeaQnE4hwtEAfR00SgV9bD5HCe5i8n4m4KcOr' \
+  -d '{
+        photmetry_file = 'file.dat'
+        ra =  1.23
+        dec = 4.56
+        match_dist = 2.0
+        no_plot = True
+        survey = 'GaiaSp'
+        filter = 'V'
+        image_format = 'png'
+  }'
+
+### Response
+
+The script will display the response from the API with a calibration result, so you can check the calibrations result and plot.
 # CALIBRATIONS API
 
 <!-- ### Description -->
