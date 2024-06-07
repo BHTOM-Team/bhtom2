@@ -162,6 +162,14 @@
                                 <td></td>
                             {% endif %}
                         </tr>
+                        <tr>
+                            <td>Calibration log</td>
+                            {% if cpcs_log %}
+                                <td> <a href="{% url 'bhtom_dataproducts:calibration_log_download' id=object.id %}"> {{ cpcs_log }}</a></td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        </tr>
                         </tbody>
                     </table>
                 </div>

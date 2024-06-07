@@ -46,7 +46,6 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         if not request.GET:
             messages.error(self.request, 'Please provide a valid form')
             return HttpResponseRedirect(reverse('bhtom_targets:list'))
-        
 
         # If the request contains form data, proceed with the regular GET handler
         return super().get(request, *args, **kwargs)
@@ -167,7 +166,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         if not form.is_bound:
             messages.error(self.request, 'Please provide a valid form: {}'.format(form.errors.as_json()))
             return redirect(form.cleaned_data.get('referrer', '/'))
-        
+
         # TODO: Format error messages in a more human-readable way
         messages.error(self.request, 'There was a problem uploading your file: {}'.format(form.errors.as_json()))
         return redirect(form.cleaned_data.get('referrer', '/'))
@@ -233,7 +232,6 @@ class DataProductListAllView(LoginRequiredMixin, FilterView):
 
         # Order by 'created' descending to show the newest first
         return queryset.order_by('-created')
-    
 
     def get_context_data(self, *args, **kwargs):
         """
@@ -422,7 +420,7 @@ class DataDetailsView(DetailView):
 
     def get_context_data(self, **kwargs):
         logger.debug("Start preparation data details")
-        error_message =  "An error occurred while processing the data."
+        error_message = "An error occurred while processing the data."
         try:
             try:
                 context = {}
@@ -467,6 +465,7 @@ class DataDetailsView(DetailView):
                 try:
                     calibration = Calibration_data.objects.get(dataproduct=data_product)
                     context['calibration'] = calibration
+                    context['cpcs_log'] = calibration.calibration_log.split('/')[-1]
 
                     if calibration.calibration_plot:
                         try:
@@ -475,6 +474,7 @@ class DataDetailsView(DetailView):
                                 context['cpcs_plot'] = encoded_string.decode("utf-8")
                         except IOError as e:
                             logger.error('plot error: ' + str(e))
+
                 except Calibration_data.DoesNotExist:
                     logger.debug("Calibration_data not found")
                     context['calibration'] = None
@@ -495,7 +495,7 @@ class DataDetailsView(DetailView):
         except Exception as e:
             logger.error("Error in DataDetailsView: " + str(e))
             return HttpResponseRedirect(reverse('bhtom_dataproducts:list_all'))
-            
+
         return self.render_to_response(context)
 
 
@@ -571,3 +571,36 @@ class CpcsArchiveData(LoginRequiredMixin, View):
         except Exception as e:
             logger.error("Error connecting to wsdb")
         return context
+
+
+class CalibrationLogDownload(LoginRequiredMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        try:
+            data_id = self.kwargs['id']
+            logger.info('Download Calibration log: %s, user: %s' % (str(data_id), str(self.request.user)))
+            calibration = Calibration_data.objects.get(dataproduct_id=data_id)
+            assert calibration.calibration_log is not None
+
+        except (Calibration_data.DoesNotExist, AssertionError):
+            logger.error('Download Calibration log - file not exist')
+            messages.error(self.request, 'File not found')
+            if self.request.META.get('HTTP_REFERER') is None:
+                return HttpResponseRedirect('/')
+            else:
+                return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+
+        try:
+            address = settings.DATA_TARGETS_PATH + format(calibration.calibration_log)
+            logger.debug('Calibration log download address: ' + address)
+            open(address, 'r')
+
+            return FileResponse(open(address, 'rb'), as_attachment=True)
+
+        except IOError:
+            logger.error('Download Calibration log, file not exist')
+            messages.error(self.request, 'File not found')
+            if self.request.META.get('HTTP_REFERER') is None:
+                return HttpResponseRedirect('/')
+            else:
+                return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
