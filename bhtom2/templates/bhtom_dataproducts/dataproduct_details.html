@@ -98,7 +98,11 @@
                         </tr>
                         <tr>
                             <td>Standardised to</td>
+                            {% if calibration.best_filter != None %}
                             <td>{{ calibration.best_filter }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
                         </tr>
                     
                         <tr>

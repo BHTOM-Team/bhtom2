@@ -398,7 +398,7 @@ class photometry_download(LoginRequiredMixin, View):
                 return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
         try:
-            address = settings.DATA_TARGETS_PATH + format(dataProduct.photometry_data)
+            address = settings.DATA_MEDIA_PATH + format(dataProduct.photometry_data)
 
             logger.debug('Photometry download address: ' + address)
             open(address, 'r')
@@ -453,7 +453,7 @@ class DataDetailsView(DetailView):
 
                 try:
                     observatory_matrix = ObservatoryMatrix.objects.get(id=data_product.observatory.id)
-                except (ObservatoryMatrix.DoesNotExist):
+                except ObservatoryMatrix.DoesNotExist:
                     logger.error("Observatory not found")
                     error_message = 'Observatory not found'
                     raise
@@ -465,7 +465,10 @@ class DataDetailsView(DetailView):
                 try:
                     calibration = Calibration_data.objects.get(dataproduct=data_product)
                     context['calibration'] = calibration
-                    context['cpcs_log'] = calibration.calibration_log.split('/')[-1]
+                    if calibration.calibration_log is not None and calibration.calibration_log != '':
+                        context['cpcs_log'] = calibration.calibration_log.split('/')[-1]
+                    else:
+                        context['cpcs_log'] = None
 
                     if calibration.calibration_plot:
                         try:
