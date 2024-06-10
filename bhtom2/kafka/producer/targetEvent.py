@@ -7,10 +7,10 @@ import json
 from django_guid import get_guid
 from dotenv import dotenv_values
 
-from bhtom2 import settings
+from settings import settings
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
-secret = dotenv_values(os.path.join(settings.BASE_DIR, 'bhtom2/.bhtom.env'))
+secret = dotenv_values(os.path.join(settings.BASE_DIR, 'settings/.bhtom.env'))
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: kafka.target_event')
 
@@ -33,8 +33,8 @@ class TargetCreateEventProducer:
             self.initialize_producer()
 
         value = {
-            "targetId": target.id,
-            "name": target.name,
+            "target_id": target.id,
+            "target": target.name,
             "ra": target.ra,
             "dec": target.dec,
             "radius": 0.5

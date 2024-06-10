@@ -20,6 +20,12 @@ done
 
 echo "Migrating..."
 
+# Wait for few minute and run makemigrations
+while ! python manage.py makemigrations  2>&1; do
+   echo "Make migrations..."
+   sleep 3
+done
+
 # Wait for few minute and run db migraiton
 while ! python manage.py migrate  2>&1; do
    echo "Migration is in progress..."
@@ -29,10 +35,11 @@ done
 echo "Add admin if not yet created..."
 python3 manage.py add_admin
 
-echo "Local django is fully configured."
+echo "Add catalogs if not yet created..."
+python3 manage.py add_catalogs
 
+echo "Local django is fully configured."
 echo "Running server..."
 
-python manage.py runserver localhost:8000
-
+python3 manage.py runserver 0.0.0.0:8000
 exec "$@"

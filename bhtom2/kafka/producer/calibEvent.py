@@ -8,10 +8,10 @@ import json
 from django_guid import get_guid
 from dotenv import dotenv_values
 
-from bhtom2 import settings
+from settings import settings
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 
-secret = dotenv_values(os.path.join(settings.BASE_DIR, 'bhtom2/.bhtom.env'))
+secret = dotenv_values(os.path.join(settings.BASE_DIR, 'settings/.bhtom.env'))
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: kafka.calib_event')
 
@@ -27,16 +27,16 @@ class CalibCreateEventProducer:
         try:
             self.producer = Producer(conf)
         except KafkaError as e:
-            logger.error("Kafka Procucer error: " + str(e))
+            logger.error("Kafka Producer error: " + str(e))
 
     def send_message(self, data_product_id, target_name, dp_data):
         if self.producer is None:
             self.initialize_producer()
 
         value = {
-            "dataProductId": data_product_id,
-            "targetName": str(target_name),
-            "dataProductData": str(dp_data)
+            "data_product_id": data_product_id,
+            "target": str(target_name),
+            "data_product": str(dp_data)
         }
         guid = get_guid()
 

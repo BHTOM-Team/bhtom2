@@ -29,9 +29,10 @@ from guardian.shortcuts import get_objects_for_user, get_groups_with_perms
 from django.views.generic import TemplateView, RedirectView
 from django.urls import reverse
 from abc import ABC, abstractmethod
+from django.utils.html import format_html
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic import View
-from bhtom2 import settings
+from settings import settings
 from django_filters.views import FilterView
 from django_tables2.views import SingleTableMixin
 from django.views.generic.detail import DetailView
@@ -171,10 +172,14 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
 
             if len(coords_names) != 0:
                 ccnames = ' '.join(coords_names)
-                logger.error("There is a source found already at these coordinates (rad 3 arcsec)")
-                form.add_error(None, f"Source found already at these coordinates (rad 3 arcsec): {ccnames}")
+                existing_targets = Target.objects.filter(ra=ra, dec=dec)
+                links = [
+                    format_html('<a href="{}">{}</a>', reverse('bhtom_targets:detail', args=[t.id]), t.name)
+                    for t in existing_targets
+                ]
+                link_list = format_html(', '.join(links))
+                form.add_error(None, format_html("Source found already at these coordinates (rad 3 arcsec): {}", link_list))
                 return super().form_invalid(form)
-        #            raise ValidationError(f'Source found already at these coordinates: {ccnames}')
 
         # Check if the form, extras and names are all valid:
         if names.is_valid() and (not duplicate_names) and (not existing_names):

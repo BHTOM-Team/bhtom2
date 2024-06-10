@@ -18,7 +18,7 @@
             <button type="submit" class="btn btn-primary">
                 Filter
             </button>
-            <a href="{% url 'bhtom_base.bhtom_dataproducts:list' %}" class="btn btn-secondary" title="Reset">Reset</a>
+            <a href="{% url 'bhtom_dataproducts:list_user' %}" class="btn btn-secondary" title="Reset">Reset</a>
             {% endbuttons %}
         </form>
     </div>
@@ -34,6 +34,7 @@
                         <th>Owner</th>
                         <th>Type</th>
                         <th>Status</th>
+                        <th>Uploaded date</th>
                         <th>Details</th>
                     </tr>
                 </thead>
@@ -74,7 +75,7 @@
                             ERROR
                             {% endif %}
                         </td>
-                
+                        <td>{{product.created}}</td>
                         {% if product.data_product_type == 'fits_file' or product.data_product_type == 'photometry' %}
                         <td>
                             <a href="{% url 'bhtom_dataproducts:dataproduct-details' pk=product.id %}" title="Show details"
@@ -99,5 +100,16 @@
         </div>
     </div>
 </div>        
+
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.js"></script>
+<script>
+  $(document).ready(function() {
+      $('.table').DataTable({
+          "paging": false,
+          "searching": false
+      });
+  });
+  </script>
 {% endblock %}
+
 

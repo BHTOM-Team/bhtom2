@@ -98,7 +98,11 @@
                         </tr>
                         <tr>
                             <td>Standardised to</td>
+                            {% if calibration.best_filter != None %}
                             <td>{{ calibration.best_filter }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
                         </tr>
                     
                         <tr>
@@ -158,6 +162,14 @@
                             <td>Comment</td>
                             {% if object.comment != None %}
                                 <td>{{ object.comment }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Calibration log</td>
+                            {% if cpcs_log %}
+                                <td> <a href="{% url 'bhtom_dataproducts:calibration_log_download' id=object.id %}"> {{ cpcs_log }}</a></td>
                             {% else %}
                                 <td></td>
                             {% endif %}

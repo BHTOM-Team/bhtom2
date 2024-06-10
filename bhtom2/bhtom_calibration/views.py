@@ -49,7 +49,7 @@ class CalibrationResultsApiView(APIView):
         files = request.data['files']
         getPlot = request.data['getPlot']
         results = {}
-        base_path = settings.DATA_PLOT_PATH
+        base_path = settings.DATA_PLOTS_PATH
         try:
             user = Token.objects.get(key=request.auth.key).user
             for file in files:

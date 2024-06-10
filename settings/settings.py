@@ -24,7 +24,7 @@ from bhtom2.external_service.data_source_information import DataSource, TARGET_N
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Environment variables
-secret = dotenv_values(os.path.join(BASE_DIR, 'bhtom2/.bhtom.env'))
+secret = dotenv_values(os.path.join(BASE_DIR, 'settings/.bhtom.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
@@ -40,12 +40,7 @@ SITE_ID = int(secret.get("SITE_ID", 1))
 BHTOM_URL = secret.get('BHTOM_URL', '')
 HARVESTER_URL = secret.get('HARVESTER_URL', '')
 CPCS_URL = secret.get('CPCS_URL', '')
-CPCS_DATA_ACCESS_HASHTAG = secret.get('CPCS_DATA_ACCESS_HASHTAG', '')
 UPLOAD_SERVICE_URL = secret.get('UPLOAD_SERVICE_URL', '')
-WSDB_USER = secret.get('WSDB_LOCAL_USER', '')
-WSDB_PASSWORD = secret.get('WSDB_LOCAL_PASSWORD', '')
-WSDB_HOST = secret.get('WSDB_LOCAL_HOST', '')
-WSDB_PORT = secret.get('WSDB_LOCAL_PORT', '')
 
 ADMIN_USERNAME = secret.get('ADMIN_USERNAME')
 ADMIN_PASSWORD = secret.get('ADMIN_PASSWORD')
@@ -53,12 +48,13 @@ ADMIN_EMAIL = secret.get('ADMIN_EMAIL', '')
 
 GRAYLOG_HOST = secret.get('GRAYLOG_HOST', '')
 GRAYLOG_PORT = int(secret.get('GRAYLOG_PORT', 12201))
-DATA_FILE_PATH = secret.get('DATA_FILE_PATH', './data/')
-DATA_PLOT_PATH = secret.get('DATA_PLOT_PATH', '../data/')
-DATA_TARGET_PATH = secret.get('DATA_TARGET_PATH', '../data/')
-
-DELETE_FITS_FILE_DAY = int(secret.get('DELETE_FITS_FILE_DAY',3))
-DELETE_FITS_ERROR_FILE_DAY = int(secret.get('DELETE_FITS_ERROR_FILE_DAY',30))
+DATA_MEDIA_PATH = secret.get('DATA_MEDIA_ROOT', '/data')
+DATA_FITS_PATH = DATA_MEDIA_PATH + secret.get('DATA_FITS_PATH', '/data')
+DATA_TARGETS_PATH = DATA_MEDIA_PATH + secret.get('DATA_TARGETS_PATH', '/data')
+DATA_PLOTS_PATH = secret.get('DATA_PLOTS_PATH', '/data')
+DATA_CACHE_PATH = secret.get('DATA_CACHE_PATH', '/data')
+DELETE_FITS_FILE_DAY = int(secret.get('DELETE_FITS_FILE_DAY', 3))
+DELETE_FITS_ERROR_FILE_DAY = int(secret.get('DELETE_FITS_ERROR_FILE_DAY', 30))
 
 
 CSRF_TRUSTED_ORIGINS = [] + list(secret.get("CSRF_TRUSTED_ORIGINS", 'localhost').split(','))
@@ -67,7 +63,7 @@ PROPOSALS_API_KEYS = {
     'LCO': secret.get('LCO_API_KEY', '')
 }
 
-OPENAI_API_KEY = secret.get('OPENAI_API_KEY')
+OPENAI_API_KEY = secret.get('OPENAI_API_KEY', '')
 
 # E-mail Messages
 
@@ -94,7 +90,8 @@ EMAIL_USE_TLS = secret.get('EMAIL_USE_TLS', True)
 EMAIL_HOST_USER = TOMEMAIL
 EMAIL_HOST_PASSWORD = TOMEMAILPASSWORD
 
-
+PASSWORD_RESET_EMAIL_TEMPLATE = 'registration/password_reset_email.txt'
+PASSWORD_RESET_SUBJECT_TEMPLATE = 'registration/password_reset_subject.txt'
 # Application definition
 
 INSTALLED_APPS = [
@@ -247,16 +244,17 @@ DATE_FORMAT = 'Y-m-d'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, '_static')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'bhtom2/static')]
-MEDIA_ROOT = os.path.join(BASE_DIR, 'data')
+MEDIA_ROOT = DATA_MEDIA_PATH
 MEDIA_URL = '/data/'
 
 # LOG
-logFolder = secret.get("LOG_FOLDER", '../log/bhtom.log')
-logWhen = secret.get("LOG_CADENCE", "D")
-logInterval = int(secret.get("LOG_INTERVAL", 7))
-logBackupCount = int(secret.get("LOG_BACKUP_COUNT", 20))
-logFileLevel = secret.get("LOG_FILE_LEVEL", 'INFO')
-logGrayPyLevel = secret.get("LOG_GRAYPY_LEVEL", 'DEBUG')
+log_folder = secret.get("LOG_BHTOM_FOLDER", '../log/bhtom.log')
+log_cadence = secret.get("LOG_CADENCE", "D")
+log_interval = int(secret.get("LOG_INTERVAL", 7))
+log_backup_count = int(secret.get("LOG_BACKUP_COUNT", 20))
+log_level_file = secret.get("LOG_FILE_LEVEL", 'INFO')
+log_level_graypy = secret.get("LOG_GRAYPY_LEVEL", 'DEBUG')
+log_level_console = secret.get("LOG_LEVEL_CONSOLE", 'DEBUG')
 
 LOGGING = {
     'version': 1,
@@ -279,7 +277,7 @@ LOGGING = {
 
     'handlers': {
         'graypy': {
-            'level': logGrayPyLevel,
+            'level': log_level_graypy,
             'class': 'graypy.GELFTCPHandler',
             'host': GRAYLOG_HOST,
             'port': GRAYLOG_PORT,
@@ -289,16 +287,16 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'console',
-            'level': 'INFO',
+            'level': log_level_console,
         },
         'file': {
-            'level': logFileLevel,
+            'level': log_level_file,
             'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': logFolder,
+            'filename': log_folder,
             'formatter': 'default',
-            'when': logWhen,
-            'interval': logInterval,
-            'backupCount': logBackupCount,
+            'when': log_cadence,
+            'interval': log_interval,
+            'backupCount': log_backup_count,
             'filters': ['correlation_id'],
         },
     },
@@ -317,15 +315,15 @@ LOGGING = {
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(BASE_DIR, 'bhtom2/cache')
+        'LOCATION': DATA_CACHE_PATH
     },
     'targetList': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(BASE_DIR, 'bhtom2/cache/targetList')
+        'LOCATION': DATA_CACHE_PATH + '/targetList'
     },
     'targetDetails': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(BASE_DIR, 'bhtom2/cache/targetDetails')
+        'LOCATION': DATA_CACHE_PATH + '/targetDetails'
     }
 }
 
@@ -489,3 +487,4 @@ DJANGO_GUID = {
 }
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB (adjust as needed)
+

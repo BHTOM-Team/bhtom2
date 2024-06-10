@@ -10,6 +10,9 @@ from django.core.paginator import Paginator
 from django.shortcuts import reverse
 from plotly import offline
 
+import datetime, time
+from astropy.time import Time
+
 from bhtom2.bhtom_dataproducts.forms import DataProductUploadForm
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum, ReducedDatumUnit
@@ -17,6 +20,8 @@ from bhtom_base.bhtom_observations.models import ObservationRecord
 from bhtom_base.bhtom_targets.models import Target, TargetGaiaDr3, TargetGaiaDr2
 
 from numpy import around
+
+import numpy as np
 
 from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_stats
 
@@ -227,9 +232,33 @@ def upload_dataproduct(context, obj):
 def photometry_for_target(context, target, width=1000, height=600, background=None, label_color=None, grid=True):
     fig = None
     if target.photometry_plot is not None and target.photometry_plot != '':
-        base_path = settings.DATA_PLOT_PATH
+        base_path = settings.DATA_PLOTS_PATH
         try:
             fig = plotly.io.read_json(base_path + str(target.photometry_plot))
+
+            # Get current date as a string in 'YYYY-MM-DD' format
+            current_date = datetime.datetime.now().strftime('%Y-%m-%d')
+
+            # Calculate the y-range from your data traces
+            y_values = [trace['y'] for trace in fig['data'] if 'y' in trace]
+            y_min = np.min([np.min(values) for values in y_values])
+            y_max = np.max([np.max(values) for values in y_values])
+
+            # Add a vertical dashed line at the current date
+            line_trace = go.Scatter(
+                x=[current_date, current_date],
+                y=[y_min-2, y_max+2],  # This will make the line span the entire plot in Y
+                mode='lines',
+                name='NOW',
+                line=dict(
+                    color="Grey",  # Change the color here
+                    width=1,
+                    dash="dash",  # This makes the line dashed.
+                ),
+                showlegend=True
+            )
+            fig.add_trace(line_trace)
+
             return {
                 'target': target,
                 'plot': offline.plot(fig, output_type='div', show_link=False)
@@ -257,9 +286,33 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
 def photometry_for_target_obs(context, target, width=1000, height=600, background=None, label_color=None, grid=True):
     fig = None
     if target.photometry_plot_obs is not None and target.photometry_plot_obs != '':
-        base_path = settings.DATA_PLOT_PATH
+        base_path = settings.DATA_PLOTS_PATH
         try:
             fig = plotly.io.read_json(base_path + str(target.photometry_plot_obs))
+
+            # Get current date as a string in 'YYYY-MM-DD' format
+            current_date = datetime.datetime.now().strftime('%Y-%m-%d')
+
+            # Calculate the y-range from your data traces
+            y_values = [trace['y'] for trace in fig['data'] if 'y' in trace]
+            y_min = np.min([np.min(values) for values in y_values])
+            y_max = np.max([np.max(values) for values in y_values])
+
+            # Add a vertical dashed line at the current date
+            line_trace = go.Scatter(
+                x=[current_date, current_date],
+                y=[y_min-2, y_max+2],  # This will make the line span the entire plot in Y
+                mode='lines',
+                name='NOW',
+                line=dict(
+                    color="Grey",  # Change the color here
+                    width=1,
+                    dash="dash",  # This makes the line dashed.
+                ),
+                showlegend=True
+            )
+            fig.add_trace(line_trace)
+
             return {
                 'target': target,
                 'plot': offline.plot(fig, output_type='div', show_link=False)
@@ -309,7 +362,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
     """
 
     if target.photometry_icon_plot is not None and target.photometry_icon_plot != '':
-        base_path = settings.DATA_PLOT_PATH
+        base_path = settings.DATA_PLOTS_PATH
         try:
             fig = plotly.io.read_json(base_path + str(target.photometry_icon_plot))
             return {
@@ -339,7 +392,7 @@ def photometry_for_target_icon(context, target, width=800, height=400, backgroun
 def spectroscopy_for_target(context, target, dataproduct=None):
 
     if target.spectroscopy_plot is not None and target.spectroscopy_plot != '':
-        base_path = settings.DATA_PLOT_PATH
+        base_path = settings.DATA_PLOTS_PATH
         try:
             fig = plotly.io.read_json(base_path + str(target.spectroscopy_plot))
             return {

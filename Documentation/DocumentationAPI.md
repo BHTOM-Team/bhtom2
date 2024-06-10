@@ -115,6 +115,60 @@ The script will display the response from the API with a list of uploaded files 
 - The `requests` library (install with `pip install requests`)
 
 
+# CALIBRATION FILE UPLOAD API
+
+### Description
+This API facilitates programmable batch file calibration file to the **BHTOM system**. It offers a command-line interface for uploading files along with their associated meta data.
+
+<!-- Please note, an authentication `TOKEN` is required to use this script. -->
+
+### Endpoint
+
+- **Method**: POST
+- **URL**: `/calibFile`
+
+
+### Request Headers
+
+- `accept: application/json`: Specify the desired response format as JSON.
+- `Authorization: Token 10f21fe7308f06f7e23ccb7848da554c2271be49`: Authentication token for the API.
+- `Content-Type: application/json`: Specify the format of the request payload as JSON.
+- `X-CSRFToken: uUz2fRnXhPuvD9YuuiDW9cD1LsajeaQnE4hwtEAfR00SgV9bD5HCe5i8n4m4KcOr`: CSRF token for security.
+
+### Request Body
+
+  -  `photometry_file `: TYPE_FILE
+  -  `ra`: FORMAT_FLOAT
+  -  `dec`: FORMAT_FLOAT
+  -  `match_dist`: FORMAT_FLOAT
+  -  `survey`: TYPE_STRING
+  -  `filter`: TYPE_STRING
+  -  `no_plot`: TYPE_BOOLEAN
+  -  `image_format`: TYPE_STRING
+
+### Example Request
+
+```bash
+curl -X 'POST' \
+  'https://uploadsvc2.astrolabs.pl/calibFile/' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Token <yourToken>' \
+  -H 'Content-Type: application/json' \
+  -H 'X-CSRFToken: uUz2fRnXhPuvD9YuuiDW9cD1LsajeaQnE4hwtEAfR00SgV9bD5HCe5i8n4m4KcOr' \
+  -d '{
+        photmetry_file = 'file.dat'
+        ra =  1.23
+        dec = 4.56
+        match_dist = 2.0
+        no_plot = True
+        survey = 'GaiaSp'
+        filter = 'V'
+        image_format = 'png'
+  }'
+
+### Response
+
+The script will display the response from the API with a calibration result, so you can check the calibrations result and plot.
 # CALIBRATIONS API
 
 <!-- ### Description -->
@@ -276,12 +330,12 @@ curl -X 'POST' \
 ## 2. Add Favourite Observatory
 <!-- /observatory/addFavouriteObservatory/ -->
 
-This API endpoint allows users to add observatory to their favourite list. Users must provide the observatory name, and can include an optional comment.
+This API endpoint allows users to add observatory to their favourite list. Users must provide the (observatory name and camera name) or simply provide oname, and can include an optional comment.
 
 ### Request
 
 - **Method**: POST
-- **URL**: `/create-observatory-matrix/`
+- **URL**: `/addFavouriteObservatory/`
 
 ### Request Headers
 
@@ -292,6 +346,7 @@ This API endpoint allows users to add observatory to their favourite list. Users
 - `observatory` (string, required): The name of the observatory.
 - `camera` (string, required): The name of the observatory camera.
 - `comment` (string, optional): An optional comment.
+- `oname` ((string, required if observatory or camera is not provided): The short name of observatory/camera ONAME.)
 
 ### Example Request Body
 
@@ -299,12 +354,15 @@ This API endpoint allows users to add observatory to their favourite list. Users
 {
   "observatory": "Observatory Name",
   "camera": "Camera Name",
-  "comment": "This is an optional comment."
+  "comment": "This is an optional comment.",
+  "oname": "The short name of observatory/camera ONAME"
 }
 ```
 
 
 ### Example Request
+
+#### Use with observatory and camera name:
 
 ```bash
 curl -X POST \
@@ -314,6 +372,18 @@ curl -X POST \
   -d '{
     "observatory": "Observatory Name",
     "camera": "Camera Name",
+    "comment": "This is an optional comment."
+  }'
+```
+#### Or use with ONAME:
+
+```bash
+curl -X POST \
+  'https://bh-tom2.astrolabs.pl/observatory/addFavouriteObservatory/' \
+  -H 'Authorization: Token <yourToken>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "oname": "ONAME",
     "comment": "This is an optional comment."
   }'
 ```
@@ -1050,7 +1120,8 @@ API for DataProduct list, lists uploaded instrumental or fits files and tracks t
     "fits_data": "test",
     "camera" : "BIALKOW_ANDOR-DW432", 
     "created_start": "2024-01-01",
-    "created_end": "2024-01-02"
+    "created_end": "2024-01-02",
+    "mjd": "2"
 }
 
 ### Example Request

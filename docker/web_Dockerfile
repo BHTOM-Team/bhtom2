@@ -1,0 +1,21 @@
+FROM python:3.8-slim-buster
+
+EXPOSE 8000
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONBUFFERED 1
+
+WORKDIR /bhtom
+
+COPY . /bhtom/
+COPY docker/.env /bhtom/settings/.bhtom.env
+ENV PYTHONPATH /bhtom
+
+RUN pwd
+RUN apt update
+RUN apt install -y libpq-dev
+RUN apt install -y gcc g++
+
+RUN python -m pip install -r requirements.txt
+
+CMD ["sh", "docker/entrypoint.sh"]

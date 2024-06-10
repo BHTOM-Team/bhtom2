@@ -1,0 +1,22 @@
+Instruction is only for local environments (docker-compose)
+Folders migrations should be empty (posible conflict)
+
+1. Create structure:
+    - data_store
+        * cache
+        * fits
+        * cpcsArchiveFile
+        * log
+        * plots
+            calibrations
+            photometry
+            photometryIcon
+            spectroscopy
+        * targets
+        * calib_log
+
+2. create .env file from .env.template
+3. fill the DATA_STORE_PATH in .env
+    opcional change database and harvester section
+4. copy .env to cpcs, harvester, upload_service -> folder docker
+5. build docker -> docker-compose -f docker-compose.yml up -d --build

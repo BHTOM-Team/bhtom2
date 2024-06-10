@@ -47,7 +47,6 @@
                             ERROR
                         {% endif %}
                     </td>
-
                     {% if product.data_product_type == 'fits_file' or product.data_product_type == 'photometry' %}
                         <td>
                             <a href="{% url 'bhtom_dataproducts:dataproduct-details' pk=product.id %}"
