@@ -293,6 +293,11 @@ services:
       # GELF TCP
       - "12201:12201/tcp" # GELF TCP
       - "12201:12201/udp" # GELF UDP
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
     entrypoint: /usr/bin/tini -- wait-for-it elasticsearch:9200 --  /docker-entrypoint.sh
 
 volumes:
