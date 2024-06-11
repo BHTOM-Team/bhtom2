@@ -48,6 +48,7 @@ services:
       - targets:/data/targets
       - fits_data:/data/fits
       - static:/_static
+      - cache:/data/cache
     ports:
       - "7010:8000"
     logging:
