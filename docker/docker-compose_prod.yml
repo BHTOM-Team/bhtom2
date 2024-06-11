@@ -44,7 +44,7 @@ services:
       - "POSTGRES_HOST_AUTH_METHOD=scram-sha-256"
     restart: on-failure
     volumes:
-      - log:/log
+      - log:/data/log
       - plots:/data/plots
       - targets:/data/targets
       - fits_data:/data/fits
