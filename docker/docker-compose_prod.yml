@@ -23,11 +23,13 @@ services:
       - POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
     ports:
       - "${POSTGRES_PORT}:5432"
+
     logging:
       driver: "json-file"
       options:
         max-size: "100m"
         max-file: "5"
+        log-level: "DEBUG"
 
   bhtom:
     container_name: bhtom
@@ -56,6 +58,7 @@ services:
       options:
         max-size: "100m"
         max-file: "5"
+        log-level: "DEBUG"
     depends_on:
       - bhtom_db
 
