@@ -368,6 +368,12 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/bhtom_db
+  cache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/cache
   mongo_data:
     driver: local
     driver_opts:
