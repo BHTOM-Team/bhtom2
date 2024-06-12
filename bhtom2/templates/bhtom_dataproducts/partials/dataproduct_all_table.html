@@ -68,6 +68,9 @@
                             {% if product.status == "P" %}
                             IN PROGRESS
                             {% endif %}
+                            {% if product.status == "R" %}
+                            Send to calibration
+                            {% endif %}
                             {% if product.status == "S" %}
                             SUCCESS
                             {% endif %}

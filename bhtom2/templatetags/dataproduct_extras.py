@@ -132,20 +132,20 @@ def gaia_stats(target):
         return {'data': data_list}
 
     data_dict = {'Parameter': 'parallax [mas]',
-                 'GDR2': f'{around(gaiaDr2.parallax, 3)}&plusmn;{around(gaiaDr2.parallax_error, 3)}',
-                 'GDR3': f'{around(gaiaDr3.parallax, 3)}&plusmn;{around(gaiaDr3.parallax_error, 3)}'
+                 'GDR2': f'{around(gaiaDr2.parallax, 3)} ± {around(gaiaDr2.parallax_error, 3)}',
+                 'GDR3': f'{around(gaiaDr3.parallax, 3)} ± {around(gaiaDr3.parallax_error, 3)}'
                  }
     data_list.append(data_dict)
 
     data_dict = {'Parameter': 'PM RA [mas/yr]',
-                 'GDR2': f'{around(gaiaDr2.pmra, 3)}&plusmn;{around(gaiaDr2.pmra_error, 3)}',
-                 'GDR3': f'{around(gaiaDr3.pmra, 3)}&plusmn;{around(gaiaDr3.pmra_error, 3)}'
+                 'GDR2': f'{around(gaiaDr2.pmra, 3)} ± {around(gaiaDr2.pmra_error, 3)}',
+                 'GDR3': f'{around(gaiaDr3.pmra, 3)} ± {around(gaiaDr3.pmra_error, 3)}'
                  }
     data_list.append(data_dict)
 
     data_dict = {'Parameter': 'PM Dec [mas/yr]',
-                 'GDR2': f'{around(gaiaDr3.pmdec, 3)}&plusmn;{around(gaiaDr2.pmdec_error, 3)}',
-                 'GDR3': f'{around(gaiaDr3.pmdec, 3)}&plusmn;{around(gaiaDr3.pmdec_error, 3)}'
+                 'GDR2': f'{around(gaiaDr2.pmdec, 3)} ± {around(gaiaDr2.pmdec_error, 3)}',
+                 'GDR3': f'{around(gaiaDr3.pmdec, 3)} ± {around(gaiaDr3.pmdec_error, 3)}'
                  }
     data_list.append(data_dict)
 
