@@ -38,16 +38,16 @@ services:
       - bhtom_db
     build:
       context: ..
-      dockerfile: docker/web_Dockerfile
+      dockerfile: Docker/web_Dockerfile
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=scram-sha-256"
     restart: on-failure
     volumes:
-      - log:/data/log
+      - log:/log
       - plots:/data/plots
       - targets:/data/targets
       - fits_data:/data/fits
-      - static:/bhtom/_static
+      - static:/_static
       - cache:/data/cache
     ports:
       - "7010:8000"
@@ -81,6 +81,7 @@ services:
       options:
         max-size: "100m"
         max-file: "5"
+
     restart: always
 
   zookeeper2:
@@ -105,6 +106,7 @@ services:
       options:
         max-size: "100m"
         max-file: "5"
+
     restart: always
 
   zookeeper3:
@@ -129,6 +131,7 @@ services:
       options:
         max-size: "100m"
         max-file: "5"
+
     restart: always
 
   kafka1:
@@ -236,6 +239,7 @@ services:
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
+    restart: on-failure
     env_file:
       - .kafka.env
     networks:
@@ -269,6 +273,7 @@ services:
   mongo:
     image: mongo:7.0.0
     container_name: mongo
+    restart: on-failure
     env_file:
       - .graylog.env
     volumes:
@@ -280,9 +285,11 @@ services:
       options:
         max-size: "100m"
         max-file: "5"
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
     container_name: elasticsearch
+    restart: on-failure
     env_file:
       - .graylog.env
     volumes:
@@ -305,14 +312,15 @@ services:
       options:
         max-size: "100m"
         max-file: "5"
+
   graylog:
     image: graylog/graylog:5.1
     container_name: graylog
+    restart: on-failure
     env_file:
       - .graylog.env
     volumes:
       - graylog_data:/usr/share/graylog/data
-      - log_graylog:/usr/share/elasticsearch/logs
     environment:
       - GRAYLOG_PASSWORD_SECRET=${GRAYLOG_PASSWORD_SECRET}
       - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD_SHA2}
@@ -396,12 +404,6 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/log/elasticsearch
-  log_graylog:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${DATA_STORE_PATH}/log/graylog
   plots:
     driver: local
     driver_opts:

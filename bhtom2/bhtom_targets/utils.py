@@ -309,7 +309,7 @@ def coords_to_degrees(value, c_type):
 
 
 def update_targetList_cache():
-    cachePath = os.path.join(settings.BASE_DIR, "bhtom2/cache/targetList")
+    cachePath = os.path.join(settings.BASE_DIR, "/data//cache/targetList")
 
     for file in os.listdir(cachePath):
         f = os.path.join(cachePath, file)
@@ -328,7 +328,7 @@ def update_targetList_cache():
 
 
 def update_targetDetails_cache():
-    cachePath = os.path.join(settings.BASE_DIR, "bhtom2/cache/targetDetails")
+    cachePath = os.path.join(settings.BASE_DIR, "/data/cache/targetDetails")
 
     for file in os.listdir(cachePath):
         f = os.path.join(cachePath, file)
