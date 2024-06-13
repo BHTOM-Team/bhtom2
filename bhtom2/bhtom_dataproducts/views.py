@@ -28,7 +28,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.mixins import LoginRequiredMixin
-from bhtom2.bhtom_dataproducts.utils import map_data_from_cpcs
+from bhtom2.bhtom_dataproducts.utils import map_data_from_cpcs, is_valid_file_size
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_dataproducts.views')
 
@@ -156,7 +156,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         if response.status_code == 201:
             messages.success(self.request, 'Successfully uploaded')
         else:
-            messages.error(self.request, 'There was a problem uploading your file')
+            messages.error(self.request, f'There was a problem uploading your file: {response.json()}')
         return redirect(form.cleaned_data.get('referrer', '/'))
 
     def form_invalid(self, form):
