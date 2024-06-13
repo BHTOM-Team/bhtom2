@@ -57,6 +57,8 @@ def getCatalogs():
         {'id': 50, 'survey': 'any', 'filters': 'H', 'isActive': False},
         {'id': 51, 'survey': 'any', 'filters': 'K', 'isActive': False},
         {'id': 52, 'survey': 'any', 'filters': 'U', 'isActive': False},
+        {'id': 53, 'survey': 'GaiaSP', 'filters': 'ugriz', 'isActive': True},
+        {'id': 54, 'survey': 'GaiaSP', 'filters': 'UBVRI', 'isActive': True},
     ]
 
 
