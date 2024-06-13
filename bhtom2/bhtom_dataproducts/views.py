@@ -156,7 +156,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         if response.status_code == 201:
             messages.success(self.request, 'Successfully uploaded')
         else:
-            messages.error(self.request, 'There was a problem uploading your file')
+            messages.error(self.request, f'There was a problem uploading your file: {response.json()}')
         return redirect(form.cleaned_data.get('referrer', '/'))
 
     def form_invalid(self, form):
@@ -445,7 +445,9 @@ class DataDetailsView(DetailView):
                     error_message = 'Data not found'
                     raise
 
-                context['fits_data'] = data_product.fits_data.split('/')[-1]
+                if data_product.data_product_type == 'fits_file':
+                    context['fits_data'] = data_product.data.name.split('/')[-1]
+
                 context['ccdphot'] = ccdphot
 
             if data_product.photometry_data:

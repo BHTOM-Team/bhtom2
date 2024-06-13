@@ -192,7 +192,7 @@ class UpdateFits(LoginRequiredMixin, FormView):
         for data in dataProducts:
             if delete_fits:
                 try:
-                    base_path = settings.DATA_FITS_PATH
+                    base_path = settings.DATA_MEDIA_PATH
                     url_result = base_path + str(data.fits_data)
                     os.remove(url_result)
                     data.fits_data = ''

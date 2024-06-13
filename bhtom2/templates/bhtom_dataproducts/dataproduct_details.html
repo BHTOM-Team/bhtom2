@@ -35,12 +35,6 @@
                     <table class="table">
                         <tbody>
                         <tr>
-                            <td>Fits</td>
-                            <td>
-                                <div title="{{ fits_data }}">{{ fits_data }}</div>
-                            </td>
-                        </tr>
-                        <tr>
                             <td>Photometry</td>
                             {% if photometry_data is not None %}
                                 <td>
@@ -92,14 +86,14 @@
                             {% if calibration.use_catalog.survey != None %}
                                 <td>{{ calibration.use_catalog.survey }}/{{calibration.use_catalog.filters}}</td>
                             {% else %}
-                                <td></td>
+                                <td>any</td>
                             {% endif %}
                         
                         </tr>
                         <tr>
                             <td>Standardised to</td>
                             {% if calibration.best_filter != None %}
-                            <td>{{ calibration.best_filter }}</td>
+                            <td>{{ calibration.survey }}/{{ calibration.best_filter }}</td>
                             {% else %}
                                 <td></td>
                             {% endif %}
@@ -108,7 +102,7 @@
                         <tr>
                             <td>Magnitude</td>
                             {% if calibration.mag != None %}
-                                <td>{{ calibration.mag|floatformat:2 }} +/- {{ calibration.mag_error|floatformat:2 }} mag</td>
+                                <td>{{ calibration.mag|floatformat:3 }} +/- {{ calibration.mag_error|floatformat:3 }} mag</td>
                             {% else %}
                                 <td></td>
                             {% endif %}
@@ -117,7 +111,7 @@
                         <tr>
                             <td>ZP</td>
                             {% if calibration.zeropoint != None %}
-                                <td>{{ calibration.zeropoint|floatformat:2 }} mag</td>
+                                <td>{{ calibration.zeropoint|floatformat:3 }} mag</td>
                             {% else %}
                                 <td></td>
                             {% endif %}
@@ -192,7 +186,12 @@
                     <h1>Target: {{ target.name }}</h1>
                     <table class="table">
                         <tbody>
-
+                            <tr>
+                                <td>Fits</td>
+                                <td>
+                                    <div title="{{ fits_data }}">{{ fits_data }}</div>
+                                </td>
+                            </tr>
                             <tr>
                                 <td>Instrument</td>
                                 <td>{{ ccdphot.instrument|default:"N/A" }}</td>
