@@ -162,8 +162,7 @@ def gaia_stats(target):
     data_list.append(data_dict)
 
     return {'data': data_list}
-
-
+    
 @register.inclusion_tag('bhtom_dataproducts/partials/dataproduct_list_for_target.html', takes_context=True)
 def dataproduct_list_for_target(context, target):
     """

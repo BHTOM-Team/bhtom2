@@ -219,6 +219,7 @@ class ObservatoryUserUpdateForm(forms.ModelForm):
         fields = ('comment',)
 
 
+
 class ObservatoryUserCreationForm(forms.Form):
     observatory = forms.ChoiceField(widget=forms.Select(attrs={'id': 'observatory-select'}))
     camera = forms.ChoiceField(widget=forms.Select(attrs={'id': 'camera-select'}))
@@ -228,23 +229,36 @@ class ObservatoryUserCreationForm(forms.Form):
         required=False
     )
 
+
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
         observatory_id = kwargs.pop('observatory_id', None)
         super(ObservatoryUserCreationForm, self).__init__(*args, **kwargs)
 
+        # Get active observatories with cameras
         active_observatory_ids = set(Camera.objects.filter(active_flg=True).values_list('observatory_id', flat=True))
-        active_observatories = Observatory.objects.filter(id__in=active_observatory_ids).order_by('name')
-        
-        self.fields['observatory'] = ObservatoryChoiceField(
-            queryset=active_observatories,
-            widget=forms.Select(),
-            required=True
-        )
+        active_observatories = Observatory.objects.filter(id__in=active_observatory_ids)
 
+        # Filter out observatories where user has all cameras
+        observatories_to_show = []
+        for observatory in active_observatories:
+            observatory_cameras = Camera.objects.filter(observatory=observatory, active_flg=True).values_list('id')
+            user_camera_ids = ObservatoryMatrix.objects.filter(user_id=self.user.id, camera_id__in=observatory_cameras).values_list('camera_id', flat=True)
+            if observatory_cameras.exclude(id__in=user_camera_ids).exists():
+                logger.info("observatory")
+                observatories_to_show.append(observatory.id)
+
+        observatory_list = Observatory.objects.filter(id__in=observatories_to_show).order_by('name')
+
+        self.fields['observatory'] = ObservatoryChoiceField(
+             queryset=observatory_list,
+             widget=forms.Select(),
+             required=True
+        )
         self.fields['camera'] = CameraChoiceField(
                 queryset= Camera.objects.all(),
                 widget=forms.Select(),
                 required=True
             )
-        self.fields['camera'].widget.attrs['data-observatory'] = observatory_id
+        if observatory_id:
+            self.fields['camera'].widget.attrs['data-observatory'] = observatory_id
