@@ -102,7 +102,7 @@
                         <tr>
                             <td>Magnitude</td>
                             {% if calibration.mag != None %}
-                                <td>{{ calibration.mag|floatformat:2 }} +/- {{ calibration.mag_error|floatformat:2 }} mag</td>
+                                <td>{{ calibration.mag|floatformat:3 }} +/- {{ calibration.mag_error|floatformat:3 }} mag</td>
                             {% else %}
                                 <td></td>
                             {% endif %}
@@ -111,7 +111,7 @@
                         <tr>
                             <td>ZP</td>
                             {% if calibration.zeropoint != None %}
-                                <td>{{ calibration.zeropoint|floatformat:2 }} mag</td>
+                                <td>{{ calibration.zeropoint|floatformat:3 }} mag</td>
                             {% else %}
                                 <td></td>
                             {% endif %}

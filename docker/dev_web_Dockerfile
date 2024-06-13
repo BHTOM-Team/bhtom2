@@ -8,7 +8,7 @@ ENV PYTHONBUFFERED 1
 WORKDIR /bhtom
 
 COPY . /bhtom/
-COPY docker/.env /settings/.bhtom.env
+COPY docker/.env /bhtom/settings/.bhtom.env
 
 RUN pwd
 RUN apt update
@@ -17,4 +17,4 @@ RUN apt install -y gcc g++
 
 RUN python -m pip install -r requirements.txt
 
-CMD ["sh", "dev_entrypoint.sh"]
+CMD ["sh", "docker/dev_entrypoint.sh"]
