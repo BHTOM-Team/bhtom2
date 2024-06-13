@@ -28,7 +28,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.mixins import LoginRequiredMixin
-from bhtom2.bhtom_dataproducts.utils import map_data_from_cpcs, is_valid_file_size
+from bhtom2.bhtom_dataproducts.utils import map_data_from_cpcs
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_dataproducts.views')
 
