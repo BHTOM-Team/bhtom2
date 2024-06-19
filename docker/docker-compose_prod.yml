@@ -38,16 +38,16 @@ services:
       - bhtom_db
     build:
       context: ..
-      dockerfile: Docker/web_Dockerfile
+      dockerfile: docker/web_Dockerfile
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=scram-sha-256"
     restart: on-failure
     volumes:
-      - log:/log
+      - log:/data/log
       - plots:/data/plots
       - targets:/data/targets
       - fits_data:/data/fits
-      - static:/_static
+      - static:/bhtom/_static
       - cache:/data/cache
     ports:
       - "7010:8000"
