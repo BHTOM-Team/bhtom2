@@ -305,6 +305,11 @@
                         </tbody>
                     </table>
                 </div>
+                {% if fits_webp_url %}
+                <div class="col-md-6">
+                    <img src="{{ fits_webp_url }}" alt="FITS Image" class="img-fluid" />
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
