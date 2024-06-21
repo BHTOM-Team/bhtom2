@@ -1,4 +1,4 @@
-name: Build and Push Docker Image to hub.astrolabs.pl
+name: Build and Push Docker Image to hub.astrolabs.pl (branch bhtom2-test)
 
 on:
   push:
@@ -30,13 +30,13 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Build and tag Docker image
-        run: docker build -f testdocker/Dockerfile -t https://hub.astrolabs.pl/bh-tom2/bh-tom2:${{ env.VERSION }} .
+        run: docker build -f testdocker/Dockerfile -t https://hub.astrolabs.pl/bh-tom2-test/bh-tom2-test:${{ env.VERSION }} .
 
       - name: Tag Docker image as latest
-        run: docker tag https://hub.astrolabs.pl/bh-tom2/bh-tom2:${{ env.VERSION }} https://hub.astrolabs.pl/bh-tom2/bh-tom2:latest
+        run: docker tag https://hub.astrolabs.pl/bh-tom2-test/bh-tom2-test:${{ env.VERSION }} https://hub.astrolabs.pl/bh-tom2-test/bh-tom2-test:latest
 
       - name: Push versioned Docker image
-        run: docker push https://hub.astrolabs.pl/bh-tom2/bh-tom2:${{ env.VERSION }}
+        run: docker push https://hub.astrolabs.pl/bh-tom2-test/bh-tom2-test:${{ env.VERSION }}
 
       - name: Push latest Docker image
-        run: docker push https://hub.astrolabs.pl/bh-tom2/bh-tom2:latest
+        run: docker push https://hub.astrolabs.pl/bh-tom2-test/bh-tom2-test:latest
