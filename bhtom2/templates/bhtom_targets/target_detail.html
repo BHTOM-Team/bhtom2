@@ -240,6 +240,16 @@
 
 {% block extra_javascript %}
     <script type="text/javascript">
+        var plotElements = document.getElementsByClassName('plotly-graph-div js-plotly-plot');
+        for (var i = 0; i < plotElements.length; i++) {
+            plotElements[i].on('plotly_click', function(event) {
+                var link = event.points[0].customdata[1];
+                if (event.points[0].customdata && link != '') {
+                  clickedPointIndex = event.points[0].customdata;
+                  window.open(link, '_blank'); // Open link in a new tab
+                } 
+            });
+        };
         function download_photometry() {
             window.open('{% url "targets:download_photometry_data" target.id %}')
         }
