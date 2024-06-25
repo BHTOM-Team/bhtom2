@@ -440,6 +440,7 @@ class DataDetailsView(DetailView):
             if data_product.data_product_type == "fits_file":
                 try:
                     ccdphot = CCDPhotJob.objects.get(job_id=data_product.id)
+
                 except CCDPhotJob.DoesNotExist:
                     logger.error("CCDPhotJob not found: data" + str(data_product.id))
                     error_message = 'Data not found'
@@ -449,7 +450,8 @@ class DataDetailsView(DetailView):
                     context['fits_data'] = data_product.data.name.split('/')[-1]
 
                 context['ccdphot'] = ccdphot
-
+                context['fits_webp_url'] = data_product.fits_webp.url if data_product.fits_webp else None
+                
             if data_product.photometry_data:
                 context['photometry_data'] = data_product.photometry_data.split('/')[-1]
 
