@@ -8,10 +8,8 @@ services:
     env_file:
       - .env
     build:
-      context: .
-      dockerfile: db_Dockerfile
-    volumes:
-      - ./data/db:/docker-entrypoint-initdb.d/
+      context: ../..
+      dockerfile: docker/dev/db_Dockerfile
     networks:
       - bhtom_network
     environment:
@@ -25,8 +23,8 @@ services:
   bhtom:
     container_name: bhtom
     build:
-      context: ..
-      dockerfile: docker/dev_web_Dockerfile
+      context: ../..
+      dockerfile: docker/dev/dev_web_Dockerfile
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
     restart: always
@@ -97,7 +95,6 @@ services:
       KAFKA_CLUSTERS_0_NAME: bhtom2
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'kafka1:19092'
       KAFKA_CLUSTERS_0_ZOOKEEPER: "zookeeper1:2181"
-
     depends_on:
       - kafka1
 

@@ -10,8 +10,8 @@ services:
       - bhtom_db
     restart: on-failure
     build:
-      context: .
-      dockerfile: db_Dockerfile
+      context: ../..
+      dockerfile: docker/prod/db_Dockerfile
     volumes:
       - ./data/db:/docker-entrypoint-initdb.d/
       - bhtom_db:/var/lib/postgresql/data
@@ -37,8 +37,8 @@ services:
       - bhtom_network
       - bhtom_db
     build:
-      context: ..
-      dockerfile: docker/web_Dockerfile
+      context: ../..
+      dockerfile: docker/prod/web_Dockerfile
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=scram-sha-256"
     restart: on-failure
@@ -49,6 +49,7 @@ services:
       - fits_data:/data/fits
       - static:/bhtom/_static
       - cache:/data/cache
+      - env:/bhtom/settings/env
     ports:
       - "7010:8000"
     logging:
@@ -464,6 +465,12 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/kafka/zookeeper3
+  env:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/env
 
 networks:
   bhtom_network:

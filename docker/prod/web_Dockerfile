@@ -1,4 +1,4 @@
-FROM python:3.8-slim-buster
+FROM --platform=linux/amd64 python:3.8-slim-buster
 
 EXPOSE 8000
 
@@ -8,12 +8,14 @@ ENV PYTHONBUFFERED 1
 WORKDIR /bhtom
 
 COPY . /bhtom/
+ENV PYTHONPATH /bhtom
 
 RUN pwd
 RUN apt update
 RUN apt install -y libpq-dev
 RUN apt install -y gcc g++
+RUN apt install -y --no-install-recommends build-essential
 
 RUN python -m pip install -r requirements.txt
 
-CMD ["sh", "docker/test_entrypoint.sh"]
+CMD ["sh", "docker/prod/entrypoint.sh"]
