@@ -154,3 +154,7 @@ div.dataTables_paginate {
 .custom-label {
   color: white;
 }
+
+.white-border {
+  border: 5px solid white;
+}
