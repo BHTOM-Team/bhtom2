@@ -24,7 +24,7 @@ from bhtom2.external_service.data_source_information import DataSource, TARGET_N
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Environment variables
-secret = dotenv_values(os.path.join(BASE_DIR, 'settings/.bhtom.env'))
+secret = dotenv_values(os.path.join(BASE_DIR, 'settings/env/.bhtom.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
