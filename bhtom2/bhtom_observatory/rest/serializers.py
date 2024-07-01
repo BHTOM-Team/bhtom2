@@ -5,7 +5,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix, Camera
 
-from bhtom_base.bhtom_dataproducts.models import DataProduct
+from bhtom_base.bhtom_dataproducts.models import DataProduct, CCDPhotJob
 
 
 class CameraSerializer(serializers.ModelSerializer):
@@ -127,6 +127,8 @@ class DataProductSerializer(serializers.ModelSerializer):
     camera = serializers.SerializerMethodField()
     observatory_name = serializers.SerializerMethodField()
     observatory = serializers.SerializerMethodField()
+    fits_filter = serializers.SerializerMethodField()
+
     class Meta:
         model = DataProduct
         fields = '__all__'
@@ -171,3 +173,11 @@ class DataProductSerializer(serializers.ModelSerializer):
         except Exception as e:
             observatory = None
         return observatory
+    
+    def get_fits_filter(self, obj):
+        try:
+            ccdphotjob  =  CCDPhotJob.objects.get(dataProduct=obj.id)
+            fits_filter = ccdphotjob.fits_filter
+        except Exception as e:
+            fits_filter = None
+        return fits_filter

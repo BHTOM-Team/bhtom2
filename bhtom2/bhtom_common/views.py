@@ -212,8 +212,7 @@ class UpdateFits(LoginRequiredMixin, FormView):
             data.status = status
             data.save()
 
-        messages.success(self.request,
-                         'successfully created, observatory requires administrator approval')
+        messages.success(self.request,'Files updated successfully')
         return redirect(self.get_success_url())
 
 
