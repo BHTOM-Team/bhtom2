@@ -5,13 +5,13 @@ services:
   bhtom_db:
     container_name: bhtom_db
     env_file:
-      - .env
+      - .db.env
     networks:
       - bhtom_db
     restart: on-failure
     build:
-      context: ../..
-      dockerfile: docker/prod/db_Dockerfile
+      context: .
+      dockerfile: prod/db_Dockerfile
     volumes:
       - ./data/db:/docker-entrypoint-initdb.d/
       - bhtom_db:/var/lib/postgresql/data
@@ -35,7 +35,7 @@ services:
       - bhtom_network
       - bhtom_db
     build:
-      context: ../..
+      context: ..
       dockerfile: docker/prod/web_Dockerfile
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=scram-sha-256"
@@ -47,7 +47,6 @@ services:
       - fits_data:/data/fits
       - static:/bhtom/_static
       - cache:/data/cache
-      - env:/bhtom/settings/env
     ports:
       - "7010:8000"
     logging:
@@ -227,7 +226,7 @@ services:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
     env_file:
-      - .env
+      - .kafka.env
     restart: on-failure
     networks:
       - kafka_network
@@ -256,6 +255,7 @@ services:
       - kafka1
       - kafka2
       - kafka3
+      -
   mongo:
     image: mongo:7.0.0
     container_name: mongo
@@ -299,7 +299,7 @@ services:
     image: graylog/graylog:5.1
     container_name: graylog
     env_file:
-      - .env
+      - .graylog.env
     restart: on-failure
     volumes:
       - graylog_data:/usr/share/graylog/data
