@@ -256,7 +256,6 @@ services:
       - kafka1
       - kafka2
       - kafka3
-      -
   mongo:
     image: mongo:7.0.0
     container_name: mongo
