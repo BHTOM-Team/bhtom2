@@ -7,6 +7,9 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom2.bhtom_targets.utils import get_brokers
 from bhtom_base.bhtom_dataproducts.models import BrokerCadence, ReducedDatum
 from django_comments.models import Comment
+import requests
+from django.conf import settings
+from django_guid import get_guid
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.hooks')
 
@@ -62,6 +65,25 @@ def update_alias(target, broker):
     try:
         ReducedDatumEventProducer().send_message(kafkaTopic.updateReducedDatum, target, broker, isNew=False,
                                                  plotForce=True)
+    except Exception as e:
+        logger.error(str(e))
+
+
+
+def delete_alias(target, broker):
+
+    try:
+        datum = ReducedDatum.objects.filter(target=target, source_name=broker)
+        datum.delete()
+        headers = {
+            'Correlation-ID': get_guid(),
+        }
+        post_data = {'target_id': target.id}
+        response = requests.post(settings.CPCS_URL + '/target/updatePlot/', data=post_data,
+                                     headers=headers)
+        if response.status_code != 200:
+             logger.info("Error, plot does not updated!")
+
     except Exception as e:
         logger.error(str(e))
 

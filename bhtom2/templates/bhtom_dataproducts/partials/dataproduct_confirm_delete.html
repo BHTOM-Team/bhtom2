@@ -1,0 +1,16 @@
+{% extends 'bhtom_common/base.html' %}
+{% load static %}
+
+{% block title %} Confirm Delete {% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Confirm Delete</h2>
+    <p>Are you sure you want to delete the data product "{{ data_product.get_file_name|truncatechars:40 }}"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Confirm</button>
+        <a href="{% url 'bhtom_dataproducts:list_user' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

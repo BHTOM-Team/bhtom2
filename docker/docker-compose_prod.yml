@@ -11,7 +11,7 @@ services:
     restart: on-failure
     build:
       context: .
-      dockerfile: db_Dockerfile
+      dockerfile: prod/db_Dockerfile
     volumes:
       - ./data/db:/docker-entrypoint-initdb.d/
       - bhtom_db:/var/lib/postgresql/data
@@ -32,14 +32,12 @@ services:
 
   bhtom:
     container_name: bhtom
-    env_file:
-      - .env
     networks:
       - bhtom_network
       - bhtom_db
     build:
       context: ..
-      dockerfile: docker/web_Dockerfile
+      dockerfile: docker/prod/web_Dockerfile
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=scram-sha-256"
     restart: on-failure
@@ -62,8 +60,6 @@ services:
 
   zookeeper1:
     image: 'confluentinc/cp-zookeeper:7.3.2'
-    env_file:
-      - .kafka.env
     container_name: zookeeper1
     networks:
       - kafka_network
@@ -87,8 +83,6 @@ services:
 
   zookeeper2:
     image: confluentinc/cp-zookeeper:7.3.2
-    env_file:
-      - .kafka.env
     container_name: zookeeper2
     networks:
       - kafka_network
@@ -112,8 +106,6 @@ services:
 
   zookeeper3:
     image: confluentinc/cp-zookeeper:7.3.2
-    env_file:
-      - .kafka.env
     container_name: zookeeper3
     networks:
       - kafka_network
@@ -137,8 +129,6 @@ services:
 
   kafka1:
     image: 'confluentinc/cp-kafka:7.3.2'
-    env_file:
-      - .kafka.env
     container_name: kafka1
     networks:
       - kafka_network
@@ -174,8 +164,6 @@ services:
     container_name: kafka2
     volumes:
       - kafka2-data:/var/lib/kafka/data
-    env_file:
-      - .kafka.env
     networks:
       - kafka_network
       - bhtom_network
@@ -208,8 +196,6 @@ services:
     container_name: kafka3
     volumes:
       - kafka3-data:/var/lib/kafka/data
-    env_file:
-      - .kafka.env
     networks:
       - kafka_network
       - bhtom_network
@@ -240,9 +226,9 @@ services:
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
-    restart: on-failure
     env_file:
       - .kafka.env
+    restart: on-failure
     networks:
       - kafka_network
     ports:
@@ -266,17 +252,15 @@ services:
       AUTH_TYPE: "LOGIN_FORM"
       SPRING_SECURITY_USER_NAME: ${KAFKA_UI_USER}
       SPRING_SECURITY_USER_PASSWORD: ${KAFKA_UI_PASSWORD}
-
     depends_on:
       - kafka1
       - kafka2
       - kafka3
+      -
   mongo:
     image: mongo:7.0.0
     container_name: mongo
     restart: on-failure
-    env_file:
-      - .graylog.env
     volumes:
       - mongo_data:/data/db
     networks:
@@ -291,8 +275,6 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
     container_name: elasticsearch
     restart: on-failure
-    env_file:
-      - .graylog.env
     volumes:
       - es_data:/usr/share/elasticsearch/data
       - log_els:/usr/share/elasticsearch/logs
@@ -317,9 +299,9 @@ services:
   graylog:
     image: graylog/graylog:5.1
     container_name: graylog
-    restart: on-failure
     env_file:
       - .graylog.env
+    restart: on-failure
     volumes:
       - graylog_data:/usr/share/graylog/data
     environment:
@@ -465,6 +447,12 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/kafka/zookeeper3
+  env:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/env/prod
 
 networks:
   bhtom_network:

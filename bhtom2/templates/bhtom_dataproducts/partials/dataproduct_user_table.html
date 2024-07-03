@@ -36,6 +36,7 @@
                         <th>Status</th>
                         <th>Uploaded date</th>
                         <th>Details</th>
+                        <th>Delete</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -87,6 +88,9 @@
                         {% else %}
                         <td></td>
                         {% endif %}
+                        <td>
+                            <a href="{% url 'bhtom_dataproducts:delete' pk=product.id %}" class="btn btn-danger">Delete</a>
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>

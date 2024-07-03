@@ -3,6 +3,7 @@ import base64
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import ListView, DetailView
+from django.views.generic import DeleteView
 from django.views.generic.edit import FormView, CreateView
 from django_filters.views import FilterView
 from django_guid import get_guid
@@ -26,6 +27,7 @@ import requests
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.mixins import LoginRequiredMixin
 from bhtom2.bhtom_dataproducts.utils import map_data_from_cpcs
@@ -156,7 +158,8 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         if response.status_code == 201:
             messages.success(self.request, 'Successfully uploaded')
         else:
-            messages.error(self.request, f'There was a problem uploading your file: {response.json()}')
+            messages.error(self.request, f'There was a problem uploading your file: '
+                                         f'{response.json().get("detail")}')
         return redirect(form.cleaned_data.get('referrer', '/'))
 
     def form_invalid(self, form):
@@ -611,3 +614,23 @@ class CalibrationLogDownload(LoginRequiredMixin, View):
                 return HttpResponseRedirect('/')
             else:
                 return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+
+
+class DataProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = DataProduct
+    template_name = 'bhtom_dataproducts/partials/dataproduct_confirm_delete.html'
+    context_object_name = 'data_product'
+    success_url = reverse_lazy('bhtom_dataproducts:list_user')
+
+    def test_func(self):
+        data_product = self.get_object()
+        return self.request.user == data_product.user or self.request.user.is_superuser
+
+    def delete(self, request, *args, **kwargs):
+        response = super().delete(request, *args, **kwargs)
+        messages.success(request, 'Data product deleted successfully.')
+        return response
+
+    def handle_no_permission(self):
+        messages.error(self.request, 'You do not have permission to delete this data product.')
+        return redirect('bhtom_dataproducts:list_user')

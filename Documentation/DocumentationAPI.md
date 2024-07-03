@@ -165,10 +165,11 @@ curl -X 'POST' \
         filter = 'V'
         image_format = 'png'
   }'
-
+```
 ### Response
 
 The script will display the response from the API with a calibration result, so you can check the calibrations result and plot.
+
 # CALIBRATIONS API
 
 <!-- ### Description -->
@@ -186,7 +187,7 @@ The script will display the response from the API with a calibration result, so 
 
 ```bash
 python get_catalogs_script.py <token>
-```
+
 
 ### Arguments
 
@@ -275,7 +276,6 @@ curl -X 'POST' \
 ### Parameters
 
 - `name` (string): A parameter for specifying a name.
-- `prefix` (string): A parameter for specifying a prefix.
 - `lon` (number): Longitude value.
 - `lat` (number): Latitude value.
 - `active_flg` (boolean): A flag to indicate whether an item is active.
@@ -287,7 +287,6 @@ curl -X 'POST' \
 ```json
 {
   "name": "Example Name",
-  "prefix": "EX",
   "lon": 123.456,
   "lat": 45.678,
   "active_flg": true,
@@ -313,7 +312,6 @@ curl -X 'POST' \
   -H 'X-CSRFToken: uUz2fRnXhPuvD9YuuiDW9cD1LsajeaQnE4hwtEAfR00SgV9bD5HCe5i8n4m4KcOr' \
   -d '{
   "name": "string",
-  "prefix": "string",
   "lon": 0,
   "lat": 0,
   "active_flg": true,
@@ -335,7 +333,7 @@ This API endpoint allows users to add observatory to their favourite list. Users
 ### Request
 
 - **Method**: POST
-- **URL**: `/addFavouriteObservatory/`
+- **URL**: `observatory/addFavouriteObservatory/`
 
 ### Request Headers
 
@@ -396,7 +394,7 @@ curl -X POST \
 ### Request
 
 - **Method**: POST
-- **URL**: `/observatory/create/`
+- **URL**: `/observatory/createObservatory/`
 
 ### Request Parameters
 
@@ -405,6 +403,7 @@ The request to create an observatory should include the following parameters in 
 - `name` (string, required): The name of the observatory.
 - `lon` (number, float, required): The longitude coordinate of the observatory.
 - `lat` (number, float, required): The latitude coordinate of the observatory.
+- `camera_name` -(string, required): The name of the observatory camera.
 - `calibration_flg` (boolean, optional): A flag indicating whether the observatory is for calibration purposes only (default is `False`).
 - `example_file` (string, optional): An example file associated with the observatory.
 - `comment` (string, optional): Additional comments or notes about the observatory.
@@ -426,6 +425,7 @@ The request to create an observatory should include the following parameters in 
     "name": "My Observatory",
     "lon": 45.12345,
     "lat": -120.67890,
+    "camera_name": "Camera1",
     "calibration_flg": true,
     "example_file": "observatory_example.txt",
     "comment": "This observatory is for calibration purposes.",
@@ -446,18 +446,19 @@ curl -X POST \
     "name": "My Observatory",
     "lon": 45.12345,
     "lat": -120.67890,
+    "camera_name": "Camera1",
     "calibration_flg": true,
     "example_file": "observatory_example.txt",
     "comment": "This observatory is for calibration purposes."
   }' \
-  https://bh-tom2.astrolabs.pl/observatory/create/
+  https://bh-tom2.astrolabs.pl/observatory/createObservatory/
 ```
 
 ### Using Python Script
 
 You can use a Python script to create observatories:
 ```bash
-python create_observatory.py --name "My Observatory" --lon 45.12345 --lat -120.67890 --calibration_flg --example_file "observatory_example.txt" --comment "This observatory is for calibration purposes" --token <yourToken> 
+python create_observatory.py --name "My Observatory" --lon 45.12345 --lat -120.67890  --camera_name "Camera1" --calibration_flg --example_file "observatory_example.txt" --comment "This observatory is for calibration purposes" --token <yourToken> 
 ```
 
 ## 4. Update Observatory 
@@ -467,7 +468,7 @@ python create_observatory.py --name "My Observatory" --lon 45.12345 --lat -120.6
 ### Request
 
 - **Method**: POST
-- **URL**: `observatory/update/`
+- **URL**: `observatory/updateObservatory/`
 
 ### Request Parameters
 
@@ -511,7 +512,7 @@ curl -X PATCH \
     "calibration_flg": true,
     "comment": "Updated observatory information."
   }' \
-  https://bh-tom2.astrolabs.pl/observatory/update/
+  https://bh-tom2.astrolabs.pl/observatory/updateObservatory/
 ```
 
 ### Using Python Script
@@ -571,7 +572,7 @@ curl -X POST \
     "created_start": "2023-01-01T00:00:00Z",
     "created_end": "2023-12-31T23:59:59Z"
   }' \
-  https://bh-tom2.astrolabs.pl/observatory-matrix/get-matrix/
+  https://bh-tom2.astrolabs.pl/observatory/getFavouriteObservatory/
 ```
 
 ### Using Python Script
@@ -622,7 +623,7 @@ curl -X DELETE \
     "observatory": "My Observatory",
     "camera": "My Camera"
   }' \
-  https://bh-tom2.astrolabs.pl/observatory-matrix/delete/
+  https://bh-tom2.astrolabs.pl/observatory/deleteFavouriteObservatory/
 ```
 
 ### Using Python Script

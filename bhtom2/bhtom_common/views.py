@@ -29,7 +29,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.db.models import Q
-from bhtom2.bhtom_observatory.rest.serializers import DataProductSerializer
+from bhtom2.bhtom_common.serializers import DataProductSerializer
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_common.views')
 
@@ -212,8 +212,7 @@ class UpdateFits(LoginRequiredMixin, FormView):
             data.status = status
             data.save()
 
-        messages.success(self.request,
-                         'successfully created, observatory requires administrator approval')
+        messages.success(self.request,'Files updated successfully')
         return redirect(self.get_success_url())
 
 
@@ -502,6 +501,6 @@ class GetDataProductApi(views.APIView):
         if mjd is not None:
             query &= (Q(spectroscopydatum__mjd=mjd) | Q(calibration_data__mjd=mjd))
 
-        queryset = DataProduct.objects.filter(query).distinct().order_by('created')
+        queryset = DataProduct.objects.filter(query).distinct().order_by('-created')[:500]
         serialized_queryset = self.serializer_class(queryset, many=True).data
         return Response(serialized_queryset, status=200)

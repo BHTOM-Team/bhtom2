@@ -24,7 +24,7 @@ from bhtom2.external_service.data_source_information import DataSource, TARGET_N
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Environment variables
-secret = dotenv_values(os.path.join(BASE_DIR, 'settings/.bhtom.env'))
+secret = dotenv_values(os.path.join(BASE_DIR, 'settings/env/.bhtom.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
@@ -425,6 +425,7 @@ OPEN_URLS = []
 HOOKS = {
     'target_post_save': 'bhtom2.bhtom_targets.hooks.target_post_save',
     'update_alias': 'bhtom2.bhtom_targets.hooks.update_alias',
+    'delete_alias': 'bhtom2.bhtom_targets.hooks.delete_alias',
     'update_priority': 'bhtom2.bhtom_targets.hooks.update_priority',
     'reduced_datum_pre_save': 'bhtom_base.bhtom_dataproducts.hooks.reduced_datum_pre_save',
     'observation_change_state': 'bhtom_base.bhtom_common.hooks.observation_change_state',

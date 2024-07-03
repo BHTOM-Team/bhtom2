@@ -343,6 +343,7 @@ class TargetUpdateView(LoginRequiredMixin, UpdateView):
 
         # Delete target names not in the form (probably deleted by the user)
         for to_delete in TargetName.objects.filter(target=self.object).exclude(source_name__in=target_source_names):
+            run_hook('delete_alias', target=self.object, broker=get_pretty_survey_name(to_delete.source_name))
             to_delete.delete()
             messages.add_message(
                 self.request,
