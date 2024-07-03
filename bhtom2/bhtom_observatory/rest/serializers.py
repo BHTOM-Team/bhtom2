@@ -1,11 +1,7 @@
 from django.utils import timezone
-
 from rest_framework import serializers
-
-from django.contrib.auth.models import User
 from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix, Camera
 
-from bhtom_base.bhtom_dataproducts.models import DataProduct, CCDPhotJob
 
 
 class CameraSerializer(serializers.ModelSerializer):
@@ -118,66 +114,3 @@ class ObservatoryMatrixSerializers(serializers.ModelSerializer):
 
         instance.save()
         return instance
-
-class DataProductSerializer(serializers.ModelSerializer):
-    user_name = serializers.SerializerMethodField()
-    target_name = serializers.SerializerMethodField()
-    target = serializers.SerializerMethodField()
-    user = serializers.SerializerMethodField()
-    camera = serializers.SerializerMethodField()
-    observatory_name = serializers.SerializerMethodField()
-    observatory = serializers.SerializerMethodField()
-    fits_filter = serializers.SerializerMethodField()
-
-    class Meta:
-        model = DataProduct
-        fields = '__all__'
-
-    def get_user_name(self, obj):
-        user_name = obj.user.first_name + " " + obj.user.last_name
-        return user_name
-    
-    def get_user(self, obj):
-        user = obj.user.username
-        return user
-    
-    def get_camera(self, obj):
-        camera = None
-        try:
-            camera = obj.observatory.camera.prefix
-        except Exception as e:
-            camera = None
-        return camera
-    
-    def get_target_name(self, obj):
-        target_name = obj.target.name if obj.target else None
-        return target_name
-    
-    def get_target(self, obj):
-        target = obj.target.id if obj.target else None
-        return target
-    
-       
-    def get_observatory_name(self, obj):
-        observatory_name = None
-        try:
-            observatory_name  =  obj.observatory.camera.observatory.name
-        except Exception as e:
-            observatory_name = None
-        return observatory_name
-    
-    def get_observatory(self, obj):
-        observatory = None
-        try:
-            observatory  =  obj.observatory.camera.observatory.id
-        except Exception as e:
-            observatory = None
-        return observatory
-    
-    def get_fits_filter(self, obj):
-        try:
-            ccdphotjob  =  CCDPhotJob.objects.get(dataProduct=obj.id)
-            fits_filter = ccdphotjob.fits_filter
-        except Exception as e:
-            fits_filter = None
-        return fits_filter
