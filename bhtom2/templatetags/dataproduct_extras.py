@@ -150,7 +150,7 @@ def gaia_stats(target):
     data_list.append(data_dict)
 
     data_dict = {'Parameter': 'RUWE / AEN [mas]',
-                 'GDR2': f'{around(gaiaDr2.ruwe, 3)} / {around(gaiaDr2.astrometric_excess_noise, 3)}',
+                 'GDR2': f"{around(gaiaDr2.ruwe, 3)} / {around(gaiaDr2.astrometric_excess_noise, 3)}" if gaiaDr2.ruwe is not None else "-",
                  'GDR3': f'{around(gaiaDr3.ruwe, 3)} / {around(gaiaDr3.astrometric_excess_noise, 3)}'
                  }
     data_list.append(data_dict)
@@ -262,8 +262,8 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
                 'target': target,
                 'plot': offline.plot(fig, output_type='div', show_link=False)
             }
-        except:
-            logger.warning("Plot(filters) does not exist")
+        except Exception as e:
+            logger.warning("Plot(filters) does not exist" + str(e))
 
     layout = go.Layout(
         height=height,
