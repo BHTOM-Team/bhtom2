@@ -9,6 +9,11 @@
         .dhtmlwindow {
             top: 100px !important;
         }
+        @media (max-width: 500px) {
+            .hide-on-small {
+                display: none;
+            }
+        }   
     </style>
 
 {% endblock %}
@@ -305,7 +310,7 @@
                     </table>
                 </div>
                 {% if fits_webp_url %}
-                <div class="col-md-6">
+                <div class=="col-md-2">
                     <img src="{{ fits_webp_url }}" alt="FITS Image" class="img-fluid white-border" />
                 </div>
                 {% endif %}
