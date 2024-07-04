@@ -16,22 +16,37 @@
     <div>
         <h2>Key Features</h2>
         <ul>
-            <li><strong>Telescope Network Coordination:</strong> BHTOM enables you to connect and manage multiple telescopes, forming a powerful network that can work in harmony to observe celestial bodies.</li>
-            <li><strong>Observation Processing:</strong> With BHTOM, you can easily submit your astronomical observations as fits or instrumental photometry. Our interface ensures a smooth submission process, reducing the time spent on data processing.</li>
-            <li><strong>Archives:</strong> BHTOM also gathers data already collected for target of interest, enabling time-domain astronomy studies.</li>
+            <li><strong>Telescope Network Coordination:</strong> BHTOM enables you to collect photometry data from multiple telescopes for your time-domain targets.</li>
+            <li><strong>Raw Data Processing:</strong> With BHTOM, you can upload your raw observations as fits or instrumental photometry. We will derive the PSF photometry and standardise the data to Gaia Synthetic Photometry filters automatically.</li>
+            <li><strong>Archives:</strong> BHTOM will automatically gather photometric data already collected for your target of interest, enabling time-domain astronomy studies.</li>
+            <li><strong>Automation:</strong> BHTOM functionalities can be fully automatised from your scripts. See our API documentation.</li>
         </ul>
     </div>
 
     <div>
-        <h2>Why Choose BHTOM?</h2>
-        <p>Choosing BHTOM means choosing efficiency, precision, and ease-of-use. Our platform has been carefully designed with the needs of the astronomical community in mind. Whether you're a seasoned astronomer or a student just starting out, BHTOM provides the tools you need to make the most of your observations.</p>
-        <p>We invite you to join us on this journey of discovery. Let's explore the universe together with BHTOM.</p>
+        <h2>BHTOM for reseachers:</h2>
+        <p>Any time-domain target can be added to our system. The target will then be observed by our network with the requested frequency, and you will receive the standardised photometric data for your target(s).</p>
+        <h2>BHTOM for telescope operators:</h2>
+        <p>You can register your telescope in our system and we will process your images automatically. Your observations will be labelled with your name and telescope.</p>
+        <h2>BHTOM for teachers:</h2>
+        <p>Your students can both submit their targets and their observations and learn the basics of data processing and time-domain research.</p>
+        <h2>BHTOM for amateurs:</h2>
+        <p>Join us with your telescope, observe interesting science targets and we will help you process your data! Each datapoint you collect will be labelled with your name!</p>
     </div>
 
     <div>
-        <h2>Recent changes</h2>
-        <h3>2024 June 11</h3>
-        <p>
+        <h2>Recent changes:</h2>
+        
+        <h4>2024 July 4</h4>
+        <ul>
+            <li>Added validation for uploaded files.</li>
+            <li>Added functionality to generate images directly from FITS files.</li>
+            <li>Added the ability to delete uploaded files located in the data/Yours file.</li>
+            <li>Added a link to data details within the photometry plot for easier access to additional information.</li>
+            <li>Added a fits_filter parameter to the data download API.</li>
+            </ul>
+
+        <h4>2024 June 11</h4>
             <ul>
             <li>Added new filters in the data tab (GaiaSP/ugriz and GaiaSP/UBVRI)</li>
             <li>Added password reset function</li>
@@ -40,8 +55,11 @@
             <li>Added API for downloading archives</li>
             <li>Added calibration logs </li>
             </ul>
+    </div>
 
-        </p>
+    <div>
+        <h2>BHTOM Target Newsletter Mailing List</h2>
+        <p><a href="https://groups.google.com/g/bhtomtargets/">Join the mailing list to find out which targets are currently worth observing!</a></p>
     </div>
 
     <div>
@@ -49,7 +67,6 @@
         <p><a href="https://github.com/BHTOM-Team/bhtom2/blob/bhtom2-dev/Documentation/Documentation.md">Draft version of the documentation</a></p>
         <p>For more information contact us at bhtom_@_astrouw.edu.pl</p>
     </div>
-
 
     <div class="row" style="color:blue;">
         <h3>Acknowledgments</h3>
