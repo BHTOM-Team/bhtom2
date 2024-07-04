@@ -158,7 +158,8 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         if response.status_code == 201:
             messages.success(self.request, 'Successfully uploaded')
         else:
-            messages.error(self.request, f'There was a problem uploading your file: {response.json()}')
+            messages.error(self.request, f'There was a problem uploading your file: '
+                                         f'{response.json().get("detail")}')
         return redirect(form.cleaned_data.get('referrer', '/'))
 
     def form_invalid(self, form):
