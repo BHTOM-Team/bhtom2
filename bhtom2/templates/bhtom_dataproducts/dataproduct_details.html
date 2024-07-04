@@ -9,11 +9,6 @@
         .dhtmlwindow {
             top: 100px !important;
         }
-        @media (max-width: 500px) {
-            .hide-on-small {
-                display: none;
-            }
-        }   
     </style>
 
 {% endblock %}
@@ -194,7 +189,9 @@
                             <tr>
                                 <td>Fits</td>
                                 <td>
-                                    <div title="{{ fits_data }}">{{ fits_data }}</div>
+                                    <div title="{{ fits_data }}" data-toggle="tooltip" data-placement="top">
+                                        {{ fits_data|truncatechars:50 }}
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -317,7 +314,11 @@
             </div>
         </div>
     </div>
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.1/js/bootstrap.min.js"></script>
     <script>
+        
         document.getElementById('downloadButton').addEventListener('click', function () {
             // Get the base64-encoded data from the image source
             var encodedData = document.getElementById('calibrationPlot').src.split(',')[1];
@@ -335,6 +336,14 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Initialize all tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
         });
     </script>
 {% endblock %}
