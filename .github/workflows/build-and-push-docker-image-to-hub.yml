@@ -30,7 +30,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Build and tag Docker image
-        run: docker build -f docker/test_Dockerfile -t hub.astrolabs.pl/bh-tom2-test/bh-tom2-test:${{ env.VERSION }} .
+        run: docker build -f docker/test/test_Dockerfile -t hub.astrolabs.pl/bh-tom2-test/bh-tom2-test:${{ env.VERSION }} .
 
       - name: Tag Docker image as latest
         run: docker tag hub.astrolabs.pl/bh-tom2-test/bh-tom2-test:${{ env.VERSION }} hub.astrolabs.pl/bh-tom2-test/bh-tom2-test:latest
