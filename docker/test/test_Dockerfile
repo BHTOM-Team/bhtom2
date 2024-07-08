@@ -14,6 +14,7 @@ RUN pwd
 RUN apt update
 RUN apt install -y libpq-dev
 RUN apt install -y gcc g++
+RUN apt install -y git
 
 RUN python -m pip install -r requirements.txt
 
