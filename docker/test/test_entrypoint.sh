@@ -1,6 +1,7 @@
 #!/bin/sh
 
 echo "Copy config .env file to settings destination..."
+mkdir /bhtom/settings/env
 cp /env/.env /bhtom/settings/env/.bhtom.env
 
 if [ "$DATABASE" = "postgres" ]
