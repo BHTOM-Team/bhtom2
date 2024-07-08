@@ -4,6 +4,10 @@ echo "Copy config .env file to settings destination..."
 mkdir /bhtom/settings/env
 cp /env/.env /bhtom/settings/env/.bhtom.env
 
+cd /bhtom
+git clone -b bhtom-base-test https://github.com/BHTOM-Team/bhtom_base.git
+git clone -b bhtom-custom-registration-test https://github.com/BHTOM-Team/bhtom_custom_registration.git
+
 if [ "$DATABASE" = "postgres" ]
 then
     echo "Waiting for postgres..."
