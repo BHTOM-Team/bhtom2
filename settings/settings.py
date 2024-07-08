@@ -34,6 +34,7 @@ SECRET_KEY = secret.get("SECRET_KEY", '')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(secret.get("DEBUG", False)))
+PROFILE = secret.get("PROFILE", "PROD")
 
 ALLOWED_HOSTS = [] + list(secret.get("ALLOWED_HOSTS", 'localhost').split(','))
 SITE_ID = int(secret.get("SITE_ID", 1))
@@ -157,6 +158,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'bhtom2.bhtom_common.profiles_variable.profile_variable',
             ],
         },
     },
