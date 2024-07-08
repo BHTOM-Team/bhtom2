@@ -1,219 +1,211 @@
 {% extends 'bhtom_common/base.html' %}
 {% load bootstrap4 bhtom_common_extras static %}
 {% block title %}Admin Data{% endblock %}
-{% block additional_css %}
+{% comment %} {% block additional_css %}
     <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
     <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}">
-{% endblock %}
+{% endblock %} {% endcomment %}
 {% block content %}
     {% if request.user.is_staff %}
-
         <div class="row">
             <div class="col-md-12">
-                <ul class="nav nav-tabs" id="tabs">
+                <!-- Tab Navigation -->
+                <ul class="nav nav-tabs" id="tabs" role="tablist">
                     <li class="nav-item">
-                        <span class="nav-link active" data-target="#alerts"
-                              data-toggle="tab">CPCS_Alerts</span>
+                        <a class="nav-link active" data-toggle="tab" href="#alerts" role="tab">CPCS Alerts</a>
                     </li>
                     <li class="nav-item">
-                        <span class="nav-link" data-target="#calib" data-toggle="tab">CPCS_Archive_Calib</span>
+                        <a class="nav-link" data-toggle="tab" href="#followup" role="tab">CPCS Followup</a>
                     </li>
                     <li class="nav-item">
-                        <span class="nav-link" data-target="#catalog" data-toggle="tab">Cpcs_Catalogs</span>
-                    </li>
-                    <li class="nav-item">
-                        <span class="nav-link" data-target="#followup" data-toggle="tab">Cpcs_Followup</span>
-                    </li>
-                    <li class="nav-item">
-                        <span class="nav-link" data-target="#obs" data-toggle="tab">Cpcs_Observatories</span>
+                        <a class="nav-link" data-toggle="tab" href="#obs" role="tab">CPCS Observatories</a>
                     </li>
                 </ul>
-                <div class="tab-content">
-                    <div class="tab-pane active" id="alerts">
-                        <table class="table table-hover sortable" id="alerts_t" >
-                            <thead>
-                            <tr>
-                                <th>Ivorn</th>
-                                <th>Ra</th>
-                                <th>Dec</th>
-                                <th>Url</th>
-                                <th>published</th>
-                                <th>comment</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for data in cpcs_alerts %}
-                                <tr>  
-                                    <td>{{ data.ivorn }}</td>
-                                    <td>{{ data.ra}}</td>
-                                    <td>{{ data.dec }}</td>
-                                    <td>{{ data.url }}</td>
-                                    <td>{{ data.published }}</td>
-                                    <td>{{ data.comment }}</td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="5">
-                                        No data yet.
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
+
+                <!-- Tab Content -->
+                <div class="tab-content mt-3">
+                    <!-- Alerts Tab -->
+                    <div class="tab-pane fade show active" id="alerts" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <form method="post" class="mb-2">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="ivorn" class="form-label-sm">IVORN:</label>
+                                        <input type="text" class="form-control form-control-sm" id="ivorn" name="ivorn">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ra" class="form-label-sm">RA:</label>
+                                        <input type="text" class="form-control form-control-sm" id="ra" name="ra">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="dec" class="form-label-sm">DEC:</label>
+                                        <input type="text" class="form-control form-control-sm" id="dec" name="dec">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="radius" class="form-label-sm">Radius:</label>
+                                        <input type="text" class="form-control form-control-sm" id="radius" name="radius">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm">Apply Filters</button>
+                                </form>
+                            </div>
+                            <div class="col-md-9">
+                                <table class="table table-hover table-sm sortable" id="alerts_t">
+                                    <thead>
+                                        <tr>
+                                            <th>Ivorn</th>
+                                            <th>Ra</th>
+                                            <th>Dec</th>
+                                            <th>Url</th>
+                                            <th>Comment</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for data in cpcs_alerts %}
+                                            <tr>
+                                                <td>{{ data.ivorn }}</td>
+                                                <td>{{ data.ra }}</td>
+                                                <td>{{ data.dec }}</td>
+                                                <td>{{ data.url }}</td>
+                                                <td>{{ data.comment }}</td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="6">No data yet.</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-                    <div class="tab-pane" id="calib">
-                        <table class="table table-hover sortable" id="calib_t" >
-                            <thead>
-                            <tr>
-                                <th>Target</th>
-                                <th>Ra</th>
-                                <th>Dec</th>
-                                <th>Observer</th>
-                                <th>Facility</th>
-                                <th>MJD</th>
-                                <th>Mag</th>
-                                <th>Mag err</th>
-                                <th>Exp time</th>
-                                <th>Zeropoint</th>
-                                <th>Outlier fraction</th>
-                                <th>Scater</th>
-                                <th>Npoints</th>
-                                <th>Filter</th>
-                                <th>Survey</th>
-                                <th>Match distans</th>
-                                <th>Observatory lon</th>
-                                <th>Observatory lat</th>
-                                <th>Source</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for data in cpcs_archive_calib %}
-                                <tr>
-                                    <td>{{ data.observation_target_name }}</td>
-                                    <td>{{ data.ra}}</td>
-                                    <td>{{ data.dec }}</td>
-                                    <td>{{ data.observer }}</td>
-                                    <td>{{ data.facility }}</td>
-                                    <td>{{ data.mjd }}</td>
-                                    <td>{{ data.mag}}</td>
-                                    <td>{{ data.mag_err }}</td>
-                                    <td>{{ data.exp_time }}</td>
-                                    <td>{{ data.zeropoint }}</td>
-                                    <td>{{ data.outlier_fraction }}</td>
-                                    <td>{{ data.scater}}</td>
-                                    <td>{{ data.npoints }}</td>
-                                    <td>{{ data.filter }}</td>
-                                    <td>{{ data.survey }}</td>
-                                    <td>{{ data.match_distans }}</td>
-                                    <td>{{ data.observatory_lon }}</td>
-                                    <td>{{ data.observatory_lat }}</td>
-                                    <td>{{ data.source }}</td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="5">
-                                        No data yet.
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
+
+                    <!-- Followup Tab -->
+                    <div class="tab-pane fade" id="followup" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <form method="post" class="mb-2">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="alert" class="form-label-sm">Alert:</label>
+                                        <input type="text" class="form-control form-control-sm" id="alert" name="alert">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="observatory" class="form-label-sm">Observatory:</label>
+                                        <input type="text" class="form-control form-control-sm" id="observatory" name="observatory">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="catalog" class="form-label-sm">Catalog:</label>
+                                        <input type="text" class="form-control form-control-sm" id="catalog" name="catalog">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="filter" class="form-label-sm">Filter:</label>
+                                        <input type="text" class="form-control form-control-sm" id="filter" name="filter">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="data_from" class="form-label-sm">Data From:</label>
+                                        <input type="text" class="form-control form-control-sm" id="data_from" name="data_from">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="data_to" class="form-label-sm">Data To:</label>
+                                        <input type="text" class="form-control form-control-sm" id="data_to" name="data_to">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm">Apply Filters</button>
+                                </form>
+                            </div>
+                            <div class="col-md-9">
+                                <table class="table table-hover table-sm sortable" id="followup_t">
+                                    <thead>
+                                        <tr>
+                                            <th>Alert</th>
+                                            <th>Observatory</th>
+                                            <th>MJD</th>
+                                            <th>Mag</th>
+                                            <th>Mag Err</th>
+                                            <th>Calib Err</th>
+                                            <th>Catalog</th>
+                                            <th>Filter ID</th>
+                                            <th>Comment</th>
+                                            <th>Npoints</th>
+                                            <th>Match Dist</th>
+                                            <th>Exp Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for data in cpcs_followup %}
+                                            <tr>
+                                                <td>{{ data.ivorn }}</td>
+                                                <td>{{ data.observatory_name }}</td>
+                                                <td>{{ data.mjd }}</td>
+                                                <td>{{ data.mag }}</td>
+                                                <td>{{ data.mag_err }}</td>
+                                                <td>{{ data.calib_err }}</td>
+                                                <td>{{ data.catalog_name }}</td>
+                                                <td>{{ data.filters }}</td>
+                                                <td>{{ data.comment }}</td>
+                                                <td>{{ data.npoints }}</td>
+                                                <td>{{ data.match_dist }}</td>
+                                                <td>{{ data.exp_time }}</td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="12">No data yet.</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-                    <div class="tab-pane" id="catalog">
-                        <table class="table table-hover sortable" id="catalog_t" >
-                            <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Filters</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for data in cpcs_catalogs %}
-                                <tr>
-                                    <td>{{ data.name }}</td>
-                                    <td>{{ data.filters}}</td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="5">
-                                        No data yet.
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="tab-pane" id="followup">
-                        <table class="table table-hover sortable" id="followup_t">
-                            <thead>
-                            <tr>
-                                <th>Alert id</th>
-                                <th>Observatory id</th>
-                                <th>mjd obs</th>
-                                <th>mag</th>
-                                <th>mag err</th>
-                                <th>calib err</th>
-                                <th>catalog id</th>
-                                <th>filter id</th>
-                                <th>comment</th>
-                                <th>npoints</th>
-                                <th>match dist</th>
-                                <th>exp time</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for data in cpcs_followup %}
-                                <tr>
-                                    <td>{{ data.alert_id }}</td>
-                                    <td>{{ data.observatory_id}}</td>
-                                    <td>{{ data.mjd_obs }}</td>
-                                    <td>{{ data.mag }}</td>
-                                    <td>{{ data.mag_err }}</td>
-                                    <td>{{ data.calib_err }}</td>
-                                    <td>{{ data.catalog_id}}</td>
-                                    <td>{{ data.filter_id }}</td>
-                                    <td>{{ data.comment }}</td>
-                                    <td>{{ data.npoints }}</td>
-                                    <td>{{ data.match_dist }}</td>
-                                    <td>{{ data.exp_time}}</td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="5">
-                                        No data yet.
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="tab-pane" id="obs">
-                        <table class="table table-hover sortable" id="obs_t">
-                            <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Lon</th>
-                                <th>Lat</th>
-                                <th>Filters</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for data in cpcs_observatories %}
-                                <tr>
-                                    <td>{{ data.name }}</td>
-                                    <td>{{ data.lon}}</td>
-                                    <td>{{ data.lat }}</td>
-                                    <td>{{ data.filters }}</td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="5">
-                                        No data yet.
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
+
+                    <!-- Observatories Tab -->
+                    <div class="tab-pane fade" id="obs" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <form method="post" class="mb-2">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="name" class="form-label-sm">Name:</label>
+                                        <input type="text" class="form-control form-control-sm" id="name" name="name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lon" class="form-label-sm">Lon:</label>
+                                        <input type="text" class="form-control form-control-sm" id="lon" name="lon">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lat" class="form-label-sm">Lat:</label>
+                                        <input type="text" class="form-control form-control-sm" id="lat" name="lat">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm">Apply Filters</button>
+                                </form>
+                            </div>
+                            <div class="col-md-9">
+                                <table class="table table-hover table-sm sortable" id="obs_t">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Lon</th>
+                                            <th>Lat</th>
+                                            <th>Filters</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for data in cpcs_observatories %}
+                                            <tr>
+                                                <td>{{ data.name }}</td>
+                                                <td>{{ data.lon }}</td>
+                                                <td>{{ data.lat }}</td>
+                                                <td>{{ data.filters }}</td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="4">No data yet.</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -221,46 +213,23 @@
     {% endif %}
 
     <!-- jQuery -->
-<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- DataTables JS -->
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
 
-<script>
-    $(document).ready(function() {
-
-        $('#alerts_t').DataTable({
-            searching: true,
-            paging: true,
-            ordering: true,
-        });
     
-        // Initialize DataTable for calib table
-        $('#calib_t').DataTable({
-            searching: true,
-            paging: true,
-            ordering: true,
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTables without search box
+            $('#alerts_t').DataTable({
+                searching: false 
+            });
+            $('#followup_t').DataTable({
+                searching: false
+            });
+            $('#obs_t').DataTable({
+                searching: false 
+            });
         });
-        
-        $('#catalog_t').DataTable({
-            searching: true,
-            paging: true,
-            ordering: true,
-        });
-    
-        // Initialize DataTable for calib table
-        $('#followup_t').DataTable({
-            searching: true,
-            paging: true,
-            ordering: true,
-        });
-
-        $('#obs_t').DataTable({
-            searching: true,
-            paging: true,
-            ordering: true,
-        });
-    
-    });
-</script>
-
+    </script>
 {% endblock %}
