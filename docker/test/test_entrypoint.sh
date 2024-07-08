@@ -1,5 +1,8 @@
 #!/bin/sh
 
+echo "Copy config .env file to settings destination..."
+cp /env/.env /bhtom/settings/env/.bhtom.env
+
 if [ "$DATABASE" = "postgres" ]
 then
     echo "Waiting for postgres..."
