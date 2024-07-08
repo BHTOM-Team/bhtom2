@@ -6,7 +6,7 @@ from django.db.models import Q
 class CalibrationDataAdmin(admin.ModelAdmin):
     model = Calibration_data
     list_display = ['id', 'status_message', 'created', 'dataproduct_id']
-    list_filter = ['id', 'status_message', 'created','dataproduct_id']
+    list_filter = ['status_message', 'created']
     search_fields = ['status_message']  
 
     def get_search_results(self, request, queryset, search_term):
