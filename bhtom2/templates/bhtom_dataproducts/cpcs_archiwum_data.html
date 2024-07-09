@@ -1,50 +1,46 @@
 {% extends 'bhtom_common/base.html' %}
 {% load bootstrap4 bhtom_common_extras static %}
 {% block title %}Admin Data{% endblock %}
-{% comment %} {% block additional_css %}
-    <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
-    <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}">
-{% endblock %} {% endcomment %}
 {% block content %}
     {% if request.user.is_staff %}
         <div class="row">
             <div class="col-md-12">
                 <!-- Tab Navigation -->
-                <ul class="nav nav-tabs" id="tabs" role="tablist">
+                <ul class="nav nav-tabs" id="tabs">
                     <li class="nav-item">
-                        <a class="nav-link active" data-toggle="tab" href="#alerts" role="tab">CPCS Alerts</a>
+                        <span class="nav-link active" data-toggle="tab" href="#alerts">CPCS Alerts</span>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#followup" role="tab">CPCS Followup</a>
+                        <span class="nav-link" data-toggle="tab" href="#followup" >CPCS Followup</span>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#obs" role="tab">CPCS Observatories</a>
+                        <span class="nav-link" data-toggle="tab" href="#obs">CPCS Observatories</span>
                     </li>
                 </ul>
 
                 <!-- Tab Content -->
                 <div class="tab-content mt-3">
                     <!-- Alerts Tab -->
-                    <div class="tab-pane fade show active" id="alerts" role="tabpanel">
+                    <div class="tab-pane active" id="alerts" role="tabpanel">
                         <div class="row">
                             <div class="col-md-2">
-                                <form method="post" class="mb-2">
+                                <form method="post" class="mb-2" id="alerts_form">
                                     {% csrf_token %}
                                     <div class="form-group">
                                         <label for="ivorn" class="form-label-sm">IVORN:</label>
-                                        <input type="text" class="form-control form-control-sm" id="ivorn" name="ivorn">
+                                        <input type="text" class="form-control form-control-sm" id="ivorn" name="ivorn" value="{{ cpcs_alerts_filters.ivorn }}">
                                     </div>
                                     <div class="form-group">
                                         <label for="ra" class="form-label-sm">RA:</label>
-                                        <input type="text" class="form-control form-control-sm" id="ra" name="ra">
+                                        <input type="text" class="form-control form-control-sm" id="ra" name="ra" value="{{ cpcs_alerts_filters.ra }}">
                                     </div>
                                     <div class="form-group">
                                         <label for="dec" class="form-label-sm">DEC:</label>
-                                        <input type="text" class="form-control form-control-sm" id="dec" name="dec">
+                                        <input type="text" class="form-control form-control-sm" id="dec" name="dec" value="{{ cpcs_alerts_filters.dec }}">
                                     </div>
                                     <div class="form-group">
                                         <label for="radius" class="form-label-sm">Radius:</label>
-                                        <input type="text" class="form-control form-control-sm" id="radius" name="radius">
+                                        <input type="text" class="form-control form-control-sm" id="radius" name="radius" value="{{ cpcs_alerts_filters.radius }}">
                                     </div>
                                     <button type="submit" class="btn btn-primary btn-sm">Apply Filters</button>
                                 </form>
@@ -57,6 +53,7 @@
                                             <th>Ra</th>
                                             <th>Dec</th>
                                             <th>Url</th>
+                                            <th>Published</th>
                                             <th>Comment</th>
                                         </tr>
                                     </thead>
@@ -67,7 +64,9 @@
                                                 <td>{{ data.ra }}</td>
                                                 <td>{{ data.dec }}</td>
                                                 <td>{{ data.url }}</td>
+                                                <td>{{ data.published }}</td>
                                                 <td>{{ data.comment }}</td>
+                                                
                                             </tr>
                                         {% empty %}
                                             <tr>
@@ -81,34 +80,34 @@
                     </div>
 
                     <!-- Followup Tab -->
-                    <div class="tab-pane fade" id="followup" role="tabpanel">
+                    <div class="tab-pane" id="followup" role="tabpanel">
                         <div class="row">
                             <div class="col-md-2">
-                                <form method="post" class="mb-2">
+                                <form method="post" class="mb-2" id="followup_form">
                                     {% csrf_token %}
                                     <div class="form-group">
                                         <label for="alert" class="form-label-sm">Alert:</label>
-                                        <input type="text" class="form-control form-control-sm" id="alert" name="alert">
+                                        <input type="text" class="form-control form-control-sm" id="alert" name="alert" value="{{ cpcs_followup_filters.alert }}">
                                     </div>
                                     <div class="form-group">
                                         <label for="observatory" class="form-label-sm">Observatory:</label>
-                                        <input type="text" class="form-control form-control-sm" id="observatory" name="observatory">
+                                        <input type="text" class="form-control form-control-sm" id="observatory" name="observatory" value="{{ cpcs_followup_filters.observatory }}">
                                     </div>
                                     <div class="form-group">
                                         <label for="catalog" class="form-label-sm">Catalog:</label>
-                                        <input type="text" class="form-control form-control-sm" id="catalog" name="catalog">
+                                        <input type="text" class="form-control form-control-sm" id="catalog" name="catalog" value="{{ cpcs_followup_filters.catalog }}">
                                     </div>
                                     <div class="form-group">
                                         <label for="filter" class="form-label-sm">Filter:</label>
-                                        <input type="text" class="form-control form-control-sm" id="filter" name="filter">
+                                        <input type="text" class="form-control form-control-sm" id="filter" name="filter" value="{{ cpcs_followup_filters.filter }}">
                                     </div>
                                     <div class="form-group">
                                         <label for="data_from" class="form-label-sm">Data From:</label>
-                                        <input type="text" class="form-control form-control-sm" id="data_from" name="data_from">
+                                        <input type="text" class="form-control form-control-sm" id="data_from" name="data_from" value="{{ cpcs_followup_filters.data_from }}">
                                     </div>
                                     <div class="form-group">
                                         <label for="data_to" class="form-label-sm">Data To:</label>
-                                        <input type="text" class="form-control form-control-sm" id="data_to" name="data_to">
+                                        <input type="text" class="form-control form-control-sm" id="data_to" name="data_to" value="{{ cpcs_followup_filters.data_to }}">
                                     </div>
                                     <button type="submit" class="btn btn-primary btn-sm">Apply Filters</button>
                                 </form>
@@ -124,11 +123,13 @@
                                             <th>Mag Err</th>
                                             <th>Calib Err</th>
                                             <th>Catalog</th>
-                                            <th>Filter ID</th>
-                                            <th>Comment</th>
+                                            <th>Filters</th>
                                             <th>Npoints</th>
                                             <th>Match Dist</th>
                                             <th>Exp Time</th>
+                                            <th>Calib Date</th>
+                                            <th>Comment</th>
+                                            <th></th>  
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -142,14 +143,20 @@
                                                 <td>{{ data.calib_err }}</td>
                                                 <td>{{ data.catalog_name }}</td>
                                                 <td>{{ data.filters }}</td>
-                                                <td>{{ data.comment }}</td>
                                                 <td>{{ data.npoints }}</td>
                                                 <td>{{ data.match_dist }}</td>
                                                 <td>{{ data.exp_time }}</td>
+                                                <td>{{ data.calib_date }}</td>
+                                                <td>{{ data.comment }}</td>
+                                                <td>
+                                                    {% if data.id %}
+                                                        <a class="btn btn-sm btn-primary" href="{% url 'bhtom_dataproducts:download_archive_photometry' data.id %}">Download</a>
+                                                    {% endif %}
+                                                </td>
                                             </tr>
                                         {% empty %}
                                             <tr>
-                                                <td colspan="12">No data yet.</td>
+                                                <td colspan="13">No data yet.</td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>
@@ -159,22 +166,22 @@
                     </div>
 
                     <!-- Observatories Tab -->
-                    <div class="tab-pane fade" id="obs" role="tabpanel">
+                    <div class="tab-pane" id="obs" role="tabpanel">
                         <div class="row">
                             <div class="col-md-2">
-                                <form method="post" class="mb-2">
+                                <form method="post" class="mb-2" id="obs_form">
                                     {% csrf_token %}
                                     <div class="form-group">
-                                        <label for="name" class="form-label-sm">Name:</label>
-                                        <input type="text" class="form-control form-control-sm" id="name" name="name">
+                                        <label for="name" class="form-label-sm">Observatory name:</label>
+                                        <input type="text" class="form-control form-control-sm" id="name" name="name" value="{{ cpcs_observatories_filters.name }}">
                                     </div>
                                     <div class="form-group">
                                         <label for="lon" class="form-label-sm">Lon:</label>
-                                        <input type="text" class="form-control form-control-sm" id="lon" name="lon">
+                                        <input type="text" class="form-control form-control-sm" id="lon" name="lon" value="{{ cpcs_observatories_filters.lon }}">
                                     </div>
                                     <div class="form-group">
                                         <label for="lat" class="form-label-sm">Lat:</label>
-                                        <input type="text" class="form-control form-control-sm" id="lat" name="lat">
+                                        <input type="text" class="form-control form-control-sm" id="lat" name="lat" value="{{ cpcs_observatories_filters.lat }}">
                                     </div>
                                     <button type="submit" class="btn btn-primary btn-sm">Apply Filters</button>
                                 </form>
@@ -211,15 +218,23 @@
             </div>
         </div>
     {% endif %}
-
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
 
-    
+    <!-- JavaScript to handle tab persistence -->
     <script>
         $(document).ready(function() {
+            // Restore active tab based on localStorage
+            var activeTab = localStorage.getItem('activeTab');
+            if (activeTab) {
+                $('#tabs a[href="' + activeTab + '"]').tab('show');
+            }
+
+            // Store active tab in localStorage
+            $('#tabs a').on('click', function(e) {
+                localStorage.setItem('activeTab', $(this).attr('href'));
+            });
+
             // Initialize DataTables without search box
             $('#alerts_t').DataTable({
                 searching: false 

@@ -1,4 +1,5 @@
 import base64
+import os
 
 from django.urls import reverse_lazy
 from django.views import View
@@ -11,7 +12,6 @@ from guardian.shortcuts import get_objects_for_user
 from django.http import FileResponse, HttpResponseRedirect, Http404
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from django.conf import settings
-
 from bhtom_base.bhtom_dataproducts.filters import DataProductFilter
 from bhtom_base.bhtom_dataproducts.models import DataProduct, DataProductGroup, DataProductGroup_user, CCDPhotJob
 from bhtom_base.bhtom_targets.models import Target
@@ -524,25 +524,25 @@ class CpcsArchiveData(LoginRequiredMixin, View):
 
         # Handle separate filters for each table
         cpcs_alerts_filters = {
-            'ivorn': request.POST.get('ivorn'),
-            'ra': request.POST.get('ra'),
-            'dec': request.POST.get('dec'),
-            'radius': request.POST.get('radius'),
+            'ivorn': request.POST.get('ivorn', ''),
+            'ra': request.POST.get('ra', ''),
+            'dec': request.POST.get('dec', ''),
+            'radius': request.POST.get('radius', ''),
         }
 
         cpcs_followup_filters = {
-            'alert': request.POST.get('alert'),
-            'observatory': request.POST.get('observatory'),
-            'catalog': request.POST.get('catalog'),
-            'filter': request.POST.get('filter'),
-            'data_from': request.POST.get('data_from'),
-            'data_to': request.POST.get('data_to'),
+            'alert': request.POST.get('alert', ''),
+            'observatory': request.POST.get('observatory', ''),
+            'catalog': request.POST.get('catalog', ''),
+            'filter': request.POST.get('filter', ''),
+            'data_from': request.POST.get('data_from', ''),
+            'data_to': request.POST.get('data_to', ''),
         }
 
         cpcs_observatories_filters = {
-            'name': request.POST.get('name'),
-            'lon': request.POST.get('lon'),
-            'lat': request.POST.get('lat'),
+            'observatory': request.POST.get('name', ''),
+            'lon': request.POST.get('lon', ''),
+            'lat': request.POST.get('lat', ''),
         }
 
         context = self.get_context_data(
@@ -581,8 +581,45 @@ class CpcsArchiveData(LoginRequiredMixin, View):
             logger.error("Error during data retrieval")
             logger.error(str(e))
 
+        # Add filters to context with default empty string if not provided
+        context['cpcs_alerts_filters'] = cpcs_alerts_filters or {
+            'ivorn': '',
+            'ra': '',
+            'dec': '',
+            'radius': '',
+        }
+        context['cpcs_followup_filters'] = cpcs_followup_filters or {
+            'alert': '',
+            'observatory': '',
+            'catalog': '',
+            'filter': '',
+            'data_from': '',
+            'data_to': '',
+        }
+        context['cpcs_observatories_filters'] = cpcs_observatories_filters or {
+            'name': '',
+            'lon': '',
+            'lat': '',
+        }
+
         return context
     
+class download_archive_photometry(LoginRequiredMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        try:
+            followup_id = self.kwargs['id']
+            base_path = settings.DATA_ARCHIVE_PATH
+            file_path =  os.path.join(base_path, 'export', 'data', '%08d.dat' % followup_id)
+
+            logger.info('Download Photometry Archive file: %s, user: %s' % (str(file_path), str(self.request.user)))
+            return FileResponse(open(file_path, 'rb'), as_attachment=True)
+        except Exception as e:
+            logger.info('Error while downloading file: %s, error: %s' % (str(file_path), str(e)))
+            messages.error(self.request, 'File not found')
+            return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+
+
 class CalibrationLogDownload(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
