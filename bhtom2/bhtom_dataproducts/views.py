@@ -634,3 +634,69 @@ class DataProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
     def handle_no_permission(self):
         messages.error(self.request, 'You do not have permission to delete this data product.')
         return redirect('bhtom_dataproducts:list_user')
+    
+
+
+class CpcsCatalogData(LoginRequiredMixin, View):
+    template_name = 'bhtom_dataproducts/cpcs_catalog_data.html'
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        if not self.request.user.is_staff:
+            logger.error("The user is not an admin")
+            return redirect('home')
+
+        cpcs_catalogs_filter = {
+            'ra': request.POST.get('ra', ''),
+            'dec': request.POST.get('dec', ''),
+            'radius': request.POST.get('radius', ''),
+            'target': request.POST.get('target', ''),
+            'facility': request.POST.get('facility', ''),
+            'mjd_min': request.POST.get('mjd_min', ''),
+            'mjd_max': request.POST.get('mjd_max', ''),
+        }
+
+        context = self.get_context_data(
+            cpcs_catalogs_filter=cpcs_catalogs_filter,
+        )
+
+        return render(request, self.template_name, context)
+
+    def get_context_data(self, cpcs_catalogs_filter=None):
+        context = {}
+
+        if not self.request.user.is_staff:
+            logger.error("The user is not an admin")
+            return context
+
+        try:
+            url = settings.CPCS_URL + '/catalogs/getDataFromCatalog/'
+            response = requests.post(url, data=cpcs_catalogs_filter)
+            response.raise_for_status()
+            context['cpcs_catalogs'] = response.json()
+            
+        except requests.RequestException as e:
+                    logger.error(f"Error loading data from {url}: {e}")
+                    context['cpcs_catalogs'] = []
+
+        except Exception as e:
+            context['cpcs_catalogs'] = []
+            logger.error("Error during data retrieval")
+            logger.error(str(e))
+
+        # Add filters to context with default empty string if not provided
+        context['cpcs_catalogs_filter'] = cpcs_catalogs_filter or {
+            'ra': '',
+            'dec': '',
+            'radius': '',
+            'target': '',
+            'facility': '',
+            'mjd_min': '',
+            'mjd_max': '',
+        }
+
+        return context
+    
