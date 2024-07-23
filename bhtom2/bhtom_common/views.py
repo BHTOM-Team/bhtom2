@@ -30,6 +30,9 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.db.models import Q
 from bhtom2.bhtom_common.serializers import DataProductSerializer
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from rest_framework.pagination import PageNumberPagination
+from django.contrib.auth.models import User
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_common.views')
 
@@ -445,11 +448,25 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
         return redirect(reverse('bhtom_common:list'))
 
 
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size_query_param = 'page_size'
+    max_page_size = 1000
+
+    def get_paginated_response(self, data):
+        return Response({
+            'count': self.page.paginator.count,
+            'num_pages': self.page.paginator.num_pages,
+            'current_page': self.page.number,
+            'data': data
+        })
+
+
 class GetDataProductApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     serializer_class = DataProductSerializer
+    pagination_class = StandardResultsSetPagination
 
     @swagger_auto_schema(
         request_body=openapi.Schema(
@@ -462,6 +479,7 @@ class GetDataProductApi(views.APIView):
                 'created_start': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'created_end': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'mjd': openapi.Schema(type=openapi.TYPE_STRING),
+                'page': openapi.Schema(type=openapi.TYPE_INTEGER),
             },
             required=[]
         ),
@@ -473,18 +491,26 @@ class GetDataProductApi(views.APIView):
                 required=True,
                 description='Token <Your Token>'
             ),
+            openapi.Parameter(
+                name='page',
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_INTEGER,
+                required=False,
+                description='Page number for pagination'
+            ),
         ],
     )
     def post(self, request):
         query = Q()
 
-        data_product_type = self.request.data.get('data_product_type', None)
-        status = self.request.data.get('status', None)
-        fits_data = self.request.data.get('fits_data', None)
-        camera = self.request.data.get('camera', None)
-        created_start = self.request.data.get('created_start', None)
-        created_end = self.request.data.get('created_end', None)
-        mjd = self.request.data.get('mjd', None)
+        data_product_type = request.data.get('data_product_type', None)
+        status = request.data.get('status', None)
+        fits_data = request.data.get('fits_data', None)
+        camera = request.data.get('camera', None)
+        created_start = request.data.get('created_start', None)
+        created_end = request.data.get('created_end', None)
+        mjd = request.data.get('mjd', None)
+        page = request.data.get('page', 1)
 
         if data_product_type is not None:
             query &= Q(data_product_type=data_product_type)
@@ -501,6 +527,25 @@ class GetDataProductApi(views.APIView):
         if mjd is not None:
             query &= (Q(spectroscopydatum__mjd=mjd) | Q(calibration_data__mjd=mjd))
 
-        queryset = DataProduct.objects.filter(query).distinct().order_by('-created')[:500]
-        serialized_queryset = self.serializer_class(queryset, many=True).data
-        return Response(serialized_queryset, status=200)
+        queryset = DataProduct.objects.filter(query).distinct().order_by('-created')
+
+        # Determine page size based on user role
+        page_size = 500 if not request.user.is_staff else 1000
+
+        paginator = Paginator(queryset, page_size)  # Set page size based on user role
+
+        try:
+            data_products = paginator.page(page)
+        except PageNotAnInteger:
+            data_products = paginator.page(1)
+        except EmptyPage:
+            data_products = paginator.page(paginator.num_pages)
+
+        serialized_queryset = self.serializer_class(data_products, many=True).data
+
+        return Response({
+            'count': paginator.count,
+            'num_pages': paginator.num_pages,
+            'current_page': data_products.number,
+            'data': serialized_queryset
+        }, status=200)
