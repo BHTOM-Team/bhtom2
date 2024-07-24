@@ -1122,12 +1122,13 @@ API for DataProduct list, lists uploaded instrumental or fits files and tracks t
     "camera" : "BIALKOW_ANDOR-DW432", 
     "created_start": "2024-01-01",
     "created_end": "2024-01-02",
-    "mjd": "2"
+      "mjd": "2",
+    "page": "2",
 }
-
+```
 ### Example Request
 
-You can make a POST request using the `curl` command or any HTTP client that supports POST requests.
+You can make a POST request using the `curl` command or any HTTP client that supports POST requests. You can request only 500 records for one request, use parametr "page" to get next 500 records
 
 ### Using `curl`
 
