@@ -20,6 +20,7 @@ from django.conf.urls.static import static
 
 from settings import settings
 from bhtom2.views import BrokerQueryListView
+from bhtom2.prometheus_metrics import custom_metrics
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -46,6 +47,8 @@ urlpatterns = [
                      namespace='registration')),
     path('alerts/query/list/', BrokerQueryListView.as_view(template_name='bhtom_alerts/brokerquery_list.html'),
          name='alerts:list'),
+    path('', include('django_prometheus.urls')),
+    path('metrics/', custom_metrics, name='custom_metrics'),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

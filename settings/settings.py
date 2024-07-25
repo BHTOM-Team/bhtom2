@@ -125,7 +125,8 @@ INSTALLED_APPS = [
     'bhtom2.bhtom_calibration.apps.BhtomCalibrationConfig',
     'crispy_bootstrap4',
     'drf_yasg',
-    'django_guid'
+    'django_guid',
+    'django_prometheus'
 ]
 
 MIDDLEWARE = [
@@ -142,7 +143,9 @@ MIDDLEWARE = [
     'bhtom_custom_registration.bhtom_registration.middleware.RedirectAuthenticatedUsersFromRegisterMiddleware',
     'django_guid.middleware.guid_middleware',
     'bhtom2.middleware.RequestLogMiddleware',
-    'bhtom2.middleware.AccessControlMiddleware'
+    'bhtom2.middleware.AccessControlMiddleware',
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 ROOT_URLCONF = 'bhtom2.urls'

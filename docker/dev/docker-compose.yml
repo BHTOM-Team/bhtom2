@@ -97,6 +97,28 @@ services:
       KAFKA_CLUSTERS_0_ZOOKEEPER: "zookeeper1:2181"
     depends_on:
       - kafka1
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - bhtom_network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - "3000:3000"
+    networks:
+      - bhtom_network
+    depends_on:
+      - prometheus
 
 volumes:
   data_store:
