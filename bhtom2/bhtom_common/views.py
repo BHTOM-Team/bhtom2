@@ -1,5 +1,5 @@
 import os
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, date
 from django.db import transaction
 import requests
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,6 +14,8 @@ from django.views import View
 from django.views.generic import ListView, FormView
 
 from settings import settings
+from bhtom_base.bhtom_targets.models import Target
+from bhtom_base.bhtom_dataproducts.models import DataProduct
 from bhtom2.bhtom_calibration.models import Calibration_data
 from bhtom2.bhtom_common.forms import UpdateFitsForm
 from bhtom2.kafka.producer.calibEvent import CalibCreateEventProducer
@@ -548,3 +550,57 @@ class GetDataProductApi(views.APIView):
             'current_page': data_products.number,
             'data': serialized_queryset
         }, status=200)
+    
+class NewsletterView(LoginRequiredMixin, ListView):
+    template_name = 'bhtom_common/newsletter.html'
+    context_object_name = 'weeks'
+
+    def get_queryset(self):
+        now = timezone.now()
+        start_of_last_week = now - timedelta(days=now.weekday() + 7)
+        end_of_last_week = start_of_last_week + timedelta(days=6)
+        
+        # Count new users
+        new_users_count = User.objects.filter(date_joined__gte=start_of_last_week, date_joined__lt=end_of_last_week + timedelta(days=1)).count()
+        
+        # Get new targets
+        new_targets = Target.objects.filter(created__gte=start_of_last_week, created__lt=end_of_last_week + timedelta(days=1))
+        
+        # Get new data products
+        new_dataproducts = DataProduct.objects.filter(created__gte=start_of_last_week, created__lt=end_of_last_week + timedelta(days=1))
+        
+        # Get target IDs and observed targets
+        target_observed_ids = new_dataproducts.values_list('target_id', flat=True)
+        observed_targets = Target.objects.filter(id__in=target_observed_ids).distinct()
+        
+        # Get observer IDs and observers
+        observers_id = new_dataproducts.values_list('user_id', flat=True)
+        observers = User.objects.filter(id__in=observers_id)
+
+        # Count how many DataProduct each user sent
+        user_data_count = {user.username: new_dataproducts.filter(user=user).count() for user in observers}
+        
+        # Get camera names and targets
+        camera_data = {}
+        for dataproduct in new_dataproducts:
+            camera_name = dataproduct.observatory.camera.prefix if dataproduct.observatory else 'Unknown'
+            if camera_name not in camera_data:
+                camera_data[camera_name] = []
+            camera_data[camera_name].append({
+                'target_name': dataproduct.target.name,
+                'target_ra': dataproduct.target.ra,
+                'target_dec': dataproduct.target.dec,
+            })
+        
+        week_data = {
+            'start_date': start_of_last_week,
+            'end_date': end_of_last_week,
+            'new_users_count': new_users_count,
+            'new_targets': new_targets,
+            'observed_targets': observed_targets,
+            'observers': observers,
+            'user_data_count': user_data_count,
+            'camera_data': camera_data,
+        }
+
+        return [week_data]
