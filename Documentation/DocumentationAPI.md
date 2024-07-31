@@ -1122,7 +1122,7 @@ API for DataProduct list, lists uploaded instrumental or fits files and tracks t
     "camera" : "BIALKOW_ANDOR-DW432", 
     "created_start": "2024-01-01",
     "created_end": "2024-01-02",
-      "mjd": "2",
+    "mjd": "2",
     "page": "2",
 }
 ```
