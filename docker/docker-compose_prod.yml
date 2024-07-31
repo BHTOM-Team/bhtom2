@@ -47,6 +47,7 @@ services:
       - fits_data:/data/fits
       - static:/bhtom/_static
       - cache:/data/cache
+      - archive:/data/archive
     ports:
       - "7010:8000"
     logging:
@@ -402,6 +403,12 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/targets
+  archive:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/cpcsArchiveFile
   fits_data:
     driver: local
     driver_opts:

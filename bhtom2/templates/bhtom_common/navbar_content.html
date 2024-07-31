@@ -1,8 +1,5 @@
 {% load bootstrap4 %}
-{% comment %}
-The following nav-item list elements (li) are included in the bhtom_common/base.html navbar-nav (ul).
-For customization instructions, see bhtom_common/base.html
-{% endcomment %}
+
 
 <li class="nav-item {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
     <a class="nav-link" href="{% url 'about' %}">About Us <span class="sr-only">(current)</span></a>
@@ -63,6 +60,9 @@ For customization instructions, see bhtom_common/base.html
     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
         <a class="dropdown-item" href="{% url 'bhtom_dataproducts:list_all' %}">All</a>
         <a class="dropdown-item" href="{% url 'bhtom_dataproducts:list_user' %}">Yours files</a>
+        {% if request.user.is_superuser or request.user.is_staff %}
+            <a class="dropdown-item" href="{% url 'bhtom_dataproducts:list_cpcs' %}">Archived Data</a>
+        {% endif %}
     </div>
 </li>
 {% if request.user.is_superuser or request.user.is_staff %}
