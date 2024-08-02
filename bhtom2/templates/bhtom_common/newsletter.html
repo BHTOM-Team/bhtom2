@@ -1,0 +1,126 @@
+{% extends 'bhtom_common/base.html' %}
+{% load bootstrap4 static %}
+
+{% block content %}
+<div>
+    <h1>Greetings from the BHTOM Newsletter, here are some statistics of our system!</h1>
+
+    <div class="mb-4">
+        <h5>Week from {{ weeks.0.start_date|date:"Y-m-d" }} to {{ weeks.0.end_date|date:"Y-m-d" }}</h5>
+    </div>
+
+    <div class="mb-4">
+        <h4>We have {{ weeks.0.new_users_count }} new registered users!</h4>
+    </div>
+
+    <div class="mb-4">
+        <h3>Number of Data Products sent by each user:</h3>
+        <ul>
+            {% for username, count in weeks.0.user_data_count.items %}
+            <li>{{ username }}: {{ count }} Data Products</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="mb-4">
+        <h3>New targets added in the last week:</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>RA</th>
+                    <th>Dec</th>
+                    <th>mag_last</th>
+                    <th>sun_separation</th>
+                    <th>classification</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for target in weeks.0.new_targets %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ target.name }}</td>
+                    <td>{{ target.ra }}</td>
+                    <td>{{ target.dec }}</td>
+                    <td>{{ target.mag_last }}</td>
+                    <td>{{ target.sun_separation }}</td>
+                    <td>{{ target.classification }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mb-4">
+        <h3>Last week's observed targets:</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>RA</th>
+                    <th>Dec</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for target in weeks.0.observed_targets %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ target.name }}</td>
+                    <td>{{ target.ra }}</td>
+                    <td>{{ target.dec }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mb-4">
+        <h3>Cameras used for observing targets:</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Camera</th>
+                    <th>Target</th>
+                    <th>RA</th>
+                    <th>Dec</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for camera, targets in weeks.0.camera_data.items %}
+                    {% for target in targets %}
+                    <tr>
+                        <td>{{ camera }}</td>
+                        <td>{{ target.target_name }}</td>
+                        <td>{{ target.target_ra }}</td>
+                        <td>{{ target.target_dec }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mb-4">
+        <h3>Observers</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in weeks.0.observers %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.username }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock content %}

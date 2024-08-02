@@ -48,6 +48,7 @@ services:
       - fits_data:/data/fits
       - static:/bhtom/_static
       - cache:/data/cache
+      - archive:/data/archive
     ports:
       - "7010:8000"
     logging:
@@ -298,11 +299,10 @@ services:
   graylog:
     image: graylog/graylog:5.1
     container_name: graylog
-    env_file:
-      - .graylog.env
     restart: on-failure
     volumes:
       - graylog_data:/usr/share/graylog/data
+      - graylog_config:/usr/share/graylog/data/config
     environment:
       - GRAYLOG_PASSWORD_SECRET=${GRAYLOG_PASSWORD_SECRET}
       - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD_SHA2}
@@ -374,6 +374,12 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/graylog
+  graylog_config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/graylog_config
   log:
     driver: local
     driver_opts:
@@ -398,6 +404,12 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/targets
+  archive:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/cpcsArchiveFile
   fits_data:
     driver: local
     driver_opts:

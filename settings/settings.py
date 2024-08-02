@@ -34,6 +34,7 @@ SECRET_KEY = secret.get("SECRET_KEY", '')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(secret.get("DEBUG", False)))
+PROFILE = secret.get("PROFILE", "PROD")
 
 ALLOWED_HOSTS = [] + list(secret.get("ALLOWED_HOSTS", 'localhost').split(','))
 SITE_ID = int(secret.get("SITE_ID", 1))
@@ -50,6 +51,7 @@ GRAYLOG_HOST = secret.get('GRAYLOG_HOST', '')
 GRAYLOG_PORT = int(secret.get('GRAYLOG_PORT', 12201))
 DATA_MEDIA_PATH = secret.get('DATA_MEDIA_ROOT', '/data')
 DATA_FITS_PATH = DATA_MEDIA_PATH + secret.get('DATA_FITS_PATH', '/data')
+DATA_ARCHIVE_PATH = secret.get('DATA_ARCHIVE_PATH', '/data')
 DATA_TARGETS_PATH = DATA_MEDIA_PATH + secret.get('DATA_TARGETS_PATH', '/data')
 DATA_PLOTS_PATH = secret.get('DATA_PLOTS_PATH', '/data')
 DATA_CACHE_PATH = secret.get('DATA_CACHE_PATH', '/data')
@@ -124,7 +126,8 @@ INSTALLED_APPS = [
     'bhtom2.bhtom_calibration.apps.BhtomCalibrationConfig',
     'crispy_bootstrap4',
     'drf_yasg',
-    'django_guid'
+    'django_guid',
+    'django_prometheus'
 ]
 
 MIDDLEWARE = [
@@ -141,7 +144,9 @@ MIDDLEWARE = [
     'bhtom_custom_registration.bhtom_registration.middleware.RedirectAuthenticatedUsersFromRegisterMiddleware',
     'django_guid.middleware.guid_middleware',
     'bhtom2.middleware.RequestLogMiddleware',
-    'bhtom2.middleware.AccessControlMiddleware'
+    'bhtom2.middleware.AccessControlMiddleware',
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 ROOT_URLCONF = 'bhtom2.urls'
@@ -157,6 +162,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'bhtom2.bhtom_common.profiles_variable.profile_variable',
             ],
         },
     },
@@ -227,7 +233,7 @@ TOM_REGISTRATION = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Europe/Berlin'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 

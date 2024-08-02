@@ -1,65 +1,6 @@
 version: "3.7"
 
 services:
-
-  bhtom_db:
-    container_name: bhtom_db
-    env_file:
-      - .env
-    networks:
-      - bhtom_db
-    restart: on-failure
-    build:
-      context: ../..
-      dockerfile: docker/test/db_Dockerfile
-    volumes:
-      - ./data/db:/docker-entrypoint-initdb.d/
-      - bhtom_db_test:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_INITDB_ARGS=--auth=scram-sha-256
-      - POSTGRES_HOST_AUTH_METHOD=scram-sha-256
-      - POSTGRES_DB=${POSTGRES_NAME}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
-    ports:
-      - "${POSTGRES_PORT}:5432"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "100m"
-        max-file: "5"
-
-  bhtom:
-    container_name: bhtom
-    env_file:
-      - .env
-    networks:
-      - bhtom_network
-      - bhtom_db
-    build:
-      context: ../..
-      dockerfile: docker/test/test_Dockerfile
-    environment:
-      - "POSTGRES_HOST_AUTH_METHOD=scram-sha-256"
-    restart: on-failure
-    volumes:
-      - log:/data/log
-      - plots:/data/plots
-      - targets:/data/targets
-      - fits_data:/data/fits
-      - static:/bhtom/_static
-      - cache:/data/cache
-      - env:/bhtom/settings/env
-    ports:
-      - "7010:8000"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "100m"
-        max-file: "5"
-    depends_on:
-      - bhtom_db
-
   zookeeper:
     image: 'confluentinc/cp-zookeeper:7.3.2'
     container_name: zookeeper
@@ -67,7 +8,7 @@ services:
       - kafka_network
     hostname: zookeeper
     volumes:
-      - zookeeper-data_test:/var/lib/zookeeper/data
+      - zookeeper_data_test:/var/lib/zookeeper/data
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -90,7 +31,7 @@ services:
       - bhtom_network
     restart: always
     volumes:
-      - kafka-data_test:/var/lib/kafka/data
+      - kafka_data_test:/var/lib/kafka/data
     ports:
       - "9092:9092"
       - "29092:29092"
@@ -136,13 +77,11 @@ services:
       SPRING_SECURITY_USER_PASSWORD: ${KAFKA_UI_PASSWORD}
     depends_on:
       - kafka
-
+#
 #  mongo:
 #    image: mongo:7.0.0
 #    container_name: mongo
 #    restart: on-failure
-#    env_file:
-#      - .graylog.env
 #    volumes:
 #      - mongo_data:/data/db
 #    networks:
@@ -157,8 +96,6 @@ services:
 #    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
 #    container_name: elasticsearch
 #    restart: on-failure
-#    env_file:
-#      - .graylog.env
 #    volumes:
 #      - es_data:/usr/share/elasticsearch/data
 #      - log_els:/usr/share/elasticsearch/logs
@@ -184,23 +121,14 @@ services:
 #    image: graylog/graylog:5.1
 #    container_name: graylog
 #    restart: on-failure
-#    env_file:
-#      - .graylog.env
 #    volumes:
 #      - graylog_data:/usr/share/graylog/data
+#      - graylog_config:/usr/share/graylog/data/config
 #    environment:
 #      - GRAYLOG_PASSWORD_SECRET=${GRAYLOG_PASSWORD_SECRET}
 #      - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD_SHA2}
 #      - GRAYLOG_HTTP_EXTERNAL_URI=http://localhost:7900/
 #      - DISABLE_TELEMETRY=1
-#      - GRAYLOG_EMAIL_ENABLED=true
-#      - GRAYLOG_EMAIL_HOSTNAME=smtp.gmail.com
-#      - GRAYLOG_EMAIL_PORT=587
-#      - GRAYLOG_EMAIL_USE_AUTH=true
-#      - GRAYLOG_EMAIL_USE_TLS=true
-#      - GRAYLOG_EMAIL_USE_SSL=false
-#      - GRAYLOG_EMAIL_AUTH_USERNAME=${TOMEMAIL}
-#      - GRAYLOG_EMAIL_AUTH_PASSWORD=${TOMEMAILPASSWORD}
 #    networks:
 #      - graylog
 #      - bhtom_network
@@ -235,12 +163,6 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/bhtom_db
-  cache:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${DATA_STORE_PATH}/cache
   mongo_data:
     driver: local
     driver_opts:
@@ -259,65 +181,33 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/graylog
-  log:
+  graylog_config:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ${DATA_STORE_PATH}/log
+      device: ${DATA_STORE_PATH}/graylog_config
   log_els:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/log/elasticsearch
-  plots:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${DATA_STORE_PATH}/plots
-  targets:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${DATA_STORE_PATH}/targets
-  fits_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${DATA_STORE_PATH}/fits
-  static:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${DATA_STORE_PATH}/static/bhtom
-  kafka-data_test:
+  kafka_data_test:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/kafka/kafka
-  zookeeper-data_test:
+  zookeeper_data_test:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/kafka/zookeeper
-  env:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${DATA_STORE_PATH}/env/test
 
 networks:
   bhtom_network:
-    driver: bridge
-  bhtom_db:
     driver: bridge
   kafka_network:
     driver: bridge
