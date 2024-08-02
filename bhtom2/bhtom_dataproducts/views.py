@@ -1,4 +1,5 @@
 import base64
+import os
 
 from django.urls import reverse_lazy
 from django.views import View
@@ -11,7 +12,6 @@ from guardian.shortcuts import get_objects_for_user
 from django.http import FileResponse, HttpResponseRedirect, Http404
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from django.conf import settings
-
 from bhtom_base.bhtom_dataproducts.filters import DataProductFilter
 from bhtom_base.bhtom_dataproducts.models import DataProduct, DataProductGroup, DataProductGroup_user, CCDPhotJob
 from bhtom_base.bhtom_targets.models import Target
@@ -24,6 +24,7 @@ from rest_framework.views import APIView
 from django.urls import reverse
 
 import requests
+
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -516,71 +517,107 @@ class CpcsArchiveData(LoginRequiredMixin, View):
         context = self.get_context_data()
         return render(request, self.template_name, context)
 
-    def get_context_data(self):
-        context = {}
-
-        logger.debug("Preparing data for your view")
-
+    def post(self, request, *args, **kwargs):
         if not self.request.user.is_staff:
             logger.error("The user is not an admin")
             return redirect('home')
 
+        # Handle separate filters for each table
+        cpcs_alerts_filters = {
+            'ivorn': request.POST.get('ivorn', ''),
+            'ra': request.POST.get('ra', ''),
+            'dec': request.POST.get('dec', ''),
+            'radius': request.POST.get('radius', ''),
+        }
+
+        cpcs_followup_filters = {
+            'alert': request.POST.get('alert', ''),
+            'observatory': request.POST.get('observatory', ''),
+            'catalog': request.POST.get('catalog', ''),
+            'filter': request.POST.get('filter', ''),
+            'data_from': request.POST.get('data_from', ''),
+            'data_to': request.POST.get('data_to', ''),
+        }
+
+        cpcs_observatories_filters = {
+            'observatory': request.POST.get('name', ''),
+            'lon': request.POST.get('lon', ''),
+            'lat': request.POST.get('lat', ''),
+        }
+
+        context = self.get_context_data(
+            cpcs_alerts_filters=cpcs_alerts_filters,
+            cpcs_followup_filters=cpcs_followup_filters,
+            cpcs_observatories_filters=cpcs_observatories_filters,
+        )
+        return render(request, self.template_name, context)
+
+    def get_context_data(self, cpcs_alerts_filters=None, cpcs_followup_filters=None, cpcs_observatories_filters=None):
+        context = {}
+
+        if not self.request.user.is_staff:
+            logger.error("The user is not an admin")
+            return context
+
+        # Define API endpoints with filter parameters if provided
+        endpoints = {
+            "cpcs_alerts": (settings.CPCS_URL + '/archive/getAlerts/', cpcs_alerts_filters),
+            "cpcs_followup": (settings.CPCS_URL + '/archive/getFollowup/', cpcs_followup_filters),
+            "cpcs_observatories": (settings.CPCS_URL + '/archive/getObservatories/', cpcs_observatories_filters),
+        }
+
         try:
-            wsdb = WSDBConnection()
-
-            try:
-                cpcs_alerts = wsdb.run_query("SELECT * FROM cpcs_alerts")
-                columns_alert = ['id', 'ivorn', 'ra', 'dec', 'url', 'published', 'comment']
-                context["cpcs_alerts"] = map_data_from_cpcs(columns_alert, cpcs_alerts)
-            except Exception as e:
-                logger.error("Error loading data cpcs_alerts from wsdb: " + str(e))
-                context["cpcs_alerts"] = []
-
-            try:
-                cpcs_archive_calib = wsdb.run_query("SELECT * FROM cpcs_archive_calibrations")
-                columns_calib = ['id', 'ra', 'dec', 'observation_target_name', 'observer', 'facility', 'mjd', 'mag',
-                                 'mag_err', 'exp_time',
-                                 'zeropoint', 'outlier_fraction', 'scatter', 'npoints', 'created', 'filter', 'survey',
-                                 'match_distance', 'processing_time',
-                                 'data', 'observatory_lon', 'observatory_lat', 'observatory_filter', 'source']
-                context["cpcs_archive_calib"] = map_data_from_cpcs(columns_calib, cpcs_archive_calib)
-
-            except Exception as e:
-                logger.error("Error loading data cpcs_archive_calib from wsdb: " + str(e))
-                context["cpcs_archive_calib"] = []
-
-            try:
-                cpcs_catalogs = wsdb.run_query("SELECT * FROM cpcs_catalogs")
-                columns_catalog = ['id', 'name', 'filters']
-                context["cpcs_catalogs"] = map_data_from_cpcs(columns_catalog, cpcs_catalogs)
-            except Exception as e:
-                logger.error("Error loading data cpcs_catalogs from wsdb: " + str(e))
-                context["cpcs_catalogs"] = []
-
-            try:
-                cpcs_followup = wsdb.run_query("SELECT * FROM cpcs_followup")
-                columns_followup = ['id', 'alert_id', 'observatory_id', 'mjd_obs', 'mag', 'mag_err', 'calib_err',
-                                    'catalog_id', 'filter_id',
-                                    'comment', 'npoints', 'match_dist', 'isfits', 'force_filter', 'exp_time',
-                                    'calib_date', 'is_archive']
-
-                context["cpcs_followup"] = map_data_from_cpcs(columns_followup, cpcs_followup)
-            except Exception as e:
-                logger.error("Error loading data cpcs_followup from wsdb: " + str(e))
-                context["cpcs_followup"] = []
-
-            try:
-                cpcs_observatories = wsdb.run_query("SELECT * FROM cpcs_observatories")
-                columns_obs = ['id', 'name', 'lon', 'lat', 'hashtag', 'filters', 'is_admin', 'allow_upload']
-
-                context["cpcs_observatories"] = map_data_from_cpcs(columns_obs, cpcs_observatories)
-            except Exception as e:
-                logger.error("Error loading data cpcs_observatories from wsdb: " + str(e))
-                context["cpcs_observatories"] = []
+            # Fetch data from each endpoint
+            for key, (url, params) in endpoints.items():
+                try:
+                    response = requests.post(url, data=params)
+                    response.raise_for_status()  # Raise HTTPError for bad responses
+                    context[key] = response.json()
+                except requests.RequestException as e:
+                    logger.error(f"Error loading data from {url}: {e}")
+                    context[key] = []
 
         except Exception as e:
-            logger.error("Error connecting to wsdb")
+            logger.error("Error during data retrieval")
+            logger.error(str(e))
+
+        # Add filters to context with default empty string if not provided
+        context['cpcs_alerts_filters'] = cpcs_alerts_filters or {
+            'ivorn': '',
+            'ra': '',
+            'dec': '',
+            'radius': '',
+        }
+        context['cpcs_followup_filters'] = cpcs_followup_filters or {
+            'alert': '',
+            'observatory': '',
+            'catalog': '',
+            'filter': '',
+            'data_from': '',
+            'data_to': '',
+        }
+        context['cpcs_observatories_filters'] = cpcs_observatories_filters or {
+            'name': '',
+            'lon': '',
+            'lat': '',
+        }
+
         return context
+    
+class download_archive_photometry(LoginRequiredMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        try:
+            followup_id = self.kwargs['id']
+            base_path = settings.DATA_ARCHIVE_PATH
+            file_path =  os.path.join(base_path, 'export', 'data', '%08d.dat' % followup_id)
+
+            logger.info('Download Photometry Archive file: %s, user: %s' % (str(file_path), str(self.request.user)))
+            return FileResponse(open(file_path, 'rb'), as_attachment=True)
+        except Exception as e:
+            logger.info('Error while downloading file: %s, error: %s' % (str(file_path), str(e)))
+            messages.error(self.request, 'File not found')
+            return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
 
 class CalibrationLogDownload(LoginRequiredMixin, View):
@@ -634,3 +671,69 @@ class DataProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
     def handle_no_permission(self):
         messages.error(self.request, 'You do not have permission to delete this data product.')
         return redirect('bhtom_dataproducts:list_user')
+    
+
+
+class CpcsCatalogData(LoginRequiredMixin, View):
+    template_name = 'bhtom_dataproducts/cpcs_catalog_data.html'
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        if not self.request.user.is_staff:
+            logger.error("The user is not an admin")
+            return redirect('home')
+
+        cpcs_catalogs_filter = {
+            'ra': request.POST.get('ra', ''),
+            'dec': request.POST.get('dec', ''),
+            'radius': request.POST.get('radius', ''),
+            'target': request.POST.get('target', ''),
+            'facility': request.POST.get('facility', ''),
+            'mjd_min': request.POST.get('mjd_min', ''),
+            'mjd_max': request.POST.get('mjd_max', ''),
+        }
+
+        context = self.get_context_data(
+            cpcs_catalogs_filter=cpcs_catalogs_filter,
+        )
+
+        return render(request, self.template_name, context)
+
+    def get_context_data(self, cpcs_catalogs_filter=None):
+        context = {}
+
+        if not self.request.user.is_staff:
+            logger.error("The user is not an admin")
+            return context
+
+        try:
+            url = settings.CPCS_URL + '/catalogs/getDataFromCatalog/'
+            response = requests.post(url, data=cpcs_catalogs_filter)
+            response.raise_for_status()
+            context['cpcs_catalogs'] = response.json()
+            
+        except requests.RequestException as e:
+                    logger.error(f"Error loading data from {url}: {e}")
+                    context['cpcs_catalogs'] = []
+
+        except Exception as e:
+            context['cpcs_catalogs'] = []
+            logger.error("Error during data retrieval")
+            logger.error(str(e))
+
+        # Add filters to context with default empty string if not provided
+        context['cpcs_catalogs_filter'] = cpcs_catalogs_filter or {
+            'ra': '',
+            'dec': '',
+            'radius': '',
+            'target': '',
+            'facility': '',
+            'mjd_min': '',
+            'mjd_max': '',
+        }
+
+        return context
+    

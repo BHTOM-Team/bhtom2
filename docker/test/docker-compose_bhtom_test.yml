@@ -1,0 +1,82 @@
+version: "3.7"
+
+services:
+
+  bhtom:
+    container_name: bhtom
+    env_file:
+      - .env
+    networks:
+      - bhtom_network
+      - bhtom_db
+    build:
+      context: ../..
+      dockerfile: docker/test/test_Dockerfile
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=scram-sha-256"
+    restart: on-failure
+    volumes:
+      - log:/data/log
+      - plots:/data/plots
+      - targets:/data/targets
+      - fits_data:/data/fits
+      - static:/bhtom/_static
+      - cache:/data/cache
+      - env:/bhtom/settings/env
+    ports:
+      - "7010:8000"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+volumes:
+  cache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/cache
+  log:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/log
+  plots:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/plots
+  targets:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/targets
+  fits_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/fits
+  static:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/static/bhtom
+  env:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/env/test
+
+networks:
+  bhtom_network:
+    driver: bridge
+  bhtom_db:
+    driver: bridge

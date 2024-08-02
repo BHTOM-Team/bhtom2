@@ -1,5 +1,5 @@
 import os
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, date
 from django.db import transaction
 import requests
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,6 +14,8 @@ from django.views import View
 from django.views.generic import ListView, FormView
 
 from settings import settings
+from bhtom_base.bhtom_targets.models import Target
+from bhtom_base.bhtom_dataproducts.models import DataProduct
 from bhtom2.bhtom_calibration.models import Calibration_data
 from bhtom2.bhtom_common.forms import UpdateFitsForm
 from bhtom2.kafka.producer.calibEvent import CalibCreateEventProducer
@@ -30,6 +32,9 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.db.models import Q
 from bhtom2.bhtom_common.serializers import DataProductSerializer
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from rest_framework.pagination import PageNumberPagination
+from django.contrib.auth.models import User
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_common.views')
 
@@ -444,12 +449,38 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
 
         return redirect(reverse('bhtom_common:list'))
 
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size_query_param = 'page_size'
+    max_page_size = 1000
+
+    def get_paginated_response(self, data):
+        return Response({
+            'count': self.page.paginator.count,
+            'num_pages': self.page.paginator.num_pages,
+            'current_page': self.page.number,
+            'data': data
+        })
+
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size_query_param = 'page_size'
+    max_page_size = 1000
+
+    def get_paginated_response(self, data):
+        return Response({
+            'count': self.page.paginator.count,
+            'num_pages': self.page.paginator.num_pages,
+            'current_page': self.page.number,
+            'data': data
+        })
+
 
 class GetDataProductApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     serializer_class = DataProductSerializer
+    pagination_class = StandardResultsSetPagination
 
     @swagger_auto_schema(
         request_body=openapi.Schema(
@@ -462,6 +493,7 @@ class GetDataProductApi(views.APIView):
                 'created_start': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'created_end': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'mjd': openapi.Schema(type=openapi.TYPE_STRING),
+                'page': openapi.Schema(type=openapi.TYPE_INTEGER),
             },
             required=[]
         ),
@@ -473,18 +505,26 @@ class GetDataProductApi(views.APIView):
                 required=True,
                 description='Token <Your Token>'
             ),
+            openapi.Parameter(
+                name='page',
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_INTEGER,
+                required=False,
+                description='Page number for pagination'
+            ),
         ],
     )
     def post(self, request):
         query = Q()
 
-        data_product_type = self.request.data.get('data_product_type', None)
-        status = self.request.data.get('status', None)
-        fits_data = self.request.data.get('fits_data', None)
-        camera = self.request.data.get('camera', None)
-        created_start = self.request.data.get('created_start', None)
-        created_end = self.request.data.get('created_end', None)
-        mjd = self.request.data.get('mjd', None)
+        data_product_type = request.data.get('data_product_type', None)
+        status = request.data.get('status', None)
+        fits_data = request.data.get('fits_data', None)
+        camera = request.data.get('camera', None)
+        created_start = request.data.get('created_start', None)
+        created_end = request.data.get('created_end', None)
+        mjd = request.data.get('mjd', None)
+        page = request.data.get('page', 1)
 
         if data_product_type is not None:
             query &= Q(data_product_type=data_product_type)
@@ -501,6 +541,79 @@ class GetDataProductApi(views.APIView):
         if mjd is not None:
             query &= (Q(spectroscopydatum__mjd=mjd) | Q(calibration_data__mjd=mjd))
 
-        queryset = DataProduct.objects.filter(query).distinct().order_by('-created')[:500]
-        serialized_queryset = self.serializer_class(queryset, many=True).data
-        return Response(serialized_queryset, status=200)
+        queryset = DataProduct.objects.filter(query).distinct().order_by('-created')
+
+        # Determine page size based on user role
+        page_size = 500 if not request.user.is_staff else 1000
+
+        paginator = Paginator(queryset, page_size)  # Set page size based on user role
+
+        try:
+            data_products = paginator.page(page)
+        except PageNotAnInteger:
+            data_products = paginator.page(1)
+        except EmptyPage:
+            data_products = paginator.page(paginator.num_pages)
+
+        serialized_queryset = self.serializer_class(data_products, many=True).data
+
+        return Response({
+            'count': paginator.count,
+            'num_pages': paginator.num_pages,
+            'current_page': data_products.number,
+            'data': serialized_queryset
+        }, status=200)
+    
+class NewsletterView(LoginRequiredMixin, ListView):
+    template_name = 'bhtom_common/newsletter.html'
+    context_object_name = 'weeks'
+
+    def get_queryset(self):
+        now = timezone.now()
+        start_of_last_week = now - timedelta(days=now.weekday() + 7)
+        end_of_last_week = start_of_last_week + timedelta(days=6)
+        
+        # Count new users
+        new_users_count = User.objects.filter(date_joined__gte=start_of_last_week, date_joined__lt=end_of_last_week + timedelta(days=1)).count()
+        
+        # Get new targets
+        new_targets = Target.objects.filter(created__gte=start_of_last_week, created__lt=end_of_last_week + timedelta(days=1))
+        
+        # Get new data products
+        new_dataproducts = DataProduct.objects.filter(created__gte=start_of_last_week, created__lt=end_of_last_week + timedelta(days=1))
+        
+        # Get target IDs and observed targets
+        target_observed_ids = new_dataproducts.values_list('target_id', flat=True)
+        observed_targets = Target.objects.filter(id__in=target_observed_ids).distinct()
+        
+        # Get observer IDs and observers
+        observers_id = new_dataproducts.values_list('user_id', flat=True)
+        observers = User.objects.filter(id__in=observers_id)
+
+        # Count how many DataProduct each user sent
+        user_data_count = {user.username: new_dataproducts.filter(user=user).count() for user in observers}
+        
+        # Get camera names and targets
+        camera_data = {}
+        for dataproduct in new_dataproducts:
+            camera_name = dataproduct.observatory.camera.prefix if dataproduct.observatory else 'Unknown'
+            if camera_name not in camera_data:
+                camera_data[camera_name] = []
+            camera_data[camera_name].append({
+                'target_name': dataproduct.target.name,
+                'target_ra': dataproduct.target.ra,
+                'target_dec': dataproduct.target.dec,
+            })
+        
+        week_data = {
+            'start_date': start_of_last_week,
+            'end_date': end_of_last_week,
+            'new_users_count': new_users_count,
+            'new_targets': new_targets,
+            'observed_targets': observed_targets,
+            'observers': observers,
+            'user_data_count': user_data_count,
+            'camera_data': camera_data,
+        }
+
+        return [week_data]

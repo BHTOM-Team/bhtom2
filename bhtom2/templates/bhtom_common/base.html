@@ -58,7 +58,15 @@
             {% navbar_login %}
         </ul>
     </div>
+    
 </nav>
+
+ {% if PROFILE != 'PROD' %}
+<div class="alert alert-danger" role="alert">
+  This is a Test environment.
+</div>
+{% endif %}
+
 
 <main role="main" class="container-fluid">
     {% bootstrap_messages %}
@@ -75,3 +83,4 @@
 {% endblock %}
 </body>
 </html>
+

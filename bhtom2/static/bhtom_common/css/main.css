@@ -158,3 +158,14 @@ div.dataTables_paginate {
 .white-border {
   border: 5px solid white;
 }
+
+.test-bar {
+            background-color: red;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            position: fixed;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }

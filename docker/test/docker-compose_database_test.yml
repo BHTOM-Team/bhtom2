@@ -1,0 +1,41 @@
+version: "3.7"
+
+services:
+
+  bhtom_db:
+    container_name: bhtom_db
+    env_file:
+      - .env
+    networks:
+      - bhtom_db
+    restart: on-failure
+    build:
+      context: ../..
+      dockerfile: docker/test/db_Dockerfile
+    volumes:
+      - bhtom_db_test:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_INITDB_ARGS=--auth=scram-sha-256
+      - POSTGRES_HOST_AUTH_METHOD=scram-sha-256
+      - POSTGRES_DB=${POSTGRES_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+volumes:
+  bhtom_db_test:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/bhtom_db
+
+networks:
+  bhtom_db:
+    driver: bridge

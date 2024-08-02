@@ -1,0 +1,127 @@
+{% extends 'bhtom_common/base.html' %}
+{% load bootstrap4 bhtom_common_extras static %}
+{% block title %}CPCS Catalog Data{% endblock %}
+{% block content %}
+    {% if request.user.is_staff %}
+        <div class="row">
+            <div class="col-md-12">
+                <!-- Filters Form -->
+                <div class="row">
+                    <div class="col-md-2">
+                        <form method="post" class="mb-2" id="catalog_data_filters">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="ra" class="form-label-sm">RA:</label>
+                                <input type="text" class="form-control form-control-sm" id="ra" name="ra" value="{{ cpcs_catalogs_filter.ra }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="dec" class="form-label-sm">DEC:</label>
+                                <input type="text" class="form-control form-control-sm" id="dec" name="dec" value="{{ cpcs_catalogs_filter.dec }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="radius" class="form-label-sm">Radius:</label>
+                                <input type="text" class="form-control form-control-sm" id="radius" name="radius" value="{{ cpcs_catalogs_filter.radius }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="target" class="form-label-sm">Target:</label>
+                                <input type="text" class="form-control form-control-sm" id="target" name="target" value="{{ cpcs_catalogs_filter.target }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="facility" class="form-label-sm">Facility:</label>
+                                <input type="text" class="form-control form-control-sm" id="facility" name="facility" value="{{ cpcs_catalogs_filter.facility }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="mjd_min" class="form-label-sm">MJD Min:</label>
+                                <input type="text" class="form-control form-control-sm" id="mjd_min" name="mjd_min" value="{{ cpcs_catalogs_filter.mjd_min }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="mjd_max" class="form-label-sm">MJD Max:</label>
+                                <input type="text" class="form-control form-control-sm" id="mjd_max" name="mjd_max" value="{{ cpcs_catalogs_filter.mjd_max }}">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm">Apply Filters</button>
+                        </form>
+                    </div>
+                    <!-- Data Table -->
+                    <div class="col-md-9">
+                        <table class="table table-hover table-sm sortable" id="catalog_data_t">
+                            <thead>
+                                <tr>
+                                    <th>RA</th>
+                                    <th>DEC</th>
+                                    <th>Mag</th>
+                                    <th>Mag Err</th>
+                                    <th>Org Mag</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Facility</th>
+                                    <th>Email</th>
+                                    <th>Survey</th>
+                                    <th>Filter</th>
+                                    <th>Target</th>
+                                    <th>Target RA</th>
+                                    <th>Target DEC</th>
+                                    <th>MJD</th>
+                                    <th>Exp Time</th>
+                                    <th>Fits Exp</th>
+                                    <th>Fits Filter</th>
+                                    <th>Npoints</th>
+                                    <th>Zeropoint</th>
+                                    <th>Outlier Fraction</th>
+                                    <th>Scatter</th>
+                                    <th>Match Dist</th>
+                                    <th>Data</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for data in cpcs_catalogs %}
+                                    <tr>
+                                        <td>{{ data.ra }}</td>
+                                        <td>{{ data.dec }}</td>
+                                        <td>{{ data.mag }}</td>
+                                        <td>{{ data.mag_err }}</td>
+                                        <td>{{ data.org_mag }}</td>
+                                        <td>{{ data.first_name }}</td>
+                                        <td>{{ data.last_name }}</td>
+                                        <td>{{ data.facility }}</td>
+                                        <td>{{ data.email }}</td>
+                                        <td>{{ data.survey }}</td>
+                                        <td>{{ data.filter }}</td>
+                                        <td>{{ data.target }}</td>
+                                        <td>{{ data.target_ra }}</td>
+                                        <td>{{ data.target_dec }}</td>
+                                        <td>{{ data.mjd }}</td>
+                                        <td>{{ data.exp_time }}</td>
+                                        <td>{{ data.fits_exp }}</td>
+                                        <td>{{ data.fits_filter }}</td>
+                                        <td>{{ data.npoints }}</td>
+                                        <td>{{ data.zeropoint }}</td>
+                                        <td>{{ data.outlier_fraction }}</td>
+                                        <td>{{ data.scatter }}</td>
+                                        <td>{{ data.match_dist }}</td>
+                                        <td>{{ data.data }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="24">No data available.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+
+    <!-- Initialize DataTables -->
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTables without search box
+            $('#catalog_data_t').DataTable({
+                searching: false
+            });
+        });
+    </script>
+{% endblock %}
