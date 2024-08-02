@@ -301,7 +301,7 @@ services:
     restart: on-failure
     volumes:
       - graylog_data:/usr/share/graylog/data
-    #  - graylog_config:/usr/share/graylog/data/config
+      - graylog_config:/usr/share/graylog/data/config
     environment:
       - GRAYLOG_PASSWORD_SECRET=${GRAYLOG_PASSWORD_SECRET}
       - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD_SHA2}
@@ -373,12 +373,12 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/graylog
-#  graylog_config:
-#    driver: local
-#    driver_opts:
-#      type: none
-#      o: bind
-#      device: ${DATA_STORE_PATH}/graylog_config
+  graylog_config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/graylog_config
   log:
     driver: local
     driver_opts:
