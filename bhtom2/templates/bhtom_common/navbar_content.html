@@ -65,6 +65,9 @@
         {% if request.user.is_superuser or request.user.is_staff %}
             <a class="dropdown-item" href="{% url 'bhtom_dataproducts:list_cpcs' %}">Archived Data</a>
         {% endif %}
+        {% if request.user.is_superuser or request.user.is_staff %}
+            <a class="dropdown-item" href="{% url 'bhtom_dataproducts:cpcs_catalogs' %}">Cpcs Catalogs</a>
+        {% endif %}
     </div>
 </li>
 {% if request.user.is_superuser or request.user.is_staff %}
@@ -85,7 +88,6 @@
     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
         <a class="dropdown-item" href="{% url 'user-list' %}">Users</a>
         <a class="dropdown-item" href="{% url 'bhtom_common:list' %}">Data</a>
-        <a class="dropdown-item" href="{% url 'bhtom_dataproducts:cpcs_catalogs' %}">Cpcs Catalogs</a>
     </div>
 </li>
 

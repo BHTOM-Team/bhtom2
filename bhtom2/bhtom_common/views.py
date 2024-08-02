@@ -23,6 +23,7 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 from django_tables2.views import SingleTableMixin
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, CCDPhotJob, SpectroscopyDatum
 from django.contrib import messages
+from collections import defaultdict
 
 from rest_framework import views
 from rest_framework.authentication import TokenAuthentication
@@ -564,6 +565,7 @@ class GetDataProductApi(views.APIView):
             'data': serialized_queryset
         }, status=200)
     
+
 class NewsletterView(LoginRequiredMixin, ListView):
     template_name = 'bhtom_common/newsletter.html'
     context_object_name = 'weeks'
@@ -594,16 +596,20 @@ class NewsletterView(LoginRequiredMixin, ListView):
         user_data_count = {user.username: new_dataproducts.filter(user=user).count() for user in observers}
         
         # Get camera names and targets
-        camera_data = {}
+        camera_data = defaultdict(list)
+        seen_pairs = set()
         for dataproduct in new_dataproducts:
             camera_name = dataproduct.observatory.camera.prefix if dataproduct.observatory else 'Unknown'
-            if camera_name not in camera_data:
-                camera_data[camera_name] = []
-            camera_data[camera_name].append({
-                'target_name': dataproduct.target.name,
-                'target_ra': dataproduct.target.ra,
-                'target_dec': dataproduct.target.dec,
-            })
+            target_name = dataproduct.target.name
+            camera_target_pair = (camera_name, target_name)
+            
+            if camera_target_pair not in seen_pairs:
+                seen_pairs.add(camera_target_pair)
+                camera_data[camera_name].append({
+                    'target_name': target_name,
+                    'target_ra': dataproduct.target.ra,
+                    'target_dec': dataproduct.target.dec,
+                })
         
         week_data = {
             'start_date': start_of_last_week,
@@ -613,7 +619,7 @@ class NewsletterView(LoginRequiredMixin, ListView):
             'observed_targets': observed_targets,
             'observers': observers,
             'user_data_count': user_data_count,
-            'camera_data': camera_data,
+            'camera_data': dict(camera_data),  # Convert defaultdict to dict if necessary
         }
 
         return [week_data]
