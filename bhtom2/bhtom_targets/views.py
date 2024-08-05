@@ -171,15 +171,15 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             coords_names = check_for_existing_coords(ra, dec, 3. / 3600., stored)
 
             if len(coords_names) != 0:
-                ccnames = ' '.join(coords_names)
-                existing_targets = Target.objects.filter(ra=ra, dec=dec)
-                links = [
-                    format_html('<a href="{}">{}</a>', reverse('bhtom_targets:detail', args=[t.id]), t.name)
-                    for t in existing_targets
-                ]
-                link_list = format_html(', '.join(links))
-                form.add_error(None, format_html("Source found already at these coordinates (rad 3 arcsec): {}", link_list))
-                return super().form_invalid(form)
+                existing_targets = Target.objects.filter(name__in=coords_names)
+                if len(existing_targets) != 0:
+                    links = [
+                        format_html('<a href="{}">{}</a>', reverse('bhtom_targets:detail', args=[t.id]), t.name)
+                        for t in existing_targets
+                    ]
+                    link_list = format_html(', '.join(links))
+                    form.add_error(None, format_html("Source found already at these coordinates (rad 3 arcsec): {}", link_list))
+                    return super().form_invalid(form)
 
         # Check if the form, extras and names are all valid:
         if names.is_valid() and (not duplicate_names) and (not existing_names):
