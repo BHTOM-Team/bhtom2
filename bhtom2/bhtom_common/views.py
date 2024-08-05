@@ -20,6 +20,7 @@ from bhtom2.bhtom_calibration.models import Calibration_data
 from bhtom2.bhtom_common.forms import UpdateFitsForm
 from bhtom2.kafka.producer.calibEvent import CalibCreateEventProducer
 from bhtom2.utils.bhtom_logger import BHTOMLogger
+from bhtom2.utils.api_pagination import StandardResultsSetPagination
 from django_tables2.views import SingleTableMixin
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, CCDPhotJob, SpectroscopyDatum
 from django.contrib import messages
@@ -34,7 +35,6 @@ from drf_yasg import openapi
 from django.db.models import Q
 from bhtom2.bhtom_common.serializers import DataProductSerializer
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth.models import User
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_common.views')
@@ -449,32 +449,6 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
             messages.success(self.request, 'Send file to ccdphot')
 
         return redirect(reverse('bhtom_common:list'))
-
-class StandardResultsSetPagination(PageNumberPagination):
-    page_size_query_param = 'page_size'
-    max_page_size = 1000
-
-    def get_paginated_response(self, data):
-        return Response({
-            'count': self.page.paginator.count,
-            'num_pages': self.page.paginator.num_pages,
-            'current_page': self.page.number,
-            'data': data
-        })
-
-
-class StandardResultsSetPagination(PageNumberPagination):
-    page_size_query_param = 'page_size'
-    max_page_size = 1000
-
-    def get_paginated_response(self, data):
-        return Response({
-            'count': self.page.paginator.count,
-            'num_pages': self.page.paginator.num_pages,
-            'current_page': self.page.number,
-            'data': data
-        })
-
 
 class GetDataProductApi(views.APIView):
     authentication_classes = [TokenAuthentication]

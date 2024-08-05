@@ -23,12 +23,15 @@ from django.http import FileResponse
 from bhtom2.utils.reduced_data_utils import save_photometry_data_for_target_to_csv_file, \
     save_radio_data_for_target_to_csv_file
 from abc import ABC, abstractmethod
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from bhtom2.utils.api_pagination import StandardResultsSetPagination
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.rest-view')
 
 class GetTargetListApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
 
     @swagger_auto_schema(
         request_body=openapi.Schema(
@@ -46,6 +49,7 @@ class GetTargetListApi(views.APIView):
                 'galacticLat': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'galacticLon': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'description': openapi.Schema(type=openapi.TYPE_STRING),
+                'page': openapi.Schema(type=openapi.TYPE_INTEGER, description='Page number for pagination'),
             },
             required=[]
         ),
@@ -74,6 +78,8 @@ class GetTargetListApi(views.APIView):
         galacticLat = request.data.get('galacticLat', None)
         galacticLon = request.data.get('galacticLon', None)
         description = request.data.get('description', None)
+        page = request.data.get('page', 1)
+      
         
 
         try:
@@ -116,8 +122,28 @@ class GetTargetListApi(views.APIView):
             return Response("Wrong format", status=400)
 
         queryset = Target.objects.filter(query).order_by('created')
-        serialized_queryset = serializers.serialize('json', queryset)
-        return Response(serialized_queryset, status=200)
+        paginator = Paginator(queryset, self.pagination_class.max_page_size)
+
+        try:
+            paginated_queryset = paginator.page(page)
+        except PageNotAnInteger:
+            paginated_queryset = paginator.page(1)
+        except EmptyPage:
+            paginated_queryset = paginator.page(paginator.num_pages)
+
+        serialized_queryset = serializers.serialize('json', paginated_queryset)
+
+        serialized_data = json.loads(serialized_queryset)
+        fields_only = [item['fields'] for item in serialized_data]
+
+        response_data = {
+            'count': paginator.count,
+            'num_pages': paginator.num_pages,
+            'current_page': paginated_queryset.number,
+            'data': fields_only
+        }
+        
+        return Response(response_data, status=200)
 
 
 # this is API for SIDEREAL target creation, non-sidereal has to go to a different api
