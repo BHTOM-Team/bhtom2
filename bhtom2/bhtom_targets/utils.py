@@ -32,7 +32,8 @@ from bhtom_base.bhtom_targets.utils import cone_search_filter
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.utils')
 
 
-def import_targets(targets):
+
+def import_targets(targets, group_name=None):
     """
     Imports a set of targets into the TOM and saves them to the database.
 
@@ -40,147 +41,154 @@ def import_targets(targets):
 
     :param targets: String buffer of targets
     :type targets: StringIO
-
-    :returns: dictionary of successfully imported targets, as well errors
+    :param group_name: Optional name of the group to add targets to
+    :type group_name: str or None
+    :returns: dictionary of successfully imported targets and errors
     :rtype: dict
     """
 
     logger.debug("Beginning the IMPORT from a file.")
-    # TODO: Replace this with an in memory iterator
     targetreader = csv.DictReader(targets, dialect=csv.excel)
-    targets = []
+    targets_list = []
     errors = []
     base_target_fields = [field.name for field in Target._meta.get_fields()]
+
+    group = None
+    if group_name:
+        try:
+            with transaction.atomic():
+                group, created = TargetList.objects.get_or_create(name=group_name)
+                if not created:
+                    raise ValueError(f"Group with name '{group_name}' already exists.")
+        except Exception as e:
+            errors.append(str(e))
+            return {'targets': targets_list, 'errors': errors}
+
     for index, row in enumerate(targetreader):
         logger.debug(f"import: {index} {row}")
         if not any(row.values()):
-            # If all values in the row are empty, then it is considered empty
-            #            print(f"Row {index} is empty")
             continue
-        # filter out empty values in base fields, otherwise converting empty string to float will throw error
-        row = {k.strip(): v.strip() for (k, v) in row.items() if
-               not (k.strip() in base_target_fields and not v.strip())}
-        target_extra_fields = []
-        target_names = {}
-        target_fields = {}
-
-        # gets all possible source names, written in upper case
-        uppercase_source_names = [sc[0].upper() for sc in settings.SOURCE_CHOICES]
-
-        for kk in row:
-            k = kk.strip()
-            row_k_value = row[k].strip()
-            # Fields with <source_name>_name (e.g. Gaia_name, ZTF_name, where <source_name> is a valid
-            # catalog) will be added as a name corresponding to this catalog
-            k_source_name = k.upper().replace('_NAME', '')
-            if row_k_value:  # delete null value
-                if k != 'name' and k.endswith('name') and k_source_name in uppercase_source_names:
-                    target_names[k_source_name] = row_k_value
-                elif k_source_name == 'CALIB_SERVER':
-                    target_names['CPCS'] = row_k_value
-                elif k_source_name == 'GAIA_ALERT':
-                    target_names['GAIA_ALERTS'] = row_k_value
-                elif k == 'classification':
-                    target_fields['description'] = row_k_value
-                elif k == 'priority':
-                    target_fields['importance'] = row_k_value
-                elif k == 'maglast':
-                    target_fields['mag_last'] = row_k_value
-                elif k == 'Sun_separation':
-                    target_fields['sun_separation'] = row_k_value
-                elif k not in base_target_fields:
-                    target_extra_fields.append((k, row_k_value))
-                else:
-                    target_fields[k] = row_k_value
-
-        # if "ra" not in target_fields :
-        #     raise ValueError("Error: 'ra' not found in import field names")
-        # if "dec" not in target_fields :
-        #     raise ValueError("Error: 'dec' not found in import field names")
-        if "ra" not in target_fields and "GAIA_ALERTS" not in target_names:
-            raise ValueError("Error: 'ra' not found in import field names")
-        if "dec" not in target_fields and "GAIA_ALERTS" not in target_names:
-            raise ValueError("Error: 'dec' not found in import field names")
 
         try:
-            # special case when Gaia Alerts name is provided, then not using Ra,Dec from the file
-            # TODO: should be generalised for any special source name, e.g. ZTF, for which we have a harvester
-            if "GAIA_ALERTS" in target_names:
+            with transaction.atomic():
+                row = {k.strip(): v.strip() for k, v in row.items() if not (k.strip() in base_target_fields and not v.strip())}
+                target_extra_fields = []
+                target_names = {}
+                target_fields = {}
+
+                uppercase_source_names = [sc[0].upper() for sc in settings.SOURCE_CHOICES]
+
+                for kk in row:
+                    k = kk.strip()
+                    row_k_value = row[k].strip()
+                    k_source_name = k.upper().replace('_NAME', '')
+                    if row_k_value:
+                        if k != 'name' and k.endswith('name') and k_source_name in uppercase_source_names:
+                            target_names[k_source_name] = row_k_value
+                        elif k_source_name == 'CALIB_SERVER':
+                            target_names['CPCS'] = row_k_value
+                        elif k_source_name == 'GAIA_ALERT':
+                            target_names['GAIA_ALERTS'] = row_k_value
+                        elif k == 'classification':
+                            target_fields['description'] = row_k_value
+                        elif k == 'priority':
+                            target_fields['importance'] = row_k_value
+                        elif k == 'maglast':
+                            target_fields['mag_last'] = row_k_value
+                        elif k == 'Sun_separation':
+                            target_fields['sun_separation'] = row_k_value
+                        elif k not in base_target_fields:
+                            target_extra_fields.append((k, row_k_value))
+                        else:
+                            target_fields[k] = row_k_value
+
+                if "ra" not in target_fields and "GAIA_ALERTS" not in target_names:
+                    raise ValueError("Error: 'ra' not found in import field names")
+                if "dec" not in target_fields and "GAIA_ALERTS" not in target_names:
+                    raise ValueError("Error: 'dec' not found in import field names")
+
+                if "GAIA_ALERTS" in target_names:
+                    for name in target_names.items():
+                        source_name = name[0].upper().replace('_NAME', '')
+                        if source_name == "GAIA_ALERTS":
+                            gaia_alerts_name = name[1].lower().replace("gaia", "Gaia")
+                            post_data = {
+                                'terms': gaia_alerts_name,
+                                'harvester': "Gaia Alerts"
+                            }
+                            header = {
+                                "Correlation-ID": get_guid(),
+                            }
+                            try:
+                                response = requests.post(settings.HARVESTER_URL + '/findTargetWithHarvester/', data=post_data, headers=header)
+                                if response.status_code == 200:
+                                    catalog_data = json.loads(response.text)
+                                else:
+                                    response.raise_for_status()
+                            except Exception as e:
+                                logger.error("Oops something went wrong: " + str(e))
+                                raise ValueError("Error fetching Gaia Alerts data")
+
+                            ra = catalog_data["ra"]
+                            dec = catalog_data["dec"]
+                            disc = catalog_data["discovery_date"]
+
+                            description = target_fields.get('description', '')
+                            importance = target_fields.get('importance', str(9.99))
+                            cadence = target_fields.get('cadence', str(1.0))
+                            targetType = target_fields.get('type', Target.SIDEREAL)
+
+                            target_fields = {
+                                "name": gaia_alerts_name, "ra": ra, "dec": dec, "epoch": 2000.0,
+                                "discovery_date": disc, "importance": importance, "cadence": cadence,
+                                "description": description, "type": targetType
+                            }
+                            logger.info(f"Import: Gaia Alerts harvester used to fill the target info as {gaia_alerts_name}")
+
+                check_target_value(target_fields)
+                target = Target.objects.create(**target_fields)
+
                 for name in target_names.items():
-                    source_name = name[0].upper().replace('_NAME', '')
+                    if name:
+                        source_name = name[0].upper().replace('_NAME', '')
+                        TargetName.objects.create(target=target, source_name=source_name, name=name[1])
+                        logger.debug(f"Target {name} added to names for {source_name}")
 
-                    if source_name == "GAIA_ALERTS":
-                        gaia_alerts_name = name[1].lower().replace("gaia",
-                                                                   "Gaia")  # to be sure of the correct format, at least first letters
-                        post_data = {
-                        'terms': gaia_alerts_name,
-                        'harvester': "Gaia Alerts"
-                        }       
-                        header = {
-                            "Correlation-ID" : get_guid(),
-                        }     
-                        try:
-                            response = requests.post(settings.HARVESTER_URL + '/findTargetWithHarvester/', data=post_data, headers=header)
-                            if response.status_code == 200:
-                                # Extract JSON from the response
-                                catalog_data = json.loads(response.text)
-                               
-                            else:
-                                response.raise_for_status()
-                        except Exception as e:
-                            logger.error("Oops something went wrong: " + str(e))
-                          
-                        ra: str = catalog_data["ra"]
-                        dec: str = catalog_data["dec"]
-                        disc: str = catalog_data["discovery_date"]
-                        
-                        description = target_fields.get('description', '')
-                        importance = target_fields.get('importance', str(9.99)) # if not provided by user default is 9.99
-                        cadence = target_fields.get('cadence', str(1.0)) # if not provided by user default is 1.0
-                        targetType = target_fields.get('type', Target.SIDEREAL)
+                for extra in target_extra_fields:
+                    TargetExtra.objects.create(target=target, key=extra[0], value=extra[1])
 
-                        target_fields = {"name": gaia_alerts_name, "ra": ra, "dec": dec, "epoch": 2000.0,
-                                         "discovery_date": disc, "importance": importance, "cadence": cadence,
-                                         "description": description, "type": targetType
-                                         }
-                        # after adding description to the model:
-                        # target_fields = {"name":gaia_alerts_name,"ra": ra, "dec": dec, "epoch": 2000.0, "discovery_date":disc, "importance":importance, "cadence":cadence, "description":description}
-                        logger.info(f"Import: Gaia Alerts harvester used to fill the target info as {gaia_alerts_name}")
+                if 'type' not in target_fields:
+                    target.type = Target.SIDEREAL
+                    logger.debug(f"Target {row} set by default to SIDEREAL.")
 
-            check_target_value(target_fields)
-            target = Target.objects.create(**target_fields)
+                target.save()
 
-            for name in target_names.items():
-                if name:
-                    source_name = name[0].upper().replace('_NAME', '')
-                    TargetName.objects.create(target=target, source_name=source_name, name=name[1])
-                    logger.debug(f"Target {name} added to names for {source_name}")
+                try:
+                    if group:
+                        group.targets.add(target)
+                        logger.info(f"Successfully added target {target.name} to group {group.name}")
+                except Exception as e:
+                    logger.error(f"Error while adding target {target.name} to group {group.name}: {e}")
+                    errors.append(str(e))
 
-            for extra in target_extra_fields:
-                TargetExtra.objects.create(target=target, key=extra[0], value=extra[1])
+                try:
+                    run_hook('target_post_save', target=target, created=True)
+                except Exception as e:
+                    logger.error(f"Error in import hook: {e}")
+                    errors.append(f"Error in import hook: {e}")
 
-            # if type field not present, setting SIDERAL as default
-            if 'type' not in target_fields:
-                target.type = Target.SIDEREAL
-                logger.debug(f"Target {row} set by default to SIDEREAL.")
+                targets_list.append(target)
 
-            target.save()
-
-            try:
-                run_hook('target_post_save', target=target, created=True)
-            except Exception as e:
-                logger.error(f"Error in import hook: {e}")
-                pass
-
-            logger.debug(f"IMPORT: target to append {target}")
-            targets.append(target)
         except Exception as e:
-            error = 'Error: %s' % str(e)
+            error = f"Error importing row {index}: {str(e)}"
+            logger.error(error)
             errors.append(error)
-        logger.debug(f"Imported targets: {targets}")
-        logger.debug(f"Import errors: {errors}")
 
-    return {'targets': targets, 'errors': errors}
+    logger.debug(f"Imported targets: {targets_list}")
+    logger.debug(f"Import errors: {errors}")
+
+    return {'targets': targets_list, 'errors': errors}
+
 
 
 def check_target_value(target_fields):

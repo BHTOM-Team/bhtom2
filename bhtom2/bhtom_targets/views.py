@@ -517,7 +517,8 @@ class TargetImportView(LoginRequiredMixin, TemplateView):
             messages.error(request, "You can upload max 500 targets")
             return redirect(reverse('bhtom_targets:list'))
 
-        result = import_targets(csv_stream)
+        group_name = request.POST.get('group_name', None)
+        result = import_targets(csv_stream, group_name)
         messages.success(
             request,
             'Targets created: {}'.format(len(result['targets']))

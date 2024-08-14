@@ -3,6 +3,7 @@
 {% block title %}Import Targets{% endblock %}
 {% block content %}
 <h3>Import Targets</h3>
+<p>If you want to add all imported targets to a new group, please fill in the "Group name" field (optional). </p>
 <p>
   Upload a .csv to import targets in bulk.
   <h6>Allowed field names:</h6>
@@ -42,18 +43,23 @@ mytarget,   Gaia20dup,          3
 <p style="font-size: small; color: white;">
 In these special cases, the Gaia Alerts harvester will gather all information from Gaia Alerts, but any extra columns in the CSV file with corresponding fields will replace those read from Gaia Alerts.
 </p>
-    <p style="font-size: small; color: white;">
+<p style="font-size: small; color: white;">
 You can upload max 500 targets.
-    </p>
+</p>
 <hr style="border-top: 1px solid grey;">
 <br>
 <form method="POST" action="{% url 'targets:import' %}" enctype="multipart/form-data">
   {% csrf_token %}
-  <input type="file" name="target_csv" style="color: rgb(0, 217, 255);">
+  <div class="form-group">
+    <label for="group_name" style="color: rgb(0, 217, 255);">Group Name (optional):</label>
+    <input type="text" class="form-control" id="group_name" name="group_name">
+  </div>
+  <div class="form-group">
+    <input type="file" name="target_csv" style="color: rgb(0, 217, 255);">
+  </div>
   {% buttons %}
   <br>
   <input type="submit" value="Upload" class="btn btn-primary">
   {% endbuttons %}
-
 </form>
 {% endblock %}
