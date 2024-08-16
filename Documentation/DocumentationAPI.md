@@ -1104,6 +1104,52 @@ curl -X POST \
 
 Replace `<yourToken>` with your valid authentication token.
 
+
+## 8 Downloaded Target List (ADMIN ONLY)
+<!-- targets/get-downloaded-target-list/ -->
+
+This API allows admin users to obtain a list of downloaded targets. 
+This API supports filtering downloaded targets by target name, username, creation date range, and download type.
+You can request only 1000 records per request; use the parameter "page" to get more records.
+
+### Request
+
+- **Method**: POST
+- **URL**: `/targets/get-downloaded-target-list/`
+
+### Request Parameters
+
+The request to retrieve the downloaded target list may include the following query parameters:
+
+- `target` (string, optional): The name or identifier of the target.
+- `user` (string, optional): The username of the user who downloaded the target.
+- `created_from` (string, optional): The start date-time (ISO format) for filtering downloads based on creation date.
+- `created_to` (string, optional): The end date-time (ISO format) for filtering downloads based on creation date.
+- `download_type` (string, optional): The type of download.
+- `page` (number, optional): The number of the requested page.
+
+### Example Request
+
+You can make a POST request to retrieve a list of downloaded targets based on the specified criteria using the `curl` command or a web browser.
+
+### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Authorization: Token <yourToken>" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "target": "MyTarget",
+        "user": "admin",
+        "created_from": "2023-01-01T00:00:00Z",
+        "created_to": "2024-01-01T00:00:00Z",
+        "download_type": "R",
+        "page": 1
+      }' \
+  "https://bh-tom2.astrolabs.pl/targets/getDownloadedTargetList/"
+
+```
+
 # DATAPRODUCT API
 
 ### List Data Products

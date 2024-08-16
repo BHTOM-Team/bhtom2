@@ -21,9 +21,9 @@ from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_s
 from bhtom_base.bhtom_common.hooks import run_hook
 from bhtom_base.bhtom_common.mixins import Raise403PermissionRequiredMixin
 from bhtom_base.bhtom_targets.forms import TargetNamesFormset
-from bhtom_base.bhtom_targets.models import TargetName
+from bhtom_base.bhtom_targets.models import TargetName, DownloadedTarget
 from bhtom2.bhtom_targets.utils import check_duplicate_source_names, check_for_existing_alias, \
-    check_for_existing_coords, get_nonempty_names_from_queryset, coords_to_degrees
+    check_for_existing_coords, get_nonempty_names_from_queryset, coords_to_degrees, get_client_ip
 from guardian.shortcuts import get_objects_for_user, get_groups_with_perms
 
 from django.views.generic import TemplateView, RedirectView
@@ -560,11 +560,25 @@ class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
 
 class TargetDownloadPhotometryDataView(TargetDownloadDataView):
     def generate_data_method(self, target_id):
+        ip_address = get_client_ip(self.request)
+        DownloadedTarget.objects.create(
+                user=self.request.user,
+                target_id=target_id,
+                download_type='P',
+                ip_address=ip_address
+            )
         return save_photometry_data_for_target_to_csv_file(target_id)
 
 
 class TargetDownloadRadioDataView(TargetDownloadDataView):
     def generate_data_method(self, target_id):
+        ip_address = get_client_ip(self.request)
+        DownloadedTarget.objects.create(
+                user=self.request.user,
+                target_id=target_id,
+                download_type='R',
+                ip_address=ip_address
+            )
         return save_radio_data_for_target_to_csv_file(target_id)
 
 

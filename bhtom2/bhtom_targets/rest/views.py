@@ -9,11 +9,11 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR
 from django.contrib.auth.models import User
-from bhtom2.bhtom_targets.rest.serializers import TargetsSerializers, TargetDownloadDataSerializer
-from bhtom2.bhtom_targets.utils import update_targetList_cache, update_targetDetails_cache
+from bhtom2.bhtom_targets.rest.serializers import TargetsSerializers, TargetDownloadDataSerializer, DownloadedTargetSerializer
+from bhtom2.bhtom_targets.utils import update_targetList_cache, update_targetDetails_cache, get_client_ip
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_common.hooks import run_hook
-from bhtom_base.bhtom_targets.models import Target
+from bhtom_base.bhtom_targets.models import Target, DownloadedTarget
 from rest_framework import status
 import json
 from django.conf import settings
@@ -426,6 +426,13 @@ class TargetDownloadRadioDataApiView(views.APIView):
         tmp = None
         try:
             tmp, filename = save_radio_data_for_target_to_csv_file(target_id)
+            ip_address = get_client_ip(request)
+            DownloadedTarget.objects.create(
+                user=request.user,
+                target_id=target_id,
+                download_type='R',
+                ip_address=ip_address
+            )
             return FileResponse(open(tmp.name, 'rb'),
                                 as_attachment=True,
                                 filename=filename)
@@ -470,6 +477,13 @@ class TargetDownloadPhotometryDataApiView(views.APIView):
         tmp = None
         try:
             tmp, filename = save_photometry_data_for_target_to_csv_file(target_id)
+            ip_address = get_client_ip(request)
+            DownloadedTarget.objects.create(
+                user=request.user,
+                target_id=target_id,
+                download_type='P',
+                ip_address=ip_address
+            )
             return FileResponse(open(tmp.name, 'rb'),
                                 as_attachment=True,
                                 filename=filename)
@@ -479,3 +493,82 @@ class TargetDownloadPhotometryDataApiView(views.APIView):
         finally:
             if tmp:
                 os.remove(tmp.name)
+
+
+
+class GetDownloadedTargetListApi(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'target': openapi.Schema(type=openapi.TYPE_STRING),
+                'user': openapi.Schema(type=openapi.TYPE_STRING),
+                'created_from': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+                'created_to': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+                'download_type': openapi.Schema(type=openapi.TYPE_STRING),
+                'page': openapi.Schema(type=openapi.TYPE_INTEGER, description='Page number for pagination'),
+            },
+            required=[]
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
+    )
+    def post(self, request):
+        query = Q()
+
+        target = request.data.get('target', None)
+        user = request.data.get('user', None)
+        created_from = request.data.get('created_from', None)
+        created_to = request.data.get('created_to', None)
+        download_type = request.data.get('download_type', None)
+        page = request.data.get('page', 1)
+
+        if not request.user.is_superuser:
+             return Response("You have no permissions, Admin Only", status=404)
+
+        try:
+            if target is not None:
+                query &= Q(target__name__icontains=target)
+            if user is not None:
+                query &= Q(user__username__icontains=user)
+            if created_from is not None:
+                query &= Q(created__gte=created_from)
+            if created_to is not None:
+                query &= Q(created__lte=created_to)
+            if download_type is not None:
+                query &= Q(download_type=download_type)
+        except ValueError as e:
+            logger.error("Value error in GetDownloadedTargetListApi " + str(e))
+            return Response("Wrong format", status=400)
+
+        queryset = DownloadedTarget.objects.filter(query).order_by('-created')
+        paginator = Paginator(queryset, self.pagination_class.max_page_size)
+
+        try:
+            paginated_queryset = paginator.page(page)
+        except PageNotAnInteger:
+            paginated_queryset = paginator.page(1)
+        except EmptyPage:
+            paginated_queryset = paginator.page(paginator.num_pages)
+
+        serialized_queryset = DownloadedTargetSerializer(paginated_queryset, many=True)
+
+        response_data = {
+            'count': paginator.count,
+            'num_pages': paginator.num_pages,
+            'current_page': paginated_queryset.number,
+            'data': serialized_queryset.data
+        }
+        
+        return Response(response_data, status=200)
