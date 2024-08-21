@@ -28,6 +28,7 @@ from guardian.shortcuts import get_objects_for_user, get_groups_with_perms
 
 from django.views.generic import TemplateView, RedirectView
 from django.urls import reverse
+from django.shortcuts import render
 from abc import ABC, abstractmethod
 from django.utils.html import format_html
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -729,3 +730,19 @@ class UpdateReducedDatum(LoginRequiredMixin, RedirectView):
 
             return HttpResponseRedirect(reverse('targets:detail', kwargs={'pk': target.id}))
 
+
+
+
+class TargetNotFoundView(View):
+    template_name = 'bhtom_targets/target_not_exist_error.html'
+    
+    def get(self, request, *args, **kwargs):
+        # Get the target_name from the query parameters
+        target_name = request.GET.get('target_name', 'Unknown Target')
+        try:
+            alias = TargetName.objects.get(name=target_name)
+            context = {'target_name': target_name, 'alias': alias.name, 'target_alias': alias.target}
+        except Exception as e:
+            alias = None
+            context = {'target_name': target_name, 'alias': None, 'target_alias': None}
+        return render(request, self.template_name, context)
