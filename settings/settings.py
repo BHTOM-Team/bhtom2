@@ -495,3 +495,13 @@ DJANGO_GUID = {
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB (adjust as needed)
 
+CUSTOMIZATION = secret.get("CUSTOMIZATION", 'BHTOM')
+
+if CUSTOMIZATION == "OCATOM":
+    CUST_WALLPAPER = 'oca_tom_image.jpg'
+    TITLE_TEXT = "OCA TOM"
+    LOGO_TEXT = "OCATOM"
+else: # CUSTOMIZATION == "BHTOM"
+    CUST_WALLPAPER = 'bh_tom_image.jpg'
+    TITLE_TEXT = "Black Hole TOM 2.0"
+    LOGO_TEXT = "BHTOM"
