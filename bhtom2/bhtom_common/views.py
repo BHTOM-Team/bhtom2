@@ -540,6 +540,7 @@ class GetDataProductApi(views.APIView):
         }, status=200)
     
 
+
 class NewsletterView(LoginRequiredMixin, ListView):
     template_name = 'bhtom_common/newsletter.html'
     context_object_name = 'weeks'
@@ -549,51 +550,70 @@ class NewsletterView(LoginRequiredMixin, ListView):
         start_of_last_week = now - timedelta(days=now.weekday() + 7)
         end_of_last_week = start_of_last_week + timedelta(days=6)
         
-        # Count new users
-        new_users_count = User.objects.filter(date_joined__gte=start_of_last_week, date_joined__lt=end_of_last_week + timedelta(days=1)).count()
+        # New users and targets statistics
+        new_users_count = User.objects.filter(date_joined__gte=start_of_last_week, date_joined__lt=end_of_last_week).count()
+        new_targets = Target.objects.filter(created__gte=start_of_last_week, created__lt=end_of_last_week)
         
-        # Get new targets
-        new_targets = Target.objects.filter(created__gte=start_of_last_week, created__lt=end_of_last_week + timedelta(days=1))
-        
-        # Get new data products
-        new_dataproducts = DataProduct.objects.filter(created__gte=start_of_last_week, created__lt=end_of_last_week + timedelta(days=1))
-        
-        # Get target IDs and observed targets
-        target_observed_ids = new_dataproducts.values_list('target_id', flat=True)
-        observed_targets = Target.objects.filter(id__in=target_observed_ids).distinct()
-        
-        # Get observer IDs and observers
-        observers_id = new_dataproducts.values_list('user_id', flat=True)
-        observers = User.objects.filter(id__in=observers_id)
+        # Data products statistics
+        new_dataproducts = DataProduct.objects.filter(created__gte=start_of_last_week, created__lt=end_of_last_week)
+        new_dataproducts_succeeded = new_dataproducts.filter(status='S').count()
 
-        # Count how many DataProduct each user sent
-        user_data_count = {user.username: new_dataproducts.filter(user=user).count() for user in observers}
         
-        # Get camera names and targets
-        camera_data = defaultdict(list)
-        seen_pairs = set()
-        for dataproduct in new_dataproducts:
-            camera_name = dataproduct.observatory.camera.prefix if dataproduct.observatory else 'Unknown'
-            target_name = dataproduct.target.name
-            camera_target_pair = (camera_name, target_name)
-            
-            if camera_target_pair not in seen_pairs:
-                seen_pairs.add(camera_target_pair)
-                camera_data[camera_name].append({
-                    'target_name': target_name,
-                    'target_ra': dataproduct.target.ra,
-                    'target_dec': dataproduct.target.dec,
-                })
+        # All-time statistics
+        all_users_count = User.objects.all().count()
+        all_targets_count = Target.objects.all().count()
+        all_dataproducts = DataProduct.objects.all()
+        all_dataproducts_succeeded = all_dataproducts.filter(status='S').count()
+        all_observed_targets_count = Target.objects.filter(id__in=all_dataproducts.values_list('target_id', flat=True)).distinct().count()
         
-        week_data = {
+        # Observers and data upload statistics
+        user_data_count = self._get_user_data_count(new_dataproducts)
+        all_user_data_count = self._get_user_data_count(all_dataproducts, top_n=5)
+        
+        # Camera and targets statistics
+        camera_data = self._get_camera_data(new_dataproducts)
+
+        # Prepare data for the template
+        data = {
             'start_date': start_of_last_week,
             'end_date': end_of_last_week,
             'new_users_count': new_users_count,
             'new_targets': new_targets,
-            'observed_targets': observed_targets,
-            'observers': observers,
+            'new_targets_count': new_targets.count(),
+            'new_dataproducts_count': new_dataproducts.count(),
+            'new_dataproducts_succeeded': new_dataproducts_succeeded,
+            'observed_targets': Target.objects.filter(id__in=new_dataproducts.values_list('target_id', flat=True)).distinct(),
             'user_data_count': user_data_count,
-            'camera_data': dict(camera_data),  # Convert defaultdict to dict if necessary
+            'camera_data': dict(camera_data),
+            'all_users_count': all_users_count,
+            'targets_count': all_targets_count,
+            'all_dataproducts_count': all_dataproducts.count(),
+            'all_dataproducts_succeeded': all_dataproducts_succeeded,
+            'all_observed_targets': all_observed_targets_count,
+            'all_user_data_count': all_user_data_count
         }
 
-        return [week_data]
+        return [data]
+
+    def _get_user_data_count(self, dataproducts, top_n=None):
+        user_data_count = defaultdict(int)
+        for dp in dataproducts:
+            user_data_count[dp.user.username] += 1
+        sorted_data = sorted(user_data_count.items(), key=lambda item: item[1], reverse=True)
+        return sorted_data[:top_n] if top_n else sorted_data
+
+    def _get_camera_data(self, dataproducts):
+        camera_data = defaultdict(list)
+        seen_pairs = set()
+        for dp in dataproducts:
+            camera_name = dp.observatory.camera.prefix if dp.observatory else 'Unknown'
+            target_name = dp.target.name
+            pair = (camera_name, target_name)
+            if pair not in seen_pairs:
+                seen_pairs.add(pair)
+                camera_data[camera_name].append({
+                    'target_name': target_name,
+                    'target_ra': dp.target.ra,
+                    'target_dec': dp.target.dec,
+                })
+        return camera_data
