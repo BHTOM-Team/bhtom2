@@ -20,8 +20,7 @@
             <li><strong>Raw Data Processing:</strong> With BHTOM, you can upload your raw observations as fits or instrumental photometry. We will derive the PSF photometry and standardise the data to Gaia Synthetic Photometry filters automatically.</li>
             <li><strong>Archives:</strong> BHTOM will automatically gather photometric data already collected for your target of interest, enabling time-domain astronomy studies.</li>
             <li><strong>Automation:</strong> BHTOM functionalities can be fully automatised from your scripts. See our API documentation.</li>
-            <li><strong>Add Imported Targets to Group:</strong> With BHTOM, you can import your targets and automatically add all imported targets to a new group.</li>
-        </ul>
+        </ul>    
     </div>
 
     <div>
@@ -56,6 +55,20 @@
             <li>Added API for downloading archives</li>
             <li>Added calibration logs </li>
             </ul>
+
+        <h4> 2024 August 27 </h4>
+        <li><strong>Add Imported Targets to Group:</strong> With BHTOM, you can import your targets and automatically add all imported targets to a new group.</li>
+        <li><strong>Target Existence Check:</strong> When a found target already exists, BHTOM will offer a direct link to the target or provide a filtered list of similar targets.</li>
+        <li><strong>API Pagination:</strong> Added pagination to the API for:
+            <ul>
+                <li>Get Target List</li>
+                <li>Get Favourite Observatory</li>
+                <li>Observatory List</li>
+                <li>Get Catalogs</li>
+                <li>Get Calibration Results</li>
+            </ul>
+            Users can retrieve 1000 records per request, with pagination available for accessing additional records.
+        </li>
     </div>
 
     <div>
