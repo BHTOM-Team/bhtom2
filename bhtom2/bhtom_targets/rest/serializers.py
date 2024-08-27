@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from bhtom2.bhtom_targets.utils import check_duplicate_source_names, check_for_existing_alias, coords_to_degrees, \
     check_for_existing_coords
-from bhtom_base.bhtom_targets.models import Target
+from bhtom_base.bhtom_targets.models import Target, DownloadedTarget
 
 
 class TargetsSerializers(serializers.ModelSerializer):
@@ -64,3 +64,33 @@ class TargetsSerializers(serializers.ModelSerializer):
 
 class TargetDownloadDataSerializer(serializers.Serializer):
     name = serializers.CharField(required=True)
+
+
+
+class DownloadedTargetSerializer(serializers.ModelSerializer):
+    user_name = serializers.SerializerMethodField()
+    target_name = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+    target = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = DownloadedTarget
+        fields = ('id', 'user', 'user_name', 'target', 'target_name', 'created', 'modified', 'download_type', 'ip_address')
+
+    def get_user_name(self, obj):
+        # Assuming `obj.user` is a foreign key to `User`
+        if obj.user:
+            return f"{obj.user.first_name} {obj.user.last_name}"
+        return None
+    
+    def get_user(self, obj):
+        # Return the username
+        return obj.user.username if obj.user else None
+    
+    def get_target_name(self, obj):
+        # Return the name of the target
+        return obj.target.name if obj.target else None
+    
+    def get_target(self, obj):
+        # Return the id of the target
+        return obj.target.id if obj.target else None

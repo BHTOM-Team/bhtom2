@@ -21,13 +21,14 @@ from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_s
 from bhtom_base.bhtom_common.hooks import run_hook
 from bhtom_base.bhtom_common.mixins import Raise403PermissionRequiredMixin
 from bhtom_base.bhtom_targets.forms import TargetNamesFormset
-from bhtom_base.bhtom_targets.models import TargetName
+from bhtom_base.bhtom_targets.models import TargetName, DownloadedTarget
 from bhtom2.bhtom_targets.utils import check_duplicate_source_names, check_for_existing_alias, \
-    check_for_existing_coords, get_nonempty_names_from_queryset, coords_to_degrees
+    check_for_existing_coords, get_nonempty_names_from_queryset, coords_to_degrees, get_client_ip
 from guardian.shortcuts import get_objects_for_user, get_groups_with_perms
 
 from django.views.generic import TemplateView, RedirectView
 from django.urls import reverse
+from django.shortcuts import render
 from abc import ABC, abstractmethod
 from django.utils.html import format_html
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -171,15 +172,15 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
             coords_names = check_for_existing_coords(ra, dec, 3. / 3600., stored)
 
             if len(coords_names) != 0:
-                ccnames = ' '.join(coords_names)
-                existing_targets = Target.objects.filter(ra=ra, dec=dec)
-                links = [
-                    format_html('<a href="{}">{}</a>', reverse('bhtom_targets:detail', args=[t.id]), t.name)
-                    for t in existing_targets
-                ]
-                link_list = format_html(', '.join(links))
-                form.add_error(None, format_html("Source found already at these coordinates (rad 3 arcsec): {}", link_list))
-                return super().form_invalid(form)
+                existing_targets = Target.objects.filter(name__in=coords_names)
+                if len(existing_targets) != 0:
+                    links = [
+                        format_html('<a href="{}">{}</a>', reverse('bhtom_targets:detail', args=[t.id]), t.name)
+                        for t in existing_targets
+                    ]
+                    link_list = format_html(', '.join(links))
+                    form.add_error(None, format_html("Source found already at these coordinates (rad 3 arcsec): {}", link_list))
+                    return super().form_invalid(form)
 
         # Check if the form, extras and names are all valid:
         if names.is_valid() and (not duplicate_names) and (not existing_names):
@@ -517,7 +518,8 @@ class TargetImportView(LoginRequiredMixin, TemplateView):
             messages.error(request, "You can upload max 500 targets")
             return redirect(reverse('bhtom_targets:list'))
 
-        result = import_targets(csv_stream)
+        group_name = request.POST.get('group_name', None)
+        result = import_targets(csv_stream, group_name)
         messages.success(
             request,
             'Targets created: {}'.format(len(result['targets']))
@@ -559,11 +561,25 @@ class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
 
 class TargetDownloadPhotometryDataView(TargetDownloadDataView):
     def generate_data_method(self, target_id):
+        ip_address = get_client_ip(self.request)
+        DownloadedTarget.objects.create(
+                user=self.request.user,
+                target_id=target_id,
+                download_type='P',
+                ip_address=ip_address
+            )
         return save_photometry_data_for_target_to_csv_file(target_id)
 
 
 class TargetDownloadRadioDataView(TargetDownloadDataView):
     def generate_data_method(self, target_id):
+        ip_address = get_client_ip(self.request)
+        DownloadedTarget.objects.create(
+                user=self.request.user,
+                target_id=target_id,
+                download_type='R',
+                ip_address=ip_address
+            )
         return save_radio_data_for_target_to_csv_file(target_id)
 
 
@@ -714,3 +730,19 @@ class UpdateReducedDatum(LoginRequiredMixin, RedirectView):
 
             return HttpResponseRedirect(reverse('targets:detail', kwargs={'pk': target.id}))
 
+
+
+
+class TargetNotFoundView(View):
+    template_name = 'bhtom_targets/target_not_exist_error.html'
+    
+    def get(self, request, *args, **kwargs):
+        # Get the target_name from the query parameters
+        target_name = request.GET.get('target_name', 'Unknown Target')
+        try:
+            alias = TargetName.objects.get(name=target_name)
+            context = {'target_name': target_name, 'alias': alias.name, 'target_alias': alias.target}
+        except Exception as e:
+            alias = None
+            context = {'target_name': target_name, 'alias': None, 'target_alias': None}
+        return render(request, self.template_name, context)

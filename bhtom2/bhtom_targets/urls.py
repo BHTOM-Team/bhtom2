@@ -4,11 +4,11 @@ from bhtom_base.bhtom_targets.views import TargetAddRemoveGroupingView, TargetDe
     TargetExportView, TargetGroupingCreateView, TargetGroupingDeleteView, TargetGroupingView, TargetNameSearchView, \
     TargetDetailView
 from .rest.views import CleanTargetListCache, GetTargetListApi, CleanTargetDetailsCache, TargetCreateApi, \
-    TargetUpdateApi, TargetDeleteApi, GetPlotsApiView, TargetDownloadRadioDataApiView, TargetDownloadPhotometryDataApiView
+    TargetUpdateApi, TargetDeleteApi, GetPlotsApiView, TargetDownloadRadioDataApiView, TargetDownloadPhotometryDataApiView, GetDownloadedTargetListApi
 
 from .views import TargetCreateView, TargetUpdateView, TargetGenerateTargetDescriptionLatexView, TargetImportView, \
     TargetDownloadPhotometryStatsLatexTableView, TargetListImagesView, TargetDownloadPhotometryDataView, \
-    TargetDownloadRadioDataView, TargetMicrolensingView, TargetListView, UpdateReducedDatum
+    TargetDownloadRadioDataView, TargetMicrolensingView, TargetListView, UpdateReducedDatum, TargetNotFoundView
 
 from bhtom_base.bhtom_common.api_router import SharedAPIRootRouter
 
@@ -27,8 +27,10 @@ urlpatterns = [
      path('updateTarget/<str:name>/', TargetUpdateApi.as_view()),
      path('deleteTarget/', TargetDeleteApi.as_view()),
      path('get-plots/', GetPlotsApiView.as_view()),
+     path('get-downloaded-target-list/', GetDownloadedTargetListApi.as_view()),
      path('download-radio/', TargetDownloadRadioDataApiView.as_view()),
      path('download-photometry/', TargetDownloadPhotometryDataApiView.as_view()),
+     path('target_not_found/', TargetNotFoundView.as_view(), name='target_not_found'),
      path('', TargetListView.as_view(), name='list'),
      path('', TargetListView.as_view(), name='targets'),
      path('create/', TargetCreateView.as_view(), name='create'),
@@ -66,5 +68,5 @@ urlpatterns = [
          name='detail'),
      path('<str:name>/', TargetDetailView.as_view(template_name='bhtom_targets/target_detail.html'),
          name='detail'),
-     path('update-reduced-data/<int:pk>', UpdateReducedDatum.as_view(), name='update-reduced-data')
+     path('update-reduced-data/<int:pk>', UpdateReducedDatum.as_view(), name='update-reduced-data'),
 ]
