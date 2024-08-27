@@ -14,15 +14,6 @@
     </div>
 
     <div class="mb-4">
-        <h3>Number of Data Products sent by each user:</h3>
-        <ul>
-            {% for username, count in weeks.0.user_data_count.items %}
-            <li>{{ username }}: {{ count }} Data Products</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div class="mb-4">
         <h3>New targets added in the last week:</h3>
         <table class="table table-striped">
             <thead>
@@ -34,6 +25,7 @@
                     <th>mag_last</th>
                     <th>sun_separation</th>
                     <th>classification</th>
+                    <th>description</th>
                 </tr>
             </thead>
             <tbody>
@@ -46,10 +38,15 @@
                     <td>{{ target.mag_last }}</td>
                     <td>{{ target.sun_separation }}</td>
                     <td>{{ target.classification }}</td>
+                    <td>{{ target.description }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+
+    <div class="mb-4">
+        <h3>Last week's total of new Targets: {{ weeks.0.new_targets_count }}</h3>
     </div>
 
     <div class="mb-4">
@@ -82,45 +79,67 @@
             <thead>
                 <tr>
                     <th>Camera</th>
-                    <th>Target</th>
-                    <th>RA</th>
-                    <th>Dec</th>
+                    <th>Targets</th>
                 </tr>
             </thead>
             <tbody>
                 {% for camera, targets in weeks.0.camera_data.items %}
-                    {% for target in targets %}
-                    <tr>
-                        <td>{{ camera }}</td>
-                        <td>{{ target.target_name }}</td>
-                        <td>{{ target.target_ra }}</td>
-                        <td>{{ target.target_dec }}</td>
-                    </tr>
-                    {% endfor %}
+                <tr>
+                    <td>{{ camera }}</td>
+                    <td>
+                        <ul>
+                            {% for target in targets %}
+                            <li>{{ target.target_name }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
     <div class="mb-4">
-        <h3>Observers</h3>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Username</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in weeks.0.observers %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ user.username }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <h3>Last week's total of dataproducts processed: {{ weeks.0.new_dataproducts_count }} ({{ weeks.0.new_dataproducts_succeeded }} with success)</h3>
     </div>
-</div>
 
+    <div class="mb-4">
+        <h3>Last week's fits uploads score:</h3>
+        <ul>
+            {% for username, count in weeks.0.user_data_count %}
+            <li>{{ username }}: {{ count }} Data Products</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <hr>
+        <div class="line-separator"></div>
+    <hr>
+
+    <div class="mb-4">
+        <h3>Total Users: {{ weeks.0.all_users_count }}</h3>
+    </div>
+
+    <div class="mb-4">
+        <h3>Total Targets: {{ weeks.0.targets_count }}</h3>
+    </div>
+
+    <div class="mb-4">
+        <h3>Total dataproducts processed: {{ weeks.0.all_dataproducts_count }} ({{ weeks.0.all_dataproducts_succeeded }} with success)</h3>
+    </div>
+
+    <div class="mb-4">
+        <h3>Total observed targets: {{ weeks.0.all_observed_targets }}</h3>
+    </div>
+
+    <div class="mb-4">
+        <h3>Top 5 data uploaders:</h3>
+        <ul>
+            {% for username, count in weeks.0.all_user_data_count %}
+            <li>{{ username }}: {{ count }} Data Products</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+</div>
 {% endblock content %}

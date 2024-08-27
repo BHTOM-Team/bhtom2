@@ -1,0 +1,22 @@
+{% extends 'bhtom_common/base.html' %}
+{% load bootstrap4 static %}
+
+{% block title %}Target Not Found{% endblock %}
+
+{% block content %}
+<h3>Target Not Found</h3>
+{% if target_alias %}
+    <p>The target with the name "{{ target_name }}" does not exist. However, there is an existing target with the alias name "{{ target_alias }}".</p>
+    <p>You can view or manage this existing target by following the link below:</p>
+    <ul>
+      <li><a href="{% url 'bhtom_targets:detail' name=target_alias %}">View the target "{{ target_alias }}"</a></li>
+    </ul>
+{% else %}
+    <p>The page for the target "{{ target_name }}" does not exist.</p>
+    <p>You can:</p>
+    <ul>
+      <li><a href="{% url 'bhtom_targets:create' %}?name={{ target_name }}">Create a new target with the name "{{ target_name }}"</a></li>
+      <li><a href="{% url 'bhtom_base.bhtom_catalogs:query' %}">Create by Catalogue Search</a></li>
+    </ul>
+{% endif %}
+{% endblock %}

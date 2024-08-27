@@ -10,6 +10,8 @@ from django.core import serializers
 from bhtom2.bhtom_calibration.models import Catalogs as calibration_catalog
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum
 from bhtom_base.bhtom_targets.models import Target
+from bhtom2.utils.api_pagination import StandardResultsSetPagination
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -19,83 +21,130 @@ import re
 from django.conf import settings
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_calibration.views')
 
-
 class CalibrationResultsApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    
+    pagination_class = StandardResultsSetPagination
+
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
                 'files': openapi.Schema(type=openapi.TYPE_ARRAY,
-                items=openapi.Schema(type=openapi.TYPE_INTEGER),),
+                    items=openapi.Schema(type=openapi.TYPE_INTEGER),
+                ),
                 'getPlot': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'page': openapi.Schema(type=openapi.TYPE_INTEGER, description='Page number for pagination'),
             },
-            required=['fileId', 'getPlot']
+            required=['files', 'getPlot']
         ),
         manual_parameters=[
             openapi.Parameter(
-            name='Authorization',
-            in_=openapi.IN_HEADER,
-            type=openapi.TYPE_STRING,
-            required=True,
-            description='Token <Your Token>'
-        ),
-    ],
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
     )
-
     def post(self, request):
-        files = request.data['files']
-        getPlot = request.data['getPlot']
-        results = {}
+        files = request.data.get('files')
+        getPlot = request.data.get('getPlot', False)
+        page = request.data.get('page', 1)
         base_path = settings.DATA_PLOTS_PATH
+        
+        if files is None:
+            return Response({"Error": "'files' field are required."}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             user = Token.objects.get(key=request.auth.key).user
+            calibration_data_list = []
             for file in files:
                 if isinstance(file, str):
-                    instance = Calibration_data.objects.get(dataproduct__data__contains= file)
+                    instance = Calibration_data.objects.get(dataproduct__data__contains=file)
                     dp = DataProduct.objects.get(data__contains=file)   
                 elif isinstance(file, int):
                     instance = Calibration_data.objects.get(dataproduct_id=file)
                     dp = DataProduct.objects.get(id=file)
-                if(instance.dataproduct.user_id == user.id or user.is_superuser):
+
+                if instance.dataproduct.user_id == user.id or user.is_superuser:
                     serialized_data = serializers.serialize('json', [instance])
-                    data = json.loads(serialized_data)[0] 
-                    results[instance.id] = data["fields"]
+                    data = json.loads(serialized_data)[0]
+                    result = data["fields"]
                     if getPlot:
                         target = dp.target
                         if target.photometry_plot:
                             with open(base_path + str(target.photometry_plot), 'r') as json_file:
                                 plot = json.load(json_file)
-                                results[instance.id] = {"calib-res":  data["fields"] ,"plot": plot}
+                                result["plot"] = plot
+                        else:
+                            result["plot"] = None
                     else:
-                        results[instance.id] ={"calib-res":  data["fields"] ,"plot": None}
+                        result["plot"] = None
+                    calibration_data_list.append(result)
                 else:
-                        results[instance.id] ={"calib-res":  "It's not yours data","plot": None}
+                    calibration_data_list.append({"calib-res": "It's not your data", "plot": None})
+
+            paginator = Paginator(calibration_data_list, self.pagination_class.max_page_size)
+            try:
+                paginated_data = paginator.page(page)
+            except PageNotAnInteger:
+                paginated_data = paginator.page(1)
+            except EmptyPage:
+                paginated_data = paginator.page(paginator.num_pages)
+
+            response_data = {
+                'count': paginator.count,
+                'num_pages': paginator.num_pages,
+                'current_page': paginated_data.number,
+                'data': list(paginated_data)
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+
         except Calibration_data.DoesNotExist:
             return Response({"Error": 'File does not exist in the database'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"Error": 'something went wrong' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response({"Result": results}, status=status.HTTP_200_OK)
+            return Response({"Error": 'Something went wrong: ' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def list(self, request, *args, **kwargs):
         ret = super().list(request, *args, **kwargs)
         return ret
-
+    
 
 class GetCatalogsApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
 
     def get(self, request):
+        page_number = request.query_params.get('page', 1)
+
         try:
-            instance = calibration_catalog.objects.all().values('filters')
+            queryset = calibration_catalog.objects.all().values('filters')
+
+            paginator = Paginator(queryset, self.pagination_class.max_page_size)
+
+            try:
+                paginated_data = paginator.page(page_number)
+            except PageNotAnInteger:
+              
+                paginated_data = paginator.page(1)
+            except EmptyPage:
+                paginated_data = paginator.page(paginator.num_pages)
+
+            response_data = {
+                'count': paginator.count,
+                'num_pages': paginator.num_pages,
+                'current_page': paginated_data.number,
+                'data': list(paginated_data)
+            }
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+        
         except Exception as e:
             return Response({"Error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response({"Catalogs": instance}, status=status.HTTP_200_OK)
-
 
 class GetCpcsArchiveDataApiView(APIView):
     authentication_classes = [TokenAuthentication]
