@@ -7,11 +7,14 @@ from django.db import transaction
 
 import logging
 from django.db.models import Q
+import json
 
 from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix, Camera
 from bhtom2.bhtom_observatory.rest.serializers import ObservatorySerializers, CameraSerializer
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from bhtom2.utils.api_pagination import StandardResultsSetPagination
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +24,7 @@ class GetObservatoryApi(views.APIView):
     permission_classes = [IsAuthenticated]
 
     serializer_class = ObservatorySerializers
+    pagination_class = StandardResultsSetPagination
 
     @swagger_auto_schema(
         request_body=openapi.Schema(
@@ -31,6 +35,7 @@ class GetObservatoryApi(views.APIView):
                 'lat': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'created_start': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'created_end': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+                'page': openapi.Schema(type=openapi.TYPE_INTEGER, description='Page number for pagination'),
             },
             required=[]
         ),
@@ -52,6 +57,8 @@ class GetObservatoryApi(views.APIView):
         lat = self.request.data.get('lat', None)
         created_start = self.request.data.get('created_start', None)
         created_end = self.request.data.get('created_end', None)
+        page = self.request.data.get('page', 1)  
+     
 
         if name is not None:
             query &= Q(name=name)
@@ -65,8 +72,26 @@ class GetObservatoryApi(views.APIView):
             query &= Q(created__lte=created_end)
 
         queryset = Observatory.objects.filter(query).order_by('created')
+
+        paginator = Paginator(queryset, self.pagination_class.max_page_size)
+        
+        try:
+            paginated_queryset = paginator.page(page)
+        except PageNotAnInteger:
+            paginated_queryset = paginator.page(1)
+        except EmptyPage:
+            paginated_queryset = paginator.page(paginator.num_pages)
+
+
         serialized_queryset =  self.serializer_class(queryset,many=True).data
-        return Response(serialized_queryset, status=200)
+        response_data = {
+            'count': paginator.count,
+            'num_pages': paginator.num_pages,
+            'current_page': paginated_queryset.number,
+            'data': serialized_queryset
+        }
+
+        return Response(response_data, status=200)
 
 
 class CreateObservatoryApi(views.APIView):
@@ -207,7 +232,8 @@ class UpdateObservatoryApi(views.APIView):
 class GetObservatoryMatrixApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-
+    pagination_class = StandardResultsSetPagination
+    
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -217,6 +243,7 @@ class GetObservatoryMatrixApi(views.APIView):
                 'camera': openapi.Schema(type=openapi.TYPE_STRING),
                 'created_start': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'created_end': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+                'page': openapi.Schema(type=openapi.TYPE_INTEGER, description='Page number for pagination'),
             },
             required=[]
         ),
@@ -238,6 +265,7 @@ class GetObservatoryMatrixApi(views.APIView):
         camera = self.request.data.get('camera', None)
         created_end = self.request.data.get('created_end', None)
         created_start = self.request.data.get('created_start', None)
+        page = self.request.data.get('page', 1)  
         
         if user is not None:
             query &= Q(user=user)
@@ -251,8 +279,25 @@ class GetObservatoryMatrixApi(views.APIView):
             query &= Q(created__lte=created_end)
         try:
             queryset = ObservatoryMatrix.objects.filter(query).order_by('created')
+            paginator = Paginator(queryset,self.pagination_class.max_page_size) 
+            try:
+                paginated_queryset = paginator.page(page)
+            except PageNotAnInteger:
+                paginated_queryset = paginator.page(1)
+            except EmptyPage:
+                paginated_queryset = paginator.page(paginator.num_pages)
+
             serialized_queryset = serializers.serialize('json', queryset)
-            return Response(serialized_queryset, status=200)
+            serialized_data = json.loads(serialized_queryset)
+            fields_only = [item['fields'] for item in serialized_data]
+            response_data = {
+                'count': paginator.count,
+                'num_pages': paginator.num_pages,
+                'current_page': paginated_queryset.number,
+                'data': fields_only
+            }
+            
+            return Response(response_data, status=200)
         except Exception as e:
              return Response("Oops, somthing went wrong: " + str(e) , status=400)
 

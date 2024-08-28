@@ -664,9 +664,12 @@ class DataProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
         return self.request.user == data_product.user or self.request.user.is_superuser
 
     def delete(self, request, *args, **kwargs):
+        data_product = self.get_object()
         response = super().delete(request, *args, **kwargs)
         messages.success(request, 'Data product deleted successfully.')
+        logger.error(f'DataProduct {data_product.id} deleted by {request.user}')
         return response
+
 
     def handle_no_permission(self):
         messages.error(self.request, 'You do not have permission to delete this data product.')

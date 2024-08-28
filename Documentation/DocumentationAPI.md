@@ -174,14 +174,14 @@ The script will display the response from the API with a calibration result, so 
 
 <!-- ### Description -->
 
-<!-- This Python script allows you to retrieve a list of catalogues from the BHTOM2 system using the `get_catalogs` API. It provides a command-line interface for making GET requests with proper authorization. -->
+<!-- This Python script allows you to retrieve a list of catalogues from the BHTOM2 system using the `get_catalogs` API. It provides a command-line interface for making GET requests with proper authorization. API returns 1000 records by request, use parametr "page" to get more-->
 
 <!-- TOKEN is required! -->
 <!-- 
 ### Endpoint
 
 - **Method**: GET
-- **URL**: `/calibration/get-catalogs/`
+- **URL**: `/calibration/get-catalogs/?page=1`
 
 ## Usage
 
@@ -195,7 +195,7 @@ python get_catalogs_script.py <token>
 
 ### Example Usage
 
-python get_catalogs_script.py https://example.com/get_catalogs_api abc123
+python get_catalogs_script.py abc123 1
 
 ### Response
 
@@ -206,15 +206,13 @@ The script will make a GET request to the API and display the list of available 
 Python 3.x
 The requests library (install with pip install requests)
 
-Certainly! Here's the documentation for the `curl` command you provided in Markdown format:
-
 --- -->
 
 
 ### Description
  <!-- /calibration/get-calibration-res/ -->
 
-This API endpoint allows users to retrieve calibration results for previously uploaded observations.
+This API endpoint allows users to retrieve calibration results for previously uploaded observations. For 1 request you can get only 1000 records, if you want more - use "page" in request to get other records.
 
 <!-- TOKEN is required! -->
 
@@ -232,9 +230,9 @@ This API endpoint allows users to retrieve calibration results for previously up
 
 ### Request Body
 
-- `files` (array): Array containing file IDs or files name or both of them for calibration
+- `files` (array, required): Array containing file IDs or files name or both of them for calibration
 - `getPlot` (boolean): Flag to indicate whether to retrieve the calibration plot
-
+- `page` (integer): The number of page 
 ### Example Request
 
 ```bash
@@ -246,7 +244,8 @@ curl -X 'POST' \
   -H 'X-CSRFToken: uUz2fRnXhPuvD9YuuiDW9cD1LsajeaQnE4hwtEAfR00SgV9bD5HCe5i8n4m4KcOr' \
   -d '{
     "files": [1, 'fileName', 2 'fileName2'],
-    "getPlot": true
+    "getPlot": true,
+    "page": 2
   }'
 ```
     You can use script as well
@@ -264,7 +263,7 @@ curl -X 'POST' \
 ## 1. Observatory List
 <!-- /observatory/getObservatoryList/ -->
     
-    This API endpoint allows users to get the list of observatories registered in the system.
+    This API endpoint allows users to get the list of observatories registered in the system. You can get 1000 record per one request, use "page" to get more records
 
     <!-- TOKEN is required! -->
 
@@ -281,6 +280,8 @@ curl -X 'POST' \
 - `active_flg` (boolean): A flag to indicate whether an item is active.
 - `created_start` (string): A date and time parameter for specifying a start date.
 - `created_end` (string): A date and time parameter for specifying an end date.
+- `page` (number): The number of requested page.
+
 
 ### Example Request Body (Optional)
 
@@ -291,7 +292,8 @@ curl -X 'POST' \
   "lat": 45.678,
   "active_flg": true,
   "created_start": "2023-09-01T12:00:00Z",
-  "created_end": "2023-09-30T23:59:59Z"
+  "created_end": "2023-09-30T23:59:59Z",
+  "page": 1,
 }
 ```
 
@@ -316,7 +318,8 @@ curl -X 'POST' \
   "lat": 0,
   "active_flg": true,
   "created_start": "2023-09-28T14:00:09.440Z",
-  "created_end": "2023-09-28T14:00:09.440Z"
+  "created_end": "2023-09-28T14:00:09.440Z",
+  "page": 1
 }'
 ```
 
@@ -535,6 +538,7 @@ python create_observatory.py --name "My Observatory" --lon 45.12345 --lat -120.6
 
 ## Request Parameters
 
+You can requested only 1000 records per request, use pramater "page" to get more records 
 The request to retrieve observatory matrix data can include the following parameters in the request body:
 
 - `user` (string, optional): Filter observatory matrix data by the username of the user associated with the observatory.
@@ -542,6 +546,7 @@ The request to retrieve observatory matrix data can include the following parame
 - `camera` (string, optional): Filter observatory matrix data by the camera name or identifier.
 - `created_start` (string, datetime format, optional): Filter observatory matrix data to include only records created on or after the specified date and time.
 - `created_end` (string, datetime format, optional): Filter observatory matrix data to include only records created on or before the specified date and time.
+-  `page` (number): The number of requested page.
 
 ### Example Request Body
 
@@ -917,6 +922,7 @@ You can use a Python script to update an existing target with Token Authenticati
 
 This API allows users to obtain a list of targets. 
 This API supports filtering targets by name, Right Ascension (RA) range, and Declination (Dec) range.
+You can requested only 1000 records per request, use pramater "page" to get more records 
 
 ### Request
 
@@ -932,6 +938,7 @@ The request to retrieve the target list may include the following query paramete
 - `raMax` (number, optional): The maximum Right Ascension (RA) value, represented as a floating-point number.
 - `decMin` (number, optional): The minimum Declination (Dec) value, represented as a floating-point number.
 - `decMax` (number, optional): The maximum Declination (Dec) value, represented as a floating-point number.
+- `page` (number, optional): The number of requested page
 <!-- TODO: need more fields!! -->
 ### Example Request
 
@@ -1096,6 +1103,52 @@ curl -X POST \
 ```
 
 Replace `<yourToken>` with your valid authentication token.
+
+
+## 8 Downloaded Target List (ADMIN ONLY)
+<!-- targets/get-downloaded-target-list/ -->
+
+This API allows admin users to obtain a list of downloaded targets. 
+This API supports filtering downloaded targets by target name, username, creation date range, and download type.
+You can request only 1000 records per request; use the parameter "page" to get more records.
+
+### Request
+
+- **Method**: POST
+- **URL**: `/targets/get-downloaded-target-list/`
+
+### Request Parameters
+
+The request to retrieve the downloaded target list may include the following query parameters:
+
+- `target` (string, optional): The name or identifier of the target.
+- `user` (string, optional): The username of the user who downloaded the target.
+- `created_from` (string, optional): The start date-time (ISO format) for filtering downloads based on creation date.
+- `created_to` (string, optional): The end date-time (ISO format) for filtering downloads based on creation date.
+- `download_type` (string, optional): The type of download.
+- `page` (number, optional): The number of the requested page.
+
+### Example Request
+
+You can make a POST request to retrieve a list of downloaded targets based on the specified criteria using the `curl` command or a web browser.
+
+### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Authorization: Token <yourToken>" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "target": "MyTarget",
+        "user": "admin",
+        "created_from": "2023-01-01T00:00:00Z",
+        "created_to": "2024-01-01T00:00:00Z",
+        "download_type": "R",
+        "page": 1
+      }' \
+  "https://bh-tom2.astrolabs.pl/targets/getDownloadedTargetList/"
+
+```
 
 # DATAPRODUCT API
 
