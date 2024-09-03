@@ -4,6 +4,9 @@ from django.db import transaction
 import requests
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from django.views.generic import TemplateView
+import json
+
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django_guid import get_guid
@@ -25,7 +28,7 @@ from django_tables2.views import SingleTableMixin
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, CCDPhotJob, SpectroscopyDatum
 from django.contrib import messages
 from collections import defaultdict
-
+import json
 from rest_framework import views
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -541,79 +544,22 @@ class GetDataProductApi(views.APIView):
     
 
 
-class NewsletterView(LoginRequiredMixin, ListView):
+
+class NewsletterView(LoginRequiredMixin, TemplateView):
     template_name = 'bhtom_common/newsletter.html'
-    context_object_name = 'weeks'
 
-    def get_queryset(self):
-        now = timezone.now()
-        start_of_last_week = now - timedelta(days=now.weekday() + 7)
-        end_of_last_week = start_of_last_week + timedelta(days=6)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            file_path = settings.DATA_CACHE_PATH + '/newsletter/newsletter_data.json'
+            with open(file_path, 'r') as f:
+                data = json.load(f)
+                data['start_date'] = datetime.fromisoformat(data['start_date'])
+                data['end_date'] = datetime.fromisoformat(data['end_date'])
+        except FileNotFoundError:
+            logger.error("Newsletter file not found")
+            data = {}
         
-        # New users and targets statistics
-        new_users_count = User.objects.filter(date_joined__gte=start_of_last_week, date_joined__lt=end_of_last_week).count()
-        new_targets = Target.objects.filter(created__gte=start_of_last_week, created__lt=end_of_last_week)
-        
-        # Data products statistics
-        new_dataproducts = DataProduct.objects.filter(created__gte=start_of_last_week, created__lt=end_of_last_week)
-        new_dataproducts_succeeded = new_dataproducts.filter(status='S').count()
 
-        
-        # All-time statistics
-        all_users_count = User.objects.all().count()
-        all_targets_count = Target.objects.all().count()
-        all_dataproducts = DataProduct.objects.all()
-        all_dataproducts_succeeded = all_dataproducts.filter(status='S').count()
-        all_observed_targets_count = Target.objects.filter(id__in=all_dataproducts.values_list('target_id', flat=True)).distinct().count()
-        
-        # Observers and data upload statistics
-        user_data_count = self._get_user_data_count(new_dataproducts)
-        all_user_data_count = self._get_user_data_count(all_dataproducts, top_n=5)
-        
-        # Camera and targets statistics
-        camera_data = self._get_camera_data(new_dataproducts)
-
-        # Prepare data for the template
-        data = {
-            'start_date': start_of_last_week,
-            'end_date': end_of_last_week,
-            'new_users_count': new_users_count,
-            'new_targets': new_targets,
-            'new_targets_count': new_targets.count(),
-            'new_dataproducts_count': new_dataproducts.count(),
-            'new_dataproducts_succeeded': new_dataproducts_succeeded,
-            'observed_targets': Target.objects.filter(id__in=new_dataproducts.values_list('target_id', flat=True)).distinct(),
-            'user_data_count': user_data_count,
-            'camera_data': dict(camera_data),
-            'all_users_count': all_users_count,
-            'targets_count': all_targets_count,
-            'all_dataproducts_count': all_dataproducts.count(),
-            'all_dataproducts_succeeded': all_dataproducts_succeeded,
-            'all_observed_targets': all_observed_targets_count,
-            'all_user_data_count': all_user_data_count
-        }
-
-        return [data]
-
-    def _get_user_data_count(self, dataproducts, top_n=None):
-        user_data_count = defaultdict(int)
-        for dp in dataproducts:
-            user_data_count[dp.user.username] += 1
-        sorted_data = sorted(user_data_count.items(), key=lambda item: item[1], reverse=True)
-        return sorted_data[:top_n] if top_n else sorted_data
-
-    def _get_camera_data(self, dataproducts):
-        camera_data = defaultdict(list)
-        seen_pairs = set()
-        for dp in dataproducts:
-            camera_name = dp.observatory.camera.prefix if dp.observatory else 'Unknown'
-            target_name = dp.target.name
-            pair = (camera_name, target_name)
-            if pair not in seen_pairs:
-                seen_pairs.add(pair)
-                camera_data[camera_name].append({
-                    'target_name': target_name,
-                    'target_ra': dp.target.ra,
-                    'target_dec': dp.target.dec,
-                })
-        return camera_data
+        context['data'] = data 
+        return context
