@@ -127,7 +127,8 @@ INSTALLED_APPS = [
     'crispy_bootstrap4',
     'drf_yasg',
     'django_guid',
-    'django_prometheus'
+    'django_prometheus',
+    'bhtom2.bhtom_mymodule',
 ]
 
 MIDDLEWARE = [
