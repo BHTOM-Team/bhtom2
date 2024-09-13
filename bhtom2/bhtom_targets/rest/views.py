@@ -420,12 +420,14 @@ class TargetDownloadRadioDataApiView(views.APIView):
             logger.info('Error bad request')
             return Response({"Error": 'Something went wrong'}, status=status.HTTP_400_BAD_REQUEST)
 
-        target_id = serializer.validated_data['name']
+        name = serializer.validated_data['name']
+        target_id = Target.objects.get(name=name).id
+
         logger.info(f'API Generating radio data in CSV file for target with id={target_id}...')
 
         tmp = None
         try:
-            tmp, filename = save_radio_data_for_target_to_csv_file(target_id)
+            tmp, filename = save_radio_data_for_target_to_csv_file(name)
             ip_address = get_client_ip(request)
             DownloadedTarget.objects.create(
                 user=request.user,
@@ -471,12 +473,14 @@ class TargetDownloadPhotometryDataApiView(views.APIView):
         if not serializer.is_valid():
             logger.info('Error bad request')
             return Response({"Error": 'Something went wrong'}, status=status.HTTP_400_BAD_REQUEST)
-        target_id = serializer.validated_data['name']
-        logger.info(f'API Generating photometry CSV file for target with id={target_id}...')
+        name = serializer.validated_data['name']
+        target_id = Target.objects.get(name=name).id
+
+        logger.info(f'API Generating photometry CSV file for target with id={target_id}')
 
         tmp = None
         try:
-            tmp, filename = save_photometry_data_for_target_to_csv_file(target_id)
+            tmp, filename = save_photometry_data_for_target_to_csv_file(name)
             ip_address = get_client_ip(request)
             DownloadedTarget.objects.create(
                 user=request.user,
