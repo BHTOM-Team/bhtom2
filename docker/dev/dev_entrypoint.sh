@@ -13,10 +13,10 @@ fi
 
 echo "Collecting static..."
 
-while ! python manage.py collectstatic --no-input 2>&1; do
-  echo "Collecting static..."
-  sleep 3
-done
+#while ! python manage.py collectstatic --no-input 2>&1; do
+#  echo "Collecting static..."
+#  sleep 3
+#done
 
 echo "Migrating..."
 

@@ -49,6 +49,7 @@ urlpatterns = [
          name='alerts:list'),
     path('', include('django_prometheus.urls')),
     path('metrics/', custom_metrics, name='custom_metrics'),
+    path('mymodule/', include('bhtom2.bhtom_mymodule.urls', namespace='bhtom_mymodule')),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

@@ -4,10 +4,8 @@
 {% block content %}
     <div class="row">
         <div class="col-lg-9">
-            <h2 class="text-center">Black Hole TOM 2.0</h2>
-            <p class="text-center"><img
-                    src="{% static 'bh_tom_image.jpg' %}"
-                    class="img-fluid mx-auto"></p>
+            <h2 class="text-center">{{ title_text }}</h2>
+            <p class="text-center"><img src="{% static wallpaper %}" class="img-fluid mx-auto"></p>
             <p class="text-center">(Image courtesy of NASA/ESA/Gaia/DPAC)</p>
             <div>
                 <div id="react">
@@ -16,12 +14,17 @@
                     <i class="pending"></i><br><br>
                 </div>
             </div>
+            {% if title_text == "Black Hole TOM 2.0" %}
             <h3 style="color: red;">New version of BHTOM is still in beta-testing</h3>
             <p><a href="https://github.com/BHTOM-Team/bhtom2/blob/bhtom2-dev/Documentation/Documentation.md">Draft version of the documentation</a></p>
             <ul>
                 <li>Some features might not work</li>
                 <li>Report to us in case of problems</li>
             </ul>
+            {% elif title_text == "OCA TOM" %}
+            <h3 style="color: blue;">OCM Observatory proposals, targets and observations database</h3>
+            <p>Here you can find various astronomical data and tools specific to the OCA TOM project.</p>
+            {% endif %}
         </div>
         <div class="col-lg-3">
             <div class="card text-white bg-dark">
@@ -42,15 +45,15 @@
 
     <h6>
     <i>        "I have one request, which is this, that the observations shall be made known each year. Observations buried in a desk are no observations. Should they be entrusted to me for reduction, or even for publication, I will undertake it with joy and thanks, and will also answer all questions with care and with the greatest pleasure.”
-    </i>   
+    </i>
     <br>
     <p style="text-align:right;">
     Friedrich Wilhelm August Argelander, 1844 <br>
         “An Appeal to the Friends of Astronomy” in Schumacher's Astronomical Year Book<br>
         translated by Annie Jump Cannon, Popular Astronomy, 1912
-    </p>       
-        </h6>
-<!--- from https://cosmoquest.org/x/365daysofastronomy/2010/01/24/january-24th-friedrich-wilhelm-august-argelander/-->        
+    </p>
+    </h6>
+<!--- from https://cosmoquest.org/x/365daysofastronomy/2010/01/24/january-24th-friedrich-wilhelm-august-argelander/-->
     <script>
         {#window.props = {{props|json}};  // make sure to escape your props to prevent XSS! See here for the source for the json filter: https://gist.github.com/pirate/c18bfe4fd96008ffa0aef25001a2e88f#}
         window.react_mount = document.getElementById('react');
