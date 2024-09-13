@@ -6,11 +6,11 @@
     <h1>Greetings from the BHTOM Newsletter, here are some statistics of our system!</h1>
 
     <div class="mb-4">
-        <h5>Week from {{ weeks.0.start_date|date:"Y-m-d" }} to {{ weeks.0.end_date|date:"Y-m-d" }}</h5>
+        <h5>Week from {{ data.start_date|date:"Y-m-d" }} to {{ data.end_date|date:"Y-m-d" }}</h5>
     </div>
 
     <div class="mb-4">
-        <h4>We have {{ weeks.0.new_users_count }} new registered users!</h4>
+        <h4>We have {{ data.new_users_count }} new registered users!</h4>
     </div>
 
     <div class="mb-4">
@@ -29,28 +29,26 @@
                 </tr>
             </thead>
             <tbody>
-                {% for target in weeks.0.new_targets %}
+                {% for target in data.new_targets %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ target.name }}</td>
-                    <td>{{ target.ra }}</td>
-                    <td>{{ target.dec }}</td>
-                    <td>{{ target.mag_last }}</td>
-                    <td>{{ target.sun_separation }}</td>
-                    <td>{{ target.classification }}</td>
-                    <td>{{ target.description }}</td>
+                    <td><a href="{% url 'bhtom_targets:detail' name=target.0 %}">{{ target.0 }}</a></td>
+                    <td>{{ target.1 }}</td>
+                    <td>{{ target.2 }}</td>
+                    <td>{{ target.3 }}</td>
+                    <td>{{ target.4 }}</td>
+                    <td>{{ target.5 }}</td>
+                    <td>{{ target.6 }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
-    <div class="mb-4">
-        <h3>Last week's total of new Targets: {{ weeks.0.new_targets_count }}</h3>
-    </div>
+    <h5>In addition, here are some older targets that are currently visible and requested for observations. These targets have an importance greater than 4, a sun separation greater than 70, and a magnitude less than 18. They are also sorted by magnitude.</h5>
 
     <div class="mb-4">
-        <h3>Last week's observed targets:</h3>
+        <h3>North (dec>0):</h3>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -58,15 +56,55 @@
                     <th>Name</th>
                     <th>RA</th>
                     <th>Dec</th>
+                    <th>mag_last</th>
+                    <th>sun_separation</th>
+                    <th>classification</th>
+                    <th>description</th>
                 </tr>
             </thead>
             <tbody>
-                {% for target in weeks.0.observed_targets %}
+                {% for target in data.observed_targets_north %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ target.name }}</td>
-                    <td>{{ target.ra }}</td>
-                    <td>{{ target.dec }}</td>
+                    <td><a href="{% url 'bhtom_targets:detail' name=target.0 %}">{{ target.0 }}</a></td>
+                    <td>{{ target.1 }}</td>
+                    <td>{{ target.2 }}</td>
+                    <td>{{ target.3 }}</td>
+                    <td>{{ target.4 }}</td>
+                    <td>{{ target.5 }}</td>
+                    <td>{{ target.6 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mb-4">
+        <h3>South (dec<0):</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>RA</th>
+                    <th>Dec</th>
+                    <th>mag_last</th>
+                    <th>sun_separation</th>
+                    <th>classification</th>
+                    <th>description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for target in data.observed_targets_south %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><a href="{% url 'bhtom_targets:detail' name=target.0 %}">{{ target.0 }}</a></td>
+                    <td>{{ target.1 }}</td>
+                    <td>{{ target.2 }}</td>
+                    <td>{{ target.3 }}</td>
+                    <td>{{ target.4 }}</td>
+                    <td>{{ target.5 }}</td>
+                    <td>{{ target.6 }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -83,15 +121,13 @@
                 </tr>
             </thead>
             <tbody>
-                {% for camera, targets in weeks.0.camera_data.items %}
+                {% for camera, targets in data.camera_data.items %}
                 <tr>
                     <td>{{ camera }}</td>
                     <td>
-                        <ul>
-                            {% for target in targets %}
-                            <li>{{ target.target_name }}</li>
-                            {% endfor %}
-                        </ul>
+                        {% for target in targets %}
+                            <a href="{% url 'bhtom_targets:detail' name=target.target_name %}">{{ target.target_name }}</a>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -100,13 +136,13 @@
     </div>
 
     <div class="mb-4">
-        <h3>Last week's total of dataproducts processed: {{ weeks.0.new_dataproducts_count }} ({{ weeks.0.new_dataproducts_succeeded }} with success)</h3>
+        <h3>Last week's total of dataproducts processed: {{ data.new_dataproducts_count }} ({{ data.new_dataproducts_succeeded }} with success)</h3>
     </div>
 
     <div class="mb-4">
-        <h3>Last week's fits uploads score:</h3>
+        <h3>Number of fits uploaded per user:</h3>
         <ul>
-            {% for username, count in weeks.0.user_data_count %}
+            {% for username, count in data.user_data_count %}
             <li>{{ username }}: {{ count }} Data Products</li>
             {% endfor %}
         </ul>
@@ -117,25 +153,25 @@
     <hr>
 
     <div class="mb-4">
-        <h3>Total Users: {{ weeks.0.all_users_count }}</h3>
+        <h3>Total Users: {{ data.all_users_count }}</h3>
     </div>
 
     <div class="mb-4">
-        <h3>Total Targets: {{ weeks.0.targets_count }}</h3>
+        <h3>Total Targets: {{ data.targets_count }}</h3>
     </div>
 
     <div class="mb-4">
-        <h3>Total dataproducts processed: {{ weeks.0.all_dataproducts_count }} ({{ weeks.0.all_dataproducts_succeeded }} with success)</h3>
+        <h3>Total dataproducts processed: {{ data.all_dataproducts_count }} ({{ data.all_dataproducts_succeeded }} with success)</h3>
     </div>
 
     <div class="mb-4">
-        <h3>Total observed targets: {{ weeks.0.all_observed_targets }}</h3>
+        <h3>Total observed targets: {{ data.all_observed_targets_count }}</h3>
     </div>
 
     <div class="mb-4">
         <h3>Top 5 data uploaders:</h3>
         <ul>
-            {% for username, count in weeks.0.all_user_data_count %}
+            {% for username, count in data.all_user_data_count %}
             <li>{{ username }}: {{ count }} Data Products</li>
             {% endfor %}
         </ul>
