@@ -10,84 +10,22 @@
             <div class="col-md-12">
                 <ul class="nav nav-tabs" id="tabs">
                     <li class="nav-item">
-                        <span class="nav-link" data-target="#photometry" data-toggle="tab">Photometry File</span>
-                    </li>
-                    <li class="nav-item">
-                        <span class="nav-link active" data-target="#fits" data-toggle="tab">FIts File Error</span>
+                        <span class="nav-link active" data-target="#fits_s" data-toggle="tab">Completed Fits</span>
                     </li>
                 </ul>
                 <div class="tab-content">
-                    <div class="tab-pane" id="photometry">
-                        <form id="photometry-form" action="{% url 'bhtom_common:reload_photometry' %}" method="POST">
+                    <div class="tab-pane active" id="fits_s">
+                        <form id="s-fits-form" action="{% url 'bhtom_common:reload_s_fits' %}" method="POST">
                             {% csrf_token %}
-                            <input type="hidden" id="selected-photometry-ids" name="selected-photometry-ids" value="">
-                            <h4>Delay: {{ delay_fits_error }} days</h4>
-                            <div class="mb-3"> 
-                                <button type="submit" class="btn btn-outline-primary" name="reload-photometry">Reload Photometry</button> 
-                                <button type="submit" class="btn btn-outline-primary ml-1" name="update-photometry">Reload Fits</button>
-                            </div>
-
-                            <table id="photometry-table" class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th class="sort"><input type="checkbox" id="selected-photometry-checkbox" onclick="toggleSelectAll('selected-photometry','photometry-table')"></th>
-                                        <th>Data</th>
-                                        <th>Created</th>
-                                        <th>Observatory</th>
-                                        <th>Target</th>
-                                        <th>User</th>
-                                        <th>Data Type</th>
-                                        <th>Status</th>
-                                        <th>Status Message</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for data in photometry_data %}
-                                        <tr>
-                                            <td><input type="checkbox" name="selected-photometry" value="{{ data.dataProduct.id }}"></td>
-                                            <td><a href="/data/{{ data.dataProduct.data }}">{{ data.dataProduct.data  }}</a></td>
-                                            <td>{{ data.calibData.created }}</td>
-                                            <td>{{ data.dataProduct.observatory }}</td>
-                                            <td><a href="{% url 'bhtom_targets:detail' data.dataProduct.target.name %}">{{ data.dataProduct.target.name }}</a></td>
-                                            <td>{{ data.dataProduct.user.first_name }} {{ data.dataProduct.user.last_name }}</td>
-                                            <td>{{ data.dataProduct.data_product_type }}</td>
-                                            <td>
-                                                {% if data.calibData.status == "C" %}
-                                                    TO DO
-                                                {% elif data.calibData.status == "P" %}
-                                                    IN PROGRESS
-                                                {% elif data.calibData.status == "R" %}
-                                                    Send to calibration
-                                                {% elif data.calibData.status == "S" %}
-                                                    SUCCESS
-                                                {% elif data.calibData.status == "E" %}
-                                                    ERROR
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ data.calibData.status_message }}</td>
-                                        </tr>
-                                    {% empty %}
-                                        <tr>
-                                            <td colspan="9">No data yet.</td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </form>
-                    </div>
-                    <div class="tab-pane active" id="fits">
-                        <form id="fits-form" action="{% url 'bhtom_common:reload_fits' %}" method="POST">
-                            {% csrf_token %}
-                            <input type="hidden" id="selected-fits-ids" name="selected-fits-ids" value="">
+                            <input type="hidden" id="selected-s-fits-ids" name="selected-s-fits-ids" value="">
+                            <h4>Delay: {{ delay_fits}} days</h4>
                             <div class="mb-3">
-                                <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Reload Fits</button>
-                                <button type="submit" class="btn btn-outline-primary ml-1" name="update">Update Fits</button>
-                                <button type="submit" class="btn btn-outline-primary ml-1" name="test_reload">Test Reload Fits</button>
+                                <button type="submit" class="btn btn-outline-primary ml-1" name="reload-fits-s">Restart Fits</button>
                             </div>
-                            <table id="fits-error-table" class="table table-hover">
+                            <table id="fits-table" class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th class="sort"><input type="checkbox" id="selected-fits-checkbox" onclick="toggleSelectAll('selected-fits','fits-error-table')"></th>
+                                        <th class="sort"><input type="checkbox" id="selected-s-fits-checkbox" onclick="toggleSelectAll('selected-s-fits','fits-table')"></th>
                                         <th>Data</th>
                                         <th>Created</th>
                                         <th>Observatory</th>
@@ -97,24 +35,24 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for fits in fits_file %}
+                                    {% for fits in fits_s_file %}
                                         <tr>
-                                            <td><input type="checkbox" name="selected-fits" value="{{ fits.dataProduct.id }}"></td>
-                                            <td><a href="/data/{{ fits.dataProduct.data }}">{{ fits.dataProduct.data  }}</a></td>
-                                            <td>{{ fits.dataProduct.created }}</td>
-                                            <td>{{ fits.dataProduct.observatory }}</td>
-                                            <td><a href="{% url 'bhtom_targets:detail' fits.dataProduct.target.name %}">{{ fits.dataProduct.target.name }}</a></td>
-                                            <td>{{ fits.dataProduct.user.first_name }} {{ fits.dataProduct.user.last_name }}</td>
+                                            <td><input type="checkbox" name="selected-s-fits" value="{{ fits.id }}"></td>
+                                            <td><a href="/data/{{ fits.data }}">{{ fits.data  }}</a></td>
+                                            <td>{{ fits.created }}</td>
+                                            <td>{{ fits.observatory }}</td>
+                                            <td><a href="{% url 'bhtom_targets:detail' fits.target.name %}">{{ fits.target.name }}</a></td>
+                                            <td>{{ fits.user.first_name }}{{ fits.user.last_name }}</td>
                                             <td>
-                                                {% if fits.dataProduct.status == "C" %}
+                                                {% if fits.status == "C" %}
                                                     TO DO
-                                                {% elif fits.dataProduct.status == "P" %}
+                                                {% elif fits.status == "P" %}
                                                     IN PROGRESS
-                                                {% elif fits.dataProduct.status == "R" %}
+                                                {% elif fits.status == "R" %}
                                                     Send to calibration
-                                                {% elif fits.dataProduct.status == "S" %}
+                                                {% elif fits.status == "S" %}
                                                     SUCCESS
-                                                {% elif fits.dataProduct.status == "E" %}
+                                                {% elif fits.status == "E" %}
                                                     ERROR
                                                 {% endif %}
                                             </td>

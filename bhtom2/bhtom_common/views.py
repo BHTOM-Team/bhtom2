@@ -1,12 +1,10 @@
 import os
-from datetime import timedelta, datetime, date
+from datetime import timedelta, datetime
 from django.db import transaction
 import requests
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.views.generic import TemplateView
-import json
-
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django_guid import get_guid
@@ -17,17 +15,14 @@ from django.views import View
 from django.views.generic import ListView, FormView
 
 from settings import settings
-from bhtom_base.bhtom_targets.models import Target
-from bhtom_base.bhtom_dataproducts.models import DataProduct
 from bhtom2.bhtom_calibration.models import Calibration_data
 from bhtom2.bhtom_common.forms import UpdateFitsForm
 from bhtom2.kafka.producer.calibEvent import CalibCreateEventProducer
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom2.utils.api_pagination import StandardResultsSetPagination
 from django_tables2.views import SingleTableMixin
-from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, CCDPhotJob, SpectroscopyDatum
+from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, CCDPhotJob
 from django.contrib import messages
-from collections import defaultdict
 import json
 from rest_framework import views
 from rest_framework.authentication import TokenAuthentication
@@ -38,7 +33,6 @@ from drf_yasg import openapi
 from django.db.models import Q
 from bhtom2.bhtom_common.serializers import DataProductSerializer
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.contrib.auth.models import User
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_common.views')
 
@@ -72,15 +66,7 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
             .exclude(dataProduct__fits_data='') \
             .order_by('-job_id')
 
-        days_delay = timezone.now() - timedelta(days=settings.DELETE_FITS_FILE_DAY)
-
-        context['fits_s_file'] = DataProduct.objects.filter(Q(created__gte=days_delay) &
-                                                            Q(data_product_type='fits_file') &
-                                                            Q(fits_data__isnull=False) &
-                                                            Q(status='S'))
-
         context['photometry_data'] = []
-
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
 
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
@@ -117,6 +103,36 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
 
         return context
 
+
+class DataListCompletedView(SingleTableMixin, LoginRequiredMixin, ListView):
+    """
+    View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
+    """
+    template_name = 'bhtom_common/data_product_management-completed.html'
+    model = DataProduct
+    # table_class = TargetTable
+
+    permission_required = 'bhtom_targets.view_target'
+    table_pagination = False
+    strict = False
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+
+        logger.debug("Prepare DataListCompletedView for Admin")
+
+        if not self.request.user.is_staff:
+            logger.error("The user is not an admin")
+            return redirect(reverse('home'))
+
+        days_delay = timezone.now() - timedelta(days=settings.DELETE_FITS_FILE_DAY)
+
+        context['fits_s_file'] = DataProduct.objects.filter(Q(created__gte=days_delay) &
+                                                            Q(data_product_type='fits_file') &
+                                                            Q(fits_data__isnull=False) &
+                                                            Q(status='S'))
+
+        return context
 
 class ReloadFits(LoginRequiredMixin, View):
 
