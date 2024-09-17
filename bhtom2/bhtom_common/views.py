@@ -559,7 +559,9 @@ class NewsletterView(LoginRequiredMixin, TemplateView):
         except FileNotFoundError:
             logger.error("Newsletter file not found")
             data = {}
-        
+        except Exception as e:
+            logger.error("Error with newsletter " + str(e))
+            data = {}
 
         context['data'] = data 
         return context
