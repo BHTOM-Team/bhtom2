@@ -31,7 +31,8 @@
         <div class="tab-pane active" id="calib">
             <div class="row">
                 <div class="col-md-6">
-                    <h1>Target: {{ target.name }}</h1>
+                    <h1>Target: <a href="{% url 'bhtom_targets:detail' name=target.name %}">{{ target.name }}</a></h1>
+
                     <table class="table">
                         <tbody>
                         <tr>
