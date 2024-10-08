@@ -10,6 +10,9 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.views.generic.edit import CreateView, UpdateView
 
+import os
+from django.http import FileResponse
+
 from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm, TargetLatexDescriptionForm
 from bhtom2.bhtom_targets.hooks import update_force_reducedDatum
 from bhtom2.bhtom_targets.utils import import_targets
@@ -461,8 +464,6 @@ class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
         pass
 
     def get(self, request, *args, **kwargs):
-        import os
-        from django.http import FileResponse
 
         target_id = None
 
@@ -507,6 +508,7 @@ class TargetImportView(LoginRequiredMixin, TemplateView):
         :param request: the request object passed to this view
         :type request: HTTPRequest
         """
+        user = request.user 
         csv_file = request.FILES['target_csv']
         csv_stream = StringIO(csv_file.read().decode('utf-8'), newline=None)
         targets_count = StringIO(csv_file.read().decode('utf-8'), newline=None)
@@ -519,7 +521,7 @@ class TargetImportView(LoginRequiredMixin, TemplateView):
             return redirect(reverse('bhtom_targets:list'))
 
         group_name = request.POST.get('group_name', None)
-        result = import_targets(csv_stream, group_name)
+        result = import_targets(csv_stream, group_name, user)
         messages.success(
             request,
             'Targets created: {}'.format(len(result['targets']))
