@@ -13,7 +13,7 @@ from bhtom2.bhtom_targets.rest.serializers import TargetsSerializers, TargetDown
 from bhtom2.bhtom_targets.utils import update_targetList_cache, update_targetDetails_cache, get_client_ip
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_common.hooks import run_hook
-from bhtom_base.bhtom_targets.models import Target, DownloadedTarget, TargetList
+from bhtom_base.bhtom_targets.models import Target, DownloadedTarget, TargetList, TargetName
 from rest_framework import status
 import json
 from django.conf import settings
@@ -135,6 +135,14 @@ class GetTargetListApi(views.APIView):
 
         serialized_data = json.loads(serialized_queryset)
         fields_only = [item['fields'] for item in serialized_data]
+
+        for target in fields_only:
+            aliases = []
+            try:
+                aliases = TargetName.objects.filter(source_name=target['name']).values_list('name', flat=True)
+            except Exception as e:
+                aliases = []
+            target['aliases'] = aliases
 
         response_data = {
             'count': paginator.count,
