@@ -9,11 +9,11 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR
 from django.contrib.auth.models import User
-from bhtom2.bhtom_targets.rest.serializers import TargetsSerializers, TargetDownloadDataSerializer, DownloadedTargetSerializer
+from bhtom2.bhtom_targets.rest.serializers import TargetsSerializers, TargetDownloadDataSerializer, DownloadedTargetSerializer,TargetsGroupsSerializer
 from bhtom2.bhtom_targets.utils import update_targetList_cache, update_targetDetails_cache, get_client_ip
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_common.hooks import run_hook
-from bhtom_base.bhtom_targets.models import Target, DownloadedTarget
+from bhtom_base.bhtom_targets.models import Target, DownloadedTarget, TargetList
 from rest_framework import status
 import json
 from django.conf import settings
@@ -575,4 +575,208 @@ class GetDownloadedTargetListApi(views.APIView):
             'data': serialized_queryset.data
         }
         
+        return Response(response_data, status=200)
+    
+
+
+class GetTargetsGroups(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'page': openapi.Schema(type=openapi.TYPE_INTEGER, description='Page number for pagination'),
+            },
+            required=[]
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
+    )
+    def post(self, request):
+        page = request.data.get('page', 1)
+
+        if not request.user.is_superuser:
+             return Response("You have no permissions, Admin Only", status=403)
+
+        try:
+            queryset = TargetList.objects.order_by('-created')
+            paginator = Paginator(queryset, self.pagination_class.max_page_size)
+
+            try:
+                paginated_queryset = paginator.page(page)
+            except PageNotAnInteger:
+                paginated_queryset = paginator.page(1)
+            except EmptyPage:
+                paginated_queryset = paginator.page(paginator.num_pages)
+
+            serialized_queryset = TargetsGroupsSerializer(paginated_queryset, many=True)
+        except Exception as e:
+            logger.error("Oops, something went wrong: " + str(e))
+            return Response("Oops, something went wrong " + str(e), status=400)
+        response_data = {
+            'count': paginator.count,
+            'num_pages': paginator.num_pages,
+            'current_page': paginated_queryset.number,
+            'data': serialized_queryset.data
+        }
+        
+        return Response(response_data, status=200)
+    
+class GetTargetsFromGroup(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'page': openapi.Schema(type=openapi.TYPE_INTEGER, description='Page number for pagination'),
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='The Target group id'),
+                'name': openapi.Schema(type=openapi.TYPE_STRING, description='The Target group name'),
+            },
+            required=[]
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
+    )
+    def post(self, request):
+        page = request.data.get('page', 1)
+        group_id = request.data.get('id', None)
+        group_name = request.data.get('name', None)
+        
+        if not request.user.is_superuser:
+            return Response({"detail": "You have no permissions, Admin Only"}, status=403)
+
+        
+        if group_id is None and group_name is None:
+            return Response({"detail": "Please provide either 'id' or 'name' of the target group."}, status=400)
+        elif group_id and group_name:
+            return Response({"detail": "Please provide only one parameter: either 'id' or 'name', not both."}, status=400)
+
+        try:
+         
+            if group_name:
+                target_list = TargetList.objects.get(name=group_name)
+            else:
+                target_list = TargetList.objects.get(id=group_id)
+
+  
+            targets = target_list.targets.all()
+
+     
+            paginator = Paginator(targets, self.pagination_class.max_page_size)
+
+            try:
+                paginated_queryset = paginator.page(page)
+            except PageNotAnInteger:
+                paginated_queryset = paginator.page(1)
+            except EmptyPage:
+                paginated_queryset = paginator.page(paginator.num_pages)
+
+           
+            serialized_queryset = TargetsSerializers(paginated_queryset, many=True)
+
+        except TargetList.DoesNotExist:
+            return Response({"detail": "Target group not found."}, status=404)
+        except Exception as e:
+            logger.error(f"Oops, something went wrong: {str(e)}")
+            return Response({"detail": f"Oops, something went wrong: {str(e)}"}, status=400)
+
+       
+        response_data = {
+            'count': paginator.count,
+            'num_pages': paginator.num_pages,
+            'current_page': paginated_queryset.number,
+            'group': group_name if group_name else group_id,
+            'data': serialized_queryset.data
+        }
+
+        return Response(response_data, status=200)
+
+
+
+class GetAllTargetsFromAllGroups(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'page': openapi.Schema(type=openapi.TYPE_INTEGER, description='Page number for pagination'),
+            },
+            required=[]
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
+    )
+    def post(self, request):
+        page = request.data.get('page', 1)
+
+        if not request.user.is_superuser:
+            return Response({"detail": "You have no permissions, Admin Only"}, status=403)
+
+        try:
+            target_lists = TargetList.objects.all()
+            target_lists = target_lists.exclude(name="old targets not for observing")
+            # Paginate the target groups
+            paginator = Paginator(target_lists, self.pagination_class.max_page_size)
+
+            try:
+                paginated_queryset = paginator.page(page)
+            except PageNotAnInteger:
+                paginated_queryset = paginator.page(1)
+            except EmptyPage:
+                paginated_queryset = paginator.page(paginator.num_pages)
+
+            response_data = {}
+            for target_list in paginated_queryset:
+                targets = target_list.targets.all()
+
+                serialized_queryset = TargetsSerializers(targets, many=True)
+
+                response_data[target_list.name] = {
+                    'count': targets.count(),
+                    'targets': serialized_queryset.data
+                }
+
+            # Build response metadata
+            response_metadata = {
+                'count': paginator.count,
+                'num_pages': paginator.num_pages,
+                'current_page': paginated_queryset.number,
+            }
+
+            response_data['metadata'] = response_metadata
+
+        except Exception as e:
+            logger.error(f"Oops, something went wrong: {str(e)}")
+            return Response({"detail": f"Oops, something went wrong: {str(e)}"}, status=400)
+
         return Response(response_data, status=200)

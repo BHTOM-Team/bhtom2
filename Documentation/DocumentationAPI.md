@@ -1150,6 +1150,118 @@ curl -X POST \
 
 ```
 
+## 9 Get Target Groups (ADMIN ONLY)
+<!-- targets/target-groups/ -->
+
+This API allows **admin users** to retrieve a paginated list of target groups. 
+You can request a specific page of target groups by passing the `page` parameter. Only superusers are authorized to access this endpoint.
+
+### Request
+
+- **Method**: POST
+- **URL**: `/targets/target-groups/`
+
+### Request Parameters
+
+The request to retrieve the target groups may include the following query parameters:
+
+- `page` (integer, optional): The page number for pagination. Defaults to `1` if not provided.
+
+### Headers
+
+- `Authorization` (string, required): The token for authenticating the user. Format: `Token <yourToken>`.
+
+### Example Request
+
+You can make a POST request to retrieve a list of target groups using the `curl` command or an API client like Postman.
+
+### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Authorization: Token <yourToken>" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "page": 1
+      }' \
+  "https://bh-tom2.astrolabs.pl/targets/target-groups/"
+  ```
+
+## 10 Get Targets From Group (ADMIN ONLY)
+<!-- targets/targets-from-group/ -->
+
+This API allows **admin users** to retrieve a paginated list of targets associated with a specific target group. You can specify the target group either by its `id` or `name`, but not both. Only superusers are authorized to access this endpoint.
+
+### Request
+
+- **Method**: POST
+- **URL**: `/targets/targets-from-group/`
+
+### Request Parameters
+
+The request to retrieve the targets from a specific group may include the following parameters:
+- `page` (integer, optional): The page number for pagination. Defaults to `1` if not provided.
+- `id` (integer, optional): The ID of the target group. You must provide either `id` or `name`.
+- `name` (string, optional): The name of the target group. You must provide either `id` or `name`.
+
+### Headers
+
+- `Authorization` (string, required): The token for authenticating the user. Format: `Token <yourToken>`.
+
+### Example Request
+
+You can make a POST request to retrieve a list of targets from a specific group using the `curl` command or an API client like Postman.
+
+### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Authorization: Token <yourToken>" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "id": 1,
+        "page": 1
+      }' \
+  "https://bh-tom2.astrolabs.pl/targets/targets-from-group/"
+```
+
+## 11 Get All Targets from All Groups (ADMIN ONLY)
+<!-- targets/targets-in-all-groups/ -->
+
+This API allows **admin users** to retrieve a paginated list of all targets from all target groups. Only superusers are authorized to access this endpoint.
+
+### Request
+
+- **Method**: POST
+- **URL**: `/targets/targets-in-all-groups/`
+
+### Request Parameters
+
+The request to retrieve all targets from all groups may include the following parameters:
+
+- `page` (integer, optional): The page number for pagination. Defaults to `1` if not provided.
+
+### Headers
+
+- `Authorization` (string, required): The token for authenticating the user. Format: `Token <yourToken>`.
+
+### Example Request
+
+You can make a POST request to retrieve a list of all targets from all groups using the `curl` command or an API client like Postman.
+
+### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Authorization: Token <yourToken>" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "page": 1
+      }' \
+  "https://bh-tom2.astrolabs.pl/targets/targets-in-all-groups/"
+```
+
+
 # DATAPRODUCT API
 
 ### List Data Products
