@@ -1,6 +1,7 @@
 import difflib
 
 import bleach
+import html
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -40,9 +41,10 @@ class CleanData(models.Model):
             field_value = getattr(self, char_field.name)
             if field_value is not None:
                 value = field_value.replace('\r', '')
-                cleaned_value = bleach.clean(value, tags=[], attributes={}, protocols=[], strip=True)
-                if value != cleaned_value:
-                    output_list = [li for li in difflib.ndiff(value, cleaned_value) if li[0] != ' ']
+                escaped_value = html.escape(value)
+                cleaned_value = bleach.clean(escaped_value, tags=[], attributes={}, protocols=[], strip=True)
+                if escaped_value != cleaned_value:
+                    output_list = [li for li in difflib.ndiff(escaped_value, cleaned_value) if li[0] != ' ']
                     logger.debug(f"Field '{char_field}' changed from '{field_value}' to '{cleaned_value}', {output_list}")
                     raise ValidationError(f"Invalid data format. Field: '{char_field.verbose_name}', Invalid chars: {output_list}.")
 
