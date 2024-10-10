@@ -25,6 +25,7 @@
                             <div class="mb-3"> 
                                 <button type="submit" class="btn btn-outline-primary" name="reload-photometry">Reload Photometry</button> 
                                 <button type="submit" class="btn btn-outline-primary ml-1" name="update-photometry">Reload Fits</button>
+                                <button type="submit" class="btn btn-outline-primary ml-1" name="test-reload-photometry">Test Reload Fits</button>
                             </div>
 
                             <table id="photometry-table" class="table table-hover">
@@ -243,6 +244,10 @@
         });
     
         $('button[name="update-photometry"]').click(function() {
+            updateHiddenField('selected-photometry', "photometry-table");
+        });
+
+        $('button[name="test-reload-photometry"]').click(function() {
             updateHiddenField('selected-photometry', "photometry-table");
         });
         $('button[name="reload"]').click(function() {

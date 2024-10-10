@@ -5,7 +5,7 @@ from bhtom_base.bhtom_targets.views import TargetAddRemoveGroupingView, TargetDe
     TargetDetailView
 from .rest.views import CleanTargetListCache, GetTargetListApi, CleanTargetDetailsCache, TargetCreateApi, \
     TargetUpdateApi, TargetDeleteApi, GetPlotsApiView, TargetDownloadRadioDataApiView, TargetDownloadPhotometryDataApiView, GetDownloadedTargetListApi,\
-        GetTargetsGroups, GetTargetsFromGroup, GetAllTargetsFromAllGroups
+        GetTargetsGroups, GetTargetsFromGroup
 
 from .views import TargetCreateView, TargetUpdateView, TargetGenerateTargetDescriptionLatexView, TargetImportView, \
     TargetDownloadPhotometryStatsLatexTableView, TargetListImagesView, TargetDownloadPhotometryDataView, \
@@ -33,7 +33,6 @@ urlpatterns = [
      path('download-photometry/', TargetDownloadPhotometryDataApiView.as_view()),
      path('target-groups/', GetTargetsGroups.as_view()),
      path('targets-from-group/', GetTargetsFromGroup.as_view()),
-     path('targets-in-all-groups/', GetAllTargetsFromAllGroups.as_view()),
      path('target_not_found/', TargetNotFoundView.as_view(), name='target_not_found'),
      path('', TargetListView.as_view(), name='list'),
      path('', TargetListView.as_view(), name='targets'),

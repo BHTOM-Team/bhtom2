@@ -263,7 +263,7 @@ class ReloadPhotometry(LoginRequiredMixin, View):
             messages.error(self.request, 'Data is empty!')
             return redirect(reverse('bhtom_common:list'))
 
-        if 'update-photometry' in request.POST:
+        if 'update-photometry' in request.POST or 'test-reload-photometry' in request.POST:
             return HttpResponseRedirect(reverse('bhtom_common:reload_photometry_fits') + f'?data={",".join(data_ids)}')
 
         for data_id in data_ids:
@@ -360,7 +360,10 @@ class ReloadPhotometryWithFits(LoginRequiredMixin, View):
             }
 
             try:
-                response = requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
+                if 'test-reload-photometry' in request.POST:
+                    response = requests.post(settings.UPLOAD_SERVICE_URL + '/testReloadFits/', data=post_data, headers=headers)
+                else:
+                    response = requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
                 if response.status_code != 201:
                     messages.error(self.request, 'Error while sending file to the ccdphot, id:' + str(data.id))
             except Exception as e:
@@ -370,6 +373,8 @@ class ReloadPhotometryWithFits(LoginRequiredMixin, View):
 
         messages.success(self.request, 'Send file to ccdphot')
         return redirect(reverse('bhtom_common:list'))
+    
+    
 
 
 class DeletePointAndRestartProcess(LoginRequiredMixin, View):
