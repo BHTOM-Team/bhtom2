@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from bhtom2.bhtom_targets.utils import check_duplicate_source_names, check_for_existing_alias, coords_to_degrees, \
     check_for_existing_coords
-from bhtom_base.bhtom_targets.models import Target, DownloadedTarget
+from bhtom_base.bhtom_targets.models import Target, DownloadedTarget,TargetList
 
 
 class TargetsSerializers(serializers.ModelSerializer):
@@ -94,3 +94,11 @@ class DownloadedTargetSerializer(serializers.ModelSerializer):
     def get_target(self, obj):
         # Return the id of the target
         return obj.target.id if obj.target else None
+    
+
+
+class TargetsGroupsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+            model = TargetList
+            fields = ('id', 'name', 'created')

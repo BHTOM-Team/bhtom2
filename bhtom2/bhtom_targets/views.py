@@ -10,6 +10,9 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.views.generic.edit import CreateView, UpdateView
 
+import os
+from django.http import FileResponse
+
 from bhtom2.bhtom_targets.forms import NonSiderealTargetCreateForm, SiderealTargetCreateForm, TargetLatexDescriptionForm
 from bhtom2.bhtom_targets.hooks import update_force_reducedDatum
 from bhtom2.bhtom_targets.utils import import_targets
@@ -21,7 +24,7 @@ from bhtom2.utils.photometry_and_spectroscopy_data_utils import get_photometry_s
 from bhtom_base.bhtom_common.hooks import run_hook
 from bhtom_base.bhtom_common.mixins import Raise403PermissionRequiredMixin
 from bhtom_base.bhtom_targets.forms import TargetNamesFormset
-from bhtom_base.bhtom_targets.models import TargetName, DownloadedTarget
+from bhtom_base.bhtom_targets.models import TargetName, DownloadedTarget, TargetList
 from bhtom2.bhtom_targets.utils import check_duplicate_source_names, check_for_existing_alias, \
     check_for_existing_coords, get_nonempty_names_from_queryset, coords_to_degrees, get_client_ip
 from guardian.shortcuts import get_objects_for_user, get_groups_with_perms
@@ -461,8 +464,6 @@ class TargetDownloadDataView(ABC, PermissionRequiredMixin, View):
         pass
 
     def get(self, request, *args, **kwargs):
-        import os
-        from django.http import FileResponse
 
         target_id = None
 
@@ -507,6 +508,7 @@ class TargetImportView(LoginRequiredMixin, TemplateView):
         :param request: the request object passed to this view
         :type request: HTTPRequest
         """
+        user = request.user 
         csv_file = request.FILES['target_csv']
         csv_stream = StringIO(csv_file.read().decode('utf-8'), newline=None)
         targets_count = StringIO(csv_file.read().decode('utf-8'), newline=None)
@@ -519,7 +521,7 @@ class TargetImportView(LoginRequiredMixin, TemplateView):
             return redirect(reverse('bhtom_targets:list'))
 
         group_name = request.POST.get('group_name', None)
-        result = import_targets(csv_stream, group_name)
+        result = import_targets(csv_stream, group_name, user)
         messages.success(
             request,
             'Targets created: {}'.format(len(result['targets']))

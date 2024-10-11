@@ -37,6 +37,15 @@
     <div>
         <h2>Recent changes:</h2>
         
+        <h4> 2024 September 11 </h4>
+            <li><strong>New API:</strong> 
+            <ul>
+                <li>Get Targets From Group: This API allows users to retrieve a paginated list of targets associated with a specific target group. You can specify the target group either by its `id` or `name`, but not both.</li>
+                <li>Get Target Groups: This API allows users to retrieve a paginated list of target groups. You can request a specific page of target groups by passing the `page` parameter</li>
+            </ul>
+            Users can retrieve 1000 records per request, with pagination available for accessing additional records.
+        </li>
+
         <h4> 2024 August 27 </h4>
         <li><strong>Add Imported Targets to Group:</strong> With BHTOM, you can import your targets and automatically add all imported targets to a new group.</li>
         <li><strong>Target Existence Check:</strong> When a found target already exists, BHTOM will offer a direct link to the target or provide a filtered list of similar targets.</li>

@@ -33,7 +33,7 @@ logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.utils')
 
 
 
-def import_targets(targets, group_name=None):
+def import_targets(targets, group_name=None, user=None):
     """
     Imports a set of targets into the TOM and saves them to the database.
 
@@ -163,6 +163,8 @@ def import_targets(targets, group_name=None):
 
                 target.save()
 
+
+
                 try:
                     if group:
                         group.targets.add(target)
@@ -172,7 +174,7 @@ def import_targets(targets, group_name=None):
                     errors.append(str(e))
 
                 try:
-                    run_hook('target_post_save', target=target, created=True)
+                    run_hook('target_post_save', target=target, created=True, user=user)
                 except Exception as e:
                     logger.error(f"Error in import hook: {e}")
                     errors.append(f"Error in import hook: {e}")

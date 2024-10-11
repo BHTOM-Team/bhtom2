@@ -9,11 +9,11 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR
 from django.contrib.auth.models import User
-from bhtom2.bhtom_targets.rest.serializers import TargetsSerializers, TargetDownloadDataSerializer, DownloadedTargetSerializer
+from bhtom2.bhtom_targets.rest.serializers import TargetsSerializers, TargetDownloadDataSerializer, DownloadedTargetSerializer,TargetsGroupsSerializer
 from bhtom2.bhtom_targets.utils import update_targetList_cache, update_targetDetails_cache, get_client_ip
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_common.hooks import run_hook
-from bhtom_base.bhtom_targets.models import Target, DownloadedTarget
+from bhtom_base.bhtom_targets.models import Target, DownloadedTarget, TargetList, TargetName
 from rest_framework import status
 import json
 from django.conf import settings
@@ -135,6 +135,23 @@ class GetTargetListApi(views.APIView):
 
         serialized_data = json.loads(serialized_queryset)
         fields_only = [item['fields'] for item in serialized_data]
+
+        for target in fields_only:
+            aliases = []
+            target_list_names = []
+            try:
+                aliases = TargetName.objects.filter(source_name=target['name']).values_list('name', flat=True)
+            except Exception as e:
+                aliases = []
+            try:
+                temp = Target.objects.get(name=target['name'])
+                target_lists = TargetList.objects.filter(targets=temp)
+                target_list_names = target_lists.values_list('name', 'id')
+            except Exception as e:
+                target_list_names = []
+
+            target['aliases'] = aliases
+            target['groups'] = target_list_names
 
         response_data = {
             'count': paginator.count,
@@ -575,4 +592,134 @@ class GetDownloadedTargetListApi(views.APIView):
             'data': serialized_queryset.data
         }
         
+        return Response(response_data, status=200)
+    
+
+
+class GetTargetsGroups(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'page': openapi.Schema(type=openapi.TYPE_INTEGER, description='Page number for pagination'),
+            },
+            required=[]
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
+    )
+    def post(self, request):
+        page = request.data.get('page', 1)
+
+        
+        try:
+            queryset = TargetList.objects.order_by('-created')
+            paginator = Paginator(queryset, self.pagination_class.max_page_size)
+
+            try:
+                paginated_queryset = paginator.page(page)
+            except PageNotAnInteger:
+                paginated_queryset = paginator.page(1)
+            except EmptyPage:
+                paginated_queryset = paginator.page(paginator.num_pages)
+
+            serialized_queryset = TargetsGroupsSerializer(paginated_queryset, many=True)
+        except Exception as e:
+            logger.error("Oops, something went wrong: " + str(e))
+            return Response("Oops, something went wrong " + str(e), status=400)
+        response_data = {
+            'count': paginator.count,
+            'num_pages': paginator.num_pages,
+            'current_page': paginated_queryset.number,
+            'data': serialized_queryset.data
+        }
+        
+        return Response(response_data, status=200)
+    
+class GetTargetsFromGroup(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'page': openapi.Schema(type=openapi.TYPE_INTEGER, description='Page number for pagination'),
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='The Target group id'),
+                'name': openapi.Schema(type=openapi.TYPE_STRING, description='The Target group name'),
+            },
+            required=[]
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
+    )
+    def post(self, request):
+        page = request.data.get('page', 1)
+        group_id = request.data.get('id', None)
+        group_name = request.data.get('name', None)
+        
+       
+        
+        if group_id is None and group_name is None:
+            return Response({"detail": "Please provide either 'id' or 'name' of the target group."}, status=400)
+        elif group_id and group_name:
+            return Response({"detail": "Please provide only one parameter: either 'id' or 'name', not both."}, status=400)
+
+        try:
+         
+            if group_name:
+                target_list = TargetList.objects.get(name=group_name)
+            else:
+                target_list = TargetList.objects.get(id=group_id)
+
+  
+            targets = target_list.targets.all()
+
+     
+            paginator = Paginator(targets, self.pagination_class.max_page_size)
+
+            try:
+                paginated_queryset = paginator.page(page)
+            except PageNotAnInteger:
+                paginated_queryset = paginator.page(1)
+            except EmptyPage:
+                paginated_queryset = paginator.page(paginator.num_pages)
+
+           
+            serialized_queryset = TargetsSerializers(paginated_queryset, many=True)
+
+        except TargetList.DoesNotExist:
+            return Response({"detail": "Target group not found."}, status=404)
+        except Exception as e:
+            logger.error(f"Oops, something went wrong: {str(e)}")
+            return Response({"detail": f"Oops, something went wrong: {str(e)}"}, status=400)
+
+       
+        response_data = {
+            'count': paginator.count,
+            'num_pages': paginator.num_pages,
+            'current_page': paginated_queryset.number,
+            'group': group_name if group_name else group_id,
+            'data': serialized_queryset.data
+        }
+
         return Response(response_data, status=200)
