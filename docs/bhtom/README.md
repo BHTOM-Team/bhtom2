@@ -15,8 +15,9 @@ BHTOM (Black Hole Target Observation Manager) is an advanced web-based system de
 
 The BHTOM system is divided into several microservices:
 
-- **CPCS**: Handles data calibration, archiving, and integration with external databases.
+- **CPCS**: Performs calibration of photometric files and generates data visualizations and charts.
 - **Harvester**: Gathers photometric data from external sources and integrates it into the BHTOM database.
+- **CCDPHOT**: Manages user accounts, proposals, requests, and overall coordination of the observation process.
 - **Upload Service**: Manages the submission and processing of photometric and FITS data from users.
 - **Core BHTOM Services**: Manages user accounts, proposals, requests, and overall coordination of the observation process.
 
