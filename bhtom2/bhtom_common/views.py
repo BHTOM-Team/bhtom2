@@ -263,8 +263,15 @@ class ReloadPhotometry(LoginRequiredMixin, View):
             messages.error(self.request, 'Data is empty!')
             return redirect(reverse('bhtom_common:list'))
 
-        if 'update-photometry' in request.POST or 'test-reload-photometry' in request.POST:
-            return HttpResponseRedirect(reverse('bhtom_common:reload_photometry_fits') + f'?data={",".join(data_ids)}')
+        if 'update-photometry' in request.POST:
+            action = 'update-photometry'
+        elif 'test-reload-photometry' in request.POST:
+            action = 'test-reload-photometry'
+        else:
+            action = None
+
+        if action:
+            return HttpResponseRedirect(reverse('bhtom_common:reload_photometry_fits') + f'?action={action}&data={",".join(data_ids)}')
 
         for data_id in data_ids:
             try:
@@ -360,7 +367,8 @@ class ReloadPhotometryWithFits(LoginRequiredMixin, View):
             }
 
             try:
-                if 'test-reload-photometry' in request.POST:
+                action = self.request.GET.get('action', '')
+                if action == 'test-reload-photometry':
                     response = requests.post(settings.UPLOAD_SERVICE_URL + '/testReloadFits/', data=post_data, headers=headers)
                 else:
                     response = requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
