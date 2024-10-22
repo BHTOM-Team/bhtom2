@@ -1,7 +1,7 @@
 from django.urls import path
 
 from bhtom2.bhtom_common.views import GetDataProductApi, DataListView, ReloadFits, ReloadPhotometry, \
-     DeletePointAndRestartProcess, UpdateFits, ReloadPhotometryWithFits, NewsletterView, DataListCompletedView
+     DeletePointAndRestartProcess, UpdateFits, ReloadPhotometryWithFits, NewsletterView, DataListCompletedView, CommentAPIView
 from bhtom_base.bhtom_common.api_router import SharedAPIRootRouter
 
 router = SharedAPIRootRouter()
@@ -19,4 +19,5 @@ urlpatterns = [
      path('reloadPhotometryWithFits/', ReloadPhotometryWithFits.as_view(), name='reload_photometry_fits'),
      path('api/data/', GetDataProductApi.as_view(), name='data_api'),
      path('newsletter/', NewsletterView.as_view(), name='newsletter'),
+     path('api/comments/', CommentAPIView.as_view()),
 ]

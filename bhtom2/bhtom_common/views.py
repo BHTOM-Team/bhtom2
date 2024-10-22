@@ -13,8 +13,9 @@ from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import ListView, FormView
-
+from django_comments.models import Comment
 from settings import settings
+from bhtom_base.bhtom_targets.models import Target
 from bhtom2.bhtom_calibration.models import Calibration_data
 from bhtom2.bhtom_common.forms import UpdateFitsForm
 from bhtom2.kafka.producer.calibEvent import CalibCreateEventProducer
@@ -24,6 +25,7 @@ from django_tables2.views import SingleTableMixin
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, CCDPhotJob
 from django.contrib import messages
 import json
+from rest_framework import status
 from rest_framework import views
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -31,7 +33,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.db.models import Q
-from bhtom2.bhtom_common.serializers import DataProductSerializer
+from bhtom2.bhtom_common.serializers import DataProductSerializer,CommentSerializer
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_common.views')
@@ -595,3 +597,98 @@ class NewsletterView(LoginRequiredMixin, TemplateView):
 
         context['data'] = data 
         return context
+
+class CommentAPIView(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'target': openapi.Schema(type=openapi.TYPE_STRING, description='Target name'),
+                'targetid': openapi.Schema(type=openapi.TYPE_INTEGER, description='Target ID'),
+                'user': openapi.Schema(type=openapi.TYPE_STRING, description='Username who made the comment'),
+                'text': openapi.Schema(type=openapi.TYPE_STRING, description='Text to search in comments'),
+                'created_start': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='Start date for comment creation (YYYY-MM-DD)'),
+                'created_end': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE, description='End date for comment creation (YYYY-MM-DD)'),
+                'page': openapi.Schema(type=openapi.TYPE_INTEGER, description='Page number for pagination'),
+            },
+            required=[]
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
+    )
+    def post(self, request):
+        # Extract filters from the request body
+        target_name = request.data.get('target', None)
+        target_id = request.data.get('targetid', None)
+        user = request.data.get('user', None)
+        text = request.data.get('text', None)
+        created_start = request.data.get('created_start', None)
+        created_end = request.data.get('created_end', None)
+        page = request.data.get('page', 1)
+
+        # Initialize the query
+        query = Q()
+
+        # Apply filters
+        if target_name:
+            try:
+                target = Target.objects.get(name=target_name)
+                query &= Q(object_pk=target.id)
+            except Target.DoesNotExist:
+                return Response({"error": "Target not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if target_id:
+            query &= Q(object_pk=target_id)
+        
+        if user:
+            query &= Q(user_name=user)
+        
+        if text:
+            query &= Q(comment__icontains=text)
+        
+        # Apply date filtering if provided
+        try:
+            if created_start:
+                created_start = datetime.strptime(created_start, '%Y-%m-%d').date()
+                query &= Q(submit_date__date__gte=created_start)
+
+            if created_end:
+                created_end = datetime.strptime(created_end, '%Y-%m-%d').date()
+                query &= Q(submit_date__date__lte=created_end)
+        except ValueError:
+            return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Query filtered comments
+        comments = Comment.objects.filter(query).order_by('submit_date')
+
+        # Pagination
+        paginator = Paginator(comments, self.pagination_class.max_page_size)
+        try:
+            paginated_comments = paginator.page(page)
+        except PageNotAnInteger:
+            paginated_comments = paginator.page(1)
+        except EmptyPage:
+            paginated_comments = paginator.page(paginator.num_pages)
+
+        # Serialize the paginated comments
+        serializer = CommentSerializer(paginated_comments, many=True)
+        
+        response_data = {
+            'count': paginator.count,
+            'num_pages': paginator.num_pages,
+            'current_page': paginated_comments.number,
+            'data': serializer.data
+        }
+        
+        return Response(response_data, status=status.HTTP_200_OK)

@@ -1227,6 +1227,60 @@ curl -X POST \
   "https://bh-tom2.astrolabs.pl/targets/targets-from-group/"
 ```
 
+## 11. GetCommentsApi
+<!-- /common/api/comments/ -->
+
+This API endpoint allows users to filter comments based on various parameters, such as target name, target ID, username, comment text, and creation date range. Pagination is available to retrieve results in manageable sets.
+
+<!-- TOKEN is required! -->
+
+### Request
+
+- **Method**: `POST`
+- **URL**: `/common/api/comments/`
+
+### Parameters
+
+- `target` (string): The name of the target to filter comments for.
+- `targetid` (integer): The ID of the target to filter comments for.
+- `user` (string): The username of the user who made the comment.
+- `text` (string): A string to search within the comment text.
+- `created_start` (string): The start date for filtering comments (format: `YYYY-MM-DD`).
+- `created_end` (string): The end date for filtering comments (format: `YYYY-MM-DD`).
+- `page` (integer): The number of the requested page for pagination (default is 1).
+
+### Example Request Body (Optional)
+
+```json
+{
+  "target": "ExampleTarget",
+  "targetid": 123,
+  "user": "example_user",
+  "text": "search text",
+  "created_start": "2024-01-01",
+  "created_end": "2024-10-01",
+  "page": 1
+}
+```
+### Using `curl`
+
+```bash
+curl -X 'POST' \
+  "https://bh-tom2.astrolabs.pl/common/api/comments/" \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Token <yourToken>' \
+  -d '{ 
+  "target": "ExampleTarget",
+  "targetid": 123,
+  "user": "example_user",
+  "text": "search text",
+  "created_start": "2024-01-01",
+  "created_end": "2024-10-01",
+  "page": 1
+}'
+```
+
 
 # DATAPRODUCT API
 
