@@ -15,7 +15,7 @@
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane active" id="fits_s">
-                        <form id="s-fits-form" action="{% url 'bhtom_common:reload_s_fits' %}" method="POST">
+                        <form id="s-fits-form" action="{% url 'bhtom_common:reload_s_fits' %}?next={{ request.path }}" method="POST">
                             {% csrf_token %}
                             <input type="hidden" id="selected-s-fits-ids" name="selected-s-fits-ids" value="">
                             <h4>Delay: {{ delay_fits}} days</h4>

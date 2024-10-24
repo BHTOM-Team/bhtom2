@@ -5,7 +5,7 @@
 {% block content %}
     <script src="{% static 'bhtom_observatory/create_observatory.js' %}"></script>
 
-    <form action="{% url 'bhtom_common:update_fits' %}?data={{ fitsId }}" enctype="multipart/form-data" method="POST">
+    <form action="{% url 'bhtom_common:update_fits' %}?data={{ fitsId }}&url={{ next_url}}" enctype="multipart/form-data" method="POST">
         {% csrf_token %}
         <h4>Fits to update:</h4>
         {% for file in fitsName %}

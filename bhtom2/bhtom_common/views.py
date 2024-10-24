@@ -104,6 +104,217 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
                 continue
 
         return context
+    
+
+
+class DataListInCalibView(SingleTableMixin, LoginRequiredMixin, ListView):
+    """
+    View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
+    """
+    template_name = 'bhtom_common/data_product_management-in-calibration.html'
+    model = DataProduct
+    # table_class = TargetTable
+
+    permission_required = 'bhtom_targets.view_target'
+    table_pagination = False
+    strict = False
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+
+        logger.debug("Prepare DataListView for Admin")
+
+        if not self.request.user.is_staff:
+            logger.error("The user is not an admin")
+            return redirect(reverse('home'))
+
+        context['photometry_data'] = []
+        days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
+
+        context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
+        context['delay_fits'] = settings.DELETE_FITS_FILE_DAY
+        
+        ccdphot = CCDPhotJob.objects.filter((Q(status='F') | Q(status='D')) & Q(dataProduct__status='R')&
+                                            ~Q(dataProduct__fits_data__isnull=True) &
+                                            ~Q(dataProduct__fits_data='') &
+                                            Q(dataProduct__created__gte=days_delay_error)).order_by('-job_id')
+
+        for data in ccdphot:
+            try:
+                calib_data = Calibration_data.objects.get(dataproduct=data.dataProduct)
+            except Calibration_data.DoesNotExist:
+                continue
+
+            if calib_data.status == 'R':
+                try:
+                    data = {
+                        'dataProduct': data.dataProduct,
+                        'calibData': calib_data
+                    }
+                    context['photometry_data'].append(data)
+                except Exception as e:
+                    logger.error("Error in Calibration_data: " + str(e))
+                    continue
+
+        return context
+
+
+class DataListCPCSErrorView(SingleTableMixin, LoginRequiredMixin, ListView):
+    """
+    View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
+    """
+    template_name = 'bhtom_common/data_product_management-cpcs-error.html'
+    model = DataProduct
+    # table_class = TargetTable
+
+    permission_required = 'bhtom_targets.view_target'
+    table_pagination = False
+    strict = False
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+
+        logger.debug("Prepare DataListView for Admin")
+
+        if not self.request.user.is_staff:
+            logger.error("The user is not an admin")
+            return redirect(reverse('home'))
+
+        context['photometry_data'] = []
+        days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
+
+        context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
+        context['delay_fits'] = settings.DELETE_FITS_FILE_DAY
+        
+        ccdphot = CCDPhotJob.objects.filter((Q(status='F') | Q(status='D')) &
+                                            ~Q(dataProduct__fits_data__isnull=True) &
+                                            ~Q(dataProduct__fits_data='') &
+                                            Q(dataProduct__created__gte=days_delay_error)).order_by('-job_id')
+
+        for data in ccdphot:
+            try:
+                calib_data = Calibration_data.objects.get(dataproduct=data.dataProduct)
+            except Calibration_data.DoesNotExist:
+                continue
+
+            if calib_data.status == 'E':
+                try:
+                    data = {
+                        'dataProduct': data.dataProduct,
+                        'calibData': calib_data
+                    }
+                    context['photometry_data'].append(data)
+                except Exception as e:
+                    logger.error("Error in Calibration_data: " + str(e))
+                    continue
+
+        return context
+
+class DataListCPCSLimitView(SingleTableMixin, LoginRequiredMixin, ListView):
+    """
+    View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
+    """
+    template_name = 'bhtom_common/data_product_management-cpcs-limit.html'
+    model = DataProduct
+    # table_class = TargetTable
+
+    permission_required = 'bhtom_targets.view_target'
+    table_pagination = False
+    strict = False
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+
+        logger.debug("Prepare DataListView for Admin")
+
+        if not self.request.user.is_staff:
+            logger.error("The user is not an admin")
+            return redirect(reverse('home'))
+
+        context['photometry_data'] = []
+        days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
+
+        context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
+        context['delay_fits'] = settings.DELETE_FITS_FILE_DAY
+        
+        ccdphot = CCDPhotJob.objects.filter((Q(status='F') | Q(status='D')) &
+                                            ~Q(dataProduct__fits_data__isnull=True) &
+                                            ~Q(dataProduct__fits_data='') &
+                                            Q(dataProduct__created__gte=days_delay_error)).order_by('-job_id')
+
+        for data in ccdphot:
+            try:
+                calib_data = Calibration_data.objects.get(dataproduct=data.dataProduct)
+            except Calibration_data.DoesNotExist:
+                continue
+
+            if calib_data.status == 'S' and (calib_data.mag_error == 1 or calib_data.mag_error == -1):
+                try:
+                    data = {
+                        'dataProduct': data.dataProduct,
+                        'calibData': calib_data
+                    }
+                    context['photometry_data'].append(data)
+                except Exception as e:
+                    logger.error("Error in Calibration_data: " + str(e))
+                    continue
+
+        return context
+
+class DataListCCDPHOTErrorView(SingleTableMixin, LoginRequiredMixin, ListView):
+    """
+    View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
+    """
+    template_name = 'bhtom_common/data_product_management-ccdphot-error.html'
+    model = DataProduct
+    # table_class = TargetTable
+
+    permission_required = 'bhtom_targets.view_target'
+    table_pagination = False
+    strict = False
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+
+        logger.debug("Prepare DataListView for Admin")
+
+        if not self.request.user.is_staff:
+            logger.error("The user is not an admin")
+            return redirect(reverse('home'))
+
+        context['fits_file'] = CCDPhotJob.objects.filter(Q(dataProduct__status='E')).order_by('-job_id')
+
+        context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
+        return context
+
+
+class DataListInProgressView(SingleTableMixin, LoginRequiredMixin, ListView):
+    """
+    View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
+    """
+    template_name = 'bhtom_common/data_product_management-in-progress.html'
+    model = DataProduct
+    # table_class = TargetTable
+
+    permission_required = 'bhtom_targets.view_target'
+    table_pagination = False
+    strict = False
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+
+        logger.debug("Prepare DataListView for Admin")
+
+        if not self.request.user.is_staff:
+            logger.error("The user is not an admin")
+            return redirect(reverse('home'))
+
+        context['fits_file'] = CCDPhotJob.objects.filter(Q(dataProduct__status='P')).order_by('-job_id')
+
+        context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
+        return context
+
+
 
 
 class DataListCompletedView(SingleTableMixin, LoginRequiredMixin, ListView):
@@ -140,11 +351,12 @@ class ReloadFits(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         data_ids_str = request.POST.get('selected-fits-ids', '')
+        next_url = request.GET.get('next', reverse('bhtom_common:list_ccdphot_error'))  # Fallback to default URL
         if data_ids_str != '':
             data_ids = data_ids_str.split(',')
         else:
             messages.error(self.request, 'Data is empty!')
-            return redirect(reverse('bhtom_common:list'))
+            return redirect(next_url)
 
         user = request.user
         logger.debug("Start ReloadFits, data: %s, user: %s" % (str(data_ids), str(request.user)))
@@ -155,7 +367,7 @@ class ReloadFits(LoginRequiredMixin, View):
 
 
         if 'update' in request.POST:
-            return HttpResponseRedirect(reverse('bhtom_common:update_fits') + f'?data={",".join(data_ids)}')
+            return HttpResponseRedirect(reverse('bhtom_common:update_fits') + f'?data={",".join(data_ids)}&url={next_url}')
 
         try:
             token = Token.objects.get(user=user)
@@ -166,7 +378,7 @@ class ReloadFits(LoginRequiredMixin, View):
         except Token.DoesNotExist:
             logger.error("Token does not exist")
             messages.error(self.request, "Token does not exist")
-            return redirect(reverse('bhtom_common:list'))
+            return redirect(next_url)
 
         for data_id in data_ids:
             post_data = {
@@ -179,15 +391,15 @@ class ReloadFits(LoginRequiredMixin, View):
                     response = requests.post(settings.UPLOAD_SERVICE_URL + '/reloadFits/', data=post_data, headers=headers)
                 if response.status_code != 201:
                     messages.error(self.request, 'Error while sending file to the ccdphot')
-                    return redirect(reverse('bhtom_common:list'))
+                    return redirect(next_url)
 
             except Exception as e:
                 logger.error("Error in connect to upload service: " + str(e))
                 messages.error(self.request, 'Error in connect to upload service.')
-                return redirect(reverse('bhtom_common:list'))
+                return redirect(next_url)
 
         messages.success(self.request, 'Send file to ccdphot')
-        return redirect(reverse('bhtom_common:list'))
+        return redirect(next_url)
 
 
 
@@ -195,13 +407,14 @@ class UpdateFits(LoginRequiredMixin, FormView):
     model = DataProduct
     form_class = UpdateFitsForm
     template_name = 'bhtom_common/fits_update.html'
-    success_url = reverse_lazy('bhtom_common:list')
+    success_url = reverse_lazy('bhtom_common:list_ccdphot_error')
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         fitsId = self.request.GET.get('data', '')
-
+        next_url = self.request.GET.get('url', reverse('bhtom_common:list_ccdphot_error'))  # Fallback to default URL
         context['fitsId'] = fitsId
+        context['next_url'] = next_url
         fits = DataProduct.objects.filter(id__in=fitsId.split(','))
         context['fitsName'] = [fit.get_file_name() for fit in fits]
         return context
@@ -240,17 +453,19 @@ class UpdateFits(LoginRequiredMixin, FormView):
             data.save()
 
         messages.success(self.request,'Files updated successfully')
-        return redirect(self.get_success_url())
+        next_url = self.request.GET.get('url', reverse('bhtom_common:list_ccdphot_error'))  # Fallback to default URL
+        return redirect(next_url)
 
 
 class ReloadPhotometry(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         data_ids_str = request.POST.get('selected-photometry-ids', '')
+        next_url = request.GET.get('next', reverse('bhtom_common:list_ccdphot_error'))  # Fallback to default URL
         if data_ids_str != '':
             data_ids = data_ids_str.split(',')
         else:
             messages.error(self.request, 'Data is empty!')
-            return redirect(reverse('bhtom_common:list'))
+            return redirect(next_url)
 
 
         success = False
@@ -263,7 +478,7 @@ class ReloadPhotometry(LoginRequiredMixin, View):
 
         if len(data_ids) == 0:
             messages.error(self.request, 'Data is empty!')
-            return redirect(reverse('bhtom_common:list'))
+            return redirect(next_url)
 
         if 'update-photometry' in request.POST:
             action = 'update-photometry'
@@ -272,8 +487,9 @@ class ReloadPhotometry(LoginRequiredMixin, View):
         else:
             action = None
 
+
         if action:
-            return HttpResponseRedirect(reverse('bhtom_common:reload_photometry_fits') + f'?action={action}&data={",".join(data_ids)}')
+            return HttpResponseRedirect(reverse('bhtom_common:reload_photometry_fits') + f'?action={action}&url={next_url}&data={",".join(data_ids)}')
 
         for data_id in data_ids:
             try:
@@ -328,7 +544,7 @@ class ReloadPhotometry(LoginRequiredMixin, View):
 
         if success:
             messages.success(self.request, 'Send file to calibration')
-        return redirect(reverse('bhtom_common:list'))
+        return redirect(next_url)
 
 
 class ReloadPhotometryWithFits(LoginRequiredMixin, View):
@@ -338,8 +554,8 @@ class ReloadPhotometryWithFits(LoginRequiredMixin, View):
         fitsId = self.request.GET.get('data', '').split(',')
 
         user = request.user
+        next_url = self.request.GET.get('url', reverse('bhtom_common:list_ccdphot_error'))  # Fallback to default URL
         logger.debug("Start ReloadFits, data: %s, user: %s" % (str(fitsId), str(request.user)))
-
         if not request.user.is_staff:
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
@@ -353,14 +569,14 @@ class ReloadPhotometryWithFits(LoginRequiredMixin, View):
         except Token.DoesNotExist:
             logger.error("Token does not exist")
             messages.error(self.request, "Token does not exist")
-            return redirect(reverse('bhtom_common:list'))
+            return redirect(next_url)
 
         try:
             dataProducts = DataProduct.objects.filter(id__in=fitsId)
         except DataProduct.DoesNotExist:
             logger.error("DataProduct not Exist")
             messages.error(self.request, 'DataProduct not Exist')
-            return redirect(reverse('bhtom_common:list'))
+            return redirect(next_url)
 
         for data in dataProducts:
 
@@ -381,9 +597,9 @@ class ReloadPhotometryWithFits(LoginRequiredMixin, View):
             except Exception as e:
                 logger.error("Error in connect to upload service: " + str(e))
                 messages.error(self.request, 'Error in connect to upload service.')
-                return redirect(reverse('bhtom_common:list'))
+                return redirect(next_url)
 
-        return redirect(reverse('bhtom_common:list'))
+        return redirect(next_url)
     
     
 
@@ -396,7 +612,7 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
             data_ids = data_ids_str.split(',')
         else:
             messages.error(self.request, 'Data is empty!')
-            return redirect(reverse('bhtom_common:list'))
+            return redirect(reverse('bhtom_common:list_ccdphot_error'))
 
         user = request.user
         success = False
@@ -409,7 +625,7 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
 
         if len(data_ids) == 0:
             messages.error(self.request, 'Data is empty!')
-            return redirect(reverse('bhtom_common:list'))
+            return redirect(reverse('bhtom_common:list_ccdphot_error'))
 
         try:
             token = Token.objects.get(user=user)
@@ -420,7 +636,7 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
         except Token.DoesNotExist:
             logger.error("Token not exist")
             messages.error(self.request, "Token not exist")
-            return redirect(reverse('bhtom_common:list'))
+            return redirect(reverse('bhtom_common:list_ccdphot_error'))
 
         for data_id in data_ids:
             post_data = {
@@ -478,12 +694,12 @@ class DeletePointAndRestartProcess(LoginRequiredMixin, View):
                 except Exception as e:
                     logger.error("Error in connect to upload service: " + str(e))
                     messages.error(self.request, 'Error in connect to upload service.')
-                    return redirect(reverse('bhtom_common:list'))
+                    return redirect(reverse('bhtom_common:list_ccdphot_error'))
 
         if success:
             messages.success(self.request, 'Send file to ccdphot')
 
-        return redirect(reverse('bhtom_common:list'))
+        return redirect(reverse('bhtom_common:list_ccdphot_error'))
 
 class GetDataProductApi(views.APIView):
     authentication_classes = [TokenAuthentication]
