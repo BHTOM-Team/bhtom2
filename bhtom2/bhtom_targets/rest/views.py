@@ -139,15 +139,19 @@ class GetTargetListApi(views.APIView):
         for target in fields_only:
             aliases = []
             target_list_names = []
+            
             try:
-                aliases = TargetName.objects.filter(source_name=target['name']).values_list('name', flat=True)
+                temp = Target.objects.get(name=target['name'])
+                aliases = TargetName.objects.filter(target_id=temp.id).values_list('source_name','name')
             except Exception as e:
+                logger.error("Ops, something went wrong" + str(e))
                 aliases = []
             try:
                 temp = Target.objects.get(name=target['name'])
                 target_lists = TargetList.objects.filter(targets=temp)
                 target_list_names = target_lists.values_list('name', 'id')
             except Exception as e:
+                logger.error("Ops, something went wrong" + str(e))
                 target_list_names = []
 
             target['aliases'] = aliases

@@ -1,0 +1,121 @@
+{% extends 'bhtom_common/base.html' %}
+{% load bootstrap4 bhtom_common_extras static %}
+
+{% block title %}Admin Data{% endblock %}
+
+{% block content %}
+    {% if request.user.is_staff %}
+        <div class="row">
+            <div class="col-md-12">
+                <h4>In Progress</h4>
+                <form id="fits-form" action="{% url 'bhtom_common:reload_fits' %}?next={{ request.path }}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" id="selected-fits-ids" name="selected-fits-ids" value="">
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-outline-primary ml-1" name="reload">Reload Fits</button>
+                        <button type="submit" class="btn btn-outline-primary ml-1" name="update">Update Fits</button>
+                        <button type="submit" class="btn btn-outline-primary ml-1" name="test_reload">Test Reload Fits</button>
+                    </div>
+                    <table id="fits-in-progress-table" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="sort">
+                                    <input type="checkbox" id="selected-fits-checkbox" onclick="toggleSelectAll('selected-fits','fits-in-progress-table')">
+                                </th>
+                                <th>Data</th>
+                                <th>Created</th>
+                                <th>Observatory</th>
+                                <th>Target</th>
+                                <th>User</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fits in fits_file %}
+                                <tr>
+                                    <td><input type="checkbox" name="selected-fits" value="{{ fits.dataProduct.id }}"></td>
+                                    <td><a href="/data/{{ fits.dataProduct.data }}">{{ fits.dataProduct.data  }}</a></td>
+                                    <td>{{ fits.dataProduct.created }}</td>
+                                    <td>{{ fits.dataProduct.observatory }}</td>
+                                    <td><a href="{% url 'bhtom_targets:detail' fits.dataProduct.target.name %}">{{ fits.dataProduct.target.name }}</a></td>
+                                    <td>{{ fits.dataProduct.user.first_name }} {{ fits.dataProduct.user.last_name }}</td>
+                                    <td>
+                                        {% if fits.dataProduct.status == "C" %}
+                                            TO DO
+                                        {% elif fits.dataProduct.status == "P" %}
+                                            IN PROGRESS
+                                        {% elif fits.dataProduct.status == "R" %}
+                                            Send to calibration
+                                        {% elif fits.dataProduct.status == "S" %}
+                                            SUCCESS
+                                        {% elif fits.dataProduct.status == "E" %}
+                                            ERROR
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7">No data yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#fits-in-progress-table').DataTable({
+                "searching": false,
+                "paging": false,
+                "columnDefs": [{
+                    "targets": [0], // First column
+                    "orderable": false // Disable sorting
+                }],
+                "drawCallback": function(settings) {
+                    // Uncheck the "select all" checkbox when the table redraws
+                    $('#selected-fits-checkbox').prop('checked', false);
+                }
+            });
+        });
+
+        var selectedIds = [];
+
+        function toggleSelectAll(checkboxName, tableName) {
+            var checkboxes = document.getElementsByName(checkboxName);
+            var selectAllCheckbox = document.getElementById(checkboxName + '-checkbox');
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = selectAllCheckbox.checked;
+            }
+        }
+
+        function updateHiddenField(checkboxName) {
+            selectedIds = [];
+            var checkboxes = document.getElementsByName(checkboxName);
+            for (var j = 0; j < checkboxes.length; j++) {
+                if (checkboxes[j].checked) {
+                    var id = checkboxes[j].value;
+                    if (!selectedIds.includes(id)) {
+                        selectedIds.push(id);
+                    }
+                }
+            }
+            $('#' + checkboxName + '-ids').val(selectedIds.join(','));
+        }
+
+        $('button[name="reload"]').click(function() {
+            updateHiddenField('selected-fits');
+        });
+
+        $('button[name="update"]').click(function() {
+            updateHiddenField('selected-fits');
+        });
+
+        $('button[name="test_reload"]').click(function() {
+            updateHiddenField('selected-fits');
+        });
+    </script>
+{% endblock %}

@@ -165,7 +165,7 @@ class TargetForm(forms.ModelForm):
             logger.error("----------Error in validate data, detect html code------------")
             raise ValidationError("Invalid data format.")
 
-        pattern = r'^[a-zA-Z0-9\-_+., :?\'"&apos;&#39;()@!~\r\n]*$'
+        pattern = r'^[a-zA-Z0-9\-_+., :?\'"&apos;&#39;()/@!~\r\n]*$'
         match = re.match(pattern, value)
         if not match:
             invalid_chars = re.findall(r'[^a-zA-Z0-9\-_+., :?\'"&apos;&#39;()@!~\r\n]', value)
@@ -198,6 +198,8 @@ class SiderealTargetCreateForm(TargetForm):
                 else:
                     mapped_value = obj_classification_type
                 kwargs['initial']['classification']= mapped_value
+                if kwargs.get('initial', {}).get('discovery_date') is None:
+                    kwargs.setdefault('initial', {})['discovery_date'] = ''
                 super().__init__(*args, **kwargs)
         except Exception as e:
                super().__init__(*args, **kwargs)

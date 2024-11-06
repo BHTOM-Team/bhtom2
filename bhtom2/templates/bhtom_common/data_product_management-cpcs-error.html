@@ -1,0 +1,124 @@
+{% extends 'bhtom_common/base.html' %}
+{% load bootstrap4 bhtom_common_extras static %}
+
+{% block title %}CPCS Error{% endblock %}
+
+{% block content %}
+    {% if request.user.is_staff %}
+        <div class="row">
+            <div class="col-md-12">
+                <form id="photometry-form" action="{% url 'bhtom_common:reload_photometry' %}?next={{ request.path }}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" id="selected-photometry-ids" name="selected-photometry-ids" value="">
+                    <h4>CPCS Error</h4>
+                    <h4>Delay: {{ delay_fits_error }} days</h4>
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-outline-primary" name="reload-photometry">Reload Photometry</button>
+                        <button type="submit" class="btn btn-outline-primary ml-1" name="update-photometry">Reload Fits</button>
+                        <button type="submit" class="btn btn-outline-primary ml-1" name="test-reload-photometry">Test Reload Fits</button>
+                    </div>
+
+                    <table id="photometry-table" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="sort"><input type="checkbox" id="selected-photometry-checkbox" onclick="toggleSelectAll('selected-photometry','photometry-table')"></th>
+                                <th>Data</th>
+                                <th>Created</th>
+                                <th>Observatory</th>
+                                <th>Target</th>
+                                <th>User</th>
+                                <th>Data Type</th>
+                                <th>Status</th>
+                                <th>Status Message</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in photometry_data %}
+                                <tr>
+                                    <td><input type="checkbox" name="selected-photometry" value="{{ data.dataProduct.id }}"></td>
+                                    <td><a href="/data/{{ data.dataProduct.data }}">{{ data.dataProduct.data  }}</a></td>
+                                    <td>{{ data.calibData.created }}</td>
+                                    <td>{{ data.dataProduct.observatory }}</td>
+                                    <td><a href="{% url 'bhtom_targets:detail' data.dataProduct.target.name %}">{{ data.dataProduct.target.name }}</a></td>
+                                    <td>{{ data.dataProduct.user.first_name }} {{ data.dataProduct.user.last_name }}</td>
+                                    <td>{{ data.dataProduct.data_product_type }}</td>
+                                    <td>
+                                        {% if data.calibData.status == "C" %}
+                                            TO DO
+                                        {% elif data.calibData.status == "P" %}
+                                            IN PROGRESS
+                                        {% elif data.calibData.status == "R" %}
+                                            Send to calibration
+                                        {% elif data.calibData.status == "S" %}
+                                            SUCCESS
+                                        {% elif data.calibData.status == "E" %}
+                                            ERROR
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ data.calibData.status_message }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="9">No data yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+    
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#photometry-table').DataTable({
+                "searching": false,
+                "paging": false,
+                "columnDefs": [{
+                    "targets": [0], // First column
+                    "orderable": false // Disable sorting
+                }],
+                "drawCallback": function(settings) {
+                    // Uncheck the "select all" checkbox when the table redraws
+                    $('#selected-photometry-checkbox').prop('checked', false);
+                }
+            });
+        });
+
+        function toggleSelectAll(checkboxName,tableName) {
+            var checkboxes = document.getElementsByName(checkboxName);
+            var selectAllCheckbox = document.getElementById(checkboxName + '-checkbox');
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = selectAllCheckbox.checked;
+            }
+        }
+
+        function updateHiddenField(checkboxName) {
+            var selectedIds = [];
+            var checkboxes = document.getElementsByName(checkboxName);
+            for (var j = 0; j < checkboxes.length; j++) {
+                if (checkboxes[j].checked) {
+                    var id = checkboxes[j].value;
+                    if (!selectedIds.includes(id)) {
+                        selectedIds.push(id);
+                    }
+                }
+            }
+            $('#' + checkboxName + '-ids').val(selectedIds.join(','));
+        }
+
+        $('button[name="reload-photometry"]').click(function() {
+            updateHiddenField('selected-photometry');
+        });
+
+        $('button[name="update-photometry"]').click(function() {
+            updateHiddenField('selected-photometry');
+        });
+
+        $('button[name="test-reload-photometry"]').click(function() {
+            updateHiddenField('selected-photometry');
+        });
+    </script>
+    
+{% endblock %}

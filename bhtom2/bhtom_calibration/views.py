@@ -4,6 +4,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework import status
+import base64
 from django_guid import get_guid
 from bhtom2.bhtom_calibration.models import Calibration_data
 from django.core import serializers
@@ -30,13 +31,18 @@ class CalibrationResultsApiView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'files': openapi.Schema(type=openapi.TYPE_ARRAY,
+                'calibid': openapi.Schema(type=openapi.TYPE_ARRAY,
                     items=openapi.Schema(type=openapi.TYPE_INTEGER),
+                    description="Array of calibration IDs"
+                ),
+                'filename': openapi.Schema(type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(type=openapi.TYPE_STRING),
+                    description="Array of calibration filenames"
                 ),
                 'getPlot': openapi.Schema(type=openapi.TYPE_BOOLEAN),
                 'page': openapi.Schema(type=openapi.TYPE_INTEGER, description='Page number for pagination'),
             },
-            required=['files', 'getPlot']
+            required=['getPlot']
         ),
         manual_parameters=[
             openapi.Parameter(
@@ -49,43 +55,70 @@ class CalibrationResultsApiView(APIView):
         ],
     )
     def post(self, request):
-        files = request.data.get('files')
+        calibid = request.data.get('calibid', [])
+        filename = request.data.get('filename', [])
         getPlot = request.data.get('getPlot', False)
         page = request.data.get('page', 1)
-        base_path = settings.DATA_PLOTS_PATH
-        
-        if files is None:
-            return Response({"Error": "'files' field are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not calibid and not filename:
+            return Response({"Error": "'calibid' or 'filename' fields are required."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             user = Token.objects.get(key=request.auth.key).user
             calibration_data_list = []
-            for file in files:
-                if isinstance(file, str):
-                    instance = Calibration_data.objects.get(dataproduct__data__contains=file)
-                    dp = DataProduct.objects.get(data__contains=file)   
-                elif isinstance(file, int):
-                    instance = Calibration_data.objects.get(dataproduct_id=file)
-                    dp = DataProduct.objects.get(id=file)
 
-                if instance.dataproduct.user_id == user.id or user.is_superuser:
-                    serialized_data = serializers.serialize('json', [instance])
-                    data = json.loads(serialized_data)[0]
-                    result = data["fields"]
-                    if getPlot:
-                        target = dp.target
-                        if target.photometry_plot:
-                            with open(base_path + str(target.photometry_plot), 'r') as json_file:
-                                plot = json.load(json_file)
-                                result["plot"] = plot
+            # Process based on calibid (integer IDs)
+            for file_id in calibid:
+                try:
+                    instance = Calibration_data.objects.get(dataproduct_id=file_id)
+                    if instance.dataproduct.user_id == user.id or user.is_superuser:
+                        serialized_data = serializers.serialize('json', [instance])
+                        data = json.loads(serialized_data)[0]
+                        result = data["fields"]
+                        if getPlot:
+                            if instance.calibration_plot:
+                                plot_path = settings.DATA_PLOTS_PATH + str(instance.calibration_plot)
+                                with open(plot_path, 'rb') as image_file:
+                                    plot_data = base64.b64encode(image_file.read()).decode('utf-8')
+                                    result["plot"] = f"data:image/png;base64,{plot_data}"
+                            else:
+                                result["plot"] = None
                         else:
                             result["plot"] = None
+                        calibration_data_list.append(result)
                     else:
-                        result["plot"] = None
-                    calibration_data_list.append(result)
-                else:
-                    calibration_data_list.append({"calib-res": "It's not your data", "plot": None})
+                        calibration_data_list.append({"calib-res": "It's not your data", "plot": None})
 
+                except Calibration_data.DoesNotExist:
+                    calibration_data_list.append({"Error": f"File with id {file_id} does not exist"})
+
+            # Process based on filename (string filenames)
+            for file_name in filename:
+                try:
+                    instance = Calibration_data.objects.get(dataproduct__data__contains=file_name)
+
+                    if instance.dataproduct.user_id == user.id or user.is_superuser:
+                        serialized_data = serializers.serialize('json', [instance])
+                        data = json.loads(serialized_data)[0]
+                        result = data["fields"]
+                        if getPlot:
+                            if instance.calibration_plot:
+                                plot_path = settings.DATA_PLOTS_PATH + str(instance.calibration_plot)
+                                with open(plot_path, 'rb') as image_file:
+                                    plot_data = base64.b64encode(image_file.read()).decode('utf-8')
+                                    result["plot"] = f"data:image/png;base64,{plot_data}"
+                            else:
+                                result["plot"] = None
+                        else:
+                            result["plot"] = None
+                        calibration_data_list.append(result)
+                    else:
+                        calibration_data_list.append({"calib-res": "It's not your data", "plot": None})
+
+                except Calibration_data.DoesNotExist:
+                    calibration_data_list.append({"Error": f"File with name {file_name} does not exist"})
+
+            # Pagination logic remains the same
             paginator = Paginator(calibration_data_list, self.pagination_class.max_page_size)
             try:
                 paginated_data = paginator.page(page)
@@ -103,15 +136,13 @@ class CalibrationResultsApiView(APIView):
 
             return Response(response_data, status=status.HTTP_200_OK)
 
-        except Calibration_data.DoesNotExist:
-            return Response({"Error": 'File does not exist in the database'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"Error": 'Something went wrong: ' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def list(self, request, *args, **kwargs):
         ret = super().list(request, *args, **kwargs)
         return ret
-    
+
 
 class GetCatalogsApiView(APIView):
     authentication_classes = [TokenAuthentication]

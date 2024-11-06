@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from bhtom_base.bhtom_dataproducts.models import DataProduct, CCDPhotJob
-
+from bhtom_base.bhtom_targets.models import Target
+from django_comments.models import Comment
 
 class DataProductSerializer(serializers.ModelSerializer):
     user_name = serializers.SerializerMethodField()
@@ -64,3 +65,22 @@ class DataProductSerializer(serializers.ModelSerializer):
         except Exception as e:
             fits_filter = None
         return fits_filter
+    
+
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    target_name = serializers.SerializerMethodField()
+    target_id = serializers.SerializerMethodField()
+
+    def get_target_name(self, obj):
+        target_name = Target.objects.get(id=obj.object_pk).name
+        return target_name
+    
+    def get_target_id(self, obj):
+        target_id = obj.object_pk
+        return target_id
+    
+    class Meta:
+        model = Comment
+        fields = ['id','user_name','comment', 'submit_date','user_id','target_name','target_id'] 

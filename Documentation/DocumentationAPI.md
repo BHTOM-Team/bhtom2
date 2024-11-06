@@ -224,14 +224,15 @@ This API endpoint allows users to retrieve calibration results for previously up
 ### Request Headers
 
 - `accept: application/json`: Specify the desired response format as JSON.
-- `Authorization: Token 10f21fe7308f06f7e23ccb7848da554c2271be49`: Authentication token for the API.
+- `Authorization: Token <your token>`: Authentication token for the API.
 - `Content-Type: application/json`: Specify the format of the request payload as JSON.
 - `X-CSRFToken: uUz2fRnXhPuvD9YuuiDW9cD1LsajeaQnE4hwtEAfR00SgV9bD5HCe5i8n4m4KcOr`: CSRF token for security.
 
 ### Request Body
 
-- `files` (array, required): Array containing file IDs or files name or both of them for calibration
-- `getPlot` (boolean): Flag to indicate whether to retrieve the calibration plot
+- `filename` (array, required): Array containing files name for calibration
+- `calibid` (array, required): Array containing files ID for calibration
+- `getPlot` (boolean): Flag to indicate whether to retrieve the calibration plot (for python: True/False, for curl true/false) 
 - `page` (integer): The number of page 
 ### Example Request
 
@@ -239,11 +240,12 @@ This API endpoint allows users to retrieve calibration results for previously up
 curl -X 'POST' \
   'https://bh-tom2.astrolabs.pl/calibration/get-calibration-res/' \
   -H 'accept: application/json' \
-  -H 'Authorization: Token <yourToken>' \
+  -H 'Authorization: Token <your token>'\
   -H 'Content-Type: application/json' \
   -H 'X-CSRFToken: uUz2fRnXhPuvD9YuuiDW9cD1LsajeaQnE4hwtEAfR00SgV9bD5HCe5i8n4m4KcOr' \
   -d '{
-    "files": [1, 'fileName', 2 'fileName2'],
+    "filename": ['296_cat-Gaia19eyy-ROAD-not-matched','other_file_name_without_extension'],
+    "calibid": [1234, 23212, 12345],
     "getPlot": true,
     "page": 2
   }'
@@ -1223,6 +1225,60 @@ curl -X POST \
         "page": 1
       }' \
   "https://bh-tom2.astrolabs.pl/targets/targets-from-group/"
+```
+
+## 11. GetCommentsApi
+<!-- /common/api/comments/ -->
+
+This API endpoint allows users to filter comments based on various parameters, such as target name, target ID, username, comment text, and creation date range. Pagination is available to retrieve results in manageable sets.
+
+<!-- TOKEN is required! -->
+
+### Request
+
+- **Method**: `POST`
+- **URL**: `/common/api/comments/`
+
+### Parameters
+
+- `target` (string): The name of the target to filter comments for.
+- `targetid` (integer): The ID of the target to filter comments for.
+- `user` (string): The username of the user who made the comment.
+- `text` (string): A string to search within the comment text.
+- `created_start` (string): The start date for filtering comments (format: `YYYY-MM-DD`).
+- `created_end` (string): The end date for filtering comments (format: `YYYY-MM-DD`).
+- `page` (integer): The number of the requested page for pagination (default is 1).
+
+### Example Request Body (Optional)
+
+```json
+{
+  "target": "ExampleTarget",
+  "targetid": 123,
+  "user": "example_user",
+  "text": "search text",
+  "created_start": "2024-01-01",
+  "created_end": "2024-10-01",
+  "page": 1
+}
+```
+### Using `curl`
+
+```bash
+curl -X 'POST' \
+  "https://bh-tom2.astrolabs.pl/common/api/comments/" \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Token <yourToken>' \
+  -d '{ 
+  "target": "ExampleTarget",
+  "targetid": 123,
+  "user": "example_user",
+  "text": "search text",
+  "created_start": "2024-01-01",
+  "created_end": "2024-10-01",
+  "page": 1
+}'
 ```
 
 

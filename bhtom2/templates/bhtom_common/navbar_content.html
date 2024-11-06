@@ -87,7 +87,12 @@
     </a>
     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
         <a class="dropdown-item" href="{% url 'user-list' %}">Users</a>
-        <a class="dropdown-item" href="{% url 'bhtom_common:list' %}">Data</a>
+        {% comment %} <a class="dropdown-item" href="{% url 'bhtom_common:list' %}">Data</a> {% endcomment %}
+        <a class="dropdown-item" href="{% url 'bhtom_common:list_ccdphot_error' %}">File Error</a>
+        <a class="dropdown-item" href="{% url 'bhtom_common:list_in_progress' %}">In Progress</a>
+        <a class="dropdown-item" href="{% url 'bhtom_common:list_in_calibration' %}">In Calibration</a>
+        <a class="dropdown-item" href="{% url 'bhtom_common:list_cpcs_error' %}">CPCS Error</a>
+        <a class="dropdown-item" href="{% url 'bhtom_common:list_cpcs_limit' %}">Limit</a>
         <a class="dropdown-item" href="{% url 'bhtom_common:list_completed' %}">Data completed</a>
     </div>
 </li>
