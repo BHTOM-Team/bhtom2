@@ -154,7 +154,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
             'error_message': "Error: No data returned",
         }
 
-    print("LARGEST: ", largets_set, delta_m, maxmag, minmag)
+
 
     smartte = 50.
 
@@ -173,7 +173,7 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
     if (logu0 == 'on'): params['u_0'] = np.log10(init_u0)
     params['t_E'] = init_te
 
-    print("PARAMS: ", params)
+
 
     ############ figure of raw data:
     fig = go.Figure(layout=dict(width=1000, height=500))
@@ -309,10 +309,6 @@ def microlensing_for_target(context, target, sel, init_t0, init_te, init_u0, log
             mag0_dict[filt] = np.around(mag0[0], 3)
             fs_dict[filt] = np.around(fs[0], 3)  # the result was an 1-element array
 
-        print("Mag0 values:")
-        print(mag0_dict)
-        print("\nFs values:")
-        print(fs_dict)
 
         info_executionTime = "Time of fitting execution: %s seconds" % '{0:.3f}'.format((time.time() - start_time))
 
