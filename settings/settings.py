@@ -469,6 +469,10 @@ FACILITIES = {
         'portal_url': 'https://observe.lco.global',
         'api_key': PROPOSALS_API_KEYS['LCO'],
     },
+        'REM': {
+           'proposalIDs': ((50823, "ORP-PI:Mariusz Gromadzki"),(50712,"CNTAC-PI:Rene Mendez") ),
+           'email': "wyrzykow@gmail.com",
+    },
 }
 
 TOM_FACILITY_CLASSES = [
