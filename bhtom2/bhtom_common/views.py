@@ -283,7 +283,8 @@ class DataListCCDPHOTErrorView(SingleTableMixin, LoginRequiredMixin, ListView):
             return redirect(reverse('home'))
 
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
-        context['fits_file'] = CCDPhotJob.objects.filter(Q(dataProduct__status='E') & Q(dataProduct__created__gte=days_delay_error)).order_by('-job_id')
+        context['fits_file'] = CCDPhotJob.objects.filter(Q(dataProduct__status='E') & ~Q(dataProduct__fits_data__isnull=True) &
+                                            ~Q(dataProduct__fits_data='') & Q(dataProduct__created__gte=days_delay_error)).order_by('-job_id')
 
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
         return context
