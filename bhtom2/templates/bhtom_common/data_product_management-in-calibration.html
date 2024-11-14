@@ -57,7 +57,7 @@
                                         {% endif %}
                                     </td>
                                     <td>{{ data.calibData.status_message }}</td>
-                                    {% if data.dataProduct.data_product_type == 'fits_file' or data.dataProduct..data_product_type == 'photometry' %}
+                                    {% if data.dataProduct.data_product_type == 'fits_file' or data.dataProduct.data_product_type == 'photometry' %}
                                     <td>
                                         <a href="{% url 'bhtom_dataproducts:dataproduct-details' pk=data.dataProduct.id %}" title="Show details"
                                             class="btn btn-primary">Detail</a>
