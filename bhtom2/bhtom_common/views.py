@@ -145,7 +145,7 @@ class DataListInCalibView(SingleTableMixin, LoginRequiredMixin, ListView):
             except Calibration_data.DoesNotExist:
                 continue
 
-            if calib_data.status == 'R':
+            if calib_data.status == 'P':
                 try:
                     data = {
                         'dataProduct': data.dataProduct,
@@ -282,7 +282,8 @@ class DataListCCDPHOTErrorView(SingleTableMixin, LoginRequiredMixin, ListView):
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
 
-        context['fits_file'] = CCDPhotJob.objects.filter(Q(dataProduct__status='E')).order_by('-job_id')
+        days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
+        context['fits_file'] = CCDPhotJob.objects.filter(Q(dataProduct__status='E') & Q(dataProduct__created__gte=days_delay_error)).order_by('-job_id')
 
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
         return context
