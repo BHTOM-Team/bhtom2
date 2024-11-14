@@ -145,7 +145,7 @@ class DataListInCalibView(SingleTableMixin, LoginRequiredMixin, ListView):
             except Calibration_data.DoesNotExist:
                 continue
 
-            if calib_data.status == 'R':
+            if calib_data.status == 'P':
                 try:
                     data = {
                         'dataProduct': data.dataProduct,
