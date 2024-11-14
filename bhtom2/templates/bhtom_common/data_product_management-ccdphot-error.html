@@ -28,6 +28,7 @@
                                 <th>Target</th>
                                 <th>User</th>
                                 <th>Status</th>
+                                <th>Details</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -52,6 +53,14 @@
                                             ERROR
                                         {% endif %}
                                     </td>
+                                    {% if fits.dataProduct.data_product_type == 'fits_file' or fits.dataProduct.data_product_type == 'photometry' %}
+                                    <td>
+                                        <a href="{% url 'bhtom_dataproducts:dataproduct-details' pk=fits.dataProduct.id %}" title="Show details"
+                                            class="btn btn-primary">Detail</a>
+                                    </td>
+                                    {% else %}
+                                    <td></td>
+                                    {% endif %}
                                 </tr>
                             {% empty %}
                                 <tr>
