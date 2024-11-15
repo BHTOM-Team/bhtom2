@@ -302,7 +302,7 @@ PeriodicalTarget: 1
 Period: {cadence}
 
 # Priority (this item is optional, 0 is the maximum priority, then 1, 2, etc.)
-Priority: 1
+Priority: 2
 
 
 
