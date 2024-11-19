@@ -196,11 +196,15 @@ def import_targets(targets, group_name=None, user=None):
 def check_target_value(target_fields):
     ra = float(target_fields['ra'])
     dec = float(target_fields['dec'])
-
+    desc = target_fields['description']
+    
+    if desc is None or len(desc) < 10:
+        logger.error("Descriptions is None or less then 10 char")
+        raise ValueError("Target description, mandatory, min 10 characters, for example: candidate supernova, or: old target, do not observe.")
+    
     if ra < 0 or ra > 360 or dec < -90 or dec > 90:
         logger.error("Coordinates beyond range")
         raise ValueError("Coordinates beyond range")
-
     stored = Target.objects.all()
     coords_names = check_for_existing_coords(ra, dec, 3. / 3600., stored)
 
