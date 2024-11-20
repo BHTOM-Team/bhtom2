@@ -289,7 +289,7 @@ class DataListCCDPHOTErrorView(SingleTableMixin, LoginRequiredMixin, ListView):
             .exclude(dataProduct__status='S') \
             .exclude(dataProduct__fits_data__isnull=True) \
             .exclude(dataProduct__fits_data='') \
-            .filter(dataProduct__created__gte=days_delay_error) \
+            .filter(dataProduct__created__gte=days_delay_error, dataProduct__status='E') \
             .order_by('-job_id')
 
 
