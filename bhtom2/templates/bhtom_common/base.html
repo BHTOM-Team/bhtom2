@@ -25,11 +25,11 @@
 
     {% bootstrap_javascript jquery='True' %}
 
-    <title>BHTOM | {% block title %}{% endblock %}</title>
+    <title>{{ logo_text }} | {% block title %}{% endblock %}</title> <!-- Dynamiczny tytuł -->
 </head>
 <body>
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <a class="navbar-brand" href="/"><img src="{% static 'logo.png' %}" class="img-fluid"> BHTOM</a>
+    <a class="navbar-brand" href="/"><img src="{% static 'logo.png' %}" class="img-fluid"> {{ logo_text }}</a> <!-- Dynamiczny tekst logo -->
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
             aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -58,7 +58,7 @@
             {% navbar_login %}
         </ul>
     </div>
-    
+
 </nav>
 
  {% if PROFILE != 'PROD' %}
@@ -83,4 +83,3 @@
 {% endblock %}
 </body>
 </html>
-

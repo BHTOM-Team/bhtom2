@@ -98,3 +98,18 @@
 </li>
 
 {% endif %}
+
+{% if customization == "OCATOM" %}
+    {% if request.user.is_superuser or request.user.is_staff %}
+    <li class="nav-item dropdown {% if 'mymodule' in request.resolver_match.url_name %}active{% endif %}">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            MyModule {{ customization }}
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="{% url 'bhtom_mymodule:list' %}">List</a>
+            <a class="dropdown-item" href="{% url 'bhtom_mymodule:details' %}">Details</a>
+        </div>
+    </li>
+    {% endif %}
+{% endif %}

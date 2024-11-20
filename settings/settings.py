@@ -127,7 +127,8 @@ INSTALLED_APPS = [
     'crispy_bootstrap4',
     'drf_yasg',
     'django_guid',
-    'django_prometheus'
+    'django_prometheus',
+    'bhtom2.bhtom_mymodule',
 ]
 
 MIDDLEWARE = [
@@ -499,3 +500,13 @@ DJANGO_GUID = {
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB (adjust as needed)
 
+CUSTOMIZATION = secret.get("CUSTOMIZATION", 'BHTOM')
+
+if CUSTOMIZATION == "OCATOM":
+    CUST_WALLPAPER = 'oca_tom_image.jpg'
+    TITLE_TEXT = "OCA TOM"
+    LOGO_TEXT = "OCATOM"
+else: # CUSTOMIZATION == "BHTOM"
+    CUST_WALLPAPER = 'bh_tom_image.jpg'
+    TITLE_TEXT = "Black Hole TOM 2.0"
+    LOGO_TEXT = "BHTOM"
