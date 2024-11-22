@@ -132,8 +132,10 @@ def import_targets(targets, group_name=None, user=None):
                             ra = catalog_data["ra"]
                             dec = catalog_data["dec"]
                             disc = catalog_data["discovery_date"]
-                            description = catalog_data["description"]
-                            #description = target_fields.get('description', '')
+                            # description = catalog_data["description"]
+                            # description = target_fields.get('description', '')
+                            # Use catalog_data's description as the default
+                            description = target_fields.get('description', catalog_data.get("description", ''))
                             importance = target_fields.get('importance', str(9.99))
                             cadence = target_fields.get('cadence', str(1.0))
                             targetType = target_fields.get('type', Target.SIDEREAL)
