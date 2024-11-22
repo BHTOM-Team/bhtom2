@@ -14,6 +14,8 @@ from astropy.coordinates import Angle
 from astropy import units as u
 from django.forms import ValidationError
 
+from django.core.validators import MinLengthValidator
+
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_targets.models import (
     Target, TargetExtra, TargetName, SIDEREAL_FIELDS, NON_SIDEREAL_FIELDS, REQUIRED_SIDEREAL_FIELDS,
@@ -188,6 +190,11 @@ class SiderealTargetCreateForm(TargetForm):
                           help_text='Declination, in decimal or sexagesimal degrees. See '
                                     ' https://docs.astropy.org/en/stable/api/astropy.coordinates.Angle.html for '
                                     'supported sexagesimal inputs.')
+    description = forms.CharField(
+        label='Description*',
+        help_text="Target description, mandatory, min 10 characters, for example: candidate supernova, or: old target, do not observe.",
+        validators=[MinLengthValidator(10)],
+    )
 
     def __init__(self, *args, **kwargs):
         try:
@@ -215,7 +222,7 @@ class SiderealTargetCreateForm(TargetForm):
             label='Classification',
             initial='Unknown',
             required=True
-    )
+        )   
         # self.fields['classification'].widget.attrs['rows'] = 1
 
         # self.fields['discovery_date'].required = False
