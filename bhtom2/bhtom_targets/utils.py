@@ -90,6 +90,8 @@ def import_targets(targets, group_name=None, user=None):
                         elif k_source_name == 'GAIA_ALERT':
                             target_names['GAIA_ALERTS'] = row_k_value
                         elif k == 'classification':
+                            target_fields['classification'] = row_k_value
+                        elif k == 'description':
                             target_fields['description'] = row_k_value
                         elif k == 'priority':
                             target_fields['importance'] = row_k_value
