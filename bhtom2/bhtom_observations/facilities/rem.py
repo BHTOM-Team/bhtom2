@@ -10,6 +10,8 @@ from django.conf import settings
 from datetime import datetime, timedelta
 
 
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_rem.views')
+
 SUCCESSFUL_OBSERVING_STATES = ['COMPLETED']
 FAILED_OBSERVING_STATES = ['WINDOW_EXPIRED', 'CANCELED', 'FAILURE_LIMIT_REACHED', 'NOT_ATTEMPTED']
 TERMINAL_OBSERVING_STATES = SUCCESSFUL_OBSERVING_STATES + FAILED_OBSERVING_STATES
@@ -380,20 +382,25 @@ Priority: 2
         return julian_date
  
     #recipients can be a single string or a list of strings
-    def send_template_email(self,filled_template, recipients):
+    def send_template_email(self, filled_template, recipients):
+        # Ensure recipients is a list even if a single email is passed
         if isinstance(recipients, str):
             recipients = [recipients]  # Convert single email to list
 
-        subject = "REM_OBS" #don't change!
-        message = filled_template  # The filled template string
-        from_email = settings.EMAIL_HOST_USER  # From email address
-        recipient_list = recipients
+        subject = "REM_OBS"  # Don't change!
+        from_email = settings.EMAIL_HOST_USER  # Ensure this is configured correctly
 
-        # Send the email
-        send_mail(
-            subject,
-            message,
-            from_email,
-            recipient_list,
-            fail_silently=False,  # Set to True in production to avoid raising errors
-        )
+        try:
+            send_mail(
+                subject=subject,
+                message=filled_template,
+                from_email=from_email,
+                recipient_list=recipients,
+                fail_silently=False  # Set to True in production to suppress errors
+            )
+            print(f"Failed to send email: {e}")  # Replace with proper logging
+        
+        except Exception as e:
+            # Optionally, log the error or take other actions
+            print(f"Failed to send email: {e}")  # Replace with proper logging
+            return False  # Indicate failure
