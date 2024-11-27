@@ -29,7 +29,7 @@ proposal_choices = [(str(proposal_id), description) for proposal_id, description
 
 
 class REMPhotometricSequenceForm(BaseManualObservationForm):
-#    name = forms.CharField()
+    name = forms.CharField()
 
     proposal_id = forms.ChoiceField(label="Proposal ID", choices=proposal_choices)
 
@@ -97,7 +97,7 @@ class REMPhotometricSequenceForm(BaseManualObservationForm):
         filter_rows = "".join(f"<tr><td>{filter_option}</td><td>{self.exposure_times.get(filter_option)}</td></tr>" for filter_option, _ in valid_filters)
         mag = self.mag_init
         return Div(
-#            Div('name'),
+            Div('name'),
             Div('proposal_id'),
             Div(
                 Div('start', css_class='col'),
@@ -177,7 +177,6 @@ class REM(BaseManualObservationFacility):
 
     def submit_observation(self, observation_payload):
         #print(observation_payload)
-        logger.debug("submitted rem observations")
         # Retrieve target information using the target_id
         target_id = observation_payload['target_id']
         try:
@@ -189,7 +188,6 @@ class REM(BaseManualObservationFacility):
         target_name = target.name.replace(" ", "_")  # or use .replace(" ", "")
         ra = target.ra
         dec = target.dec
-
         template = """
 [STARTREMOB]
 
