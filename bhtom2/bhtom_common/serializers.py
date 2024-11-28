@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from bhtom_base.bhtom_dataproducts.models import DataProduct, CCDPhotJob
+from bhtom2.bhtom_calibration.models import Calibration_data
 from bhtom_base.bhtom_targets.models import Target
 from django_comments.models import Comment
 
@@ -11,61 +12,62 @@ class DataProductSerializer(serializers.ModelSerializer):
     camera = serializers.SerializerMethodField()
     observatory_name = serializers.SerializerMethodField()
     observatory = serializers.SerializerMethodField()
-    fits_filter = serializers.SerializerMethodField()
+    calibration_data = serializers.SerializerMethodField()
 
     class Meta:
         model = DataProduct
         fields = '__all__'
 
     def get_user_name(self, obj):
-        user_name = obj.user.first_name + " " + obj.user.last_name
-        return user_name
-    
+        return f"{obj.user.first_name} {obj.user.last_name}"
+
     def get_user(self, obj):
-        user = obj.user.username
-        return user
-    
+        return obj.user.username
+
     def get_camera(self, obj):
-        camera = None
         try:
-            camera = obj.observatory.camera.prefix
-        except Exception as e:
-            camera = None
-        return camera
-    
+            return obj.observatory.camera.prefix
+        except AttributeError:
+            return None
+
     def get_target_name(self, obj):
-        target_name = obj.target.name if obj.target else None
-        return target_name
-    
+        return obj.target.name if obj.target else None
+
     def get_target(self, obj):
-        target = obj.target.id if obj.target else None
-        return target
-    
-       
+        return obj.target.id if obj.target else None
+
     def get_observatory_name(self, obj):
-        observatory_name = None
         try:
-            observatory_name  =  obj.observatory.camera.observatory.name
-        except Exception as e:
-            observatory_name = None
-        return observatory_name
-    
+            return obj.observatory.camera.observatory.name
+        except AttributeError:
+            return None
+
     def get_observatory(self, obj):
-        observatory = None
         try:
-            observatory  =  obj.observatory.camera.observatory.id
-        except Exception as e:
-            observatory = None
-        return observatory
-    
-    def get_fits_filter(self, obj):
-        try:
-            ccdphotjob  =  CCDPhotJob.objects.get(dataProduct=obj.id)
-            fits_filter = ccdphotjob.fits_filter
-        except Exception as e:
-            fits_filter = None
-        return fits_filter
-    
+            return obj.observatory.camera.observatory.id
+        except AttributeError:
+            return None
+
+
+    def get_calibration_data(self, obj):
+     
+        calibration_data = Calibration_data.objects.filter(dataproduct=obj)
+        return [
+            {
+                'id': cal.id,
+                'time_photometry': cal.modified,
+                'mjd': cal.mjd,
+                'calib_survey_filter': f"{cal.use_catalog.survey}/{cal.use_catalog.filters}",
+                'standardised_to': f"{cal.survey}/{cal.best_filter}" if cal.survey and cal.best_filter else None,
+                'magnitude': cal.mag,
+                'zp': cal.zeropoint,
+                'scatter': cal.scatter,
+                'number of datapoints used for calibration': cal.npoints,
+                'outlier fraction': cal.outlier_fraction,
+                'matching radius[arcsec]': cal.match_distans
+            }
+            for cal in calibration_data
+        ]
 
 
 

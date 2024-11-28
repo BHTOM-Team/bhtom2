@@ -36,6 +36,7 @@ from django.db.models import Q
 from bhtom2.bhtom_common.serializers import DataProductSerializer,CommentSerializer
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_common.views')
 
 
@@ -721,9 +722,11 @@ class GetDataProductApi(views.APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
                 'data_product_type': openapi.Schema(type=openapi.TYPE_STRING),
                 'status': openapi.Schema(type=openapi.TYPE_STRING),
                 'fits_data': openapi.Schema(type=openapi.TYPE_STRING),
+                'photometry_data': openapi.Schema(type=openapi.TYPE_STRING),
                 'camera': openapi.Schema(type=openapi.TYPE_STRING),
                 'created_start': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'created_end': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
@@ -751,24 +754,29 @@ class GetDataProductApi(views.APIView):
     )
     def post(self, request):
         query = Q()
-
+        id = request.data.get('id', None)
         data_product_type = request.data.get('data_product_type', None)
-        status = request.data.get('status', None)
+        dp_status = request.data.get('status', None)
         fits_data = request.data.get('fits_data', None)
+        photometry_data = request.data.get('photometry_data', None)
         camera = request.data.get('camera', None)
         created_start = request.data.get('created_start', None)
         created_end = request.data.get('created_end', None)
         mjd = request.data.get('mjd', None)
         page = request.data.get('page', 1)
 
+        if id is not None:
+            query &= Q(id=id)
+        if photometry_data is not None:
+            query &= Q(data__contains=photometry_data)
         if data_product_type is not None:
             query &= Q(data_product_type=data_product_type)
-        if status is not None:
-            query &= Q(status=status)
+        if dp_status is not None:
+            query &= Q(status=dp_status)
         if camera is not None:
             query &= Q(observatory__camera__prefix=camera)
         if fits_data is not None:
-            query &= Q(fits_data=fits_data)
+            query &= Q(fits_data__contains=fits_data)
         if created_start is not None:
             query &= Q(created__gte=created_start)
         if created_end is not None:
@@ -778,10 +786,8 @@ class GetDataProductApi(views.APIView):
 
         queryset = DataProduct.objects.filter(query).distinct().order_by('-created')
 
-        # Determine page size based on user role
         page_size = 500 if not request.user.is_staff else 1000
-
-        paginator = Paginator(queryset, page_size)  # Set page size based on user role
+        paginator = Paginator(queryset, page_size)
 
         try:
             data_products = paginator.page(page)
@@ -790,6 +796,7 @@ class GetDataProductApi(views.APIView):
         except EmptyPage:
             data_products = paginator.page(paginator.num_pages)
 
+        # Serialize the data
         serialized_queryset = self.serializer_class(data_products, many=True).data
 
         return Response({
@@ -797,9 +804,7 @@ class GetDataProductApi(views.APIView):
             'num_pages': paginator.num_pages,
             'current_page': data_products.number,
             'data': serialized_queryset
-        }, status=200)
-    
-
+        }, status= status.HTTP_200_OK)
 
 
 class NewsletterView(LoginRequiredMixin, TemplateView):
