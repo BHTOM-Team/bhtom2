@@ -50,8 +50,7 @@ class CatalogQueryView(FormView):
             form.add_error('term', ValidationError('Object not found'))
             return self.form_invalid(form)
         except Exception as e:
-            # Handle other exceptions, log the error, etc.
-            form.add_error('term', ValidationError('Object not found'))
+            form.add_error('term', ValidationError("Error while searching for target"))
             logger.error("Oops something went wrong: " + str(e))
             return self.form_invalid(form)
 

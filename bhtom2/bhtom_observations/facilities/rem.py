@@ -8,7 +8,11 @@ from bhtom_base.bhtom_observations.cadence import CadenceForm
 from django.core.mail import send_mail
 from django.conf import settings
 from datetime import datetime, timedelta
+from bhtom2.utils.bhtom_logger import BHTOMLogger
 
+import random
+
+logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_observations.facilities.rem')
 
 SUCCESSFUL_OBSERVING_STATES = ['COMPLETED']
 FAILED_OBSERVING_STATES = ['WINDOW_EXPIRED', 'CANCELED', 'FAILURE_LIMIT_REACHED', 'NOT_ATTEMPTED']
@@ -25,7 +29,7 @@ proposal_choices = [(str(proposal_id), description) for proposal_id, description
 
 
 class REMPhotometricSequenceForm(BaseManualObservationForm):
-#    name = forms.CharField()
+    name = forms.CharField()
 
     proposal_id = forms.ChoiceField(label="Proposal ID", choices=proposal_choices)
 
@@ -93,7 +97,7 @@ class REMPhotometricSequenceForm(BaseManualObservationForm):
         filter_rows = "".join(f"<tr><td>{filter_option}</td><td>{self.exposure_times.get(filter_option)}</td></tr>" for filter_option, _ in valid_filters)
         mag = self.mag_init
         return Div(
-#            Div('name'),
+            Div('name'),
             Div('proposal_id'),
             Div(
                 Div('start', css_class='col'),
@@ -175,14 +179,15 @@ class REM(BaseManualObservationFacility):
         #print(observation_payload)
         # Retrieve target information using the target_id
         target_id = observation_payload['target_id']
-        target = Target.objects.get(id=target_id)
-
+        try:
+            target = Target.objects.get(id=target_id)
+        except Exception as e:
+            logger.error("No target id", str(e))
         # Extract target details
         # removing spaces in target name (REM requirement)
         target_name = target.name.replace(" ", "_")  # or use .replace(" ", "")
         ra = target.ra
         dec = target.dec
-
         template = """
 [STARTREMOB]
 
@@ -364,7 +369,8 @@ Priority: 2
         recipient_email = ["remobs@www.rem.inaf.it","wyrzykow@gmail.com"]
         # Send the email
         self.send_template_email(filled_template, recipient_email)
-        return []
+        obs_id = random.randint(10000, 99999)
+        return [obs_id]
 
 
 
@@ -380,20 +386,25 @@ Priority: 2
         return julian_date
  
     #recipients can be a single string or a list of strings
-    def send_template_email(self,filled_template, recipients):
+    def send_template_email(self, filled_template, recipients):
+        # Ensure recipients is a list even if a single email is passed
         if isinstance(recipients, str):
             recipients = [recipients]  # Convert single email to list
 
-        subject = "REM_OBS" #don't change!
-        message = filled_template  # The filled template string
-        from_email = settings.EMAIL_HOST_USER  # From email address
-        recipient_list = recipients
+        subject = "REM_OBS"  # Don't change!
+        from_email = settings.EMAIL_HOST_USER  # Ensure this is configured correctly
 
-        # Send the email
-        send_mail(
-            subject,
-            message,
-            from_email,
-            recipient_list,
-            fail_silently=False,  # Set to True in production to avoid raising errors
-        )
+        try:
+            send_mail(
+                subject,
+                filled_template,
+                from_email,
+                recipients,
+                fail_silently=False  # Set to True in production to suppress errors
+            )
+            logger.info(f"Email sent successfully to", recipients)
+        
+        except Exception as e:
+            # Optionally, log the error or take other actions
+            logger.info(f"Failed to send email: {e}") 
+            return False  # Indicate failure

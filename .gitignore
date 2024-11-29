@@ -175,3 +175,4 @@ bhtom2/.DS_Store
 *.env
 
 /data
+.gitattributes

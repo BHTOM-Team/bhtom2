@@ -1302,8 +1302,10 @@ API for DataProduct list, lists uploaded instrumental or fits files and tracks t
 ```json
 {
     "data_product_type": "photometry",
+    "id": 1,
     "status": "Dataproduct status",
-    "fits_data": "test",
+    "fits_data": "fits file name",
+    "photometry_data": "photometry file name",
     "camera" : "BIALKOW_ANDOR-DW432", 
     "created_start": "2024-01-01",
     "created_end": "2024-01-02",

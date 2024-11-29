@@ -75,6 +75,8 @@ class CalibrationResultsApiView(APIView):
                         serialized_data = serializers.serialize('json', [instance])
                         data = json.loads(serialized_data)[0]
                         result = data["fields"]
+                        file_url = request.build_absolute_uri(settings.DATA_MEDIA_PATH + str(instance.dataproduct.photometry_data))
+                        result["file_download_link"] = file_url
                         if getPlot:
                             if instance.calibration_plot:
                                 plot_path = settings.DATA_PLOTS_PATH + str(instance.calibration_plot)
@@ -101,6 +103,8 @@ class CalibrationResultsApiView(APIView):
                         serialized_data = serializers.serialize('json', [instance])
                         data = json.loads(serialized_data)[0]
                         result = data["fields"]
+                        file_url = request.build_absolute_uri(settings.DATA_MEDIA_PATH + str(instance.dataproduct.photometry_data))
+                        result["file_download_link"] = file_url
                         if getPlot:
                             if instance.calibration_plot:
                                 plot_path = settings.DATA_PLOTS_PATH + str(instance.calibration_plot)
