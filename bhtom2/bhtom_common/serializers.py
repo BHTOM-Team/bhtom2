@@ -50,39 +50,35 @@ class DataProductSerializer(serializers.ModelSerializer):
 
 
     def get_calibration_data(self, obj):
-    # Fetch the first calibration data record related to the dataproduct
-    cal = Calibration_data.objects.filter(dataproduct=obj).first()
-    
-    # Return empty fields if no calibration data exists
-    if not cal:
+        
+        cal = Calibration_data.objects.filter(dataproduct=obj).first()
+        if not cal:
+            return {
+                'id': "",
+                'time_photometry': "",
+                'mjd': "",
+                'calib_survey_filter': "",
+                'standardised_to': "",
+                'magnitude': "",
+                'zp': "",
+                'scatter': "",
+                'number of datapoints used for calibration': "",
+                'outlier fraction': "",
+                'matching radius[arcsec]': ""
+            }
         return {
-            'id': "",
-            'time_photometry': "",
-            'mjd': "",
-            'calib_survey_filter': "",
-            'standardised_to': "",
-            'magnitude': "",
-            'zp': "",
-            'scatter': "",
-            'number of datapoints used for calibration': "",
-            'outlier fraction': "",
-            'matching radius[arcsec]': ""
+            'id': cal.id or "",
+            'time_photometry': cal.modified or "",
+            'mjd': cal.mjd or "",
+            'calib_survey_filter': f"{cal.use_catalog.survey or ''}/{cal.use_catalog.filters or ''}",
+            'standardised_to': f"{cal.survey or ''}/{cal.best_filter or ''}" if cal.survey and cal.best_filter else "",
+            'magnitude': cal.mag or "",
+            'zp': cal.zeropoint or "",
+            'scatter': cal.scatter or "",
+            'number of datapoints used for calibration': cal.npoints or "",
+            'outlier fraction': cal.outlier_fraction or "",
+            'matching radius[arcsec]': cal.match_distans or ""
         }
-    
-    # Return populated data if calibration data exists
-    return {
-        'id': cal.id or "",
-        'time_photometry': cal.modified or "",
-        'mjd': cal.mjd or "",
-        'calib_survey_filter': f"{cal.use_catalog.survey or ''}/{cal.use_catalog.filters or ''}",
-        'standardised_to': f"{cal.survey or ''}/{cal.best_filter or ''}" if cal.survey and cal.best_filter else "",
-        'magnitude': cal.mag or "",
-        'zp': cal.zeropoint or "",
-        'scatter': cal.scatter or "",
-        'number of datapoints used for calibration': cal.npoints or "",
-        'outlier fraction': cal.outlier_fraction or "",
-        'matching radius[arcsec]': cal.match_distans or ""
-    }
   
 
 
