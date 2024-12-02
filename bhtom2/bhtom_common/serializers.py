@@ -51,15 +51,28 @@ class DataProductSerializer(serializers.ModelSerializer):
 
     def get_calibration_data(self, obj):
      
-        if obj.status == "E":
-            return  [{"status": "Error"}]
-        elif obj.status == "P":
-             return  [{"status": "In progress"}]
-        else:
+       
             calibration_data = Calibration_data.objects.filter(dataproduct=obj)
-
-            return [
+            if obj.status != "S":
+                return [
                 {
+                    'id': "",
+                    'time_photometry': "",
+                    'mjd': "and",
+                    'calib_survey_filter': "",
+                    'standardised_to': "",
+                    'magnitude': "",
+                    'zp': "",
+                    'scatter': "",
+                    'number of datapoints used for calibration': "",
+                    'outlier fraction': "",
+                    'matching radius[arcsec]': "",
+                }
+                for cal in calibration_data
+            ]
+            else:
+                return [
+                    {
                     'id': cal.id,
                     'time_photometry': cal.modified,
                     'mjd': cal.mjd,
@@ -71,9 +84,9 @@ class DataProductSerializer(serializers.ModelSerializer):
                     'number of datapoints used for calibration': cal.npoints,
                     'outlier fraction': cal.outlier_fraction,
                     'matching radius[arcsec]': cal.match_distans
-                }
-                for cal in calibration_data
-            ]
+                    }
+                    for cal in calibration_data
+                ]
 
 
 
