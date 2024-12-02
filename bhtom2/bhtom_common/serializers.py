@@ -50,41 +50,22 @@ class DataProductSerializer(serializers.ModelSerializer):
 
 
     def get_calibration_data(self, obj):
-     
-       
-        calibration_data = Calibration_data.objects.filter(dataproduct=obj)
-
-        if not calibration_data.exists() or any(cal.status != "S" for cal in calibration_data):
-            return [{
-                 'id': "",
-                 'time_photometry': "",
-                 'mjd': "",
-                 'calib_survey_filter': "",
-                 'standardised_to': "",
-                 'magnitude': "",
-                 'zp': "",
-                 'scatter': "",
-                 'number of datapoints used for calibration': "",
-                 'outlier fraction': "",
-                 'matching radius[arcsec]': "",
-             }]
-        
-        return [
-                 {
-                     'id': cal.id,
-                     'time_photometry': cal.modified,
-                     'mjd': cal.mjd,
-                     'calib_survey_filter': f"{cal.use_catalog.survey}/{cal.use_catalog.filters}",
-                     'standardised_to': f"{cal.survey}/{cal.best_filter}" if cal.survey and cal.best_filter else None,
-                     'magnitude': cal.mag,
-                     'zp': cal.zeropoint,
-                     'scatter': cal.scatter,
-                     'number of datapoints used for calibration': cal.npoints,
-                     'outlier fraction': cal.outlier_fraction,
-                     'matching radius[arcsec]': cal.match_distans
-                 }
-                 for cal in calibration_data
-             ]
+    
+        cal = Calibration_data.objects.get(dataproduct=obj)
+        return {
+            'id': cal.id or "",
+            'time_photometry': cal.modified or "",
+            'mjd': cal.mjd or "",
+            'calib_survey_filter': f"{cal.use_catalog.survey or ''}/{cal.use_catalog.filters or ''}",
+            'standardised_to': f"{cal.survey or ''}/{cal.best_filter or ''}" if cal.survey and cal.best_filter else "",
+            'magnitude': cal.mag or "",
+            'zp': cal.zeropoint or "",
+            'scatter': cal.scatter or "",
+            'number of datapoints used for calibration': cal.npoints or "",
+            'outlier fraction': cal.outlier_fraction or "",
+            'matching radius[arcsec]': cal.match_distans or ""
+        }
+  
 
 
 
