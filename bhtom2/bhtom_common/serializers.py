@@ -70,7 +70,7 @@ class DataProductSerializer(serializers.ModelSerializer):
             'id': cal.id or "",
             'time_photometry': cal.modified or "",
             'mjd': cal.mjd or "",
-            'calib_survey_filter': f"{cal.use_catalog.survey or ''}/{cal.use_catalog.filters or ''}",
+            'calib_survey_filter': f"{cal.use_catalog.survey or ''}/{cal.use_catalog.filters or ''}"  if cal.use_catalog else "",
             'standardised_to': f"{cal.survey or ''}/{cal.best_filter or ''}" if cal.survey and cal.best_filter else "",
             'magnitude': cal.mag or "",
             'zp': cal.zeropoint or "",
