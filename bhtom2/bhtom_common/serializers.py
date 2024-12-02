@@ -51,23 +51,29 @@ class DataProductSerializer(serializers.ModelSerializer):
 
     def get_calibration_data(self, obj):
      
-        calibration_data = Calibration_data.objects.filter(dataproduct=obj)
-        return [
-            {
-                'id': cal.id,
-                'time_photometry': cal.modified,
-                'mjd': cal.mjd,
-                'calib_survey_filter': f"{cal.use_catalog.survey}/{cal.use_catalog.filters}",
-                'standardised_to': f"{cal.survey}/{cal.best_filter}" if cal.survey and cal.best_filter else None,
-                'magnitude': cal.mag,
-                'zp': cal.zeropoint,
-                'scatter': cal.scatter,
-                'number of datapoints used for calibration': cal.npoints,
-                'outlier fraction': cal.outlier_fraction,
-                'matching radius[arcsec]': cal.match_distans
-            }
-            for cal in calibration_data
-        ]
+        if obj.status == "E":
+            return  [{"status": "Error"}]
+        elif obj.status == "P":
+             return  [{"status": "In progress"}]
+        else:
+            calibration_data = Calibration_data.objects.filter(dataproduct=obj)
+
+            return [
+                {
+                    'id': cal.id,
+                    'time_photometry': cal.modified,
+                    'mjd': cal.mjd,
+                    'calib_survey_filter': f"{cal.use_catalog.survey}/{cal.use_catalog.filters}",
+                    'standardised_to': f"{cal.survey}/{cal.best_filter}" if cal.survey and cal.best_filter else None,
+                    'magnitude': cal.mag,
+                    'zp': cal.zeropoint,
+                    'scatter': cal.scatter,
+                    'number of datapoints used for calibration': cal.npoints,
+                    'outlier fraction': cal.outlier_fraction,
+                    'matching radius[arcsec]': cal.match_distans
+                }
+                for cal in calibration_data
+            ]
 
 
 

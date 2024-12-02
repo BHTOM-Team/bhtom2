@@ -141,11 +141,11 @@ def import_targets(targets, group_name=None, user=None):
                             importance = target_fields.get('importance', str(9.99))
                             cadence = target_fields.get('cadence', str(1.0))
                             targetType = target_fields.get('type', Target.SIDEREAL)
-
+                            classification = target_fields.get('classification', '')
                             target_fields = {
                                 "name": gaia_alerts_name, "ra": ra, "dec": dec, "epoch": 2000.0,
                                 "discovery_date": disc, "importance": importance, "cadence": cadence,
-                                "description": description, "type": targetType
+                                "description": description, "type": targetType, 'classification': classification, 
                             }
                             logger.info(f"Import: Gaia Alerts harvester used to fill the target info as {gaia_alerts_name}")
 
