@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from bhtom_base.bhtom_dataproducts.models import DataProduct, CCDPhotJob
+from bhtom_base.bhtom_dataproducts.models import DataProduct, CCDPhotJob, ReducedDatum
 from bhtom2.bhtom_calibration.models import Calibration_data
 from bhtom_base.bhtom_targets.models import Target
 from django_comments.models import Comment
@@ -83,6 +83,12 @@ class DataProductSerializer(serializers.ModelSerializer):
 
 
 
+class ReducedDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReducedDatum
+        fields = '__all__'
+
+        
 
 class CommentSerializer(serializers.ModelSerializer):
     target_name = serializers.SerializerMethodField()

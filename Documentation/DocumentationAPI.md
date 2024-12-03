@@ -1332,3 +1332,50 @@ Replace `<yourToken>` with your valid authentication token.
 curl -X POST -H "Content-Type: application/json" -H "Authorization: Token <yourToken>" \
   "https://bh-tom2.astrolabs.pl/common/api/data/" 
 ```
+
+
+
+# Reduced Datum API
+
+### List Reduced Datums
+
+
+### Request
+- **Method**: POST
+- **URL**: `common/api/reducedDatum/`
+
+- Token Authentication: You must include a valid authentication token in the request headers.
+
+
+### Example Request Body
+
+please provide target_name or target_id, not both of them
+```json
+{
+    "target_name": "MyTarget",
+    "target_id": 1,
+    "page": "1",
+}
+```
+### Example Request
+
+You can make a POST request using the `curl` command or any HTTP client that supports POST requests. You can request only 500 records for one request, use parametr "page" to get next 500 records
+
+### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Authorization: Token <yourToken>" \
+  "https://bh-tom2.astrolabs.pl/common/api/reducedDatum/"
+```
+
+Replace `<yourToken>` with your valid authentication token.
+
+
+```bash
+curl -X POST -H "Content-Type: application/json" -H "Authorization: Token <yourToken>" \
+  "https://bh-tom2.astrolabs.pl/common/api/reducedDatum/"  -d '{ 
+  "target_name": "ExampleTarget",
+  "page": 1
+}' 
+```
