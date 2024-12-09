@@ -1,77 +1,117 @@
-# Architecture of BHTOM
+# Installation
 
-## Overview
+This document provides detailed steps for setting up the BHTOM system on your local machine or deploying it in a production environment.
 
-The BHTOM (Black Hole Target Observation Manager) system is built using a combination of Python libraries, Django web applications, and other components that enable the coordination of telescope networks and management of astronomical observations. This document outlines the key architectural components and how they work together to facilitate data processing and observation management.
+---
 
-## Core Components
+## Prerequisites
 
-### 1. Observation Portal
-   - The **Observation Portal** is the heart of BHTOM, managing user accounts, observation proposals, requests, and scheduling of observations.
-   - It serves as a database and API for handling observation data and provides a user-friendly interface for researchers, telescope operators, and students.
+Before installing the system, ensure the following dependencies are installed:
 
-### 2. Configuration Database (ConfigDB)
-   - The **ConfigDB** manages detailed information about the observatory setup, such as site structure, telescope configurations, and instrument settings.
-   - It enables automatic validation and auto-completion of data when adding or modifying telescope and instrument details, ensuring accuracy in observations.
+- **Python**: Version 3.9 or newer.
+- **PostgreSQL**: Version 14 or newer.
+- **Docker and Docker Compose**: Ensure Docker Compose version is at least 1.25.0.
+- **Kafka**: A running Kafka service is required for some services.
 
-### 3. WSDB Cache Database
-   - Uses `q3c` for efficient spatial queries.
-   - Caches data from WSDB Cambridge to reduce load and speed up access for subsequent queries.
-   - Stores archived data from BHTOM1 and plans to include photometric catalogs in the future.
+---
 
-## Optional Components
+## Local Development (Without Docker)
 
-### 1. Adaptive Scheduler
-   - The **Adaptive Scheduler** processes observation requests and prioritizes them to generate a schedule for telescope observations.
-   - While tightly integrated into the BHTOM ecosystem, users can also opt for custom scheduling solutions if needed.
+### Step 1: Clone the Repository
 
-### 2. Science Archive and Ingester
-   - Provides the means to store image metadata and links to observation data files, using AWS S3 for scalable storage.
-   - This archive enables users to search, filter, and download data products, supporting long-term data storage and analysis.
+Clone the main BHTOM repository and its submodules:
 
-### 3. Downtime Database
-   - Manages periods of scheduled downtime for telescopes and instruments.
-   - Helps improve scheduling efficiency by ensuring observations are planned around known downtime intervals.
+```
+git clone https://github.com/BHTOM-Team/bhtom2.git
+cd bhtom2
+git submodule foreach --recursive git reset --hard
+git submodule update --init --recursive --remote
+```
 
-## Data Flow
+### Step 2: Create a Conda Environment
 
-### 1. Upload Photometry Files
-   - Users can upload photometry files directly through the **Upload Service**.
-   - The data is processed through Kafka to CPCS (Calibration, Plot Generation, and Data Update) before being saved in the BHTOM database.
-   - Users can access the processed results via the BHTOM portal.
+```
+conda create -n bhtom2 python=3.9
+conda activate bhtom2
+conda install pip
+```
 
-### 2. Upload FITS Files
-   - FITS files are handled by the **Upload Service**, processed using **Dramatiq** for asynchronous task handling, and further calibrated through **CCDPhotSvc**.
-   - Results are then stored back into the BHTOM database and presented to users for analysis.
+### Step 3: Install Requirements
 
-## Kafka Integration
+```
+pip install -r requirements.txt
+```
 
-### 1. Event Handling
-   - Kafka manages events such as `Event_Calibration_File`, `Event_Create_Target`, and `Event_Reduced_Datum_Update` to streamline the flow of observation data.
-   - This helps in maintaining the high throughput needed for real-time data ingestion and processing.
+### Step 4: Configure the Environment
 
-### 2. Infrastructure
-   - BHTOM utilizes a Kafka cluster with three brokers and three Zookeeper instances to ensure data consistency and reliability.
-   - The system also includes a Kafka UI for monitoring and managing topics and brokers.
+Copy the environment template and fill in necessary values:
 
-## Docker-based Microservices
+```
+cp template.env bhtom2/.bhtom.env
+```
 
-### 1. Containerized Environment
-   - All BHTOM services run in **Docker containers**, allowing for easy deployment and scaling.
-   - Services include:
-     - `kafka`
-     - `mongo`
-     - `wsdb`
-     - `upload-service`
-     - `graylog` for centralized log management
-   - Containers share access to a common disk for data persistence.
+Update `.bhtom.env` with database and other configuration details.
 
-### 2. Graylog and Elasticsearch
-   - **Graylog** is used to centralize log collection from various services.
-   - **Elasticsearch** is used for indexing logs and providing quick access to diagnostic data.
+### Step 5: Set Up the Database
 
-## Diagrams and Visualizations
+Ensure PostgreSQL is installed. Create a user and database:
 
-For a visual representation of the BHTOM architecture, refer to the diagram below:
+```
+psql --set=pswrd="YOUR_PASSWORD" -U postgres -c "CREATE USER bhtom WITH PASSWORD 'YOUR_PASSWORD';"
+psql --set=pswrd="YOUR_PASSWORD" -U postgres -c "CREATE DATABASE bhtom2 OWNER bhtom;"
+```
 
-![BHTOM Architecture Diagram](link-to-diagram.png)
+Run the `init_no_pswrd.sql` script to initialize the database.
+
+### Step 6: Run the Development Server
+
+```
+python manage.py runserver
+```
+
+---
+
+## Using Docker for Development
+
+### Step 1: Create the `.env` File
+
+```
+cp template.env bhtom2/.bhtom.env
+```
+
+Fill in the required values.
+
+### Step 2: Start the Docker Containers
+
+```
+COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose up -d --build
+```
+
+---
+
+## Running Tests
+
+To run the tests:
+
+1. Ensure your `.bhtom.env` file is correctly configured.
+2. Run the following command:
+
+```
+python manage.py test
+```
+
+---
+
+## Troubleshooting
+
+- Ensure you have the latest PostgreSQL version installed.
+- Verify that all environment variables in `.bhtom.env` are set correctly.
+- Check that Kafka is running and accessible.
+- If encountering database permissions errors, ensure the `bhtom` user has `CREATEDB` privileges.
+- To fix permission issues on Unix systems:
+
+```
+chmod +x dev_entrypoint.sh
+```
+
+For further support, refer to the project’s main documentation.
