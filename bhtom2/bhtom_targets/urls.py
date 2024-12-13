@@ -9,7 +9,7 @@ from .rest.views import CleanTargetListCache, GetTargetListApi, CleanTargetDetai
 
 from .views import TargetCreateView, TargetUpdateView, TargetGenerateTargetDescriptionLatexView, TargetImportView, \
     TargetDownloadPhotometryStatsLatexTableView, TargetListImagesView, TargetDownloadPhotometryDataView, \
-    TargetDownloadRadioDataView, TargetMicrolensingView, TargetListView, UpdateReducedDatum, TargetNotFoundView
+    TargetDownloadRadioDataView, TargetMicrolensingView, TargetListView, UpdateReducedDatum, TargetNotFoundView, TargetAddNewGroupingView
 
 from bhtom_base.bhtom_common.api_router import SharedAPIRootRouter
 
@@ -46,6 +46,7 @@ urlpatterns = [
      path('targetgrouping/<int:pk>/delete/', TargetGroupingDeleteView.as_view(), name='delete-group'),
      path('targetgrouping/create/', TargetGroupingCreateView.as_view(), name='create-group'),
      path('add-remove-grouping/', TargetAddRemoveGroupingView.as_view(), name='add-remove-grouping'),
+     path('add-new-grouping/', TargetAddNewGroupingView.as_view(), name='add-new-grouping'),
      path('name/<str:name>', TargetNameSearchView.as_view(), name='name-search'),
      path('<int:pk>/generate-target-description-latex/', TargetGenerateTargetDescriptionLatexView.as_view(),
          name='generate_target_description_latex'),

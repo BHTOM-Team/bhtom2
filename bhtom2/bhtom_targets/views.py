@@ -748,3 +748,46 @@ class TargetNotFoundView(View):
             alias = None
             context = {'target_name': target_name, 'alias': None, 'target_alias': None}
         return render(request, self.template_name, context)
+    
+
+
+class TargetAddNewGroupingView(LoginRequiredMixin, View):
+    """
+    View that handles the creation of new groups and addition of targets to target groups. Requires authentication.
+    """
+
+    def post(self, request, *args, **kwargs):
+ 
+        query_string = request.POST.get('query_string', '')
+        grouping_name = request.POST.get('grouping')  
+        selected_target_id = request.POST.get('selected-target')
+
+        try:
+            if not grouping_name:
+                messages.error(request, 'Group name is required.')
+                return redirect(reverse('bhtom_base.bhtom_targets:list') + '?' + query_string)
+            
+            if TargetList.objects.filter(name=grouping_name).exists():
+                messages.warning(
+                    request,
+                    f'A group with the name "{grouping_name}" already exists. Please provide a new group name.'
+                )
+                return redirect(reverse('bhtom_base.bhtom_targets:list') + '?' + query_string)
+
+            grouping_object = TargetList.objects.create(name=grouping_name)
+            messages.success(request, f'Group "{grouping_name}" created successfully.')
+            
+
+            if selected_target_id:
+                target = Target.objects.get(pk=selected_target_id)
+                grouping_object.targets.add(target)
+                messages.success(request, f'Target "{target.name}" added to group "{grouping_name}".')
+            else:
+                messages.warning(request, 'No target selected to add to the group.')
+
+        except Target.DoesNotExist:
+            messages.error(request, f'Target with ID "{selected_target_id}" does not exist.')
+        except Exception as e:
+            messages.error(request, f'Error creating group or adding target: {e}')
+        
+        return redirect(reverse('bhtom_base.bhtom_targets:list') + '?' + query_string)
