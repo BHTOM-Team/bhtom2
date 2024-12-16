@@ -1,117 +1,99 @@
-# Installation
-
-This document provides detailed steps for setting up the BHTOM system on your local machine or deploying it in a production environment.
-
----
+# Running Services Locally Using Docker
 
 ## Prerequisites
 
-Before installing the system, ensure the following dependencies are installed:
+1. **Install Docker**: Ensure Docker is installed on your system.  
+2. **Install Docker Compose**: Version > 1.25.0 is required.  
+3. **VPN Connection (if required)**: For services requiring access to `wsdb_cache`, ensure you are connected to the VPN or have valid SSH parameters configured in the environment file.  
 
-- **Python**: Version 3.9 or newer.
-- **PostgreSQL**: Version 14 or newer.
-- **Docker and Docker Compose**: Ensure Docker Compose version is at least 1.25.0.
-- **Kafka**: A running Kafka service is required for some services.
+## Environment Setup
 
+1. **Create Environment Files**:  
+   Each service requires a `.env` file for configuration, which should be created in the `docker/dev` directory.  
+
+   - Each service includes an `.env.template` file in the `docker/dev` folder. Copy the content of the template to a new `.env` file and fill in the appropriate values.  
+   - Use the same template structure for all services.  
+
+2. **Set Up the `DATA_STORE_PATH`**:  
+   In the `.env` file, you will find a parameter called `DATA_STORE_PATH`. This should point to a local folder on your machine. The folder must have the following structure:
+
+   ```text
+   DATA_STORE_PATH/
+   ├── cache/
+   ├── log/
+   ├── plots/
+   ├── targets/
+   ├── cpcsArchiveFile/
+   ├── fits/
+   ├── kafka/
+   ```
+
+   Make sure to create all these subfolders in the directory specified by `DATA_STORE_PATH`.
+
+3. **VPN or SSH Configuration**:  
+   For the `cpcs` service, you will need access to the `wsdb_cache` database. To do this:  
+   - Connect via VPN to the Cambridge WSDB database.  
+   - Alternatively, configure SSH parameters in the `.env` file for the service.  
+```
+
+This includes the precise folder structure needed under `DATA_STORE_PATH`. Ensure that your local folder matches this structure for the services to function correctly.
 ---
 
-## Local Development (Without Docker)
+## Starting Services Locally
 
-### Step 1: Clone the Repository
+### Step 1: Start the `bhtom2` Service  
 
-Clone the main BHTOM repository and its submodules:
+The `bhtom2` service must be started first as it initializes the main database.  
 
-```
-git clone https://github.com/BHTOM-Team/bhtom2.git
-cd bhtom2
-git submodule foreach --recursive git reset --hard
-git submodule update --init --recursive --remote
-```
+1. Navigate to the `docker/dev` directory of the `bhtom2` service:  
+   ```bash
+   cd bhtom2/docker/dev
+   ```  
+2. Build and run the `bhtom2` service:  
+   ```bash
+   docker-compose up -d --build
+   ```  
 
-### Step 2: Create a Conda Environment
+### Step 2: Start Other Services  
 
-```
-conda create -n bhtom2 python=3.9
-conda activate bhtom2
-conda install pip
-```
+Once the `bhtom2` service is running, start the other services in any order:  
 
-### Step 3: Install Requirements
+#### Upload Service  
 
-```
-pip install -r requirements.txt
-```
+1. Navigate to the `docker/dev` directory of the `upload-service`:  
+   ```bash
+   cd upload-service/docker/dev
+   ```  
+2. Build and run the service:  
+   ```bash
+   docker-compose up -d --build
+   ```  
 
-### Step 4: Configure the Environment
+#### CPCS Service  
 
-Copy the environment template and fill in necessary values:
+1. Navigate to the `docker/dev` directory of the `cpcs` service:  
+   ```bash
+   cd cpcs/docker/dev
+   ```  
+2. Build and run the service:  
+   ```bash
+   docker-compose up -d --build
+   ```  
 
-```
-cp template.env bhtom2/.bhtom.env
-```
+#### Harvester Service  
 
-Update `.bhtom.env` with database and other configuration details.
+1. Navigate to the `docker/dev` directory of the `harvester` service:  
+   ```bash
+   cd harvester/docker/dev
+   ```  
+2. Build and run the service:  
+   ```bash
+   docker-compose up -d --build
+   ```  
 
-### Step 5: Set Up the Database
+### Step 3: Verify All Services  
 
-Ensure PostgreSQL is installed. Create a user and database:
-
-```
-psql --set=pswrd="YOUR_PASSWORD" -U postgres -c "CREATE USER bhtom WITH PASSWORD 'YOUR_PASSWORD';"
-psql --set=pswrd="YOUR_PASSWORD" -U postgres -c "CREATE DATABASE bhtom2 OWNER bhtom;"
-```
-
-Run the `init_no_pswrd.sql` script to initialize the database.
-
-### Step 6: Run the Development Server
-
-```
-python manage.py runserver
-```
-
----
-
-## Using Docker for Development
-
-### Step 1: Create the `.env` File
-
-```
-cp template.env bhtom2/.bhtom.env
-```
-
-Fill in the required values.
-
-### Step 2: Start the Docker Containers
-
-```
-COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose up -d --build
-```
-
----
-
-## Running Tests
-
-To run the tests:
-
-1. Ensure your `.bhtom.env` file is correctly configured.
-2. Run the following command:
-
-```
-python manage.py test
-```
-
----
-
-## Troubleshooting
-
-- Ensure you have the latest PostgreSQL version installed.
-- Verify that all environment variables in `.bhtom.env` are set correctly.
-- Check that Kafka is running and accessible.
-- If encountering database permissions errors, ensure the `bhtom` user has `CREATEDB` privileges.
-- To fix permission issues on Unix systems:
-
-```
-chmod +x dev_entrypoint.sh
-```
-
-For further support, refer to the project’s main documentation.
+To ensure all services are running correctly, check their logs:  
+```bash
+docker-compose logs -f
+```  
