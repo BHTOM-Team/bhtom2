@@ -62,24 +62,6 @@ The Harvester service is responsible for aggregating data from various astronomi
 
 The service will start on `http://localhost:8000`.
 
-## API Endpoints
-
-Key API endpoints provided by the Harvester service:
-
-- **/fetch-data**: Triggers data fetching from external sources.
-- **/list-sources**: Lists all available data sources and their status.
-- **/parse-data**: Parses and processes raw data into the system.
-- **/schedule**: Schedules a new data harvesting task.
-
-## Usage
-
-The Harvester service can be used to periodically fetch and integrate data from various astronomical data sources. It is typically run as a background service, automatically fetching data based on predefined schedules.
-
-To manually trigger data fetching, use:
-
-   ```
-   curl -X POST http://localhost:8000/fetch-data
-   ```
 
 ## Troubleshooting
 
@@ -87,9 +69,6 @@ To manually trigger data fetching, use:
 - **Kafka Connectivity**: Verify that the Kafka service is accessible and the necessary topics are configured.
 - **Scheduler Issues**: If automated tasks are not running, check your cron job or task scheduler settings.
 
-## Contributing
-
-Contributions to the Harvester service are welcome. Fork the repository and open a pull request with your changes.
 
 ## License
 

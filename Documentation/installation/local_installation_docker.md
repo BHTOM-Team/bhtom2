@@ -20,6 +20,8 @@
    ```text
    DATA_STORE_PATH/
    ├── cache/
+   │   ├── newsletter/
+       │   ├── newsletter_data.json
    ├── log/
    ├── plots/
    ├── targets/
@@ -34,10 +36,6 @@
    For the `cpcs` service, you will need access to the `wsdb_cache` database. To do this:  
    - Connect via VPN to the Cambridge WSDB database.  
    - Alternatively, configure SSH parameters in the `.env` file for the service.  
-```
-
-This includes the precise folder structure needed under `DATA_STORE_PATH`. Ensure that your local folder matches this structure for the services to function correctly.
----
 
 ## Starting Services Locally
 

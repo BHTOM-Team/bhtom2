@@ -1,8 +1,8 @@
-# CPCS - Calibration and Photometry Control Service
+# CPCS - Cambridge Photometric Calibration Server
 
 ## Overview
 
-CPCS (Calibration and Photometry Control Service) is a core component of the BHTOM ecosystem. It handles the calibration, plotting, and archiving of photometric data, enabling accurate and consistent data processing for time-domain astronomy.
+CPCS (Cambridge Photometric Calibration Server) is a core component of the BHTOM ecosystem. It handles the calibration, plotting, and archiving of photometric data, enabling accurate and consistent data processing for time-domain astronomy.
 
 ## Features
 
@@ -62,24 +62,11 @@ python manage.py runserver
 
 This will start the service on `http://localhost:8000`.
 
-## API Endpoints
-
-CPCS provides the following key API endpoints for integration with other services:
-
-- **/calibrate**: Endpoint for calibrating photometric data.
-- **/archive**: Access archived photometric data.
-- **/generate-charts**: Generate visualizations of data.
-- **/wsdb-cache**: Retrieve data from WSDB cache for efficient data processing.
-
 ## Troubleshooting
 
 - Ensure that all environment variables in the `.env` file are correctly set.
 - If you encounter database connection issues, verify your PostgreSQL configuration and credentials.
 - For issues with Kafka, make sure the Kafka service is running and accessible.
-
-## Contributing
-
-Contributions to CPCS are welcome. Please fork the repository and submit a pull request for review.
 
 ## License
 

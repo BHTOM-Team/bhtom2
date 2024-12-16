@@ -62,25 +62,6 @@ The Upload service in BHTOM is responsible for handling the upload of photometri
 
 The service will start on `http://localhost:8000`.
 
-## API Endpoints
-
-Key API endpoints provided by the Upload service:
-
-- **/upload-photometry**: Endpoint for uploading photometric data files.
-- **/upload-fits**: Endpoint for uploading FITS files.
-- **/calibrate**: Endpoint for manually triggering data calibration.
-- **/status**: Check the status of uploaded files and their processing state.
-
-## Usage
-
-The Upload service is used to manage the submission and processing of photometric and FITS data. To upload a file, use:
-
-   ```
-   curl -X POST -F "file=@path/to/your/file.fits" http://localhost:8000/upload-fits
-   ```
-
-This will initiate the upload and processing of the provided FITS file.
-
 ## Troubleshooting
 
 - **File Upload Failures**: Ensure that your file is in the correct format and that the server is running.
@@ -88,9 +69,6 @@ This will initiate the upload and processing of the provided FITS file.
 - **Kafka Issues**: Make sure Kafka is running and properly configured.
 - **Calibration Errors**: If calibration fails, check the data format and integrity of the uploaded files.
 
-## Contributing
-
-Contributions to the Upload service are welcome. Fork the repository and open a pull request with your changes.
 
 ## License
 

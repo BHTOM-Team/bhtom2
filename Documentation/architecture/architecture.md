@@ -22,7 +22,7 @@ The BHTOM (Black Hole Target Observation Manager) system is designed to manage a
   - Archives data from BHTOM1 for historical reference.
   - Plans for future integration of photometry catalogs.
 
-### 3. **CPCS (Central Photometric Calibration Service)**
+### 3. **CPCS (Cambridge Photometric Calibration Server)**
 
 - **Description**: A crucial component for data calibration and standardization.
 - **Purpose**: Processes uploaded photometric data, applies calibrations, and generates standardized outputs.
