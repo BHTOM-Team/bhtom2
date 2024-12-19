@@ -33,7 +33,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.db.models import Q
-from bhtom2.bhtom_common.serializers import DataProductSerializer,CommentSerializer
+from bhtom2.bhtom_common.serializers import DataProductSerializer,CommentSerializer,ReducedDataSerializer
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
@@ -314,12 +314,15 @@ class DataListInProgressView(SingleTableMixin, LoginRequiredMixin, ListView):
         context = super().get_context_data(*args, **kwargs)
 
         logger.debug("Prepare DataListView for Admin")
-
         if not self.request.user.is_staff:
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
+        days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
 
-        context['fits_file'] = CCDPhotJob.objects.filter(Q(dataProduct__status='P')).order_by('-job_id')
+        context['fits_file'] = CCDPhotJob.objects.filter(Q(dataProduct__status='P') 
+                                                        & Q(dataProduct__created__gte=days_delay_error)
+                                                        & ~Q(dataProduct__fits_data__isnull=True)
+                                                        & ~Q(dataProduct__fits_data='')).order_by('-job_id')
 
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
         return context
@@ -805,6 +808,76 @@ class GetDataProductApi(views.APIView):
             'current_page': data_products.number,
             'data': serialized_queryset
         }, status= status.HTTP_200_OK)
+
+
+
+
+class GetReducedDataApi(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = ReducedDataSerializer
+    pagination_class = StandardResultsSetPagination
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'target_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'target_name': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=[]  # Optional fields
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+            openapi.Parameter(
+                name='page',
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_INTEGER,
+                required=False,
+                description='Page number for pagination'
+            ),
+        ],
+    )
+    def post(self, request):
+        target_id = request.data.get('target_id')
+        target_name = request.data.get('target_name')
+        page_number = request.data.get('page', 1)
+
+        if bool(target_id) == bool(target_name): 
+            return Response(
+                {"error": "Provide either 'target_id' or 'target_name', but not both."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if target_name:
+            try:
+                target_id = Target.objects.get(name=target_name).id
+            except Target.DoesNotExist:
+                return Response({"error": "Target does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
+        queryset = ReducedDatum.objects.filter(target_id=target_id).distinct()
+
+        page_size = 1000 if request.user.is_staff else 500
+        paginator = Paginator(queryset, page_size)
+
+        try:
+            paginated_data = paginator.page(page_number)
+        except (PageNotAnInteger, EmptyPage):
+            return Response({"error": "Invalid page number."}, status=status.HTTP_400_BAD_REQUEST)
+
+        serialized_data = self.serializer_class(paginated_data, many=True).data
+
+        return Response({
+            'count': paginator.count,
+            'num_pages': paginator.num_pages,
+            'current_page': paginated_data.number,
+            'data': serialized_data
+        }, status=status.HTTP_200_OK)
 
 
 class NewsletterView(LoginRequiredMixin, TemplateView):
