@@ -1,137 +1,112 @@
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/maja-jablonska/bhtom2/Django%20CI) ![GitHub issues](https://img.shields.io/github/issues/maja-jablonska/bhtom2) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/maja-jablonska/bhtom2) ![GitHub contributors](https://img.shields.io/github/contributors/maja-jablonska/bhtom2) ![GitHub last commit](https://img.shields.io/github/last-commit/maja-jablonska/bhtom2)
+<center>
+  <img src="https://img.shields.io/github/workflow/status/maja-jablonska/bhtom2/Django%20CI" alt="GitHub Workflow Status">
+  <img src="https://img.shields.io/github/issues/maja-jablonska/bhtom2" alt="GitHub issues">
+  <img src="https://img.shields.io/github/issues-pr-raw/maja-jablonska/bhtom2" alt="GitHub pull requests">
+  <img src="https://img.shields.io/github/contributors/maja-jablonska/bhtom2" alt="GitHub contributors">
+  <img src="https://img.shields.io/github/last-commit/maja-jablonska/bhtom2" alt="GitHub last commit">
+</center>
 
-# BHTom 2
+<center>
+  <img src="bhtom2/static/logo.png" alt="BHTom 2 Logo or Banner Image">
+</center>
 
-! **Important** Make sure to clone subrepositories as well:
+# BHTom 2  
 
-```git submodule foreach --recursive git reset --hard```
+The **BHTom 2** system is designed to facilitate collaborative astronomical observing projects, enabling users to manage target lists, request observations, and process resulting data efficiently.  
 
-and then update all subrepositories:
+---
 
-```git submodule update --init --recursive --remote```
+# BHTOM2 Documentation
 
-! **Important** Make sure to have at least Python 3.8 or newer
+Click [here for BHTOM2 API documentation](Documentation/DocumentationAPI.md).
+Click [here for BHTOM2 instalation documentation](Documentation/installation/local_installation_docker.md).
 
-# Local development (no docker)
+We strongly recommend running BHTOM2 using Docker to streamline the setup process and ensure a consistent and simplified experience. Docker eliminates many potential configuration issues, making it easier to get started quickly and focus on using BHTOM2 without worrying about environment-specific dependencies.
 
-**Prerequisite**: make sure to have the neweest PostgreSQL (14) installed
+**Note: the documentation is still in preparation.**
 
-Development is done best on the local environment. This way you can generate new migrations in case of
-database changes.
+In the meantime, you can listen to [a recording on the BHTOM2 presentation by Lukasz Wyrzykowski from Malta 2023 workshop](https://www.youtube.com/watch?v=jzlkFjEZVz0)
 
-1. (Recommended) Create a conda environment
-   1. ```conda create -n bhtom2 python=3.9```
-   2. ```conda activate bhtom2```
-   3. ```conda install pip``` - so that the local env pip is used, not the global one.
-2. Install the requirements:
-   
-   Use pip to install packages (only after using conda install, refer to https://www.anaconda.com/blog/using-pip-in-a-conda-environment for caveats)
-   
-   ```pip install -r requirements.txt```
-   
-   Why not conda? Unfortunately, some of the packages aren't in conda-forge :(
-3. Create a local .env file
+# Data Download and Use policy
 
-   ```cp template.env bhtom2/.bhtom.env```
-   
-   and fill the values in.
-   Remember to input the values in ```"```.
-   
-   For now, the values of ```SENTRY_SDK_DSN, CPCS_DATA_ACCESS_HASHTAG, CPCS_BASE_URL``` can remain empty.
-   
-   For local development, you will probably want to use localhost as the postgres and graylog host (although you can use a Dockerized/remote one if you wish!)
-   
-   ```
-   POSTGRES_HOST="localhost"
-   GRAYLOG_HOST="localhost"
-   ```
-4. Create a local DB (or an exposed Docker one, this is up to you)
+Please contact us if you plan to use the data in a publication. By downloading the data from BHTOM you agree to follow our data policy and to use this acknowledgment:
 
-   Please note that Postgres installation differs from on system, method of installation etc. to another. **This is not bhtom2-specific**, therefore I cannot automatize it fully. Please referto external tutorials and resources, luckily for Postgres there are plenty of them. The important things are to **install Postgres>=14.0**, **create the bhtom2 database and bhtom user** (so, to execute the commands in the init_no_pswd.sql script). Note that the 'pswrd' is not hard-coded, it's the password that you have set up in the .bhtom.env. So if you are executing the lines directly in the console, make sure to pass the appropriate password.
-   
-   For example, for Mac OS and homebrew you can refer to https://daily-dev-tips.com/posts/installing-postgresql-on-a-mac-with-homebrew/.
-
-   1. Set the .bhtom.env as source of environment variables.
-      ```source bhtom2/.bhtom.env```
-   2. You can run the Docker/init_no_pswrd.sql script on your local database. In case of any required changes, create a local copy of the script.
-      Keep in mind you have to pass the ```$POSTGRES_PASSWORD``` variable as an argument to set the postgres variable ```pswrd```, e.g. (this will works on Linux, but i'm not sure about MacOS):
-      ```psql --set=pswrd="$POSTGRES_PASSWORD" -U postgres``` and execute with e.g. ```\i Docker/init_no_pswrd.sql```
-      Another method would be to just log in to the ```psql``` console and copying the script lines. But then you have to substitute ```pswrd``` with the password from .bhtom.env
-
-   3. Remember to fill the necessary values in the .bhtom.env file.
-5. (ONLY AFTER CHANGES) Create the migrations. **Migrations are being commited to Github in order to ensure integration between all databases.** (Do watch out)
-   1. ```python manage.py makemigrations```
-   2. ```python manage.py makemigrations bhtom2```
-6. After creating the migrations run the entrypoint.sh script.
-
-
-# Building Docker
-
-## Requirements
-
-docker
-docker-compose>1.25.0
-
-1. Create a local .env file
-
-   ```cp template.env bhtom2/.bhtom.env```
-   
-   and fill the values in.
-
-## Command
-
-In the Docker directory:
-
-``COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose up -d --build``
-
-Add superuser:
-
-``docker-compose run web python manage.py createsuperuser``
-
-## Environment
-
-Environment settings are defined in Docker/.bhtom.env file.
-
-This file is copied to bhtom2 directory in the Docker container and used the same way as on the local machine.
-(It overwrites the local .bhtom.env, so no need to change that when changing something to the architecture.)
-
-Refer to the template.env file for variable names.
-
-# Testing
-
-To run the tests provide your local database data in the ``.bhtom.env`` file.
-
-Run the test using the following commands (in the main folder):
-
-```bash
-python manage.py test
 ```
-This can take a while!
+The data was obtained via [BHTOM](https://bhtom.space), which has received funding from the European Union's Horizon 2020 research and innovation program under grant agreement No. 101004719 (OPTICON-RadioNet Pilot).
+```
 
-# Troubleshooting
+For more information about acknowledgement and data policy contact us and visit [https://about.bhtom.space](https://about.bhtom.space)
 
-- Make sure to clone subrepositories as well:
+# 1. Time-Domain Archives
 
-```git submodule update --init --recursive```
+Brokers in BHTOM search for time-series archival data in photometric (and soon also radio and spectra) archives providing publicly available data. We access the data either via API's provided by each service, or we access copies of archives stored in the Whole Sky Data Base (WSDB), maintained at the Institute of Cambridge, UK, by Sergey Koposov.
 
-- Make sure that the ``bhtom`` user has the permission to create the test database. You might need to alter user in your local DB:
+### Gaia Alerts
+Webpage: https://gsaweb.ast.cam.ac.uk/alerts
 
-``ALTER USER bhtom CREATEDB;``
+### Gaia DR3 lightcurves
+Oficial Gaia DR3 data release. Limited to selected sources only.
 
-- Django>4.0 does not support Postgres<10 anymore. Make sure that you have the newest version.
+### NEOWISE and ALLWISE
+ALLWISE is an archival MID-IR WISE data, while NEOWISE is a new on-going scanning mission, providing data every 6 months for targets from all-over the sky
 
-- Make sure to allow for dev_entrypoint.sh execution.
+### CRTS (Catalina)
+Read directly from Caltech archive, contain neary 10-year long time-series for most of the sky (North and South) except the Galactic Plane. Observations were taken in a broad-band clear filter we call CRTS (CL)
 
-``chmod +x dev_entrypoint.sh`` in UNIX-based systems (Linux, Mac OS)
+### FIRST (Radio)
+From WSDB.
 
-- When testing, you might encounter a problem:
+Problem: only mean epoch JD is stored in that table. 
+Returns flux in miliJanskys (ReducedDatumUnit.MILLIJANSKY).
+Filter name: FIRST(Flux 1.4GHz)
 
-```Got an error recreating the test database: must be owner of database test_bhtom2```
+### ZTF/ANTARES
 
-if you are working on a local database, perhaps you can just set bhtom as a superuser...
+ZTF data is read from most recent Data Release and ANTARES broker (newest data). 
 
-```ALTER USER bhtom WITH SUPERUSER;```
+### SDSS 
+Reads WSDB archive, DR14 is read,  typically 1 observation per filter per epoch, but for targets from e.g. Stripe82 there are way more epochs. 
 
-- Some users experienced postgresql unable to find some libraries (dylib.so) when launching via entrypoint.sh. One fix we found was to make sure ```psycopg2``` and ```psycopg2-binary``` are uninstalled via pip, and then ```psycopg2-binary``` installed via conda:
+### PANSTARRS (PS1)
 
-```conda install -c conda-forge psycopg2-binary```
+WSDB is read for typically single epochs in multiple bands.
+
+### LINEAR
+
+Uses WSDB. About 10 years-long timeseries in a clear filter we call LINEAR(CL).
+
+
+<!-- # AAVSO
+
+URL for fetching AAVSO data is set in settings.py: AAVSO_API_PATH: str = 'https://www.aavso.org/vsx/index.php'
+
+AAVSO name is set as a TargetExtra tag at target create with aavso_name = name by default. Later can be changed.  -->
+
+### CPCS
+Old service, Cambridge Photometric Calibration Server, now used only as a repository of old observations prior to BHTOM2. 
+
+### ASASSN (ASAS-SN)
+As of 2023, there are three sources of ASASSN photometry: variable star catalogue, pre-computed photometry and photometry on request (most fresh data). Because of that, the ASASSN URL for a Target has to be the full path to the URL with the object. First, the user has to manually identify the object in ASASSN SkyPatrol db by entering coordinates (https://asas-sn.osu.edu/), then select one of the three paths there, one the webpage with the object and copy its URL as the ASASSN url, for example, https://asas-sn.osu.edu/photometry/31a0bd00-3b2c-541b-9bb6-1a3bf050da34. The only exception is for variable, where for the name the user has to copy the link to the CSV file, e.g. 
+for variable star https://asas-sn.osu.edu/variables/448970 it is going to be https://asas-sn.osu.edu/photometry/31a0bd00-3b2c-541b-9bb6-1a3bf050da34.csv.
+For the ASASSN name one can use either the name found in ASASSN archive, or a generic ASASSN+Ra+Dec name.
+
+### ATLAS
+The data from this Survey orignate from ATLAS Webpage: https://fallingstar-data.com/forcedphot/.
+For a new target created, the request is sent to this service. It typically takes up to 15 minutes for the request on the entire ATLAS time-span to be generated. The data are then automatically loaded to the target. Then, an automated process is taking care to keep ATLAS light curve up-to-date, with refresh time of 12h. Note, we download magnitudes which include reference flux (if available).
+
+<!-- The time-series data has to be added manually by requesting data from ATLAS Webpage: https://fallingstar-data.com/forcedphot/.
+Make sure you request for photometry with reference flux added: from here https://fallingstar-data.com/forcedphot/queue/, marking **Use reduced (input) instead of difference images.**. Under ATLAS url the user should put the entire link to the photometry, e.g. https://fallingstar-data.com/forcedphot/static/results/job664347.txt For the name, one can use simply a generic name ATLAS+RA+DEC. -->
+
+ATLAS data is automatically cleaned from extreme outliers (scipy.stats.z_score>10) as well as limited to 5>mag>22, including negative magnitudes (limits), which are not currently stored nor showed.
+
+Cite: Tonry et al. (2018), Smith et al. (2020), Heinze et al. (2018), Shingles et al. (2021).
+
+
+
+## Reporting Issues or Feature Requests  
+
+Please use the [GitHub Issue Tracker](https://github.com/maja-jablonska/bhtom2/issues) for:  
+- Bug reports  
+- Feature requests  
+- Support inquiries  
+---
