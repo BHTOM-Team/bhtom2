@@ -511,7 +511,12 @@ class ReloadPhotometry(LoginRequiredMixin, View):
                 logger.error("DataProduct not Exist, data: " + str(data_id))
                 messages.error(self.request, 'DataProduct not Exist')
                 continue
-
+            try:
+                reduced_datum = ReducedDatum.objects.get(data_product=dataProduct)
+                reduced_datum.delete()
+            except ReducedDatum.DoesNotExist:
+                logger.info(f"ReducedDatum does not exist for data_product: {dataProduct}")
+            
             try:
                 calib = Calibration_data.objects.get(dataproduct=dataProduct)
                 calib.status = "C"
