@@ -92,7 +92,11 @@ or
 - `--mjd <mjd>`: Modified Julian Date (float) [note MJD=JD-2400000.5], required for single photometry file
 - `--observer <observer>`: Name of the observer to be associated with the datapoint(s). Note that by default the token's owner name will be used as a an observer. Selecting this option overwrites the name from the token.
 match_dist
- `--match_dist <match_dist>`: Matching Radius.
+- `--match_dist <match_dist>`: Matching Radius in arcsec (do not set if you want to run on auto).
+
+**Note on Matching Radius**: This value indicates how accurate is your astrometry on your image. We perform a cross-match between objects from your image and Gaia catalogue with 5 arcsec very generous matching radius, but then we remove bad matches. This also helps us determine the accuracy of your astrometry. The standard deviation of the match in RA and Dec is then used as a matching dist (if in auto mode). This value is used solely in one place - when we identify the desired target among your objects. If the target is not found within the matching radius (it was either further away than the matching radius, or too faint), the outcome of the calibration is the Limit (with mag.error=-1). The limiting magnitude is computed based on the faintest object seen on your frame.
+
+
 ### Example Usage 1
 
 ```bash
