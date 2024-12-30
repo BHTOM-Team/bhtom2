@@ -1,11 +1,11 @@
 # BHTOM2 Documentation
 
 Click [here for BHTOM2 API documentation](https://github.com/BHTOM-Team/bhtom2/blob/bhtom2-dev/Documentation/DocumentationAPI.md).
-Click [here for BHTOM2 instalation documentation](Documentation/installation/local_installation_docker.md).
+Click [here for BHTOM2 instalation documentation](https://github.com/BHTOM-Team/bhtom2/blob/bhtom2-dev/Documentation/installation/local_installation_docker.md).
 
 We strongly recommend running BHTOM2 using Docker to streamline the setup process and ensure a consistent and simplified experience. Docker eliminates many potential configuration issues, making it easier to get started quickly and focus on using BHTOM2 without worrying about environment-specific dependencies.
 
-** The visual manual from December 2024 in form of a pdf is available [here](https://github.com/BHTOM-Team/bhtom2/blob/bhtom2-dev/Documentation/2024.12-BHTOM2-Manual.pdf) **
+**The visual manual from December 2024 in form of a pdf is available [here](https://github.com/BHTOM-Team/bhtom2/blob/bhtom2-dev/Documentation/2024.12-BHTOM2-Manual.pdf)**
 
 **Note: the documentation is still in preparation.**
 
