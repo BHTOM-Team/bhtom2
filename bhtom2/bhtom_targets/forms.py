@@ -205,8 +205,8 @@ class SiderealTargetCreateForm(TargetForm):
                 else:
                     mapped_value = obj_classification_type
                 kwargs['initial']['classification']= mapped_value
-                if kwargs.get('initial', {}).get('discovery_date') is None:
-                    kwargs.setdefault('initial', {})['discovery_date'] = ''
+                if kwargs['initial']['discovery_date'] is None:
+                    kwargs['initial']['discovery_date']  = ''
                 super().__init__(*args, **kwargs)
         except Exception as e:
                super().__init__(*args, **kwargs)
