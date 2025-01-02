@@ -1,13 +1,17 @@
 # BHTOM2 Documentation
 
-Click [here for BHTOM2 API documentation](Documentation/DocumentationAPI.md).
-Click [here for BHTOM2 instalation documentation](Documentation/local_installation_docker.md).
+Click [here for BHTOM2 API documentation](https://github.com/BHTOM-Team/bhtom2/blob/bhtom2-dev/Documentation/DocumentationAPI.md).
+Click [here for BHTOM2 instalation documentation](https://github.com/BHTOM-Team/bhtom2/blob/bhtom2-dev/Documentation/installation/local_installation_docker.md).
 
 We strongly recommend running BHTOM2 using Docker to streamline the setup process and ensure a consistent and simplified experience. Docker eliminates many potential configuration issues, making it easier to get started quickly and focus on using BHTOM2 without worrying about environment-specific dependencies.
 
+**The visual manual from December 2024 in form of a pdf is available [here](https://github.com/BHTOM-Team/bhtom2/blob/bhtom2-dev/Documentation/2024.12-BHTOM2-Manual.pdf)**
+
 **Note: the documentation is still in preparation.**
 
-In the meantime, you can listen to [a recording on the BHTOM2 presentation by Lukasz Wyrzykowski from Malta 2023 workshop](https://www.youtube.com/watch?v=jzlkFjEZVz0)
+The recordings on talks on BHTOM and related topics from [the 15th Gaia Science Alerts workshop in Crete 2024 can be found here](https://www.youtube.com/playlist?list=PLfl-CrV1b39ar0hXTHpT7r8cnnx_FU2DM)
+
+You can also listen to [a recording on the BHTOM2 presentation by Lukasz Wyrzykowski from Malta 2023 workshop](https://www.youtube.com/watch?v=jzlkFjEZVz0)
 
 
 ## Overview
