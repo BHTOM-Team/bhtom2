@@ -21,6 +21,7 @@ class CatalogQueryView(FormView):
 
     form_class = CatalogQueryForm
     template_name = 'bhtom_catalogs/query_form.html'
+    
 
     def form_valid(self, form):
         """
@@ -44,6 +45,8 @@ class CatalogQueryView(FormView):
             if response.status_code == 200:
                 # Extract JSON from the response
                 self.target = json.loads(response.text)
+                if 'discovery_date' not in self.target or self.target.get('discovery_date') is None:
+                    self.target['discovery_date'] = ''
             else:
                 response.raise_for_status()
         except MissingDataException:
@@ -61,5 +64,7 @@ class CatalogQueryView(FormView):
         Redirects to the ``TargetCreateView``. Appends the target parameters to the URL as query parameters in order to
         autofill the ``TargetCreateForm``, including any additional names returned from the query.
         """
-        return reverse('targets:create') + '?' + urlencode(self.target)
-
+        filtered_target = {
+            k: str(v) for k, v in self.target.items() if v not in [None, '', 'None']
+        }
+        return reverse('targets:create') + '?' + urlencode(filtered_target)
