@@ -235,8 +235,8 @@ def photometry_for_target(context, target, width=1000, height=600, background=No
         try:
             fig = plotly.io.read_json(base_path + str(target.photometry_plot))
 
-            # Get current date as a string in 'YYYY-MM-DD' format
-            current_date = datetime.datetime.now().strftime('%Y-%m-%d')
+            # Get the current UTC time
+            current_date = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
 
             # Calculate the y-range from your data traces
             y_values = [trace['y'] for trace in fig['data'] if 'y' in trace]
