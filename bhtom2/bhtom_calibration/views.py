@@ -298,3 +298,75 @@ class GetAlertLCDataView(APIView):
                 catalogs.append(None)
 
         return filters, catalogs
+
+
+
+class RestartCalibration(APIView):
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                name='target_name',
+                in_=openapi.IN_QUERY,
+                required=False,
+                type=openapi.TYPE_STRING,
+                description='Target name.'
+            ),
+            openapi.Parameter(
+                name='target_id',
+                in_=openapi.IN_QUERY,
+                required=False,
+                type=openapi.TYPE_INTEGER,
+                description='Target ID.'
+            ),
+            openapi.Parameter(
+                name='mjd_max',
+                in_=openapi.IN_QUERY,
+                required=False,
+                type=openapi.TYPE_INTEGER,
+                description='MJD max.'
+            ),
+            openapi.Parameter(
+                name='mjd_min',
+                in_=openapi.IN_QUERY,
+                required=False,
+                type=openapi.TYPE_INTEGER,
+                description='MJD min.'
+            ),
+            openapi.Parameter(
+                name='filter',
+                in_=openapi.IN_QUERY,
+                required=False,
+                type=openapi.TYPE_INTEGER,
+                description='Filter.'
+            ),
+        ],
+    )
+    def post(self, request):
+        if not request.user.is_staff:
+            return Response(
+                {"Error": "Access denied. You must be an admin."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        header = {
+            "Correlation-ID": get_guid(),
+        }
+
+        try:
+            response = requests.post(
+                url=f"{settings.CPCS_URL}/restartCalibByTarget/",
+                data=request.data,
+                headers=header
+            )
+            if response.status_code != 200:
+                return Response(
+                    {"Error": f"Oops.. something went wrong. Status code: {response.status_code}"},
+                    status=response.status_code
+                )
+        except Exception as e:
+            return Response(
+                {"Error": f"Oops.. something went wrong. Error: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response({"Success": "Calibration restart initiated successfully."}, status=status.HTTP_200_OK)
