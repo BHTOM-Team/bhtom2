@@ -301,7 +301,7 @@ class GetAlertLCDataView(APIView):
 
 
 
-class RestartCalibration(APIView):
+class RestartCalibrationApiView(APIView):
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter(
@@ -354,7 +354,7 @@ class RestartCalibration(APIView):
 
         try:
             response = requests.post(
-                url=f"{settings.CPCS_URL}/restartCalibByTarget/",
+                url=f"{settings.CPCS_URL}/calib/restartCalibByTarget/",
                 data=request.data,
                 headers=header
             )
