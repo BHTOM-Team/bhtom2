@@ -2,6 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
+
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 import base64
@@ -300,8 +302,10 @@ class GetAlertLCDataView(APIView):
         return filters, catalogs
 
 
-
 class RestartCalibrationApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter(
@@ -343,10 +347,7 @@ class RestartCalibrationApiView(APIView):
     )
     def post(self, request):
         if not request.user.is_staff:
-            return Response(
-                {"Error": "Access denied. You must be an admin."},
-                status=status.HTTP_403_FORBIDDEN
-            )
+            raise PermissionDenied(detail="Access denied. You must be an admin.")
 
         header = {
             "Correlation-ID": get_guid(),
