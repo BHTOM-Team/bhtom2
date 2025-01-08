@@ -2,6 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
+
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 import base64
@@ -75,7 +77,7 @@ class CalibrationResultsApiView(APIView):
                         serialized_data = serializers.serialize('json', [instance])
                         data = json.loads(serialized_data)[0]
                         result = data["fields"]
-                        file_url = request.build_absolute_uri(settings.DATA_MEDIA_PATH + str(instance.dataproduct.photometry_data))
+                        file_url = f"https://{request.get_host()}/dataproducts/download/photometry/{instance.dataproduct.id}/"
                         result["file_download_link"] = file_url
                         if getPlot:
                             if instance.calibration_plot:
@@ -298,3 +300,74 @@ class GetAlertLCDataView(APIView):
                 catalogs.append(None)
 
         return filters, catalogs
+
+
+class RestartCalibrationApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                name='target_name',
+                in_=openapi.IN_QUERY,
+                required=False,
+                type=openapi.TYPE_STRING,
+                description='Target name.'
+            ),
+            openapi.Parameter(
+                name='target_id',
+                in_=openapi.IN_QUERY,
+                required=False,
+                type=openapi.TYPE_INTEGER,
+                description='Target ID.'
+            ),
+            openapi.Parameter(
+                name='mjd_max',
+                in_=openapi.IN_QUERY,
+                required=False,
+                type=openapi.TYPE_INTEGER,
+                description='MJD max.'
+            ),
+            openapi.Parameter(
+                name='mjd_min',
+                in_=openapi.IN_QUERY,
+                required=False,
+                type=openapi.TYPE_INTEGER,
+                description='MJD min.'
+            ),
+            openapi.Parameter(
+                name='filter',
+                in_=openapi.IN_QUERY,
+                required=False,
+                type=openapi.TYPE_INTEGER,
+                description='Filter.'
+            ),
+        ],
+    )
+    def post(self, request):
+        if not request.user.is_staff:
+            raise PermissionDenied(detail="Access denied. You must be an admin.")
+
+        header = {
+            "Correlation-ID": get_guid(),
+        }
+
+        try:
+            response = requests.post(
+                url=f"{settings.CPCS_URL}/calib/restartCalibByTarget/",
+                data=request.data,
+                headers=header
+            )
+            if response.status_code != 200:
+                return Response(
+                    {"Error": f"Oops.. something went wrong. Status code: {response.status_code}"},
+                    status=response.status_code
+                )
+        except Exception as e:
+            return Response(
+                {"Error": f"Oops.. something went wrong. Error: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response({"Success": "Calibration restart initiated successfully."}, status=status.HTTP_200_OK)

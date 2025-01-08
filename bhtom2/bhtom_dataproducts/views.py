@@ -79,7 +79,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         camera = form.cleaned_data['camera']
         observation_filter = form.cleaned_data['filter']
         mjd = form.cleaned_data['mjd']
-        match_dist = -1
+        match_dist = -2
         dry_run = form.cleaned_data['dryRun']
         comment = form.cleaned_data['comment']
         observer = form.cleaned_data['observer']
