@@ -1338,6 +1338,39 @@ curl -X POST -H "Content-Type: application/json" -H "Authorization: Token <yourT
 ```
 
 
+### Delete Data Product
+
+This API allows you to delete a specific data product by its ID.
+
+### Request
+- **Method**: POST
+- **URL**: `common/api/deleteDataProduct/`
+
+- **Token Authentication**: You must include a valid authentication token in the request headers.
+- **Admin Access Required**: Only users with admin privileges can access this API.
+
+### Required Body Parameters
+- `id` (string): The ID of the data product to be deleted.
+
+### Example Request
+
+You can make a POST request using the `curl` command or any HTTP client.
+
+#### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Token <yourToken>" \
+  -d '{
+    "id": "12345"
+  }' \
+  "https://bh-tom2.astrolabs.pl/common/api/deleteDataProduct/"
+```
+
+Replace `<yourToken>` with your valid authentication token and `12345` with the ID of the data product you want to delete.
+
+
 
 # Reduced Datum API
 
@@ -1383,3 +1416,215 @@ curl -X POST -H "Content-Type: application/json" -H "Authorization: Token <yourT
   "page": 1
 }' 
 ```
+
+### Delete Reduced Datum
+
+This API allows you to delete a specific reduced datum (measurement) with an optional flag to delete associated data products.
+
+### Request
+- **Method**: DELETE
+- **URL**: `common/api/deleteReducedDatum/`
+
+- **Token Authentication**: You must include a valid authentication token in the request headers.
+- **Admin Access Required**: Only users with admin privileges can access this API.
+
+### Required Query Parameters
+- `mjd` (float): Modified Julian Date (precision up to 1e-6).
+- `mag` (float): Magnitude (precision up to 1e-3).
+- `magerr` (float): Magnitude error (precision up to 1e-3).
+- `filter` (string): Filter used (e.g., V, R, I).
+- `observer` (string): Observer name.
+
+### Optional Query Parameters
+- `target_name` (string): Name of the target (provide either `target_name` or `target_id`, not both).
+- `target_id` (integer): ID of the target (provide either `target_name` or `target_id`, not both).
+- `delete_associated_data_product` (boolean): Whether to delete the associated data product (default: `False`).
+
+### Example Request
+
+You can make a DELETE request using the `curl` command or any HTTP client.
+
+#### Using `curl`
+
+```bash
+curl -X DELETE \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Token <yourToken>" \
+  -d '{
+    "target_name": "MyTarget",
+    "mjd": 59580.123456,
+    "mag": 15.123,
+    "magerr": 0.001,
+    "filter": "V",
+    "observer": "ObserverName",
+    "delete_associated_data_product": true
+  }' \
+  "https://bh-tom2.astrolabs.pl/common/api/deleteReducedDatum/"
+```
+
+Replace `<yourToken>` with your valid authentication token.
+
+Here's the documentation for the `DeactivateReducedDatumApiView` in the style of the `DeleteReducedDatum` documentation:
+
+---
+
+### Deactivate Reduced Datum
+
+This API allows you to deactivate a specific reduced datum (measurement) with an optional flag to deactivate associated data products.
+
+### Request
+- **Method**: POST
+- **URL**: `common/api/deactivateReducedDatum/`
+
+- **Token Authentication**: You must include a valid authentication token in the request headers.
+- **Admin Access Required**: Only users with admin privileges can access this API.
+
+### Required Body Parameters
+- `mjd` (float): Modified Julian Date (precision up to 1e-6).
+- `mag` (float): Magnitude (precision up to 1e-3).
+- `magerr` (float): Magnitude error (precision up to 1e-3).
+- `filter` (string): Filter used (e.g., V, R, I).
+- `observer` (string): Observer name.
+
+### Optional Body Parameters
+- `target_name` (string): Name of the target (provide either `target_name` or `target_id`, not both).
+- `target_id` (integer): ID of the target (provide either `target_name` or `target_id`, not both).
+
+### Example Request
+
+You can make a POST request using the `curl` command or any HTTP client.
+
+#### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Token <yourToken>" \
+  -d '{
+    "target_name": "MyTarget",
+    "mjd": 59580.123456,
+    "mag": 15.123,
+    "magerr": 0.001,
+    "filter": "V",
+    "observer": "ObserverName"
+  }' \
+  "https://bh-tom2.astrolabs.pl/common/api/deactivateReducedDatum/"
+```
+
+Replace `<yourToken>` with your valid authentication token.
+
+
+# Calibration Data ADMIN API
+
+
+### Restart Calibration By CALIB ID 
+
+This API allows you to restart the calibration by id  process with various optional filters.
+
+### Request
+- **Method**: POST
+- **URL**: `calibration/restart-calib-by-id/`
+
+- **Token Authentication**: You must include a valid authentication token in the request headers.
+- **Admin Access Required**: Only users with admin privileges can access this API.
+
+### Optional Query Parameters
+
+- `id_from` (integer): The starting ID for the range (optional).
+- `id_to` (integer): The ending ID for the range (optional).
+- `filter` (string): The new filter value to use for recalibration (optional).
+- `old_filter` (string): The old filter value to filter data for recalibration (optional).
+- `match_dist` (integer): The match distance filter to set for the new calibration (default is -1) (optional).
+- `oname` (string): The observatory name to filter data for recalibration (optional).
+- `comment` (string): A comment or note for the recalibration process (optional).
+- `status` (string): The calibration status to filter data for recalibration (optional).
+- `status_message` (string): The status message to filter data for recalibration (optional).
+
+### Example Request
+
+You can make a POST request using the `curl` command or any HTTP client.
+
+#### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Token <yourToken>" \
+  -d '{
+    "id_from": 100,
+    "id_to": 200,
+    "filter": 3,
+    "old_filter": 2,
+    "match_dist": 0,
+    "oname": 1,
+    "comment": "Restarting calibration",
+    "status": 1,
+    "status_message": "Calibration restarted"
+  }' \
+  "https://bh-tom2.astrolabs.pl/calibration/restart-calib-by-id/"
+```
+
+Replace `<yourToken>` with your valid authentication token.
+
+### Restart Calibration By CALIB BY TARGET
+Here’s the documentation for the `RestartCalibrationByTargetApiView` similar to your previous example:
+
+---
+
+### Restart Calibration by Target
+
+This API allows you to restart the calibration process based on a target name/id and MJD range with various optional filters.
+
+### Request
+- **Method**: POST
+- **URL**: `calibration/restart-calib-by-target/`
+
+- **Token Authentication**: You must include a valid authentication token in the request headers.
+- **Admin Access Required**: Only users with admin privileges can access this API.
+
+### Optional Query Parameters
+- `target_name` (string): The name of the target to filter data for recalibration (optional).
+- `target_id` (integer): The ID of the target to filter data for recalibration (optional).
+- `mjd_max` (integer): The maximum Modified Julian Date (MJD) for the recalibration filter (optional).
+- `mjd_min` (integer): The minimum Modified Julian Date (MJD) for the recalibration filter (optional).
+- `filter` (string): The new filter value to use for recalibration (optional).
+- `old_filter` (string): The old filter value to filter data for recalibration (optional).
+- `match_dist` (integer): The match distance filter to set for the new calibration (optional).
+- `oname` (string): The observatory name to filter data for recalibration (optional).
+- `comment` (string): A comment or note for the recalibration process (optional).
+- `status` (string): The calibration status to filter data for recalibration (optional).
+- `status_message` (string): The status message to filter data for recalibration (optional).
+
+### Example Request
+
+You can make a POST request using the `curl` command or any HTTP client.
+
+#### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Token <yourToken>" \
+  -d '{
+    "target_name": "MyTarget",
+    "target_id": 123,
+    "mjd_max": 59580,
+    "mjd_min": 59579,
+    "filter": 3,
+    "old_filter": 2,
+    "match_dist": 0,
+    "oname": 1,
+    "comment": "Restarting calibration for target",
+    "status": 1,
+    "status_message": "Calibration restarted successfully"
+  }' \
+   "https://bh-tom2.astrolabs.pl/calibration/restart-calib-by-target/"
+```
+
+Replace `<yourToken>` with your valid authentication token.
+
+
+
+### Notes
+- You must provide either `target_name` or `target_id` but not both.
+- You must be an admin to access this endpoint.
