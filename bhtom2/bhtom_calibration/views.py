@@ -7,6 +7,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 import base64
+from django.db.models import Q
 from django_guid import get_guid
 from bhtom2.bhtom_calibration.models import Calibration_data
 from django.core import serializers
@@ -302,47 +303,23 @@ class GetAlertLCDataView(APIView):
         return filters, catalogs
 
 
-class RestartCalibrationApiView(APIView):
+class RestartCalibrationByTargetApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter(
-                name='target_name',
-                in_=openapi.IN_QUERY,
-                required=False,
-                type=openapi.TYPE_STRING,
-                description='Target name.'
-            ),
-            openapi.Parameter(
-                name='target_id',
-                in_=openapi.IN_QUERY,
-                required=False,
-                type=openapi.TYPE_INTEGER,
-                description='Target ID.'
-            ),
-            openapi.Parameter(
-                name='mjd_max',
-                in_=openapi.IN_QUERY,
-                required=False,
-                type=openapi.TYPE_INTEGER,
-                description='MJD max.'
-            ),
-            openapi.Parameter(
-                name='mjd_min',
-                in_=openapi.IN_QUERY,
-                required=False,
-                type=openapi.TYPE_INTEGER,
-                description='MJD min.'
-            ),
-            openapi.Parameter(
-                name='filter',
-                in_=openapi.IN_QUERY,
-                required=False,
-                type=openapi.TYPE_INTEGER,
-                description='Filter.'
-            ),
+            openapi.Parameter(name='target_name',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_STRING,description='Target name.'),
+            openapi.Parameter(name='target_id',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Target ID.'),
+            openapi.Parameter(name='mjd_max',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='MJD max.'),
+            openapi.Parameter(name='mjd_min',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='MJD min.'),
+            openapi.Parameter(name='filter',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='New Filter.'),
+            openapi.Parameter(name='old_filter',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Old Filter.'),
+            openapi.Parameter(name='match_dist',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Filter.'),
+            openapi.Parameter(name='oname',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='ONAME.'),
+            openapi.Parameter(name='comment',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Comment.'),
+            openapi.Parameter(name='status',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Status'),
+            openapi.Parameter(name='status_message',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Status Message'),
         ],
     )
     def post(self, request):
@@ -364,10 +341,63 @@ class RestartCalibrationApiView(APIView):
                     {"Error": f"Oops.. something went wrong. Status code: {response.status_code}"},
                     status=response.status_code
                 )
-        except Exception as e:
+            else:
+                # Parse the JSON response and return it
+                response_data = response.json()  # Parse the JSON response
+                return Response(
+                    {"Success": response_data},
+                    status=status.HTTP_200_OK
+                )
+        except requests.exceptions.RequestException as e:
             return Response(
                 {"Error": f"Oops.. something went wrong. Error: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        return Response({"Success": "Calibration restart initiated successfully."}, status=status.HTTP_200_OK)
+class RestartCalibrationApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(name='id_from',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Id from.'),
+            openapi.Parameter(name='id_to',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Id to.'),
+            openapi.Parameter(name='filter',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='New Filter.'),
+            openapi.Parameter(name='old_filter',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Old Filter.'),
+            openapi.Parameter(name='match_dist',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Filter.'),
+            openapi.Parameter(name='oname',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='ONAME.'),
+            openapi.Parameter(name='comment',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Comment.'),
+            openapi.Parameter(name='status',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Status'),
+            openapi.Parameter(name='status_message',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Status Message'),
+        ],
+    )
+    def post(self, request):
+        if not request.user.is_staff:
+            raise PermissionDenied(detail="Access denied. You must be an admin.")
+
+        header = {
+            "Correlation-ID": get_guid(),
+        }
+
+        try:
+            response = requests.post(
+                url=f"{settings.CPCS_URL}/calib/restartCalib/",
+                data=request.data,
+                headers=header
+            )
+            if response.status_code != 200:
+                return Response(
+                    {"Error": f"Oops.. something went wrong. Status code: {response.status_code}"},
+                    status=response.status_code
+                )
+            else:
+                response_data = response.json()  
+                return Response(
+                    {"Success": response_data},
+                    status=status.HTTP_200_OK
+                )
+        except requests.exceptions.RequestException as e:
+            return Response(
+                {"Error": f"Oops.. something went wrong. Error: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

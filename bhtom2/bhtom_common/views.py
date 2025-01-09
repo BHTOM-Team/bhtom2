@@ -35,6 +35,7 @@ from drf_yasg import openapi
 from django.db.models import Q
 from bhtom2.bhtom_common.serializers import DataProductSerializer,CommentSerializer,ReducedDataSerializer
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from rest_framework.exceptions import PermissionDenied
 
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_common.views')
@@ -1000,3 +1001,157 @@ class CommentAPIView(views.APIView):
         }
         
         return Response(response_data, status=status.HTTP_200_OK)
+    
+class DeleteReduceDatumApiView(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'target_name': openapi.Schema(type=openapi.TYPE_STRING, description='Target name.'),
+                'target_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Target ID.'),
+                'mjd': openapi.Schema(type=openapi.TYPE_NUMBER, description='Modified Julian Date (precision up to 1e-6).', ),
+                'mag': openapi.Schema(type=openapi.TYPE_NUMBER, description='Magnitude (precision up to 1e-3).'),
+                'magerr': openapi.Schema(type=openapi.TYPE_NUMBER, description='Magnitude error (precision up to 1e-3).'),
+                'filter': openapi.Schema(type=openapi.TYPE_STRING, description='Filter used (e.g., V, R, I).'),
+                'observer': openapi.Schema(type=openapi.TYPE_STRING, description='Observer name.'),
+                'delete_associated_data_product': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Flag to delete associated data product (default: False).')
+           
+            },
+            required= ['mjd','mag','magerr','filter','observer',]
+        ),
+    )
+    def delete(self, request):
+        if not request.user.is_staff:
+            raise PermissionDenied(detail="Access denied. You must be an admin.")
+
+        # Get parameters from request body
+        target_name = request.data.get('target_name')
+        target_id = request.data.get('target_id')
+        mjd = request.data.get('mjd')
+        mag = request.data.get('mag')
+        magerr = request.data.get('magerr')
+        filter_ = request.data.get('filter')
+        observer = request.data.get('observer')
+        delete_associated_data_product = request.data.get('delete_associated_data_product', False)
+
+        if not (mjd and mag and magerr and filter_ and observer):
+            return Response({"Error": "Missing required parameters."}, status=400)
+
+        try:
+            query = Q(mjd__range=(float(mjd) - 1e-6, float(mjd) + 1e-6)) & \
+                    Q(value__range=(float(mag) - 1e-3, float(mag) + 1e-3)) & \
+                    Q(error__range=(float(magerr) - 1e-3, float(magerr) + 1e-3)) & \
+                    Q(filter=filter_) & Q(observer=observer)
+
+            if target_name:
+                query &= Q(target_id__name=target_name)
+            if target_id:
+                query &= Q(target_id=target_id)
+
+            reducedatum = ReducedDatum.objects.filter(query).first()
+
+            if not reducedatum:
+                return Response({"Error": "Reduced datum not found."}, status=404)
+
+            if delete_associated_data_product and reducedatum.data_product_id:
+                dp = DataProduct.objects.get(id=reducedatum.data_product_id)
+                dp.delete()
+
+            reducedatum.delete()
+
+            return Response({"Success": "Reduced datum deleted successfully."}, status=200)
+
+        except Exception as e:
+            return Response({"Error": f"An error occurred: {str(e)}"}, status=500)
+
+
+class DeactivateReduceDatumApiView(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': openapi.Schema(type=openapi.TYPE_STRING, description='Target name.'),
+                'target_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Target ID.'),
+                'mjd': openapi.Schema(type=openapi.TYPE_NUMBER, description='Modified Julian Date (precision up to 1e-6).', ),
+                'mag': openapi.Schema(type=openapi.TYPE_NUMBER, description='Magnitude (precision up to 1e-3).'),
+                'magerr': openapi.Schema(type=openapi.TYPE_NUMBER, description='Magnitude error (precision up to 1e-3).'),
+                'filter': openapi.Schema(type=openapi.TYPE_STRING, description='Filter used (e.g., V, R, I).'),
+                'observer': openapi.Schema(type=openapi.TYPE_STRING, description='Observer name.'),
+             
+            },
+            required= ['mjd','mag','magerr','filter','observer',]
+        ),
+    )
+    def post(self, request):
+        if not request.user.is_staff:
+            raise PermissionDenied(detail="Access denied. You must be an admin.")
+
+        # Get parameters from request body
+        target_name = request.data.get('target_name')
+        target_id = request.data.get('target_id')
+        mjd = request.data.get('mjd')
+        mag = request.data.get('mag')
+        magerr = request.data.get('magerr')
+        filter_ = request.data.get('filter')
+        observer = request.data.get('observer')
+
+        if not (mjd and mag and magerr and filter_ and observer):
+            return Response({"Error": "Missing required parameters."}, status=400)
+
+        try:
+            query = Q(mjd__range=(float(mjd) - 1e-6, float(mjd) + 1e-6)) & \
+                    Q(value__range=(float(mag) - 1e-3, float(mag) + 1e-3)) & \
+                    Q(error__range=(float(magerr) - 1e-3, float(magerr) + 1e-3)) & \
+                    Q(filter=filter_) & Q(observer=observer)
+
+            if target_name:
+                query &= Q(target_id__name=target_name)
+            if target_id:
+                query &= Q(target_id=target_id)
+
+            reducedatum = ReducedDatum.objects.filter(query).first()
+            reducedatum.active_flg = False
+            reducedatum.save()
+            return Response({"Success": "Reduced datum deactivated successfully."}, status=200)
+
+        except Exception as e:
+            return Response({"Error": f"An error occurred: {str(e)}"}, status=500)
+
+
+
+class DeleteDataProductApiView(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': openapi.Schema(type=openapi.TYPE_STRING, description='Target name.'),
+            },
+            required= ['id']
+        ),
+    )
+    def post(self, request):
+        if not request.user.is_staff:
+            raise PermissionDenied(detail="Access denied. You must be an admin.")
+        
+        id = request.data.get('id')
+
+        if not id:
+            return Response ( {"Error": "Missing required parameter 'id'."}, status=400)
+
+        try:
+            dp = DataProduct.objects.get(id= id)
+            dp.delete()
+            return Response({"Success": "DataProduct deleted successfully."}, status=200)
+
+        except Exception as e:
+            return Response({"Error": f"An error occurred: {str(e)}"}, status=500)
+
