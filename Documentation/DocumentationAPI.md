@@ -1343,7 +1343,7 @@ curl -X POST -H "Content-Type: application/json" -H "Authorization: Token <yourT
 This API allows you to delete a specific data product by its ID.
 
 ### Request
-- **Method**: POST
+- **Method**: DELETE
 - **URL**: `common/api/deleteDataProduct/`
 
 - **Token Authentication**: You must include a valid authentication token in the request headers.
@@ -1359,7 +1359,7 @@ You can make a POST request using the `curl` command or any HTTP client.
 #### Using `curl`
 
 ```bash
-curl -X POST \
+curl -X DELETE \
   -H "Content-Type: application/json" \
   -H "Authorization: Token <yourToken>" \
   -d '{
