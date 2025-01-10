@@ -1138,7 +1138,7 @@ class DeleteDataProductApiView(views.APIView):
             required= ['id']
         ),
     )
-    def post(self, request):
+    def delete(self, request):
         if not request.user.is_staff:
             raise PermissionDenied(detail="Access denied. You must be an admin.")
         
