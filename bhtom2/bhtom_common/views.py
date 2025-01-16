@@ -736,10 +736,19 @@ class GetDataProductApi(views.APIView):
                 'status': openapi.Schema(type=openapi.TYPE_STRING),
                 'fits_data': openapi.Schema(type=openapi.TYPE_STRING),
                 'photometry_data': openapi.Schema(type=openapi.TYPE_STRING),
-                'camera': openapi.Schema(type=openapi.TYPE_STRING),
+                'oname': openapi.Schema(type=openapi.TYPE_STRING),
                 'created_start': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'created_end': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'mjd': openapi.Schema(type=openapi.TYPE_STRING),
+                'target_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'target_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'mag_min': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'mag_max': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'magerr_min': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'magerr_max': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'filter': openapi.Schema(type=openapi.TYPE_STRING),
+                'mjd_min': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'mjd_max': openapi.Schema(type=openapi.TYPE_NUMBER),
                 'page': openapi.Schema(type=openapi.TYPE_INTEGER),
             },
             required=[]
@@ -768,10 +777,19 @@ class GetDataProductApi(views.APIView):
         dp_status = request.data.get('status', None)
         fits_data = request.data.get('fits_data', None)
         photometry_data = request.data.get('photometry_data', None)
-        camera = request.data.get('camera', None)
+        oname = request.data.get('oname', None)
         created_start = request.data.get('created_start', None)
         created_end = request.data.get('created_end', None)
         mjd = request.data.get('mjd', None)
+        target_name = request.data.get('target_name', None)
+        target_id = request.data.get('target_id', None)
+        mag_min = request.data.get('mag_min', None)
+        mag_max = request.data.get('mag_max', None)
+        magerr_min = request.data.get('magerr_min', None)
+        magerr_max = request.data.get('magerr_max', None)
+        data_filter = request.data.get('filter', None)
+        mjd_min = request.data.get('mjd_min', None)
+        mjd_max = request.data.get('mjd_max', None)
         page = request.data.get('page', 1)
 
         if id is not None:
@@ -782,8 +800,8 @@ class GetDataProductApi(views.APIView):
             query &= Q(data_product_type=data_product_type)
         if dp_status is not None:
             query &= Q(status=dp_status)
-        if camera is not None:
-            query &= Q(observatory__camera__prefix=camera)
+        if oname is not None:
+            query &= Q(observatory__camera__prefix=oname)
         if fits_data is not None:
             query &= Q(fits_data__contains=fits_data)
         if created_start is not None:
@@ -792,6 +810,24 @@ class GetDataProductApi(views.APIView):
             query &= Q(created__lte=created_end)
         if mjd is not None:
             query &= (Q(spectroscopydatum__mjd=mjd) | Q(calibration_data__mjd=mjd))
+        if target_name is not None:
+            query &= Q(target__name__icontains=target_name)
+        if target_id is not None:
+            query &= Q(target__id=target_id)
+        if mag_min is not None:
+            query &= Q(calibration_data__mag____gte=mag_min)
+        if mag_max is not None:
+            query &= Q(calibration_data__mag___lte=mag_max)
+        if magerr_min is not None:
+            query &= Q(calibration_data__mag_error__gte=magerr_min)
+        if magerr_max is not None:
+            query &= Q(calibration_data__mag_error__lte=magerr_max)
+        if data_filter is not None:
+            query &= Q(filter=data_filter)
+        if mjd_min is not None:
+            query &= Q(calibration_data__mjd__gte=mjd_min)
+        if mjd_max is not None:
+            query &= Q(calibration_data__mjd__lte=mjd_max)
 
         queryset = DataProduct.objects.filter(query).distinct().order_by('-created')
 
@@ -813,9 +849,7 @@ class GetDataProductApi(views.APIView):
             'num_pages': paginator.num_pages,
             'current_page': data_products.number,
             'data': serialized_queryset
-        }, status= status.HTTP_200_OK)
-
-
+        }, status=status.HTTP_200_OK)
 
 
 class GetReducedDataApi(views.APIView):
