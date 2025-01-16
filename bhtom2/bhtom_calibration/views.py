@@ -332,18 +332,76 @@ class RestartCalibrationByTargetApiView(APIView):
 
         try:
             response = requests.post(
-                url=f"{settings.CPCS_URL}/calib/restartCalibByTarget/",
+                url=f"{settings.CPCS_URL}/calib/restartCalib/",
                 data=request.data,
                 headers=header
-            )
+                )
+
             if response.status_code != 200:
+                try:
+                    error_details = response.json()
+                except ValueError:
+                    error_details = response.text 
+
                 return Response(
-                    {"Error": f"Oops.. something went wrong. Status code: {response.status_code}"},
+                    {"Error": f"Oops.. something went wrong. Error: {error_details}"},
                     status=response.status_code
                 )
             else:
-                # Parse the JSON response and return it
-                response_data = response.json()  # Parse the JSON response
+                response_data = response.json()  
+                return Response(
+                    {"Success": response_data},
+                    status=status.HTTP_200_OK
+                )
+        except requests.exceptions.RequestException as e:
+            return Response(
+                {"Error": f"Oops.. something went wrong. Error: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class RestartCalibrationByDataProductApiView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(name='data_product_id',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Data Product ID.'),
+            openapi.Parameter(name='filter',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='New Filter.'),
+            openapi.Parameter(name='old_filter',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Old Filter.'),
+            openapi.Parameter(name='match_dist',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Filter.'),
+            openapi.Parameter(name='oname',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='ONAME.'),
+            openapi.Parameter(name='comment',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Comment.'),
+            openapi.Parameter(name='status',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Status'),
+            openapi.Parameter(name='status_message',in_=openapi.IN_QUERY,required=False,type=openapi.TYPE_INTEGER,description='Status Message'),
+        ],
+    )
+    def post(self, request):
+        if not request.user.is_staff:
+            raise PermissionDenied(detail="Access denied. You must be an admin.")
+
+        header = {
+            "Correlation-ID": get_guid(),
+        }
+
+        try:
+            response = requests.post(
+                url=f"{settings.CPCS_URL}/calib/restartCalibByDataProduct/",
+                data=request.data,
+                headers=header
+                )
+
+            if response.status_code != 200:
+                try:
+                    error_details = response.json()
+                except ValueError:
+                    error_details = response.text 
+
+                return Response(
+                    {"Error": f"Oops.. something went wrong. Error: {error_details}"},
+                    status=response.status_code
+                )
+            else:
+                response_data = response.json()  
                 return Response(
                     {"Success": response_data},
                     status=status.HTTP_200_OK
@@ -384,10 +442,16 @@ class RestartCalibrationApiView(APIView):
                 url=f"{settings.CPCS_URL}/calib/restartCalib/",
                 data=request.data,
                 headers=header
-            )
+                )
+
             if response.status_code != 200:
+                try:
+                    error_details = response.json()
+                except ValueError:
+                    error_details = response.text 
+
                 return Response(
-                    {"Error": f"Oops.. something went wrong. Status code: {response.status_code}"},
+                    {"Error": f"Oops.. something went wrong. Error: {error_details}"},
                     status=response.status_code
                 )
             else:
