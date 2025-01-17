@@ -1290,16 +1290,42 @@ curl -X 'POST' \
 
 ### List Data Products
 
-API for DataProduct list, lists uploaded instrumental or fits files and tracks the user who uploaded it
+API for DataProduct list, which lists uploaded instrumental or fits files and tracks the user who uploaded them.
 
-
+---
 
 ### Request
+
 - **Method**: POST
 - **URL**: `common/api/data/`
 
 - Token Authentication: You must include a valid authentication token in the request headers.
 
+#### Parameters
+
+| Parameter          | Type     | Description                                                                 |
+|--------------------|----------|-----------------------------------------------------------------------------|
+| id                 | Integer  | Unique identifier for the data product.                                    |
+| data_product_type  | String   | Type of data product (e.g., photometry, spectroscopy).                      |
+| status             | String   | Status of the data product.                                                |
+| fits_data          | String   | Name of the fits file.                                                     |
+| photometry_data    | String   | Name of the photometry file.                                               |
+| oname              | String   | Name of the observatory (replaces "camera").                               |
+| created_start      | String   | Start date for creation date filter (ISO 8601 format).                     |
+| created_end        | String   | End date for creation date filter (ISO 8601 format).                       |
+| mjd                | String   | Modified Julian Date.                                                      |
+| target_name        | String   | Name of the target.                                                        |
+| target_id          | Integer  | Identifier of the target.                                                  |
+| mag_min            | Float    | Minimum value of magnitude (inclusive).                                    |
+| mag_max            | Float    | Maximum value of magnitude (inclusive).                                    |
+| magerr_min         | Float    | Minimum value of magnitude error (inclusive).                              |
+| magerr_max         | Float    | Maximum value of magnitude error (inclusive).                              |
+| filter             | String   | Filter of the data product (e.g., "GaiaSP/U").                            |
+| mjd_min            | Float    | Minimum value of Modified Julian Date (inclusive).                         |
+| mjd_max            | Float    | Maximum value of Modified Julian Date (inclusive).                         |
+| page               | Integer  | Page number for pagination (default: 1).                                   |
+
+---
 
 ### Example Request Body
 
@@ -1310,18 +1336,30 @@ API for DataProduct list, lists uploaded instrumental or fits files and tracks t
     "status": "Dataproduct status",
     "fits_data": "fits file name",
     "photometry_data": "photometry file name",
-    "camera" : "BIALKOW_ANDOR-DW432", 
+    "oname": "BIALKOW_ANDOR-DW432",
     "created_start": "2024-01-01",
     "created_end": "2024-01-02",
     "mjd": "2",
-    "page": "2",
+    "target_name": "Star123",
+    "target_id": 42,
+    "mag_min": 15.0,
+    "mag_max": 20.0,
+    "magerr_min": 0.01,
+    "magerr_max": 0.1,
+    "filter": "GaiaSP/U",
+    "mjd_min": 59000.0,
+    "mjd_max": 59010.0,
+    "page": 2
 }
 ```
+
+---
+
 ### Example Request
 
-You can make a POST request using the `curl` command or any HTTP client that supports POST requests. You can request only 500 records for one request, use parametr "page" to get next 500 records
+You can make a POST request using the `curl` command or any HTTP client that supports POST requests. Only 500 records can be requested per page; use the "page" parameter to retrieve subsequent records.
 
-### Using `curl`
+#### Using `curl`
 
 ```bash
 curl -X POST \
@@ -1331,11 +1369,34 @@ curl -X POST \
 
 Replace `<yourToken>` with your valid authentication token.
 
+#### With Request Body
 
 ```bash
 curl -X POST -H "Content-Type: application/json" -H "Authorization: Token <yourToken>" \
-  "https://bh-tom2.astrolabs.pl/common/api/data/" 
+  "https://bh-tom2.astrolabs.pl/common/api/data/" \
+  -d '{
+    "data_product_type": "photometry",
+    "id": 1,
+    "status": "Dataproduct status",
+    "fits_data": "fits file name",
+    "photometry_data": "photometry file name",
+    "oname": "BIALKOW_ANDOR-DW432",
+    "created_start": "2024-01-01",
+    "created_end": "2024-01-02",
+    "mjd": "2",
+    "target_name": "Star123",
+    "target_id": 42,
+    "mag_min": 15.0,
+    "mag_max": 20.0,
+    "magerr_min": 0.01,
+    "magerr_max": 0.1,
+    "filter": "GaiaSP/U",
+    "mjd_min": 59000.0,
+    "mjd_max": 59010.0,
+    "page": 2
+  }'
 ```
+Ensure that your authentication token is valid and your parameters are correctly specified to get the desired results.
 
 
 ### Delete Data Product
@@ -1375,8 +1436,6 @@ Replace `<yourToken>` with your valid authentication token and `12345` with the 
 # Reduced Datum API
 
 ### List Reduced Datums
-
-
 ### Request
 - **Method**: POST
 - **URL**: `common/api/reducedDatum/`
@@ -1533,12 +1592,12 @@ This API allows you to restart the calibration by id  process with various optio
 - `id_from` (integer): The starting ID for the range (optional).
 - `id_to` (integer): The ending ID for the range (optional).
 - `filter` (string): The new filter value to use for recalibration (optional).
-- `old_filter` (string): The old filter value to filter data for recalibration (optional).
-- `match_dist` (integer): The match distance filter to set for the new calibration (default is -1) (optional).
-- `oname` (string): The observatory name to filter data for recalibration (optional).
+- `old_filter` (string): The old filter value to query data for recalibration (optional).
+- `match_dist` (float): The match distance filter to set for the new calibration (default is -1) (optional).
+- `oname` (string): The observatory name to query data for recalibration (optional).
 - `comment` (string): A comment or note for the recalibration process (optional).
-- `status` (string): The calibration status to filter data for recalibration (optional).
-- `status_message` (string): The status message to filter data for recalibration (optional).
+- `status` (string): The calibration status to query data for recalibration (optional).
+- `status_message` (string): The status message to query data for recalibration (optional).
 
 ### Example Request
 
@@ -1566,10 +1625,6 @@ curl -X POST \
 
 Replace `<yourToken>` with your valid authentication token.
 
-### Restart Calibration By CALIB BY TARGET
-Here’s the documentation for the `RestartCalibrationByTargetApiView` similar to your previous example:
-
----
 
 ### Restart Calibration by Target
 
@@ -1583,17 +1638,17 @@ This API allows you to restart the calibration process based on a target name/id
 - **Admin Access Required**: Only users with admin privileges can access this API.
 
 ### Optional Query Parameters
-- `target_name` (string): The name of the target to filter data for recalibration (optional).
-- `target_id` (integer): The ID of the target to filter data for recalibration (optional).
-- `mjd_max` (integer): The maximum Modified Julian Date (MJD) for the recalibration filter (optional).
-- `mjd_min` (integer): The minimum Modified Julian Date (MJD) for the recalibration filter (optional).
+- `target_name` (string): The name of the target to query data for recalibration (optional).
+- `target_id` (integer): The ID of the target to query data for recalibration (optional).
+- `mjd_max` (float): The maximum Modified Julian Date (MJD) for the recalibration filter (optional).
+- `mjd_min` (float): The minimum Modified Julian Date (MJD) for the recalibration filter (optional).
 - `filter` (string): The new filter value to use for recalibration (optional).
-- `old_filter` (string): The old filter value to filter data for recalibration (optional).
-- `match_dist` (integer): The match distance filter to set for the new calibration (optional).
-- `oname` (string): The observatory name to filter data for recalibration (optional).
+- `old_filter` (string): The old filter value to query data for recalibration (optional).
+- `match_dist` (float): The match distance filter to set for the new calibration (optional).
+- `oname` (string): The observatory name to query data for recalibration (optional).
 - `comment` (string): A comment or note for the recalibration process (optional).
-- `status` (string): The calibration status to filter data for recalibration (optional).
-- `status_message` (string): The status message to filter data for recalibration (optional).
+- `status` (string): The calibration status to query data for recalibration (optional).
+- `status_message` (string): The status message to query data for recalibration (optional).
 
 ### Example Request
 
@@ -1628,3 +1683,49 @@ Replace `<yourToken>` with your valid authentication token.
 ### Notes
 - You must provide either `target_name` or `target_id` but not both.
 - You must be an admin to access this endpoint.
+
+
+### Restart Calibration by Data Product
+
+This API allows you to restart the calibration process for a specific data product with optional parameters for quering and customization.
+
+### Request
+- **Method**: POST  
+- **URL**: `calibration/restart-calib-by-dataproduct/`  
+- **Token Authentication**: You must include a valid authentication token in the request headers.  
+- **Admin Access Required**: Only users with admin privileges can access this API.
+
+### Optional Query Parameters
+- `data_product_id` (integer): The ID of the data product to restart calibration for.
+- `filter` (string): The new filter value to apply for calibration (optional).
+- `old_filter` (string): The old filter value to query data for recalibration (optional).
+- `match_dist` (float): The match distance filter for the new calibration (optional).
+- `oname` (string): The observatory name to query data for recalibration (optional).
+- `comment` (string): A comment or note for the recalibration process (optional).
+- `status` (string): The calibration status to query data for recalibration (optional).
+- `status_message` (string): The status message to query data for recalibration (optional).
+
+### Example Request
+
+You can make a POST request using the `curl` command or any HTTP client.
+
+#### Using `curl`
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Token <yourToken>" \
+  -d '{
+    "data_product_id": 123,
+    "filter": 5,
+    "old_filter": 3,
+    "match_dist": 2,
+    "oname": 10,
+    "comment": "Restarting calibration with new parameters",
+    "status": 1,
+    "status_message": "Calibration initiated"
+  }' \
+   "https://bh-tom2.astrolabs.pl/calibration/restart-calib-by-dataproduct/"
+```
+
+Replace `<yourToken>` with your valid authentication token.
