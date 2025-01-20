@@ -332,7 +332,7 @@ class RestartCalibrationByTargetApiView(APIView):
 
         try:
             response = requests.post(
-                url=f"{settings.CPCS_URL}/calib/restartCalib/",
+                url=f"{settings.CPCS_URL}/calib/restartCalibByTarget/",
                 data=request.data,
                 headers=header
                 )

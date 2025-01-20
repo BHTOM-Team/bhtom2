@@ -170,10 +170,8 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
                 logger.error("Coordinates beyond range")
                 form.add_error(None, "Coordinates beyond range")
                 return super().form_invalid(form)
-        #            raise ValidationError(f'Coordinates beyond range error')
-
+        # raise ValidationError(f'Coordinates beyond range error')
             coords_names = check_for_existing_coords(ra, dec, 3. / 3600., stored)
-
             if len(coords_names) != 0:
                 existing_targets = Target.objects.filter(name__in=coords_names)
                 if len(existing_targets) != 0:
