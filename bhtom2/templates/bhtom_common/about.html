@@ -4,106 +4,108 @@
 {% block content %}
 {% load static %}
 
+<div style="display: flex; flex-direction: column;">
+
     <p>Welcome to <strong>BLACK HOLE TOM</strong> - your comprehensive Target Observation Manager.</p>
-
+  
     <div>
-        <h2>What is BHTOM?</h2>
-        <p><strong>BHTOM</strong> stands for Black Hole Target Observation Manager. It's a state-of-the-art web server designed to coordinate a network of telescopes, manage astronomical observations, and process the data obtained from these observations.</p>
-        <p>Our platform serves as a one-stop solution for astronomers and researchers around the globe, facilitating seamless coordination and efficient data management.</p>
+      <h2>What is BHTOM?</h2>
+      <p><strong>BHTOM</strong> stands for Black Hole Target Observation Manager. It's a state-of-the-art web server designed to coordinate a network of telescopes, manage astronomical observations, and process the data obtained from these observations.</p>
+      <p>Our platform serves as a one-stop solution for astronomers and researchers around the globe, facilitating seamless coordination and efficient data management.</p>
     </div>
-
+  
     <div>
-        <h2>Key Features</h2>
+      <h2>Key Features</h2>
+      <ul>
+        <li><strong>Telescope Network Coordination:</strong> BHTOM enables you to collect photometry data from multiple telescopes for your time-domain targets.</li>
+        <li><strong>Raw Data Processing:</strong> With BHTOM, you can upload your raw observations as fits or instrumental photometry. We will derive the PSF photometry and standardise the data to Gaia Synthetic Photometry filters automatically.</li>
+        <li><strong>Archives:</strong> BHTOM will automatically gather photometric data already collected for your target of interest, enabling time-domain astronomy studies.</li>
+        <li><strong>Automation:</strong> BHTOM functionalities can be fully automatised from your scripts. See our API documentation.</li>
+      </ul>
+    </div>
+  
+    <div style="color:blue;">
+      <h2>BHTOM for researchers:</h2>
+      <p>Any time-domain target can be added to our system. The target will then be observed by our network with the requested frequency, and you will receive the standardised photometric data for your target(s).</p>
+      <h2>BHTOM for telescope operators:</h2>
+      <p>You can register your telescope in our system and we will process your images automatically. Your observations will be labelled with your name and telescope.</p>
+      <h2>BHTOM for teachers:</h2>
+      <p>Your students can both submit their targets and their observations and learn the basics of data processing and time-domain research.</p>
+      <h2>BHTOM for amateurs:</h2>
+      <p>Join us with your telescope, observe interesting science targets and we will help you process your data! Each datapoint you collect will be labelled with your name!</p>
+    </div>
+  
+    <div style="color:blue;">
+      <h2>Recent changes:</h2>
+  
+      <h4>2024 September 11</h4>
+      <li><strong>New API:</strong>
         <ul>
-            <li><strong>Telescope Network Coordination:</strong> BHTOM enables you to collect photometry data from multiple telescopes for your time-domain targets.</li>
-            <li><strong>Raw Data Processing:</strong> With BHTOM, you can upload your raw observations as fits or instrumental photometry. We will derive the PSF photometry and standardise the data to Gaia Synthetic Photometry filters automatically.</li>
-            <li><strong>Archives:</strong> BHTOM will automatically gather photometric data already collected for your target of interest, enabling time-domain astronomy studies.</li>
-            <li><strong>Automation:</strong> BHTOM functionalities can be fully automatised from your scripts. See our API documentation.</li>
-        </ul>    
-    </div>
-
-    <div class="row" style="color:blue;">
-        <h2>BHTOM for reseachers:</h2>
-        <p>Any time-domain target can be added to our system. The target will then be observed by our network with the requested frequency, and you will receive the standardised photometric data for your target(s).</p>
-        <h2>BHTOM for telescope operators:</h2>
-        <p>You can register your telescope in our system and we will process your images automatically. Your observations will be labelled with your name and telescope.</p>
-        <h2>BHTOM for teachers:</h2>
-        <p>Your students can both submit their targets and their observations and learn the basics of data processing and time-domain research.</p>
-        <h2>BHTOM for amateurs:</h2>
-        <p>Join us with your telescope, observe interesting science targets and we will help you process your data! Each datapoint you collect will be labelled with your name!</p>
-    </div>
-
-    <div class="row" style="color:blue;">
-        <h2>Recent changes:</h2>
-        
-        <h4> 2024 September 11 </h4>
-            <li><strong>New API:</strong> 
-            <ul>
-                <li>Get Targets From Group: This API allows users to retrieve a paginated list of targets associated with a specific target group. You can specify the target group either by its `id` or `name`, but not both.</li>
-                <li>Get Target Groups: This API allows users to retrieve a paginated list of target groups. You can request a specific page of target groups by passing the `page` parameter</li>
-            </ul>
-            Users can retrieve 1000 records per request, with pagination available for accessing additional records.
-        </li>
-
-        <h4> 2024 August 27 </h4>
-        <li><strong>Add Imported Targets to Group:</strong> With BHTOM, you can import your targets and automatically add all imported targets to a new group.</li>
-        <li><strong>Target Existence Check:</strong> When a found target already exists, BHTOM will offer a direct link to the target or provide a filtered list of similar targets.</li>
-        <li><strong>API Pagination:</strong> Added pagination to the API for:
-            <ul>
-                <li>Get Target List</li>
-                <li>Get Favourite Observatory</li>
-                <li>Observatory List</li>
-                <li>Get Catalogs</li>
-                <li>Get Calibration Results</li>
-            </ul>
-            Users can retrieve 1000 records per request, with pagination available for accessing additional records.
-        </li>
-        
-        <h4>2024 July 4</h4>
+          <li>Get Targets From Group: This API allows users to retrieve a paginated list of targets associated with a specific target group. You can specify the target group either by its `id` or `name`, but not both.</li>
+          <li>Get Target Groups: This API allows users to retrieve a paginated list of target groups. You can request a specific page of target groups by passing the `page` parameter</li>
+        </ul>
+        Users can retrieve 1000 records per request, with pagination available for accessing additional records.
+      </li>
+  
+      <h4>2024 August 27</h4>
+      <li><strong>Add Imported Targets to Group:</strong> With BHTOM, you can import your targets and automatically add all imported targets to a new group.</li>
+      <li><strong>Target Existence Check:</strong> When a found target already exists, BHTOM will offer a direct link to the target or provide a filtered list of similar targets.</li>
+      <li><strong>API Pagination:</strong> Added pagination to the API for:
         <ul>
-            <li>Added validation for uploaded files.</li>
-            <li>Added functionality to generate images directly from FITS files.</li>
-            <li>Added the ability to delete uploaded files located in the data/Yours file.</li>
-            <li>Added a link to data details within the photometry plot for easier access to additional information.</li>
-            <li>Added a fits_filter parameter to the data download API.</li>
-            </ul>
-
-        <h4>2024 June 11</h4>
-            <ul>
-            <li>Added new filters in the data tab (GaiaSP/ugriz and GaiaSP/UBVRI)</li>
-            <li>Added password reset function</li>
-            <li>Added a link in the create form to the target if it exists</li>
-            <li>Improved CPCS standardisation procedure</li>
-            <li>Added API for downloading archives</li>
-            <li>Added calibration logs </li>
-            </ul>
+          <li>Get Target List</li>
+          <li>Get Favourite Observatory</li>
+          <li>Observatory List</li>
+          <li>Get Catalogs</li>
+          <li>Get Calibration Results</li>
+        </ul>
+        Users can retrieve 1000 records per request, with pagination available for accessing additional records.
+      </li>
+  
+      <h4>2024 July 4</h4>
+      <ul>
+        <li>Added validation for uploaded files.</li>
+        <li>Added functionality to generate images directly from FITS files.</li>
+        <li>Added the ability to delete uploaded files located in the data/Yours file.</li>
+        <li>Added a link to data details within the photometry plot for easier access to additional information.</li>
+        <li>Added a fits_filter parameter to the data download API.</li>
+      </ul>
+  
+      <h4>2024 June 11</h4>
+      <ul>
+        <li>Added new filters in the data tab (GaiaSP/ugriz and GaiaSP/UBVRI)</li>
+        <li>Added password reset function</li>
+        <li>Added a link in the create form to the target if it exists</li>
+        <li>Improved CPCS standardisation procedure</li>
+        <li>Added API for downloading archives</li>
+        <li>Added calibration logs</li>
+      </ul>
     </div>
-
-    <div class="row" style="color:blue;">
-        <h2>BHTOM Target Newsletter Mailing List</h2>
-        <p><a href="https://groups.google.com/g/bhtomtargets/">Join the mailing list to find out which targets are currently worth observing!</a></p>
+  
+    <div style="color:blue;">
+      <h2>BHTOM Target Newsletter Mailing List</h2>
+      <p><a href="https://groups.google.com/g/bhtomtargets/">Join the mailing list to find out which targets are currently worth observing!</a></p>
     </div>
-
-    <div class="row" style="color:blue;">
-        <h2>Contact</h2>
-        <p><a href="https://github.com/BHTOM-Team/bhtom2/blob/bhtom2-dev/Documentation/bhtom-service/README.md">Draft version of the documentation</a></p>
-        <br>
-        <p><a href="https://github.com/BHTOM-Team/bhtom2/blob/bhtom2-dev/Documentation/2024.12-BHTOM2-Manual.pdf">Visual manual of BHTOM</a></p>
-        <br>
-        <p>For more information contact us at contact_@_bhtom.space</p>
+  
+    <div style="color:blue;">
+      <h2>Contact</h2>
+      <p><a href="https://github.com/BHTOM-Team/bhtom2/blob/bhtom2-dev/Documentation/bhtom-service/README.md">Draft version of the documentation</a></p>
+      <br>
+      <p><a href="https://github.com/BHTOM-Team/bhtom2/blob/bhtom2-dev/Documentation/2024.12-BHTOM2-Manual.pdf">Visual manual of BHTOM</a></p>
+      <br>
+      <p>For more information contact us at contact_@_bhtom.space</p>
     </div>
-
-    <div class="row" style="color:blue;">
-        <h3>Acknowledgments</h3>
-        <p> 
-            <img src="{% static 'eu-flag-normal-reproduction-low-resolution.jpg' %}" alt="EU Flag" style="width: 30px; vertical-align: middle;">
-            BHTOM is based on the open-source <a href="https://lco.global/tomtoolkit/">TOM Toolkit by LCO</a> and has been developed with funding from the OPTICON-RadioNet Pilot (ORP) of the European Union's Horizon 2020 research and innovation programme under grant agreement No <a href="https://cordis.europa.eu/project/id/101004719">101004719</a> (2021-2025).
-            This project has received funding the European Union's Horizon Europe Research and Innovation programme ACME under grant agreement No <a href="https://cordis.europa.eu/project/id/101131928">101131928</a> (2024-2028).    
-        </p>
-        <p><br>Concept and design by <a href="https://www.linkedin.com/in/lukasz-wyrzykowski-warsaw/">Lukasz Wyrzykowski</a>, Warsaw University Astronomical Observatory and NCBJ. We acknowledge contributions from students and staff of the University of Warsaw. Hosting and technical development by <a href="https://www.akond.com/">AKOND</a>.
-        </p>
-        <p><br><font color="red">Please get in touch if you plan on using the data collected here. contact At bhtom.space</font>
-            <p>
-
+  
+    <div style="color:blue;">
+      <h3>Acknowledgments</h3>
+      <p>
+        <img src="{% static 'eu-flag-normal-reproduction-low-resolution.jpg' %}" alt="EU Flag" style="width: 30px; vertical-align: middle;">
+        BHTOM is based on the open-source <a href="https://lco.global/tomtoolkit/">TOM Toolkit by LCO</a> and has been developed with funding from the OPTICON-RadioNet Pilot (ORP) of the European Union's Horizon 2020 research and innovation programme under grant agreement No <a href="https://cordis.europa.eu/project/id/101004719">101004719</a> (2021-2025).
+        This project has received funding from the European Union's Horizon Europe Research and Innovation programme ACME under grant agreement No <a href="https://cordis.europa.eu/project/id/101131928">101131928</a> (2024-2028).
+      </p>
+      <p><br>Concept and design by <a href="https://www.linkedin.com/in/lukasz-wyrzykowski-warsaw/">Lukasz Wyrzykowski</a>, Warsaw University Astronomical Observatory and NCBJ. We acknowledge contributions from students and staff of the University of Warsaw. Hosting and technical development by <a href="https://www.akond.com/">AKOND</a>.
+      </p>
+      <p><br><font color="red">Please get in touch if you plan on using the data collected here. contact At bhtom.space</font></p>
     </div>
-{% endblock %}
+  
+  </div>
+  {% endblock %}
