@@ -93,7 +93,7 @@ class CalibrationResultsApiView(APIView):
                         if instance.dataproduct.data_product_type == "fits_file":
                             ccdphot_instance = CCDPhotJob.objects.get(dataProduct_id=instance.dataproduct.id)
                             serialized_ccdphot_data = serializers.serialize('json', [ccdphot_instance])
-                            ccdphot_data = data = json.loads(serialized_ccdphot_data)[0]
+                            ccdphot_data = json.loads(serialized_ccdphot_data)[0]
                             result["ccdphot_results"] = ccdphot_data["fields"]
                         calibration_data_list.append(result)
                     else:
@@ -126,7 +126,7 @@ class CalibrationResultsApiView(APIView):
                         if instance.dataproduct.data_product_type == "fits_file":
                             ccdphot_instance = CCDPhotJob.objects.get(dataProduct_id=instance.dataproduct.id)
                             serialized_ccdphot_data = serializers.serialize('json', [ccdphot_instance])
-                            ccdphot_data = data = json.loads(serialized_ccdphot_data)[0]
+                            ccdphot_data = json.loads(serialized_ccdphot_data)[0]
                             result["ccdphot_results"] = ccdphot_data["fields"]
                         calibration_data_list.append(result)
                     else:
