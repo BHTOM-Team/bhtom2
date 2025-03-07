@@ -32,7 +32,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from bhtom2.bhtom_common.serializers import DataProductSerializer,CommentSerializer,ReducedDataSerializer
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from rest_framework.exceptions import PermissionDenied
@@ -840,8 +840,6 @@ class GetDataProductApi(views.APIView):
             data_products = paginator.page(1)
         except EmptyPage:
             data_products = paginator.page(paginator.num_pages)
-
-        # Serialize the data
         serialized_queryset = self.serializer_class(data_products, many=True).data
 
         return Response({
