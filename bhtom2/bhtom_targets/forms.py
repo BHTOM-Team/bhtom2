@@ -221,7 +221,8 @@ class SiderealTargetCreateForm(TargetForm):
             widget=forms.Select(),
             label='Classification',
             initial='Unknown',
-            required=True
+            required=True,
+            help_text='Classification of the object (e.g. variable star, microlensing event)'
         )   
         # self.fields['classification'].widget.attrs['rows'] = 1
 
