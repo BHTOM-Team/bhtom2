@@ -5,20 +5,22 @@
     <div class="row">
         <div class="col-lg-9">
             <h2 class="text-center">Black Hole TOM 2.0</h2>
-            <p class="text-center"><img
-                    src="{% static 'bh_tom_image.jpg' %}"
-                    class="img-fluid mx-auto"></p>
-            <p class="text-center">(Image courtesy of NASA/ESA/Gaia/DPAC)</p>
-            <div>
+            <p class="text-center">
+                <a href="{% url 'bhtom_targets:list' %}">
+                    <img src="{% static 'bh_tom_image.jpg' %}" class="img-fluid mx-auto">
+                </a>
+            </p>
+            <p class="text-center">Click the image for a main page with current list of targets of interest. (Image courtesy of NASA/ESA/Gaia/DPAC)</p>
+            {% comment %} <div>
                 <div id="react">
                     <!-- Contents get replaced by mounted React.Component -->
                     <i class="fa fa-lg fa-spinner fa-spin"></i><br><br>
                     <i class="pending"></i><br><br>
                 </div>
-            </div>
+            </div> {% endcomment %}
             <p><a href="https://github.com/BHTOM-Team/bhtom2/blob/bhtom2-dev/Documentation/bhtom-service/README.md">BHTOM2 Documentation</a></p>
         </div>
-        <div class="col-lg-3">
+                <div class="col-lg-3">
             <div class="card text-white bg-dark">
                 <div class="card-header">
                     Latest Comments

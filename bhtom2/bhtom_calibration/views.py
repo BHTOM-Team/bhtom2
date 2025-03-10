@@ -12,7 +12,7 @@ from django_guid import get_guid
 from bhtom2.bhtom_calibration.models import Calibration_data
 from django.core import serializers
 from bhtom2.bhtom_calibration.models import Catalogs as calibration_catalog
-from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum
+from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, CCDPhotJob
 from bhtom_base.bhtom_targets.models import Target
 from bhtom2.utils.api_pagination import StandardResultsSetPagination
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -90,6 +90,11 @@ class CalibrationResultsApiView(APIView):
                                 result["plot"] = None
                         else:
                             result["plot"] = None
+                        if instance.dataproduct.data_product_type == "fits_file":
+                            ccdphot_instance = CCDPhotJob.objects.get(dataProduct_id=instance.dataproduct.id)
+                            serialized_ccdphot_data = serializers.serialize('json', [ccdphot_instance])
+                            ccdphot_data = json.loads(serialized_ccdphot_data)[0]
+                            result["ccdphot_results"] = ccdphot_data["fields"]
                         calibration_data_list.append(result)
                     else:
                         calibration_data_list.append({"calib-res": "It's not your data", "plot": None})
@@ -118,6 +123,11 @@ class CalibrationResultsApiView(APIView):
                                 result["plot"] = None
                         else:
                             result["plot"] = None
+                        if instance.dataproduct.data_product_type == "fits_file":
+                            ccdphot_instance = CCDPhotJob.objects.get(dataProduct_id=instance.dataproduct.id)
+                            serialized_ccdphot_data = serializers.serialize('json', [ccdphot_instance])
+                            ccdphot_data = json.loads(serialized_ccdphot_data)[0]
+                            result["ccdphot_results"] = ccdphot_data["fields"]
                         calibration_data_list.append(result)
                     else:
                         calibration_data_list.append({"calib-res": "It's not your data", "plot": None})

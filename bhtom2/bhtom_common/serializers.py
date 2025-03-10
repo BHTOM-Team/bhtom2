@@ -1,8 +1,15 @@
 from rest_framework import serializers
+from django.core import serializers as serial
 from bhtom_base.bhtom_dataproducts.models import DataProduct, CCDPhotJob, ReducedDatum
 from bhtom2.bhtom_calibration.models import Calibration_data
 from bhtom_base.bhtom_targets.models import Target
 from django_comments.models import Comment
+import json
+
+class CCDPhotJobSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CCDPhotJob
+        fields = '__all__'
 
 class DataProductSerializer(serializers.ModelSerializer):
     user_name = serializers.SerializerMethodField()
@@ -13,6 +20,7 @@ class DataProductSerializer(serializers.ModelSerializer):
     observatory_name = serializers.SerializerMethodField()
     observatory = serializers.SerializerMethodField()
     calibration_data = serializers.SerializerMethodField()
+    ccdphot_result = serializers.SerializerMethodField()
 
     class Meta:
         model = DataProduct
@@ -79,8 +87,16 @@ class DataProductSerializer(serializers.ModelSerializer):
             'outlier fraction': cal.outlier_fraction or "",
             'matching radius[arcsec]': cal.match_distans or ""
         }
-  
-
+    def get_ccdphot_result(self,obj):
+        try:
+            ccdphot = CCDPhotJob.objects.get(dataProduct_id = obj.id)
+        except:
+            ccdphot = None
+        if not ccdphot:
+            return {}
+        serialized_ccdphot_data = serial.serialize('json', [ccdphot])
+        ccdphot_data = json.loads(serialized_ccdphot_data)[0]
+        return ccdphot_data["fields"]
 
 
 class ReducedDataSerializer(serializers.ModelSerializer):
