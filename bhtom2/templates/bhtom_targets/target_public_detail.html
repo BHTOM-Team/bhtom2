@@ -1,0 +1,98 @@
+{% extends 'bhtom_common/base.html' %}
+{% load comments bootstrap4 bhtom_common_extras targets_extras bhtom_targets_extras observation_extras dataproduct_extras static cache %}
+
+{% block title %}Target {{ object.name }}{% endblock %}
+
+{% block additional_css %}
+    <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}">
+{% endblock %}
+
+{% block content %}
+    <script>
+        // This script maintains the selected tab upon reload
+        $(document).ready(function () {
+            // This is required due to the apparent redefinition of $ in another library: https://api.jquery.com/jquery.noconflict/
+            // Based on trial and error, the offending script appears to be JS9, which is used in dataproduct_list_for_target
+            $.noConflict();
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                localStorage.setItem('activeTab', $(e.target).attr('href'));
+            });
+
+            var activeTab = localStorage.getItem('activeTab');
+            if (activeTab) {
+                $('#tabs a[href="' + activeTab + '"]').tab('show');
+            }
+        });
+    </script>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <div id="target-info">
+                <h3>{{ target.name }}</h3>
+                {% if object.future_observations %}
+                    <div class="alert alert-success">
+                        {{ object.future_observations|length }} upcoming
+                        observation{{ object.future_observations|pluralize }}
+                    </div>
+                {% endif %}
+                {% target_unknown_statuses object %}
+                {% target_data object %}
+                {% if object.type == 'SIDEREAL' %}
+                    {% aladin_public object %}
+                {% endif %}
+                <p>This data is provided by BHTOM. For inquiries about the data or to collaborate on data processing, please contact us. We welcome collaborations and data processing opportunities.</p>
+            </div>
+        </div>
+        <div class="col-lg-8 target-right">
+            <ul class="nav nav-tabs" role="tablist" id="tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" id="photometry-tab" href="#photometry" role="tab"
+                       data-toggle="tab">Photometry</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="publication-tab" href="#publication" role="tab"
+                       data-toggle="tab">Publication</a>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane active" id="photometry">
+                    {% photometry_for_target target %}
+                    {% comment %} Plot with observers instead of filters {% endcomment %}
+                    {% photometry_for_target_obs target %}
+                    {% recent_photometry object limit=5 %}
+                </div>
+                <div class="tab-pane" id="publication">
+                    <div style="margin-top: 20px;">
+                        {% photometry_stats object %}
+                    </div>
+                    <div style="margin-top: 20px;" class="col-lg-6">
+                        {% gaia_stats object %}
+                    </div>
+                </div>
+
+                {% if comments_are_enabled %}
+                    <hr/>
+                    <h5>Comments</h5>
+                    {% render_comment_list for object %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_javascript %}
+    <script type="text/javascript">
+        var plotElements = document.getElementsByClassName('plotly-graph-div js-plotly-plot');
+        for (var i = 0; i < plotElements.length; i++) {
+            plotElements[i].on('plotly_click', function(event) {
+                var link = event.points[0].customdata[1];
+                if (event.points[0].customdata && link != '') {
+                  clickedPointIndex = event.points[0].customdata;
+                  window.open(link, '_blank'); 
+                } 
+            });
+        }
+    </script>
+{% endblock %}
