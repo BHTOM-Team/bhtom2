@@ -797,19 +797,27 @@ class TargetAddNewGroupingView(LoginRequiredMixin, View):
 
 class TargetPublicDetailView(DetailView):
     """
-    View that handles the display of the target details. Requires authorization.
+    View that handles the display of the target details. Allows fetching via ID or name.
     """
     model = Target
-    slug_field = 'name'
-    slug_url_kwarg = 'name'
+    template_name = "bhtom_targets/target_public_detail.html"
+    context_object_name = "target"
 
+    def get_object(self):
+        identifier = self.kwargs.get("identifier")
+        try:
+
+            if identifier.isdigit():
+                return Target.objects.get(id=int(identifier))
+            else:
+                return Target.objects.get(name=identifier)
+        except:
+            raise Http404
 
     def get(self, request, *args, **kwargs):
-        target_name = self.kwargs.get('name')
         try:
             self.object = self.get_object()
         except Http404:
-            return redirect(reverse('bhtom_targets:target_not_found')+  f'?target_name={target_name}')
+            return redirect(reverse('bhtom_targets:target_not_found') + f'?target_name={self.kwargs.get("identifier")}')
         
-
         return super().get(request, *args, **kwargs)
