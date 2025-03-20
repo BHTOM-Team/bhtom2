@@ -60,3 +60,11 @@ def substring(value, arg):
     start = indices[0]
     end = indices[1] if len(indices) > 1 else None
     return value[start:end]
+
+@register.inclusion_tag('bhtom_targets/partials/aladin_public.html')
+def aladin_public(target):
+    """
+    Displays Aladin skyview of the given target along with basic finder chart annotations including a compass
+    and a scale bar. This templatetag only works for sidereal targets.
+    """
+    return {'target': target}

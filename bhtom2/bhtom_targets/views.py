@@ -9,6 +9,7 @@ from django.contrib.auth.models import Group
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.views.generic.edit import CreateView, UpdateView
+from django.http import Http404
 
 import os
 from django.http import FileResponse
@@ -789,3 +790,34 @@ class TargetAddNewGroupingView(LoginRequiredMixin, View):
             messages.error(request, f'Error creating group or adding target: {e}')
         
         return redirect(reverse('bhtom_base.bhtom_targets:list') + '?' + query_string)
+
+
+
+
+
+class TargetPublicDetailView(DetailView):
+    """
+    View that handles the display of the target details. Allows fetching via ID or name.
+    """
+    model = Target
+    template_name = "bhtom_targets/target_public_detail.html"
+    context_object_name = "target"
+
+    def get_object(self):
+        identifier = self.kwargs.get("identifier")
+        try:
+
+            if identifier.isdigit():
+                return Target.objects.get(id=int(identifier))
+            else:
+                return Target.objects.get(name=identifier)
+        except:
+            raise Http404
+
+    def get(self, request, *args, **kwargs):
+        try:
+            self.object = self.get_object()
+        except Http404:
+            return redirect(reverse('bhtom_targets:target_not_found') + f'?target_name={self.kwargs.get("identifier")}')
+        
+        return super().get(request, *args, **kwargs)

@@ -17,7 +17,7 @@ from django.urls import path, include
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from django.conf.urls.static import static
-
+from bhtom2.bhtom_targets.views import TargetPublicDetailView
 from settings import settings
 from bhtom2.views import BrokerQueryListView
 from bhtom2.prometheus_metrics import custom_metrics
@@ -49,6 +49,7 @@ urlpatterns = [
          name='alerts:list'),
     path('', include('django_prometheus.urls')),
     path('metrics/', custom_metrics, name='custom_metrics'),
+    path("public/target/<str:identifier>",TargetPublicDetailView.as_view(template_name="bhtom_targets/target_public_detail.html")),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
