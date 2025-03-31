@@ -142,6 +142,7 @@ MIDDLEWARE = [
     'bhtom_base.bhtom_common.middleware.ExternalServiceMiddleware',
     'bhtom_base.bhtom_common.middleware.AuthStrategyMiddleware',
     'bhtom_custom_registration.bhtom_registration.middleware.RedirectAuthenticatedUsersFromRegisterMiddleware',
+    'bhtom_custom_registration.bhtom_registration.middleware.TermsCheckMiddleware',
     'django_guid.middleware.guid_middleware',
     'bhtom2.middleware.RequestLogMiddleware',
     'bhtom2.middleware.AccessControlMiddleware',
