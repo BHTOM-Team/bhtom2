@@ -128,7 +128,8 @@ INSTALLED_APPS = [
     'crispy_bootstrap4',
     'drf_yasg',
     'django_guid',
-    'django_prometheus'
+    'django_prometheus',
+    'captcha'
 ]
 
 MIDDLEWARE = [
@@ -143,6 +144,7 @@ MIDDLEWARE = [
     'bhtom_base.bhtom_common.middleware.ExternalServiceMiddleware',
     'bhtom_base.bhtom_common.middleware.AuthStrategyMiddleware',
     'bhtom_custom_registration.bhtom_registration.middleware.RedirectAuthenticatedUsersFromRegisterMiddleware',
+    'bhtom_custom_registration.bhtom_registration.middleware.TermsCheckMiddleware',
     'django_guid.middleware.guid_middleware',
     'bhtom2.middleware.RequestLogMiddleware',
     'bhtom2.middleware.AccessControlMiddleware',
@@ -500,3 +502,5 @@ DJANGO_GUID = {
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB (adjust as needed)
 
+CAPTCHA_IMAGE_SIZE = (250, 100)  
+CAPTCHA_FONT_SIZE = 40
