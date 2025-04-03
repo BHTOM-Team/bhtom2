@@ -50,6 +50,6 @@ urlpatterns = [
     path('', include('django_prometheus.urls')),
     path('metrics/', custom_metrics, name='custom_metrics'),
     path("public/target/<str:identifier>",TargetPublicDetailView.as_view(template_name="bhtom_targets/target_public_detail.html")),
-
+    path('captcha/', include('captcha.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

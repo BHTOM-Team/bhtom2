@@ -127,7 +127,8 @@ INSTALLED_APPS = [
     'crispy_bootstrap4',
     'drf_yasg',
     'django_guid',
-    'django_prometheus'
+    'django_prometheus',
+    'captcha'
 ]
 
 MIDDLEWARE = [
@@ -500,3 +501,5 @@ DJANGO_GUID = {
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB (adjust as needed)
 
+CAPTCHA_IMAGE_SIZE = (250, 100)  
+CAPTCHA_FONT_SIZE = 40
