@@ -94,9 +94,7 @@ Uses WSDB. About 10 years-long timeseries in a clear filter we call LINEAR(CL).
 Old service, Cambridge Photometric Calibration Server, now used only as a repository of old observations prior to BHTOM2. 
 
 ### ASASSN (ASAS-SN)
-As of 2023, there are three sources of ASASSN photometry: variable star catalogue, pre-computed photometry and photometry on request (most fresh data). Because of that, the ASASSN URL for a Target has to be the full path to the URL with the object. First, the user has to manually identify the object in ASASSN SkyPatrol db by entering coordinates (https://asas-sn.osu.edu/), then select one of the three paths there, one the webpage with the object and copy its URL as the ASASSN url, for example, https://asas-sn.osu.edu/photometry/31a0bd00-3b2c-541b-9bb6-1a3bf050da34. The only exception is for variable, where for the name the user has to copy the link to the CSV file, e.g. 
-for variable star https://asas-sn.osu.edu/variables/448970 it is going to be https://asas-sn.osu.edu/photometry/31a0bd00-3b2c-541b-9bb6-1a3bf050da34.csv.
-For the ASASSN name one can use either the name found in ASASSN archive, or a generic ASASSN+Ra+Dec name.
+ASAS-SN broker uses ASAS-SN's Skyportal (http://asas-sn.ifa.hawaii.edu/documentation/getting_started.html) to identify ASAS-SN id and extract the photometry. Additionally, we query the table with ASAS-SN transients (https://www.astronomy.ohio-state.edu/asassn/transients.html) to identify alerts with ASAS-SN name. The search radius is 7 arcsec.
 
 ### ATLAS
 The data from this Survey orignate from ATLAS Webpage: https://fallingstar-data.com/forcedphot/.
