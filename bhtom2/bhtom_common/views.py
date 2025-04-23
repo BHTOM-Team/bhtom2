@@ -98,7 +98,8 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
             try:
                 data = {
                     'dataProduct': data.dataProduct,
-                    'calibData': calib_data
+                    'calibData': calib_data,
+                    'file_download_link': "https://{request.get_host()}/dataproducts/download/photometry/{data.dataProduct.id}/"
                 }
                 context['photometry_data'].append(data)
             except Exception as e:
@@ -107,8 +108,6 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
 
         return context
     
-
-
 class DataListInCalibView(SingleTableMixin, LoginRequiredMixin, ListView):
     """
     View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
