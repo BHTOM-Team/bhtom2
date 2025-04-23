@@ -1,0 +1,81 @@
+{% extends 'bhtom_common/base.html' %}
+{% load comments bootstrap4 bhtom_common_extras targets_extras observation_extras dataproduct_extras static cache %}
+{% block title %}Observatory {% endblock %}
+{% block additional_css %}
+    {% comment %} <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}"> {% endcomment %}
+    {% comment %} <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}"> {% endcomment %}
+{% endblock %}
+
+{% bootstrap_javascript jquery='True' %}
+{% block content %}
+<h4>List of observatories</h4>
+<p>
+List of your registered observatories/instruments you can use for uploading the data for processing.
+You should register an observatory in your account if you want a datapoint to be labeled with your name.
+<br>
+Here you can add a new observatory to your list if you are planning to upload images or instrumental photometry for it.
+You can choose one from the list of already registered observatories, or create a new one.
+Note that different instrument (e.g. CCD) on the same telescope counts as a different observatory.
+</p>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="tab-content">
+      <div>
+          <table id="observatories-table" class="table table-hover sortable">
+          <thead>
+            <tr>
+              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Observatory(ONAME)</th><th>Comment</th><th>Only Instrumental photometry file</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for observatory in observatory_list %}
+            <tr>
+              <td>{{ observatory.name }}</td>
+              <td>{{ observatory.lon }}</td>
+              <td>{{ observatory.lat }}</td>
+              <td>
+                {% if observatory.id in prefix_obs %}
+                  {% for item in prefix_obs|get_item:observatory.id %}
+                      {{ item }}
+                      {% if not forloop.last %},{% endif %}
+                  {% endfor %}
+                {% else %}
+                    No data available
+                {% endif %}
+             </td>
+              <td>
+                {{ observatory.comment|truncatechars:30  }}
+              </td>
+              <td>{{ observatory.calibration_flg }}</td>
+              <td>
+                <a href="{% url "public_obs_details" pk=observatory.id %}" title="Observatory details" class="btn  btn-primary">Details</a>
+              </td>
+              {% if request.user.is_superuser %}
+              {% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+  </div>
+    </div>
+</div>
+
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.js"></script>
+<script>
+  $(document).ready(function() {
+      $('#observatories-table').DataTable({
+          "paging": false,
+          "searching": false
+      });
+      $('#user-observatories-table').DataTable({
+        "paging": false,
+        "searching": false
+    });
+  });
+  </script>
+  
+
+{% endblock %}
