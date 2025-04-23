@@ -50,7 +50,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
               </td>
               <td>{{ observatory.calibration_flg }}</td>
               <td>
-                <a href="{% url "public_obs_details" pk=observatory.id %}" title="Observatory details" class="btn  btn-primary">Details</a>
+                <a href="{% url "public_obs_details" identifier=observatory.id %}" title="Observatory details" class="btn  btn-primary">Details</a>
               </td>
               {% if request.user.is_superuser %}
               {% endif %}
