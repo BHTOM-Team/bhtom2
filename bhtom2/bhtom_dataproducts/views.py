@@ -140,7 +140,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             'observatory': prefix,
             'mjd': mjd,
             'group': group,
-            'observer': observer,
+            'observers': [observer],
         }
         token = Token.objects.get(user_id=user.id).key
 
