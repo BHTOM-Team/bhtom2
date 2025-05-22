@@ -223,8 +223,6 @@ def upload_dataproduct(context, obj):
         initial['referrer'] = reverse('bhtom_base.bhtom_observations:detail', args=(obj.id,))
     initial['user'] = user
     initial["users"] =  User.objects.filter(is_active=True).order_by('first_name')
-    logger.error("HEREEEE")
-    logger.error(initial["users"])
     form = DataProductUploadForm(initial=initial)
 
     return {'data_product_form_from_user': form}
