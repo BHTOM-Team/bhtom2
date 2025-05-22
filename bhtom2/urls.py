@@ -55,5 +55,6 @@ urlpatterns = [
     path("public/observatory/",ObservatoryPublicList.as_view()),
     path("public/observatory/<str:identifier>",ObservatoryPublicDetailView.as_view(), name="public_obs_details"),
     path('captcha/', include('captcha.urls')),
+    path('select2/', include('django_select2.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

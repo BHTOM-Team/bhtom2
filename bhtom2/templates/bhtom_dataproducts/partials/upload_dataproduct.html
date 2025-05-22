@@ -1,4 +1,5 @@
 {% load bootstrap4 static %}
+
 <script src="{% static 'bhtom_targets/js/upload_data.js' %}"></script>
 <h4>Upload a data product</h4>
 <p>
@@ -34,7 +35,7 @@
     <input type="submit" class="btn btn-primary" value="Upload" name="data_product_form_from_user">
     {% endbuttons %}
 </form>
-
+{{ data_product_form_from_user.media }}
 
 <script>
     var userId;
@@ -46,3 +47,53 @@
     });
 </script>
 <script src="{% static 'bhtom_observatory/get_favorite_cameras.js' %}"></script>
+
+
+<style>/* Main multiple selection box */
+.select2-container--default .select2-selection--multiple {
+  background-color: #fff;
+  color: #000;
+  border: 1px solid #555;
+}
+
+/* Each selected item (token/chip) */
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+  background-color: #eaeaea;
+  border-color: #ccc;
+  color: #000;
+}
+
+/* The "x" remove icon */
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+  color: #000;
+}
+
+/* Dropdown results list */
+.select2-container--default .select2-results > .select2-results__options {
+  background-color: #fff;
+  color: #000;
+}
+
+/* "No results found" message */
+.select2-container--default .select2-results__option.select2-results__message {
+  color: #000;
+}
+
+/* Search field in dropdown */
+.select2-container--default .select2-search--dropdown .select2-search__field {
+  background-color: #fff;
+  color: #000 !important; /* Make typed text black */
+  border: 1px solid #ccc;
+}
+
+/* Search field placeholder text */
+.select2-container--default .select2-search--dropdown .select2-search__field::placeholder {
+  color: #000;
+}
+
+/* Highlighted option in results */
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background-color: #ddd;
+  color: #000;
+}
+</style>
