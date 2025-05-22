@@ -128,7 +128,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'django_guid',
     'django_prometheus',
-    'captcha'
+    'captcha',
+    'django_select2',
 ]
 
 MIDDLEWARE = [
