@@ -78,7 +78,6 @@ class DataProductUploadForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user = kwargs['initial']['user']
         users = kwargs['initial']['users']
-        logger.error(users)
         filter = {}
         filter['no'] = 'Auto'
         catalogs = Catalogs.objects.filter(isActive=True)
