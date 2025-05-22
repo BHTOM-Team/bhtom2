@@ -7,7 +7,8 @@ from bhtom_base.bhtom_targets.models import Target
 from bhtom2.bhtom_observatory.models import Observatory, ObservatoryMatrix, Camera
 from bhtom2.bhtom_calibration.models import Catalogs
 from bhtom_base.bhtom_dataproducts.models import DataProductGroup_user
-
+from django_select2.forms import ModelSelect2MultipleWidget
+from django.contrib.auth import get_user_model
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_dataproducts.forms')
 
 
@@ -29,7 +30,17 @@ class CameraChoiceField(forms.ModelChoiceField):
 class GroupChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         return obj.group.name
+    
 
+class UserSelect2MultipleWidget(ModelSelect2MultipleWidget):
+    model = get_user_model()
+    search_fields = ['username__icontains', 'first_name__icontains', 'last_name__icontains']
+
+    def get_queryset(self):
+        return get_user_model().objects.filter(is_active=True).exclude(username='AnonymousUser')
+
+    def label_from_instance(self, obj):
+        return f"{obj.first_name} {obj.last_name} ({obj.username})"
 
 class DataProductUploadForm(forms.Form):
     observation_record = forms.ModelChoiceField(
@@ -66,6 +77,8 @@ class DataProductUploadForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs['initial']['user']
+        users = kwargs['initial']['users']
+        logger.error(users)
         filter = {}
         filter['no'] = 'Auto'
         catalogs = Catalogs.objects.filter(isActive=True)
@@ -82,12 +95,13 @@ class DataProductUploadForm(forms.Form):
             label="MJD OBS *"
         )
 
-        self.fields['observer'] = forms.CharField(
-            initial= self.user.first_name + " " +  self.user.last_name,
+        self.fields['observer'] = forms.ModelMultipleChoiceField(
+            queryset=users,
+            widget=UserSelect2MultipleWidget,
             required=False,
-            label='Observer\'s Name *'
+            label='Observers *',
+            initial=[self.user]
         )
-
         user_cameras = ObservatoryMatrix.objects.filter(user=self.user).values_list('camera__id', flat=True)
         user_active_cameras = Camera.objects.filter(id__in=user_cameras, active_flg=True)
         users_obs_id = Camera.objects.filter(id__in=user_cameras, active_flg=True).values_list('observatory_id', flat=True)
