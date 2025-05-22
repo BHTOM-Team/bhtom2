@@ -476,7 +476,8 @@ class DataDetailsView(DetailView):
                 observers = data_product.observers
                 observers_users = User.objects.filter(id__in=observers)
                 observers_names = [f"{user.first_name} {user.last_name}" for user in observers_users]
-                context['observers'] = observers_names
+                observers_string = ', '.join(observers_names)
+                context['observers'] =   observers_string
 
                 try:
                     calibration = Calibration_data.objects.get(dataproduct=data_product)

@@ -4,6 +4,7 @@ from bhtom_base.bhtom_dataproducts.models import DataProduct, CCDPhotJob, Reduce
 from bhtom2.bhtom_calibration.models import Calibration_data
 from bhtom_base.bhtom_targets.models import Target
 from django_comments.models import Comment
+from django.contrib.auth.models import User
 import json
 
 class CCDPhotJobSerializer(serializers.ModelSerializer):
@@ -121,3 +122,10 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ['id','user_name','comment', 'submit_date','user_id','target_name','target_id'] 
+
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
