@@ -49,7 +49,8 @@
 <script src="{% static 'bhtom_observatory/get_favorite_cameras.js' %}"></script>
 
 
-<style>/* Main multiple selection box */
+<style>
+/* Main multiple selection box */
 .select2-container--default .select2-selection--multiple {
   background-color: #fff;
   color: #000;
@@ -71,6 +72,11 @@
 /* Dropdown results list */
 .select2-container--default .select2-results > .select2-results__options {
   background-color: #fff;
+  color: #000;
+}
+
+/* All dropdown options (including unselected) */
+.select2-container--default .select2-results__option {
   color: #000;
 }
 
