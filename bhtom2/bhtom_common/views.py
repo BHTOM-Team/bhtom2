@@ -1279,13 +1279,16 @@ class ChangeObserversView(views.APIView):
         try:
             dp = DataProduct.objects.get(id=dp_id)
 
-            users = list(User.objects.filter(username__in=observer_usernames))
+            # Query all users matching the provided usernames
+            users = User.objects.filter(username__in=observer_usernames)
 
-            found_usernames = [user.username for user in users]
-            missing = set(observer_usernames) - set(found_usernames)
-            if missing:
+            found_usernames = set(user.username for user in users)
+            provided_usernames = set(observer_usernames)
+            missing_usernames = provided_usernames - found_usernames
+
+            if missing_usernames:
                 return Response(
-                    {"error": f"User(s) not found: {', '.join(missing)}"},
+                    {"error": f"The following usernames do not exist: {', '.join(missing_usernames)}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
