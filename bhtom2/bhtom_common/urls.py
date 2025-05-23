@@ -32,6 +32,6 @@ urlpatterns = [
      path('api/deactivateReducedDatum/',DeactivateReduceDatumApiView.as_view()),
      path('newsletter/', NewsletterView.as_view(), name='newsletter'),
      path('api/comments/', CommentAPIView.as_view()),
-     path('api/user/',GetUsersDetails.as_view()),
+     path('api/users/',GetUsersDetails.as_view()),
      path('api/changeObservers/', ChangeObserversView.as_view()),
 ]
