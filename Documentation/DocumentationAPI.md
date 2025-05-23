@@ -1832,6 +1832,3 @@ Returns the updated DataProduct object:
 * `404 Not Found`: DataProduct with the given ID does not exist
 * `500 Internal Server Error`: Unexpected server error
 
----
-
-Would you like me to merge this into your existing Markdown doc, or generate a `.md` file for it?
