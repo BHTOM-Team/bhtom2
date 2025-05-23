@@ -1757,7 +1757,7 @@ This API allows admin users to retrieve a list of user accounts from the BHTOM s
 
 ```bash
 curl -X 'POST' \
-  'https://bh-tom2.astrolabs.pl/api/get-users-details/' \
+  'https://bh-tom2.astrolabs.pl/api/users/' \
   -H 'Authorization: Token <yourToken>' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -1798,7 +1798,7 @@ This API allows authenticated users to update the list of observers associated w
 ### Endpoint
 
 * **Method**: POST
-* **URL**: `common/api/changeObservers`
+* **URL**: `common/api/changeObservers/`
 * **Authentication**: Token required
 * **Permissions**: Must be authenticated
 
@@ -1813,7 +1813,7 @@ This API allows authenticated users to update the list of observers associated w
 
 ```bash
 curl -X 'POST' \
-  'https://bh-tom2.astrolabs.pl/api/change-observers/' \
+  'https://bh-tom2.astrolabs.pl/api/changeObservers/' \
   -H 'Authorization: Token <yourToken>' \
   -H 'Content-Type: application/json' \
   -d '{
