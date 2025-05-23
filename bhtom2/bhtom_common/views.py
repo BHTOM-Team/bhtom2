@@ -1274,7 +1274,7 @@ class ChangeObserversView(views.APIView):
 
         try:
             dp = DataProduct.objects.get(id=dp_id)
-            dp.observers.set(observers) 
+            dp.observers = observers
             dp.save()
 
             serialized_dp = DataProductSerializer(dp)
