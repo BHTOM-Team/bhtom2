@@ -1188,7 +1188,6 @@ class DeleteDataProductApiView(views.APIView):
             return Response({"Error": f"An error occurred: {str(e)}"}, status=500)
 
 
-
 class GetUsersDetails(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -1199,7 +1198,7 @@ class GetUsersDetails(views.APIView):
             properties={
                 'id': openapi.Schema(type=openapi.TYPE_STRING, description='User ID'),
                 'username': openapi.Schema(type=openapi.TYPE_STRING, description='Username'),
-                'created': openapi.Schema(type=openapi.TYPE_STRING, description='Account created date (YYYY-MM-DD)'),
+                'created': openapi.Schema(type=openapi.TYPE_STRING, description='From date (YYYY-MM-DD)'),
             },
             required=[]
         ),
@@ -1221,23 +1220,21 @@ class GetUsersDetails(views.APIView):
         if user_id:
             filters['id'] = user_id
         if username:
-            filters['username__icontains'] = username
+            filters['username'] = username
         if created:
-            filters['date_joined__date'] = created 
+            filters['date_joined__date__gte'] = created
 
         try:
-            if filters:
-                users = User.objects.filter(**filters)
-            else:
-                users = User.objects.all()
-
+            users = User.objects.filter(**filters) if filters else User.objects.all()
             serialized_users = UserSerializer(users, many=True)
             return Response(serialized_users.data, status=status.HTTP_200_OK)
 
         except Exception as e:
-            return Response({"error": f"An unexpected error occurred: {str(e)}"},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+            return Response(
+                {"error": f"An unexpected error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 
 
@@ -1277,7 +1274,7 @@ class ChangeObserversView(views.APIView):
 
         try:
             dp = DataProduct.objects.get(id=dp_id)
-            dp.observers.set(observers)  # assuming a many-to-many field
+            dp.observers.set(observers) 
             dp.save()
 
             serialized_dp = DataProductSerializer(dp)

@@ -1729,3 +1729,109 @@ curl -X POST \
 ```
 
 Replace `<yourToken>` with your valid authentication token.
+
+
+
+# GET USERS DETAILS API
+
+### Description
+
+This API allows admin users to retrieve a list of user accounts from the BHTOM system based on optional filters such as `id`, `username`, and `created` (registration date). You must be an **admin user** to access this endpoint.
+
+### Endpoint
+
+* **Method**: POST
+* **URL**: `common/api/users/`
+* **Authentication**: Token required
+* **Permissions**: Must be admin (`is_staff = True`)
+
+### Request Parameters (JSON Body)
+
+| Parameter  | Type   | Required | Description                                       |
+| ---------- | ------ | -------- | ------------------------------------------------- |
+| `id`       | string | No       | Filter by User ID                                 |
+| `username` | string | No       | Filter by Username                                |
+| `created`  | string | No       | Filter users created after this date (YYYY-MM-DD) |
+
+### Example Request
+
+```bash
+curl -X 'POST' \
+  'https://bh-tom2.astrolabs.pl/api/get-users-details/' \
+  -H 'Authorization: Token <yourToken>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "username": "john",
+    "created": "2023-01-01"
+}'
+```
+
+### Successful Response (200 OK)
+
+Returns a list of user objects:
+
+```json
+[
+  {
+    "id": 12,
+    "username": "john",
+    "email": "john@example.com",
+    "date_joined": "2023-01-15T14:23:00Z",
+    ...
+  }
+]
+```
+
+### Error Responses
+
+* `403 Forbidden`: User is not an admin
+* `500 Internal Server Error`: Unexpected server-side failure
+
+---
+
+# CHANGE OBSERVERS API
+
+### Description
+
+This API allows authenticated users to update the list of observers associated with a **Data Product** by specifying its ID and a list of usernames.
+
+### Endpoint
+
+* **Method**: POST
+* **URL**: `common/api/changeObservers`
+* **Authentication**: Token required
+* **Permissions**: Must be authenticated
+
+### Request Parameters (JSON Body)
+
+| Parameter   | Type   | Required | Description                           |
+| ----------- | ------ | -------- | ------------------------------------- |
+| `id`        | string | Yes      | ID of the DataProduct to update       |
+| `observers` | array  | Yes      | List of usernames to set as observers |
+
+### Example Request
+
+```bash
+curl -X 'POST' \
+  'https://bh-tom2.astrolabs.pl/api/change-observers/' \
+  -H 'Authorization: Token <yourToken>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "id": "123456",
+    "observers": ["alice", "bob"]
+}'
+```
+
+### Successful Response (200 OK)
+
+Returns the updated DataProduct object:
+
+### Error Responses
+
+* `400 Bad Request`: Missing required fields or invalid data
+* `404 Not Found`: DataProduct with the given ID does not exist
+* `500 Internal Server Error`: Unexpected server error
+
+---
+
+Would you like me to merge this into your existing Markdown doc, or generate a `.md` file for it?
