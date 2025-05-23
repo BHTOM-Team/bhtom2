@@ -1236,8 +1236,6 @@ class GetUsersDetails(views.APIView):
             )
 
 
-
-
 class ChangeObserversView(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -1264,17 +1262,35 @@ class ChangeObserversView(views.APIView):
     )
     def post(self, request):
         dp_id = request.data.get('id')
-        observers = request.data.get('observers')
+        observer_usernames = request.data.get('observers')
 
-        if not dp_id or observers is None:
+        if not dp_id or observer_usernames is None:
             return Response(
                 {"error": "Missing required fields: 'id' and/or 'observers'"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        if not isinstance(observer_usernames, list):
+            return Response(
+                {"error": "'observers' must be a list of usernames"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         try:
             dp = DataProduct.objects.get(id=dp_id)
-            dp.observers = observers
+
+            users = list(User.objects.filter(username__in=observer_usernames))
+
+            found_usernames = [user.username for user in users]
+            missing = set(observer_usernames) - set(found_usernames)
+            if missing:
+                return Response(
+                    {"error": f"User(s) not found: {', '.join(missing)}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            user_ids = [user.id for user in users]
+            dp.observers = user_ids
             dp.save()
 
             serialized_dp = DataProductSerializer(dp)
