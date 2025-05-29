@@ -90,8 +90,8 @@ or
 - `--dry_run True/False`: if true, the script will be run in Dry Run (test) mode. The data will processed but will not be stored in the database. The default is false.
 <!-- - `--no_plot`: if true, no calibration plot will be generated. The default setting is false. -->
 - `--mjd <mjd>`: Modified Julian Date (float) [note MJD=JD-2400000.5], required for single photometry file
-- `--observer <observer>`: Name of the observer to be associated with the datapoint(s). Note that by default the token's owner name will be used as a an observer. Selecting this option overwrites the name from the token.
-match_dist
+- `--observers [observers]`: List of observers names to set as observers, observer name it is a username and is case sensitive
+
 - `--match_dist <match_dist>`: Matching Radius in arcsec (do not set if you want to run on auto).
 
 **Note on Matching Radius**: This value indicates how accurate is your astrometry on your image. We perform a cross-match between objects from your image and Gaia catalogue with 5 arcsec very generous matching radius, but then we remove bad matches. This also helps us determine the accuracy of your astrometry. The standard deviation of the match in RA and Dec is then used as a matching dist (if in auto mode). This value is used solely in one place - when we identify the desired target among your objects. If the target is not found within the matching radius (it was either further away than the matching radius, or too faint), the outcome of the calibration is the Limit (with mag.error=-1). The limiting magnitude is computed based on the faintest object seen on your frame.
@@ -1757,7 +1757,7 @@ This API allows admin users to retrieve a list of user accounts from the BHTOM s
 
 ```bash
 curl -X 'POST' \
-  'https://bh-tom2.astrolabs.pl/api/users/' \
+  'https://bh-tom2.astrolabs.pl/common/api/users/' \
   -H 'Authorization: Token <yourToken>' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -1813,7 +1813,7 @@ This API allows authenticated users to update the list of observers associated w
 
 ```bash
 curl -X 'POST' \
-  'https://bh-tom2.astrolabs.pl/api/changeObservers/' \
+  'https://bh-tom2.astrolabs.pl/common/api/changeObservers/' \
   -H 'Authorization: Token <yourToken>' \
   -H 'Content-Type: application/json' \
   -d '{

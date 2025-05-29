@@ -1270,12 +1270,11 @@ class ChangeObserversView(views.APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if not isinstance(observer_usernames, list):
-            return Response(
-                {"error": "'observers' must be a list of usernames"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
+        if isinstance(observer_usernames, str):
+            observer_usernames = [u.strip() for u in observer_usernames.split(',') if u.strip()]
+        elif not isinstance(observer_usernames, list):
+            observer_usernames = [str(observer_usernames).strip()]
+            
         try:
             dp = DataProduct.objects.get(id=dp_id)
 
