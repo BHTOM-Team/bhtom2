@@ -69,18 +69,16 @@ def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str
             observers_str = datum.observer or ''
 
         row = [
-            str(datum.mjd),
-            str(datum.value),
-            str(datum.error),
-            str(datum.facility),
-            str(datum.filter),
+            datum.mjd,
+            datum.value,
+            datum.error,
+            datum.facility,
+            datum.filter,
             observers_str
         ]
         data.append(row)
 
     return data, columns
-
-
 
 def get_photometry_stats(target: Target) -> Tuple[List[List[str]], List[str]]:
     data, columns = get_photometry_data_table(target)
