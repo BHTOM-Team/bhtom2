@@ -128,8 +128,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'django_guid',
     'django_prometheus',
-    'captcha',
-    'django_select2',
+    'captcha'
 ]
 
 MIDDLEWARE = [
@@ -351,18 +350,24 @@ DATA_PRODUCT_TYPES = {
 CLASSIFICATION_TYPES = [
     ("Unknown", "Unknown"), ('Be-star outburst', 'Be-star outburst'),
     ('AGN', "Active Galactic Nucleus(AGN)"), ("BL Lac", "BL Lac"),
-    ("CV", "Cataclysmic Variable(CV)"), ("CEPH", "Cepheid Variable(CEPH)"),
+    ("CV", "Cataclysmic Variable(CV)"), 
+    ("CEPH", "Cepheid Variable(CEPH)"),
     ("EB", "Eclipsing Binary(EB)"),
-    ("Galaxy", "Galaxy"), ("LPV", "Long Period Variable(LPV)"),
+    ("Galaxy", "Galaxy"), 
+    ("GWOC", "Gravitational Wave Optical Counterpart (GWOC)"), 
+    ("LPV", "Long Period Variable(LPV)"),
     ("LBV", "Luminous Blue Variable(LBV)"),
     ("M-dwarf flare", "M-dwarf flare"), ("Microlensing Event", "Microlensing Event"), ("Nova", "Nova"),
     ("Peculiar Supernova", "Peculiar Supernova"),
     ("QSO", "Quasar(QSO)"), ("RCrB", "R CrB Variable"), ("RR Lyrae Variable", "RR Lyrae Variable"),
     ("SSO", "Solar System Object(SSO)"),
-    ("Star", "Star"), ("SN", "Supernova(SN)"), ("Supernova imposter", "Supernova imposter"),
+    ("Star", "Star"), ("SN", "Supernova(SN)"), 
+    ("SLSN", "Super Luminous Supernova (SLSN)"),
+    ("Supernova impostor", "Supernova impostor"),
     ("Symbiotic star", "Symbiotic star"),
     ("TDE", "Tidal Disruption Event(TDE)"), ("Variable star-other", "Variable star-other"),
     ("XRB", "X-Ray Binary(XRB)"),
+    ("Xray-transient", "X-Ray Transient"),
     ("YSO", "Young Stellar Object(YSO)")]
 
 DATA_PROCESSORS = {
