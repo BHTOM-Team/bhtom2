@@ -24,6 +24,7 @@ from bhtom2.utils.api_pagination import StandardResultsSetPagination
 from django_tables2.views import SingleTableMixin
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, CCDPhotJob
 from django.contrib import messages
+from django.contrib.auth.models import User
 import json
 from rest_framework import status
 from rest_framework import views
@@ -33,7 +34,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.db.models import Q, Prefetch
-from bhtom2.bhtom_common.serializers import DataProductSerializer,CommentSerializer,ReducedDataSerializer
+from bhtom2.bhtom_common.serializers import DataProductSerializer,CommentSerializer,ReducedDataSerializer, UserSerializer
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from rest_framework.exceptions import PermissionDenied
 
@@ -98,7 +99,8 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
             try:
                 data = {
                     'dataProduct': data.dataProduct,
-                    'calibData': calib_data
+                    'calibData': calib_data,
+                    'file_download_link': "https://{request.get_host()}/dataproducts/download/photometry/{data.dataProduct.id}/"
                 }
                 context['photometry_data'].append(data)
             except Exception as e:
@@ -107,8 +109,6 @@ class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
 
         return context
     
-
-
 class DataListInCalibView(SingleTableMixin, LoginRequiredMixin, ListView):
     """
     View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
@@ -1187,3 +1187,120 @@ class DeleteDataProductApiView(views.APIView):
         except Exception as e:
             return Response({"Error": f"An error occurred: {str(e)}"}, status=500)
 
+
+class GetUsersDetails(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': openapi.Schema(type=openapi.TYPE_STRING, description='User ID'),
+                'username': openapi.Schema(type=openapi.TYPE_STRING, description='Username'),
+                'created': openapi.Schema(type=openapi.TYPE_STRING, description='From date (YYYY-MM-DD)'),
+            },
+            required=[]
+        ),
+        responses={
+            200: openapi.Response('User details', UserSerializer(many=True)),
+            400: 'Bad Request',
+            403: 'Permission Denied',
+        }
+    )
+    def post(self, request):
+        if not request.user.is_staff:
+            raise PermissionDenied(detail="Access denied. You must be an admin.")
+
+        user_id = request.data.get('id')
+        username = request.data.get('username')
+        created = request.data.get('created')
+
+        filters = {}
+        if user_id:
+            filters['id'] = user_id
+        if username:
+            filters['username'] = username
+        if created:
+            filters['date_joined__date__gte'] = created
+
+        try:
+            users = User.objects.filter(**filters) if filters else User.objects.all()
+            serialized_users = UserSerializer(users, many=True)
+            return Response(serialized_users.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {"error": f"An unexpected error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class ChangeObserversView(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': openapi.Schema(type=openapi.TYPE_STRING, description='Data Product ID'),
+                'observers': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_STRING),
+                    description='List of observer usernames'
+                ),
+            },
+            required=["id", "observers"],
+        ),
+        responses={
+            200: openapi.Response('Updated DataProduct', DataProductSerializer),
+            400: 'Bad Request',
+            404: 'DataProduct not found',
+            500: 'Internal Server Error',
+        }
+    )
+    def post(self, request):
+        dp_id = request.data.get('id')
+        observer_usernames = request.data.get('observers')
+
+        if not dp_id or observer_usernames is None:
+            return Response(
+                {"error": "Missing required fields: 'id' and/or 'observers'"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if isinstance(observer_usernames, str):
+            observer_usernames = [u.strip() for u in observer_usernames.split(',') if u.strip()]
+        elif not isinstance(observer_usernames, list):
+            observer_usernames = [str(observer_usernames).strip()]
+            
+        try:
+            dp = DataProduct.objects.get(id=dp_id)
+
+            # Query all users matching the provided usernames
+            users = User.objects.filter(username__in=observer_usernames)
+
+            found_usernames = set(user.username for user in users)
+            provided_usernames = set(observer_usernames)
+            missing_usernames = provided_usernames - found_usernames
+
+            if missing_usernames:
+                return Response(
+                    {"error": f"The following usernames do not exist: {', '.join(missing_usernames)}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            user_ids = [user.id for user in users]
+            dp.observers = user_ids
+            dp.save()
+
+            serialized_dp = DataProductSerializer(dp)
+            return Response(serialized_dp.data, status=status.HTTP_200_OK)
+
+        except DataProduct.DoesNotExist:
+            return Response({"error": "DataProduct not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response({"error": f"An unexpected error occurred: {str(e)}"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)

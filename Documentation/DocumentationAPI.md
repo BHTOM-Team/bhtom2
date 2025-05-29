@@ -90,8 +90,8 @@ or
 - `--dry_run True/False`: if true, the script will be run in Dry Run (test) mode. The data will processed but will not be stored in the database. The default is false.
 <!-- - `--no_plot`: if true, no calibration plot will be generated. The default setting is false. -->
 - `--mjd <mjd>`: Modified Julian Date (float) [note MJD=JD-2400000.5], required for single photometry file
-- `--observer <observer>`: Name of the observer to be associated with the datapoint(s). Note that by default the token's owner name will be used as a an observer. Selecting this option overwrites the name from the token.
-match_dist
+- `--observers [observers]`: List of observers names to set as observers, observer name it is a username and is case sensitive
+
 - `--match_dist <match_dist>`: Matching Radius in arcsec (do not set if you want to run on auto).
 
 **Note on Matching Radius**: This value indicates how accurate is your astrometry on your image. We perform a cross-match between objects from your image and Gaia catalogue with 5 arcsec very generous matching radius, but then we remove bad matches. This also helps us determine the accuracy of your astrometry. The standard deviation of the match in RA and Dec is then used as a matching dist (if in auto mode). This value is used solely in one place - when we identify the desired target among your objects. If the target is not found within the matching radius (it was either further away than the matching radius, or too faint), the outcome of the calibration is the Limit (with mag.error=-1). The limiting magnitude is computed based on the faintest object seen on your frame.
@@ -1729,3 +1729,106 @@ curl -X POST \
 ```
 
 Replace `<yourToken>` with your valid authentication token.
+
+
+
+# GET USERS DETAILS API
+
+### Description
+
+This API allows admin users to retrieve a list of user accounts from the BHTOM system based on optional filters such as `id`, `username`, and `created` (registration date). You must be an **admin user** to access this endpoint.
+
+### Endpoint
+
+* **Method**: POST
+* **URL**: `common/api/users/`
+* **Authentication**: Token required
+* **Permissions**: Must be admin (`is_staff = True`)
+
+### Request Parameters (JSON Body)
+
+| Parameter  | Type   | Required | Description                                       |
+| ---------- | ------ | -------- | ------------------------------------------------- |
+| `id`       | string | No       | Filter by User ID                                 |
+| `username` | string | No       | Filter by Username                                |
+| `created`  | string | No       | Filter users created after this date (YYYY-MM-DD) |
+
+### Example Request
+
+```bash
+curl -X 'POST' \
+  'https://bh-tom2.astrolabs.pl/common/api/users/' \
+  -H 'Authorization: Token <yourToken>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "username": "john",
+    "created": "2023-01-01"
+}'
+```
+
+### Successful Response (200 OK)
+
+Returns a list of user objects:
+
+```json
+[
+  {
+    "id": 12,
+    "username": "john",
+    "email": "john@example.com",
+    "date_joined": "2023-01-15T14:23:00Z",
+    ...
+  }
+]
+```
+
+### Error Responses
+
+* `403 Forbidden`: User is not an admin
+* `500 Internal Server Error`: Unexpected server-side failure
+
+---
+
+# CHANGE OBSERVERS API
+
+### Description
+
+This API allows authenticated users to update the list of observers associated with a **Data Product** by specifying its ID and a list of usernames.
+
+### Endpoint
+
+* **Method**: POST
+* **URL**: `common/api/changeObservers/`
+* **Authentication**: Token required
+* **Permissions**: Must be authenticated
+
+### Request Parameters (JSON Body)
+
+| Parameter   | Type   | Required | Description                           |
+| ----------- | ------ | -------- | ------------------------------------- |
+| `id`        | string | Yes      | ID of the DataProduct to update       |
+| `observers` | array  | Yes      | List of usernames to set as observers |
+
+### Example Request
+
+```bash
+curl -X 'POST' \
+  'https://bh-tom2.astrolabs.pl/common/api/changeObservers/' \
+  -H 'Authorization: Token <yourToken>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "id": "123456",
+    "observers": ["alice", "bob"]
+}'
+```
+
+### Successful Response (200 OK)
+
+Returns the updated DataProduct object:
+
+### Error Responses
+
+* `400 Bad Request`: Missing required fields or invalid data
+* `404 Not Found`: DataProduct with the given ID does not exist
+* `500 Internal Server Error`: Unexpected server error
+

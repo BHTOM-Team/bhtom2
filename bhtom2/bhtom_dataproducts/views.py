@@ -21,6 +21,7 @@ from ..bhtom_observatory.models import ObservatoryMatrix, Camera
 from bhtom2.bhtom_observatory.models import Observatory
 from bhtom2.external_service.connectWSDB import WSDBConnection
 from rest_framework.views import APIView
+from django.contrib.auth.models import User
 
 from django.urls import reverse
 
@@ -61,7 +62,8 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super(DataProductUploadView, self).get_form_kwargs()
-        kwargs['initial'] = {'user': self.request.user}
+        users = User.objects.filter(is_active=True).order_by('first_name')
+        kwargs['initial'] = {'user': self.request.user, 'users': users }
         return kwargs
 
     def get_form(self, *args, **kwargs):
@@ -83,7 +85,8 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
         match_dist = -2
         dry_run = form.cleaned_data['dryRun']
         comment = form.cleaned_data['comment']
-        observer = form.cleaned_data['observer']
+        observers = form.cleaned_data['observer']
+        obs_usernames = [user.username for user in observers]
         # group = form.cleaned_data['group']
         group = None
         prefix = None
@@ -140,7 +143,7 @@ class DataProductUploadView(LoginRequiredMixin, FormView):
             'observatory': prefix,
             'mjd': mjd,
             'group': group,
-            'observer': observer,
+            'observers': obs_usernames,
         }
         token = Token.objects.get(user_id=user.id).key
 
@@ -456,7 +459,13 @@ class DataDetailsView(DetailView):
 
                 context['ccdphot'] = ccdphot
                 context['fits_webp_url'] = data_product.fits_webp.url if data_product.fits_webp else None
-                
+            
+            observers = data_product.observers
+            observers_users = User.objects.filter(id__in=observers)
+            observers_names = [f"{user.first_name} {user.last_name}" for user in observers_users]
+            observers_string = ', '.join(observers_names)
+            context['observers'] =   observers_string
+            
             if data_product.photometry_data:
                 context['photometry_data'] = data_product.photometry_data.split('/')[-1]
 

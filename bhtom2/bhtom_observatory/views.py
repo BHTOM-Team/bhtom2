@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404
 from django.views.generic import FormView, ListView, UpdateView, DeleteView, DetailView
 from django.contrib import messages
 from django.conf import settings
@@ -362,3 +363,58 @@ def get_favorite_cameras(request, observatory_id, user_id):
         return JsonResponse(list(favorite_cameras), safe=False)
     except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid observatory or user ID'}, status=400)
+    
+
+
+
+class ObservatoryPublicDetailView(DetailView):
+    model = Observatory
+    template_name = 'bhtom_observatory/observatory_detail.html'
+
+    def get_object(self, queryset=None):
+        identifier = self.kwargs.get('identifier')
+        if identifier.isdigit():
+            return get_object_or_404(Observatory, id=int(identifier))
+        else:
+            return get_object_or_404(Observatory, name=identifier)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        observatory = self.object
+        cameras = Camera.objects.filter(observatory=observatory, active_flg=True)
+        context['cameras'] = cameras
+        return context
+
+class ObservatoryPublicList(ListView):
+    template_name = 'bhtom_observatory/observatory_list_public.html'
+    model = Observatory
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+
+        active_obs_id = Camera.objects.filter(active_flg=True).values_list("observatory_id", flat=True)
+
+        observatories_with_active_cameras = Observatory.objects.filter(id__in=active_obs_id)
+
+        # Initialize the dictionary to store observatory prefixes
+        prefix_obs = {}
+
+        # Iterate over observatories with active cameras
+        for observatory in observatories_with_active_cameras:
+            # Count the number of cameras in the observatory
+            camera_count = Camera.objects.filter(observatory=observatory).count()
+
+            # If there's only one camera, include its prefix
+            if camera_count == 1:
+                camera = Camera.objects.get(observatory=observatory)
+                prefix_obs[observatory.id] = [camera.prefix]
+            else:
+                cameras = Camera.objects.filter(observatory=observatory)
+                onames = [camera.prefix for camera in cameras]
+                prefix_obs[observatory.id] = onames
+
+        context['observatory_list'] = observatories_with_active_cameras
+        context['prefix_obs'] = prefix_obs
+        return context
+    

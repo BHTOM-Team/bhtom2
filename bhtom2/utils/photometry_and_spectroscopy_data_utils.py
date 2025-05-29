@@ -52,16 +52,33 @@ def get_spectroscopy_observation_time_jd(reduced_datum: ReducedDatum) -> Optiona
 
 
 def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str]]:
-    datums = ReducedDatum.objects.filter(target=target,
-                                         data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
-                                         active_flg=True
-                                         ).values('mjd', 'value', 'error', 'facility', 'filter', 'observer')
+    datums = ReducedDatum.objects.filter(
+        target=target,
+        data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
+        active_flg=True
+    ).select_related('data_product')  # prefetch DataProduct for efficiency
 
     columns = ['mjd', 'value', 'error', 'facility', 'filter', 'observer']
-    data = list(datums.values())
+    data = []
+
+    for datum in datums:
+        if datum.data_product and datum.data_product.observers:
+            observers_list = datum.data_product.observers
+            observers_str = ', '.join(observers_list)
+        else:
+            observers_str = datum.observer or ''
+
+        row = [
+            datum.mjd,
+            datum.value,
+            datum.error,
+            datum.facility,
+            datum.filter,
+            observers_str
+        ]
+        data.append(row)
 
     return data, columns
-
 
 def get_photometry_stats(target: Target) -> Tuple[List[List[str]], List[str]]:
     data, columns = get_photometry_data_table(target)

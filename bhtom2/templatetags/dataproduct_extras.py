@@ -18,7 +18,7 @@ from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum, ReducedDatumUnit
 from bhtom_base.bhtom_observations.models import ObservationRecord
 from bhtom_base.bhtom_targets.models import Target, TargetGaiaDr3, TargetGaiaDr2
-
+from django.contrib.auth.models import User
 from numpy import around
 
 import numpy as np
@@ -222,6 +222,7 @@ def upload_dataproduct(context, obj):
         initial['observation_record'] = obj
         initial['referrer'] = reverse('bhtom_base.bhtom_observations:detail', args=(obj.id,))
     initial['user'] = user
+    initial["users"] =  User.objects.filter(is_active=True).order_by('first_name')
     form = DataProductUploadForm(initial=initial)
 
     return {'data_product_form_from_user': form}
