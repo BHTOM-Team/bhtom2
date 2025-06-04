@@ -64,7 +64,7 @@ def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str
     for datum in datums:
         if datum.data_product and datum.data_product.observers:
             observers_list = datum.data_product.observers
-            observers_str = ', '.join(observers_list)
+            observers_str = ', '.join(str(o) for o in observers_list)
         else:
             observers_str = datum.observer or ''
 
