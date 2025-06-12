@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 from django.db import transaction
 import requests
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.http import FileResponse
 from django.views.generic import TemplateView
 from django.http import HttpResponseRedirect
 from django.utils import timezone
@@ -849,6 +849,54 @@ class GetDataProductApi(views.APIView):
             'data': serialized_queryset
         }, status=status.HTTP_200_OK)
 
+class GetPhotometryFile(views.APIView):
+    """
+    API endpoint to download a photometry data file by DataProduct ID.
+    """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = DataProductSerializer
+    pagination_class = StandardResultsSetPagination
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+            },
+            required=['id']
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
+    )
+    def post(self, request):
+        data_product_id = request.data.get('id')
+
+        if not data_product_id:
+            return Response("ID not provided", status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            data_product = DataProduct.objects.get(id=data_product_id)
+        except DataProduct.DoesNotExist:
+            return Response("DataProduct not found", status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response(f"Unexpected error: {str(e)}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Build full file path safely
+        file_path = os.path.join(settings.DATA_MEDIA_PATH, str(data_product.photometry_data))
+
+        if os.path.exists(file_path):
+            return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=os.path.basename(file_path))
+        else:
+            return Response("File not found", status=status.HTTP_404_NOT_FOUND)
 
 class GetReducedDataApi(views.APIView):
     authentication_classes = [TokenAuthentication]
