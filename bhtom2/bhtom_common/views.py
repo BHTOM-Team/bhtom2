@@ -891,13 +891,12 @@ class GetPhotometryFile(views.APIView):
             return Response(f"Unexpected error: {str(e)}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Build full file path safely
-        file_path = data_product.photometry_data
-
-        if os.path.exists(file_path):
+        file_path = settings.DATA_MEDIA_PATH + format(data_product.photometry_data)
+        try:
             return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=os.path.basename(file_path))
-        else:
+        except Exception:
             return Response("File not found", status=status.HTTP_404_NOT_FOUND)
-
+        
 class GetReducedDataApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
