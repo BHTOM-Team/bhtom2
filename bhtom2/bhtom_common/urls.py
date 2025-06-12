@@ -34,5 +34,5 @@ urlpatterns = [
      path('api/comments/', CommentAPIView.as_view()),
      path('api/users/',GetUsersDetails.as_view()),
      path('api/changeObservers/', ChangeObserversView.as_view()),
-     path('api/downloadPhotometryFile/', GetPhotometryFile.asview()),
+     path('api/downloadPhotometryFile/', GetPhotometryFile.as_view()),
 ]
