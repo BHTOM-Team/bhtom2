@@ -891,7 +891,7 @@ class GetPhotometryFile(views.APIView):
             return Response(f"Unexpected error: {str(e)}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Build full file path safely
-        file_path = os.path.join(settings.DATA_MEDIA_PATH, str(data_product.photometry_data))
+        file_path = data_product.photometry_data
 
         if os.path.exists(file_path):
             return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=os.path.basename(file_path))
