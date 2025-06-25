@@ -3,7 +3,7 @@ from django.urls import path
 from bhtom2.bhtom_common.views import GetDataProductApi, DataListView, ReloadFits, ReloadPhotometry, \
      DeletePointAndRestartProcess, UpdateFits, ReloadPhotometryWithFits, NewsletterView, DataListCompletedView, CommentAPIView,DataListCCDPHOTErrorView, \
      DataListInProgressView, DataListInCalibView, DataListCPCSErrorView, DataListCPCSLimitView, GetReducedDataApi  ,DeleteReduceDatumApiView, \
-          DeactivateReduceDatumApiView, DeleteDataProductApiView, GetUsersDetails,ChangeObserversView
+          DeactivateReduceDatumApiView, DeleteDataProductApiView, GetUsersDetails,ChangeObserversView,GetPhotometryFile
 
 from bhtom_base.bhtom_common.api_router import SharedAPIRootRouter
 
@@ -34,4 +34,5 @@ urlpatterns = [
      path('api/comments/', CommentAPIView.as_view()),
      path('api/users/',GetUsersDetails.as_view()),
      path('api/changeObservers/', ChangeObserversView.as_view()),
+     path('api/downloadPhotometryFile/', GetPhotometryFile.as_view()),
 ]
