@@ -1832,3 +1832,49 @@ Returns the updated DataProduct object:
 * `404 Not Found`: DataProduct with the given ID does not exist
 * `500 Internal Server Error`: Unexpected server error
 
+
+
+
+
+# DOWNLOAD PHOTOMETRY FILE API
+
+### Description
+
+This API allows authenticated users to download a photometry file (.dat) by data product id.
+
+### Endpoint
+
+* **Method**: POST
+* **URL**: `common/api/downloadPhotometryFile/`
+* **Authentication**: Token required
+* **Permissions**: Must be authenticated
+
+### Request Parameters (JSON Body)
+
+| Parameter   | Type   | Required | Description                           |
+| ----------- | ------ | -------- | ------------------------------------- |
+| `id`        | string | Yes      | ID of the DataProduct                 |
+
+### Example Request
+
+```bash
+curl -X 'POST' \
+  'https://bh-tom2.astrolabs.pl/common/api/downloadPhotometryFile/' \
+  -H 'Authorization: Token <yourToken>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "id": "123456",
+}'
+```
+
+### Successful Response (200 OK)
+
+Returns photometry file:
+
+### Error Responses
+
+* `400 Bad Request`: Missing required fields or invalid data
+* `404 Not Found`: DataProduct with the given ID does not exist
+* `500 Internal Server Error`: Unexpected server error
+
+
