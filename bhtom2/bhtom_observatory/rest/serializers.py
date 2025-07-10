@@ -37,7 +37,7 @@ class ObservatorySerializers(serializers.ModelSerializer):
     class Meta:
         model = Observatory
         fields = ('id', 'name', 'lon', 'lat', 'altitude', 'calibration_flg', 'comment',
-                   'approx_lim_mag','origin', 'telescope', 'aperture','focal_length','seeing', 'filters', 'created', 'modified', 'cameras' )
+                   'approx_lim_mag','origin', 'telescope', 'aperture','focal_length','seeing', 'filters', 'created', 'modified', 'authors','acknowledgements','cameras' )
         read_only_fields = ['created', 'modified']
         extra_kwargs = {'created_start': {'read_only': True},
                         'created_end': {'read_only': True}}
@@ -67,6 +67,8 @@ class ObservatorySerializers(serializers.ModelSerializer):
         instance.aperture = validated_data.get('aperture', instance.aperture)
         instance.focal_length = validated_data.get('focal_length', instance.focal_length)
         instance.seeing = validated_data.get('seeing', instance.seeing)
+        instance.acknowledgements = validated_data.get('acknowledgements', instance.acknowledgements)
+        instance.authors = validated_data.get('authors', instance.authors)
         instance.modified = timezone.now()
 
         instance.save()
