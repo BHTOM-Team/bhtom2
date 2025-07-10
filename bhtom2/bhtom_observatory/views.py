@@ -61,6 +61,8 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 aperture = form.cleaned_data['aperture']
                 focal_length = form.cleaned_data['focal_length']
                 telescope = form.cleaned_data['telescope']
+                authors = form.cleaned_data['authors']
+                acknowledgements =  form.cleaned_data['acknowledgements']
             else:
                 cameras.forms[0].empty_permitted = True
                 user = self.request.user
@@ -75,6 +77,8 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 aperture = form.cleaned_data['aperture']
                 focal_length = form.cleaned_data['focal_length']
                 telescope = form.cleaned_data['telescope']
+                authors = form.cleaned_data['authors']
+                acknowledgements =  form.cleaned_data['acknowledgements']
 
         except TypeError as e:
             logger.error('CreateObservatory error: ' + str(e))
@@ -95,6 +99,8 @@ class CreateObservatory(LoginRequiredMixin, FormView):
                 aperture=aperture,
                 focal_length=focal_length,
                 telescope=telescope,
+                authors=authors,
+                acknowledgements=acknowledgements
             )
             if form.cleaned_data['calibration_flg'] != True:   
                 if cameras.is_valid():

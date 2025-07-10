@@ -70,6 +70,8 @@ class Observatory(CleanData):
     filters = models.CharField(null=True, max_length=100, blank=True,
                                verbose_name="Filters (comma-separated list, as they are visible in " "FITS)",
                                default="V,R,I")
+    authors = models.CharField(max_length=255, blank=True, null=True, verbose_name='Authors')
+    acknowledgements =  models.CharField(max_length=255, blank=True, null=True, verbose_name='Acknowledgements')
     origin = models.CharField(max_length=255, blank=True, null=True, verbose_name='Origin')
     telescope = models.CharField(max_length=255, blank=True, null=True, verbose_name='Telescope name')
     aperture = models.FloatField(null=True, blank=True, default=0.0, verbose_name="Aperture [m]")

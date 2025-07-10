@@ -126,6 +126,7 @@ class ObservatoryCreationForm(forms.ModelForm):
         label='Filters*',
         widget=forms.TextInput(attrs={'placeholder': 'V,R,I'})
     )
+    authors = forms.CharField(label="Authors (Affiliations)")
 
     def __init__(self, *args, **kwargs):
         super(ObservatoryCreationForm, self).__init__(*args, **kwargs)
@@ -140,12 +141,14 @@ class ObservatoryCreationForm(forms.ModelForm):
         self.fields['aperture'].required = False
         self.fields['focal_length'].required = False
         self.fields['telescope'].required = False
+        self.fields['authors'].required = False
+        self.fields['acknowledgements'].required = False
 
     class Meta:
         model = Observatory
         fields = ('name', 'lon', 'lat',
                   'approx_lim_mag', 'filters', 'altitude','aperture','focal_length',
-                  'telescope', 'comment','calibration_flg')
+                  'telescope', 'comment','calibration_flg', 'authors','acknowledgements')
 
     def clean_name(self):
         cleaned_data = self.clean()
@@ -190,6 +193,7 @@ class ObservatoryUpdateForm(forms.ModelForm):
                               initial=None,
                               label='Filters*',
                               widget=forms.TextInput(attrs={'placeholder': 'V,R,I'}))
+    authors = forms.CharField(label="Authors (Affiliations)")
     
     def __init__(self, *args, **kwargs):
         super(ObservatoryUpdateForm, self).__init__(*args, **kwargs)
@@ -205,12 +209,14 @@ class ObservatoryUpdateForm(forms.ModelForm):
         self.fields['aperture'].required = False
         self.fields['focal_length'].required = False
         self.fields['telescope'].required = False
+        self.fields['authors'].required = False
+        self.fields['acknowledgements'].required = False
 
     class Meta:
         model = Observatory
         fields = ('name', 'lon', 'lat',
                   'approx_lim_mag', 'filters', 'altitude','aperture','focal_length',
-                  'telescope', 'comment','calibration_flg')
+                  'telescope', 'comment','calibration_flg','authors','acknowledgements')
 
 
 class ObservatoryUserUpdateForm(forms.ModelForm):

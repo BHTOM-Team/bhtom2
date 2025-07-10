@@ -108,7 +108,9 @@ class CreateObservatoryApi(views.APIView):
                 'calibration_flg': openapi.Schema(type=openapi.TYPE_BOOLEAN, format=openapi.FORMAT_INT32),
                 'camera_name': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'example_file': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
-                'comment': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+                'comment': openapi.Schema(type=openapi.TYPE_STRING),
+                'authors': openapi.Schema(type=openapi.TYPE_STRING),
+                'acknowledgements': openapi.Schema(type=openapi.TYPE_STRING),
                 'altitude': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'gain': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'readout_noise': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
@@ -143,6 +145,8 @@ class CreateObservatoryApi(views.APIView):
                     'altitude': request.data.get('altitude'),
                     'approx_lim_mag':request.data.get('approx_lim_mag'),
                     'filters': request.data.get('filters'),
+                    'authors': request.data.get('authors'),
+                    'acknowledgements': request.data.get('acknowledgements'),
         }
         camera_name= request.data.get('camera_name', None)
         example_file= request.data.get('example_file',None)
@@ -193,7 +197,9 @@ class UpdateObservatoryApi(views.APIView):
                 'lon': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'lat': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'calibration_flg': openapi.Schema(type=openapi.TYPE_BOOLEAN, format=openapi.FORMAT_INT32),
-                'comment': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
+                'comment': openapi.Schema(type=openapi.TYPE_STRING),
+                'authors': openapi.Schema(type=openapi.TYPE_STRING),
+                'acknowledgements': openapi.Schema(type=openapi.TYPE_STRING),
                 'altitude': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'approx_lim_mag': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'filters': openapi.Schema(type=openapi.TYPE_STRING),
