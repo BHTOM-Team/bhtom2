@@ -141,7 +141,7 @@ class DataListInCalibView(LoginRequiredMixin, FilterView):
         context['delay_fits'] = settings.DELETE_FITS_FILE_DAY
 
         context['photometry_data'] = []
-        for data in context['object_list']:
+        for data in context['filter'].qs:
             try:
                 calib_data = Calibration_data.objects.get(dataproduct=data.dataProduct)
                 if calib_data.status in ['P', 'C']:
@@ -157,7 +157,7 @@ class DataListInCalibView(LoginRequiredMixin, FilterView):
 
         return context
 
-class DataListCPCSErrorView(SingleTableMixin, LoginRequiredMixin, ListView):
+class DataListCPCSErrorView(LoginRequiredMixin,FilterView):
     template_name = 'bhtom_common/data_product_management-cpcs-error.html'
     model = CCDPhotJob
     filterset_class = CCDPhotJobFilter
@@ -187,7 +187,9 @@ class DataListCPCSErrorView(SingleTableMixin, LoginRequiredMixin, ListView):
 
         context['photometry_data'] = []
 
-        for data in self.get_queryset():
+        filtered_qs = context['filter'].qs
+
+        for data in filtered_qs:
             try:
                 calib_data = Calibration_data.objects.get(dataproduct=data.dataProduct)
             except Calibration_data.DoesNotExist:
@@ -204,7 +206,7 @@ class DataListCPCSErrorView(SingleTableMixin, LoginRequiredMixin, ListView):
 
         return context
 
-class DataListCPCSLimitView(SingleTableMixin, LoginRequiredMixin, ListView):
+class DataListCPCSLimitView(LoginRequiredMixin, FilterView):
     template_name = 'bhtom_common/data_product_management-cpcs-limit.html'
     model = CCDPhotJob
     filterset_class = CCDPhotJobFilter
@@ -235,7 +237,9 @@ class DataListCPCSLimitView(SingleTableMixin, LoginRequiredMixin, ListView):
 
         context['photometry_data'] = []
 
-        for data in self.get_queryset():
+        filtered_qs = context['filter'].qs
+
+        for data in filtered_qs:
             try:
                 calib_data = Calibration_data.objects.get(dataproduct=data.dataProduct)
             except Calibration_data.DoesNotExist:
@@ -276,7 +280,7 @@ class DataListCCDPHOTErrorView(LoginRequiredMixin, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['fits_file'] = self.get_queryset()  
+        context['fits_file'] =  context['filter'].qs 
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
         return context
 
@@ -304,7 +308,7 @@ class DataListInProgressView(LoginRequiredMixin, FilterView):
         if not self.request.user.is_staff:
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
-        context['fits_file'] = self.get_queryset()  
+        context['fits_file'] = context['filter'].qs 
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
         return context
 
