@@ -2,6 +2,7 @@ import os
 from datetime import timedelta, datetime
 from django.db import transaction
 import requests
+from django_filters.views import FilterView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import FileResponse
 from django.views.generic import TemplateView
@@ -12,6 +13,7 @@ from rest_framework.authtoken.models import Token
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
+from bhtom2.bhtom_common.filters import FitsFilter
 from django.views.generic import ListView, FormView
 from django_comments.models import Comment
 from settings import settings
@@ -41,122 +43,112 @@ from rest_framework.exceptions import PermissionDenied
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_common.views')
 
-
-class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
+class DataListView(LoginRequiredMixin, FilterView):
     """
-    View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
+    Lists CCDPhotJobs that are in progress or have calibration problems (except successful).
     """
     template_name = 'bhtom_common/data_product_management.html'
-    model = DataProduct
-    # table_class = TargetTable
+    model = CCDPhotJob
+    filterset_class = FitsFilter
 
-    permission_required = 'bhtom_targets.view_target'
-    table_pagination = False
-    strict = False
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-
-        logger.debug("Prepare DataListView for Admin")
-
-        if not self.request.user.is_staff:
-            logger.error("The user is not an admin")
-            return redirect(reverse('home'))
-
-        context['fits_file'] = CCDPhotJob.objects \
-            .exclude(status='F') \
-            .exclude(status='D') \
+    def get_queryset(self):
+        # For fits_file: jobs not failed/done, DP not successful, and have fits_data
+        fits_file = CCDPhotJob.objects.exclude(status='F').exclude(status='D') \
             .exclude(dataProduct__status='S') \
-            .exclude(dataProduct__fits_data__isnull=True) \
-            .exclude(dataProduct__fits_data='') \
+            .exclude(dataProduct__fits_data__isnull=True).exclude(dataProduct__fits_data='') \
             .order_by('-job_id')
 
-        context['photometry_data'] = []
+        # For photometry_data: jobs failed/done, recent enough, with fits_data
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
+        ccdphot = CCDPhotJob.objects.filter(
+            (Q(status='F') | Q(status='D')) &
+            ~Q(dataProduct__fits_data__isnull=True) &
+            ~Q(dataProduct__fits_data='') &
+            Q(dataProduct__created__gte=days_delay_error)
+        ).order_by('-job_id')
+        return {'fits_file': fits_file, 'ccdphot': ccdphot}
 
-        context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
-        context['delay_fits'] = settings.DELETE_FITS_FILE_DAY
-        
-        ccdphot = CCDPhotJob.objects.filter((Q(status='F') | Q(status='D')) &
-                                            ~Q(dataProduct__fits_data__isnull=True) &
-                                            ~Q(dataProduct__fits_data='') &
-                                            Q(dataProduct__created__gte=days_delay_error)).order_by('-job_id')
-
-        for data in ccdphot:
-            try:
-                calib_data = Calibration_data.objects.get(dataproduct=data.dataProduct)
-            except Calibration_data.DoesNotExist:
-                data = {
-                    'dataProduct': data.dataProduct,
-                    'calibData': None
-                }
-                context['photometry_data'].append(data)
-                continue
-
-            if calib_data.status == 'S':
-                continue
-
-            try:
-                data = {
-                    'dataProduct': data.dataProduct,
-                    'calibData': calib_data,
-                    'file_download_link': "https://{request.get_host()}/dataproducts/download/photometry/{data.dataProduct.id}/"
-                }
-                context['photometry_data'].append(data)
-            except Exception as e:
-                logger.error("Error in Calibration_data: " + str(e))
-                continue
-
-        return context
-    
-class DataListInCalibView(SingleTableMixin, LoginRequiredMixin, ListView):
-    """
-    View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
-    """
-    template_name = 'bhtom_common/data_product_management-in-calibration.html'
-    model = DataProduct
-    # table_class = TargetTable
-
-    permission_required = 'bhtom_targets.view_target'
-    table_pagination = False
-    strict = False
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-
-        logger.debug("Prepare DataListView for Admin")
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         if not self.request.user.is_staff:
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
 
-        context['photometry_data'] = []
-        days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
+        qs = self.get_queryset()
+        context['fits_file'] = qs['fits_file']
 
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
         context['delay_fits'] = settings.DELETE_FITS_FILE_DAY
-        
-        ccdphot = CCDPhotJob.objects.filter((Q(status='F') | Q(status='D')) & Q(dataProduct__status='R')&
-                                            ~Q(dataProduct__fits_data__isnull=True) &
-                                            ~Q(dataProduct__fits_data='') &
-                                            Q(dataProduct__created__gte=days_delay_error)).order_by('-job_id')
 
-        for data in ccdphot:
+        context['photometry_data'] = []
+        for data in qs['ccdphot']:
             try:
                 calib_data = Calibration_data.objects.get(dataproduct=data.dataProduct)
             except Calibration_data.DoesNotExist:
+                context['photometry_data'].append({
+                    'dataProduct': data.dataProduct,
+                    'calibData': None
+                })
                 continue
 
-            if calib_data.status == 'P' or calib_data.status == 'C':
+            if calib_data.status != 'S':
                 try:
-                    data = {
+                    context['photometry_data'].append({
                         'dataProduct': data.dataProduct,
-                        'calibData': calib_data
-                    }
-                    context['photometry_data'].append(data)
+                        'calibData': calib_data,
+                        'file_download_link': f"https://{self.request.get_host()}/dataproducts/download/photometry/{data.dataProduct.id}/"
+                    })
                 except Exception as e:
                     logger.error("Error in Calibration_data: " + str(e))
                     continue
+
+        return context
+
+class DataListInCalibView(LoginRequiredMixin, FilterView):
+    """
+    Lists CCDPhotJobs in calibration (Calibration_data.status in P or C).
+    """
+    template_name = 'bhtom_common/data_product_management-in-calibration.html'
+    model = CCDPhotJob
+    filterset_class = FitsFilter
+
+
+    def get_queryset(self):
+        days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
+
+        ccdphot = CCDPhotJob.objects.filter(
+            (Q(status='F') | Q(status='D')) &
+            Q(dataProduct__status='R') &
+            ~Q(dataProduct__fits_data__isnull=True) &
+            ~Q(dataProduct__fits_data='') &
+            Q(dataProduct__created__gte=days_delay_error)
+        ).order_by('-job_id')
+
+        return ccdphot
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if not self.request.user.is_staff:
+            logger.error("The user is not an admin")
+            return redirect(reverse('home'))
+
+        context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
+        context['delay_fits'] = settings.DELETE_FITS_FILE_DAY
+
+        context['photometry_data'] = []
+        for data in context['object_list']:
+            try:
+                calib_data = Calibration_data.objects.get(dataproduct=data.dataProduct)
+                if calib_data.status in ['P', 'C']:
+                    context['photometry_data'].append({
+                        'dataProduct': data.dataProduct,
+                        'calibData': calib_data
+                    })
+            except Calibration_data.DoesNotExist:
+                continue
+            except Exception as e:
+                logger.error("Error in Calibration_data: " + str(e))
+                continue
 
         return context
 
@@ -263,29 +255,24 @@ class DataListCPCSLimitView(SingleTableMixin, LoginRequiredMixin, ListView):
 
         return context
 
-class DataListCCDPHOTErrorView(SingleTableMixin, LoginRequiredMixin, ListView):
+
+class DataListCCDPHOTErrorView(LoginRequiredMixin, FilterView):
     """
     View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
     """
     template_name = 'bhtom_common/data_product_management-ccdphot-error.html'
     model = DataProduct
     # table_class = TargetTable
-
+    
     permission_required = 'bhtom_targets.view_target'
     table_pagination = False
     strict = False
+    filterset_class = FitsFilter
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-
-        logger.debug("Prepare DataListView for Admin")
-
-        if not self.request.user.is_staff:
-            logger.error("The user is not an admin")
-            return redirect(reverse('home'))
-
+    
+    def get_queryset(self):
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
-        context['fits_file'] = CCDPhotJob.objects \
+        return CCDPhotJob.objects \
             .exclude(status='F') \
             .exclude(status='D') \
             .exclude(dataProduct__status='S') \
@@ -294,72 +281,68 @@ class DataListCCDPHOTErrorView(SingleTableMixin, LoginRequiredMixin, ListView):
             .filter(dataProduct__created__gte=days_delay_error, dataProduct__status='E') \
             .order_by('-job_id')
 
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
         return context
 
 
-class DataListInProgressView(SingleTableMixin, LoginRequiredMixin, ListView):
-    """
-    View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
-    """
+class DataListInProgressView(LoginRequiredMixin, FilterView):
     template_name = 'bhtom_common/data_product_management-in-progress.html'
-    model = DataProduct
-    # table_class = TargetTable
+    model = CCDPhotJob
+    filterset_class = FitsFilter
 
-    permission_required = 'bhtom_targets.view_target'
-    table_pagination = False
-    strict = False
+    def get_queryset(self):
+        # Limit to files created within last N days & status='P' & fits_data exists
+        days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
+        return CCDPhotJob.objects.filter(
+            Q(dataProduct__status='P') &
+            Q(dataProduct__created__gte=days_delay_error) &
+            ~Q(dataProduct__fits_data__isnull=True) &
+            ~Q(dataProduct__fits_data='')
+        ).order_by('-job_id')
 
-        logger.debug("Prepare DataListView for Admin")
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
         if not self.request.user.is_staff:
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
-        days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
-
-        context['fits_file'] = CCDPhotJob.objects.filter(Q(dataProduct__status='P') 
-                                                        & Q(dataProduct__created__gte=days_delay_error)
-                                                        & ~Q(dataProduct__fits_data__isnull=True)
-                                                        & ~Q(dataProduct__fits_data='')).order_by('-job_id')
 
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
         return context
 
 
 
-
-class DataListCompletedView(SingleTableMixin, LoginRequiredMixin, ListView):
+class DataListCompletedView(LoginRequiredMixin, FilterView):
     """
-    View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
+    View for listing completed DataProduct objects (status='S') created recently.
     """
     template_name = 'bhtom_common/data_product_management-completed.html'
     model = DataProduct
-    # table_class = TargetTable
+    filterset_class = FitsFilter
 
-    permission_required = 'bhtom_targets.view_target'
-    table_pagination = False
-    strict = False
+    def get_queryset(self):
+        days_delay = timezone.now() - timedelta(days=settings.DELETE_FITS_FILE_DAY)
+        return DataProduct.objects.filter(
+            Q(created__gte=days_delay) &
+            Q(data_product_type='fits_file') &
+            Q(fits_data__isnull=False) &
+            Q(status='S')
+        ).order_by('-created')
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-
-        logger.debug("Prepare DataListCompletedView for Admin")
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
         if not self.request.user.is_staff:
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
 
-        days_delay = timezone.now() - timedelta(days=settings.DELETE_FITS_FILE_DAY)
-
-        context['fits_s_file'] = DataProduct.objects.filter(Q(created__gte=days_delay) &
-                                                            Q(data_product_type='fits_file') &
-                                                            Q(fits_data__isnull=False) &
-                                                            Q(status='S'))
-
+        # add extra context if needed
+        context['delay_fits_file'] = settings.DELETE_FITS_FILE_DAY
         return context
+    
 
 class ReloadFits(LoginRequiredMixin, View):
 
