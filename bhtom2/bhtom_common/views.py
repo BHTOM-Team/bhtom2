@@ -43,73 +43,80 @@ from rest_framework.exceptions import PermissionDenied
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_common.views')
 
-class DataListView(LoginRequiredMixin, FilterView):
+class DataListView(SingleTableMixin, LoginRequiredMixin, ListView):
     """
-    Lists CCDPhotJobs that are in progress or have calibration problems (except successful).
+    View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
     """
     template_name = 'bhtom_common/data_product_management.html'
-    model = CCDPhotJob
-    filterset_class = FitsFilter
+    model = DataProduct
+    # table_class = TargetTable
 
-    def get_queryset(self):
-        # For fits_file: jobs not failed/done, DP not successful, and have fits_data
-        fits_file = CCDPhotJob.objects.exclude(status='F').exclude(status='D') \
-            .exclude(dataProduct__status='S') \
-            .exclude(dataProduct__fits_data__isnull=True).exclude(dataProduct__fits_data='') \
-            .order_by('-job_id')
+    permission_required = 'bhtom_targets.view_target'
+    table_pagination = False
+    strict = False
 
-        # For photometry_data: jobs failed/done, recent enough, with fits_data
-        days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
-        ccdphot = CCDPhotJob.objects.filter(
-            (Q(status='F') | Q(status='D')) &
-            ~Q(dataProduct__fits_data__isnull=True) &
-            ~Q(dataProduct__fits_data='') &
-            Q(dataProduct__created__gte=days_delay_error)
-        ).order_by('-job_id')
-        return {'fits_file': fits_file, 'ccdphot': ccdphot}
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        logger.debug("Prepare DataListView for Admin")
+
         if not self.request.user.is_staff:
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
 
-        qs = self.get_queryset()
-        context['fits_file'] = qs['fits_file']
+        context['fits_file'] = CCDPhotJob.objects \
+            .exclude(status='F') \
+            .exclude(status='D') \
+            .exclude(dataProduct__status='S') \
+            .exclude(dataProduct__fits_data__isnull=True) \
+            .exclude(dataProduct__fits_data='') \
+            .order_by('-job_id')
+
+        context['photometry_data'] = []
+        days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
 
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
         context['delay_fits'] = settings.DELETE_FITS_FILE_DAY
+        
+        ccdphot = CCDPhotJob.objects.filter((Q(status='F') | Q(status='D')) &
+                                            ~Q(dataProduct__fits_data__isnull=True) &
+                                            ~Q(dataProduct__fits_data='') &
+                                            Q(dataProduct__created__gte=days_delay_error)).order_by('-job_id')
 
-        context['photometry_data'] = []
-        for data in qs['ccdphot']:
+        for data in ccdphot:
             try:
                 calib_data = Calibration_data.objects.get(dataproduct=data.dataProduct)
             except Calibration_data.DoesNotExist:
-                context['photometry_data'].append({
+                data = {
                     'dataProduct': data.dataProduct,
                     'calibData': None
-                })
+                }
+                context['photometry_data'].append(data)
                 continue
 
-            if calib_data.status != 'S':
-                try:
-                    context['photometry_data'].append({
-                        'dataProduct': data.dataProduct,
-                        'calibData': calib_data,
-                        'file_download_link': f"https://{self.request.get_host()}/dataproducts/download/photometry/{data.dataProduct.id}/"
-                    })
-                except Exception as e:
-                    logger.error("Error in Calibration_data: " + str(e))
-                    continue
+            if calib_data.status == 'S':
+                continue
+
+            try:
+                data = {
+                    'dataProduct': data.dataProduct,
+                    'calibData': calib_data,
+                    'file_download_link': "https://{request.get_host()}/dataproducts/download/photometry/{data.dataProduct.id}/"
+                }
+                context['photometry_data'].append(data)
+            except Exception as e:
+                logger.error("Error in Calibration_data: " + str(e))
+                continue
 
         return context
+    
 
 class DataListInCalibView(LoginRequiredMixin, FilterView):
     """
     Lists CCDPhotJobs in calibration (Calibration_data.status in P or C).
     """
     template_name = 'bhtom_common/data_product_management-in-calibration.html'
-    model = CCDPhotJob
+    model = DataProduct
     filterset_class = FitsFilter
 
 
@@ -289,7 +296,7 @@ class DataListCCDPHOTErrorView(LoginRequiredMixin, FilterView):
 
 class DataListInProgressView(LoginRequiredMixin, FilterView):
     template_name = 'bhtom_common/data_product_management-in-progress.html'
-    model = CCDPhotJob
+    model = DataProduct
     filterset_class = FitsFilter
 
     def get_queryset(self):
