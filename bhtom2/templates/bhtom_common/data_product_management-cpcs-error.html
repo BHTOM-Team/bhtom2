@@ -6,7 +6,16 @@
 {% block content %}
     {% if request.user.is_staff %}
         <div class="row">
-            <div class="col-md-12">
+             <div class="col-md-2">
+                <form action="" method="get" class="form">
+                    {% bootstrap_form filter.form %}
+                    {% buttons %}
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <a href="{% url 'bhtom_common:list_cpcs_error' %}" class="btn btn-secondary" title="Reset">Reset</a>
+                    {% endbuttons %}
+                </form>
+            </div>
+            <div class="col-md-9">
                 <form id="photometry-form" action="{% url 'bhtom_common:reload_photometry' %}?next={{ request.path }}" method="POST">
                     {% csrf_token %}
                     <input type="hidden" id="selected-photometry-ids" name="selected-photometry-ids" value="">
