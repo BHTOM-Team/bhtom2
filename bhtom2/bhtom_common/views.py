@@ -127,10 +127,6 @@ class DataListInCalibView(LoginRequiredMixin, FilterView):
             Q(dataProduct__created__gte=days_delay_error)
         ).order_by('-job_id')
 
-        # Filter by user if not staff: only show objects linked to user's targets
-        if not self.request.user.is_staff:
-            qs = qs.filter(dataProduct__target__in=self.request.user.targets.all())
-
         return qs
 
     def get_context_data(self, **kwargs):
@@ -178,8 +174,6 @@ class DataListCPCSErrorView(SingleTableMixin, LoginRequiredMixin, ListView):
             Q(dataProduct__created__gte=days_delay_error)
         ).order_by('-job_id')
 
-        if not self.request.user.is_staff:
-            qs = qs.filter(dataProduct__target__in=self.request.user.targets.all())
 
         return qs
 
@@ -226,9 +220,7 @@ class DataListCPCSLimitView(SingleTableMixin, LoginRequiredMixin, ListView):
             Q(dataProduct__created__gte=days_delay_error)
         ).order_by('-job_id')
 
-        if not self.request.user.is_staff:
-            qs = qs.filter(dataProduct__target__in=self.request.user.targets.all())
-
+   
         return qs
 
     def get_context_data(self, *args, **kwargs):
@@ -276,9 +268,6 @@ class DataListCCDPHOTErrorView(LoginRequiredMixin, FilterView):
             .filter(dataProduct__created__gte=days_delay_error, dataProduct__status='E') \
             .order_by('-job_id')
 
-        if not self.request.user.is_staff:
-            qs = qs.filter(dataProduct__target__in=self.request.user.targets.all())
-
         return qs
 
     def get_context_data(self, **kwargs):
@@ -300,9 +289,6 @@ class DataListInProgressView(LoginRequiredMixin, FilterView):
             ~Q(dataProduct__fits_data__isnull=True) &
             ~Q(dataProduct__fits_data='')
         ).order_by('-job_id')
-
-        if not self.request.user.is_staff:
-            qs = qs.filter(dataProduct__target__in=self.request.user.targets.all())
 
         return qs
 
@@ -330,9 +316,6 @@ class DataListCompletedView(LoginRequiredMixin, FilterView):
             Q(fits_data__isnull=False) &
             Q(status='S')
         ).order_by('-created')
-
-        if not self.request.user.is_staff:
-            qs = qs.filter(target__in=self.request.user.targets.all())
 
         return qs
 
