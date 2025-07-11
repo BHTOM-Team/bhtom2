@@ -1,8 +1,7 @@
 import django_filters
 from django.db.models import Q
 from bhtom_base.bhtom_dataproducts.models import DataProduct
-from bhtom_base.bhtom_dataproducts.models import CCDPhotJob  # assuming this is the import path
-
+from bhtom_base.bhtom_dataproducts.models import CCDPhotJob 
 class CCDPhotJobFilter(django_filters.FilterSet):
     target_name = django_filters.CharFilter(label='Target Name', method='filter_target_name')
     observatory = django_filters.CharFilter(label='Observatory', method='filter_observatory_name')

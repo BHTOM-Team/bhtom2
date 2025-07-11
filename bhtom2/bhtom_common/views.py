@@ -276,6 +276,7 @@ class DataListCCDPHOTErrorView(LoginRequiredMixin, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['fits_file'] = self.get_queryset()  
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
         return context
 
@@ -303,7 +304,7 @@ class DataListInProgressView(LoginRequiredMixin, FilterView):
         if not self.request.user.is_staff:
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
-
+        context['fits_file'] = self.get_queryset()  
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
         return context
 
