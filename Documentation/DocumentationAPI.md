@@ -178,7 +178,7 @@ The script will display the response from the API with a calibration result, so 
 
 <!-- ### Description -->
 
-<!-- This Python script allows you to retrieve a list of catalogues from the BHTOM2 system using the `get_catalogs` API. It provides a command-line interface for making GET requests with proper authorization. API returns 1000 records by request, use parametr "page" to get more-->
+<!-- This Python script allows you to retrieve a list of catalogues from the BHTOM2 system using the `get_catalogs` API. It provides a command-line interface for making GET requests with proper authorization. API returns 200 records by request, use parametr "page" to get more-->
 
 <!-- TOKEN is required! -->
 <!-- 
@@ -216,7 +216,7 @@ The requests library (install with pip install requests)
 ### Description
  <!-- /calibration/get-calibration-res/ -->
 
-This API endpoint allows users to retrieve calibration results for previously uploaded observations. For 1 request you can get only 1000 records, if you want more - use "page" in request to get other records.
+This API endpoint allows users to retrieve calibration results for previously uploaded observations. For 1 request you can get only 200 records, if you want more - use "page" in request to get other records.
 
 <!-- TOKEN is required! -->
 
@@ -269,7 +269,7 @@ curl -X 'POST' \
 ## 1. Observatory List
 <!-- /observatory/getObservatoryList/ -->
     
-    This API endpoint allows users to get the list of observatories registered in the system. You can get 1000 record per one request, use "page" to get more records
+    This API endpoint allows users to get the list of observatories registered in the system. You can get 200 record per one request, use "page" to get more records
 
     <!-- TOKEN is required! -->
 
@@ -544,7 +544,7 @@ python create_observatory.py --name "My Observatory" --lon 45.12345 --lat -120.6
 
 ## Request Parameters
 
-You can requested only 1000 records per request, use pramater "page" to get more records 
+You can requested only 200 records per request, use pramater "page" to get more records 
 The request to retrieve observatory matrix data can include the following parameters in the request body:
 
 - `user` (string, optional): Filter observatory matrix data by the username of the user associated with the observatory.
@@ -928,7 +928,7 @@ You can use a Python script to update an existing target with Token Authenticati
 
 This API allows users to obtain a list of targets. 
 This API supports filtering targets by name, Right Ascension (RA) range, and Declination (Dec) range.
-You can requested only 1000 records per request, use pramater "page" to get more records 
+You can requested only 200 records per request, use pramater "page" to get more records 
 
 ### Request
 
@@ -1116,7 +1116,7 @@ Replace `<yourToken>` with your valid authentication token.
 
 This API allows admin users to obtain a list of downloaded targets. 
 This API supports filtering downloaded targets by target name, username, creation date range, and download type.
-You can request only 1000 records per request; use the parameter "page" to get more records.
+You can request only 200 records per request; use the parameter "page" to get more records.
 
 ### Request
 
