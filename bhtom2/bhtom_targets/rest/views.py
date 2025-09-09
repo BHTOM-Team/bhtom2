@@ -22,7 +22,6 @@ import os
 from django.http import FileResponse
 from bhtom2.utils.reduced_data_utils import save_photometry_data_for_target_to_csv_file, \
     save_radio_data_for_target_to_csv_file
-from abc import ABC, abstractmethod
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from bhtom2.utils.api_pagination import StandardResultsSetPagination
 
