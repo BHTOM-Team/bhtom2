@@ -79,8 +79,6 @@ class GetTargetListApi(views.APIView):
         galacticLon = request.data.get('galacticLon', None)
         description = request.data.get('description', None)
         page = request.data.get('page', 1)
-      
-        
 
         try:
             if name is not None:
@@ -132,30 +130,22 @@ class GetTargetListApi(views.APIView):
             paginated_queryset = paginator.page(paginator.num_pages)
 
         serialized_queryset = serializers.serialize('json', paginated_queryset)
-
         serialized_data = json.loads(serialized_queryset)
         fields_only = [item['fields'] for item in serialized_data]
 
-        for target in fields_only:
-            aliases = []
-            target_list_names = []
-            
-            try:
-                temp = Target.objects.get(name=target['name'])
-                aliases = TargetName.objects.filter(target_id=temp.id).values_list('source_name','name')
-            except Exception as e:
-                logger.error("Ops, something went wrong" + str(e))
-                aliases = []
-            try:
-                temp = Target.objects.get(name=target['name'])
-                target_lists = TargetList.objects.filter(targets=temp)
-                target_list_names = target_lists.values_list('name', 'id')
-            except Exception as e:
-                logger.error("Ops, something went wrong" + str(e))
-                target_list_names = []
+        target_ids = [target.id for target in paginated_queryset]
+        aliases_map = {}
+        for tn in TargetName.objects.filter(target_id__in=target_ids):
+            aliases_map.setdefault(tn.target_id, []).append((tn.source_name, tn.name))
+        groups_map = {}
+        for tl in TargetList.objects.filter(targets__id__in=target_ids):
+            for target in tl.targets.filter(id__in=target_ids):
+                groups_map.setdefault(target.id, []).append((tl.name, tl.id))
 
-            target['aliases'] = aliases
-            target['groups'] = target_list_names
+        # Przypisz aliasy i grupy bez dodatkowych zapytań
+        for target, item in zip(paginated_queryset, fields_only):
+            item['aliases'] = aliases_map.get(target.id, [])
+            item['groups'] = groups_map.get(target.id, [])
 
         response_data = {
             'count': paginator.count,
@@ -163,7 +153,7 @@ class GetTargetListApi(views.APIView):
             'current_page': paginated_queryset.number,
             'data': fields_only
         }
-        
+    
         return Response(response_data, status=200)
 
 
