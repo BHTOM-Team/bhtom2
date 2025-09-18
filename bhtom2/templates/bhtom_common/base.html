@@ -61,7 +61,7 @@
 {% block extra_javascript %}{% endblock %}
 
 <!-- =========================
-     BHTOM doc chatbot (clean)
+     BHTOM doc chatbot (dark-blue text)
      ========================= -->
 <style>
 /* Launcher button */
@@ -74,8 +74,10 @@
 /* Panel: hidden by default; flex only when .open */
 #bhtom-panel{
   position:fixed; right:16px; bottom:84px; width:420px; max-width:92vw; height:600px; max-height:75vh;
-  background:#fff; border:1px solid #e6e6e6; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.12);
-  display:none; overflow:hidden; z-index:9999; color:#111 !important; font-size:14px; line-height:1.45;
+  background:#ffffff; border:1px solid #e6e6e6; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.12);
+  display:none; overflow:hidden; z-index:9999;
+  color:#0f2a6f !important;             /* ← DARK BLUE text */
+  font-size:14px; line-height:1.45;
 }
 #bhtom-panel.open{ display:flex; flex-direction:column; }
 
@@ -83,36 +85,54 @@
 #bhtom-header{
   padding:12px 14px; font:600 14px system-ui; border-bottom:1px solid #eee;
   display:flex; justify-content:space-between; align-items:center;
+  color:#0f2a6f !important;
 }
 #bhtom-body{
   padding:12px; flex:1 1 auto; overflow-y:auto !important; overflow-x:hidden;
   background:#fafafa; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; scrollbar-gutter:stable;
+  color:#0f2a6f !important;
 }
 #bhtom-input{ display:flex; border-top:1px solid #eee; }
-#bhtom-input input{ flex:1; border:0; padding:12px; font:14px system-ui; background:#fff; }
+#bhtom-input input{
+  flex:1; border:0; padding:12px; font:14px system-ui; background:#fff;
+  color:#0f2a6f !important;
+}
 #bhtom-input button{
-  border:0; padding:0 14px; cursor:pointer; font:600 14px system-ui; background:#2a5bff; color:#fff; border-radius:8px; margin:8px;
+  border:0; padding:0 14px; cursor:pointer; font:600 14px system-ui;
+  background:#2a5bff; color:#fff; border-radius:8px; margin:8px;
 }
 
 /* Messages */
 #bhtom-body .chat-rows{ display:flex; flex-direction:column; }
 .msg{
   background:#fff; border:1px solid #eee; border-radius:10px; padding:10px 12px; margin:8px 0; line-height:1.45;
-  max-width:100%; word-break:break-word; overflow-wrap:anywhere; color:#111 !important; font-size:14px;
+  max-width:100%; word-break:break-word; overflow-wrap:anywhere;
+  color:#0f2a6f !important;               /* ← DARK BLUE in bubbles */
+  font-size:14px;
 }
-.msg.user{ background:#e9f0ff; border-color:#d9e4ff; align-self:flex-end; color:#0f172a !important; }
-.msg small{ color:#666 !important; }
-.msg pre{ max-width:100%; overflow:auto; padding:10px; background:#0b1020; color:#e8edf2 !important; border-radius:8px; font-size:12px; }
-.msg code{ font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace; white-space:pre-wrap; }
+.msg.user{
+  background:#e9f0ff; border-color:#d9e4ff; align-self:flex-end;
+  color:#0b1e4e !important;               /* slightly darker in user bubble */
+}
+.msg p, .msg li, .msg h1, .msg h2, .msg h3, .msg h4 { color:#0f2a6f !important; }
+.msg small{ color:#556aa8 !important; }   /* muted blue meta */
+.msg a{ color:#204ecf !important; text-decoration:underline; } /* link blue */
+.msg pre{
+  max-width:100%; overflow:auto; padding:10px; background:#0b1020;
+  color:#e8edf2 !important; border-radius:8px; font-size:12px;
+}
+.msg code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  white-space:pre-wrap; color:#0f2a6f !important;    /* inline code stays blue */
+}
 #bhtom-panel .msg table{ display:block; max-width:100%; overflow-x:auto; }
 #bhtom-panel .msg img{ max-width:100%; height:auto; }
-#bhtom-panel a{ color:#2a5bff; text-decoration:underline; }
 
 /* Thinking indicator */
-.thinking{ position:relative; color:#333 !important; }
+.thinking{ position:relative; color:#0f2a6f !important; }
 .thinking:after{
   content:""; display:inline-block; margin-left:8px; width:18px; height:18px; border-radius:50%;
-  border:2px solid #bbb; border-top-color:#2a5bff; animation:spin 0.9s linear infinite; vertical-align:middle;
+  border:2px solid #98a7df; border-top-color:#2a5bff; animation:spin 0.9s linear infinite; vertical-align:middle;
 }
 @keyframes spin{ to{ transform:rotate(360deg) } }
 </style>
@@ -125,7 +145,7 @@
 <div id="bhtom-panel">
   <div id="bhtom-header">
     <span>BHTOM Docs Bot</span>
-    <span id="bhtom-status" style="font:12px system-ui;color:#777"></span>
+    <span id="bhtom-status" style="font:12px system-ui;color:#556aa8"></span>
   </div>
   <div id="bhtom-body"><div class="chat-rows"></div></div>
   <div id="bhtom-input">
