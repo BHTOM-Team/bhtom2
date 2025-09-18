@@ -1,9 +1,9 @@
 alerce==1.0.1
 antares-client==1.1.0
-astropy==5.3.4
+astropy==5.2.1
 astroplan==0.9.1
 specutils==1.11.0
-numpy>=1.22.3,<2
+numpy>=1.22.3,<1.25
 beautifulsoup4>=4.9
 django==4.0.4
 django-bootstrap4>=3,<22
