@@ -176,3 +176,10 @@ bhtom2/.DS_Store
 
 /data
 .gitattributes
+
+# Django migration junk (keep package markers)
+**/migrations/*.py
+!**/migrations/__init__.py
+
+# caches
+**/migrations/__pycache__/
