@@ -11,6 +11,8 @@ from django_select2.forms import ModelSelect2MultipleWidget
 from django.contrib.auth import get_user_model
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_dataproducts.forms')
 
+class MultiFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
 
 class ObservatoryChoiceField(forms.ModelChoiceField):
 
@@ -55,10 +57,15 @@ class DataProductUploadForm(forms.Form):
     )
 
     files = forms.FileField(
-        label="Choose a Files",
-        widget=forms.ClearableFileInput(
-            attrs={'multiple': True,'class': 'custom-label'}
-        ),
+        required=False,
+        widget=MultiFileInput(attrs={'multiple': True}),  # <- instead of ClearableFileInput
+    
+
+    # files = forms.FileField(
+    #     label="Choose a Files",
+    #     widget=forms.ClearableFileInput(
+    #         attrs={'multiple': True,'class': 'custom-label'}
+    #     ),
     )
     data_product_type = forms.ChoiceField(
         choices=[v for k, v in settings.DATA_PRODUCT_TYPES.items()],
