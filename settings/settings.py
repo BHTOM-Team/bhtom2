@@ -130,8 +130,10 @@ INSTALLED_APPS = [
     'django_guid',
     'django_prometheus',
     'captcha',
-    'django_select2'
+    'django_select2',    
 ]
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -145,12 +147,23 @@ MIDDLEWARE = [
     'bhtom_base.bhtom_common.middleware.ExternalServiceMiddleware',
     'bhtom_base.bhtom_common.middleware.AuthStrategyMiddleware',
     'bhtom_custom_registration.bhtom_registration.middleware.RedirectAuthenticatedUsersFromRegisterMiddleware',
-    'bhtom_custom_registration.bhtom_registration.middleware.TermsCheckMiddleware',
+  #  'bhtom_custom_registration.bhtom_registration.middleware.TermsCheckMiddleware',
     'django_guid.middleware.guid_middleware',
     'bhtom2.middleware.RequestLogMiddleware',
     'bhtom2.middleware.AccessControlMiddleware',
     'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django_prometheus.middleware.PrometheusAfterMiddleware',
+]
+
+INSTALLED_APPS += ["bhtomdocsbot", "corsheaders"]
+
+MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
+    *MIDDLEWARE,
+]
+# CORS: allow your own site; add GitHub Pages origin later if you embed there
+CORS_ALLOWED_ORIGINS = [
+    "https://bhtom.space",
 ]
 
 ROOT_URLCONF = 'bhtom2.urls'
@@ -179,19 +192,33 @@ WSGI_APPLICATION = 'bhtom2.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'NAME': secret.get("POSTGRES_NAME", 'bhtom2'),
-        'ENGINE': 'django.db.backends.postgresql',
-        'USER': secret.get("POSTGRES_USER", 'bhtom2'),
-        'PASSWORD': secret.get("POSTGRES_PASSWORD", "bhtom2"),
-        'HOST': secret.get('POSTGRES_HOST', 'localhost'),
-        'PORT': secret.get('POSTGRES_PORT', 5432),
-        'TEST': {
-            'NAME': secret.get("POSTGRES_TEST_DB_NAME", 'test_bhtom2')
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+USE_SQLITE = os.getenv("USE_SQLITE", "1") == "1"  # default to sqlite in dev
+
+if USE_SQLITE:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
-    },
-}
+    }
+else:
+    DATABASES = {
+        'default': {
+            'NAME': secret.get("POSTGRES_NAME", 'bhtom2'),
+            'ENGINE': 'django.db.backends.postgresql',
+            'USER': secret.get("POSTGRES_USER", 'bhtom2'),
+            'PASSWORD': secret.get("POSTGRES_PASSWORD", "bhtom2"),
+            'HOST': secret.get('POSTGRES_HOST', 'localhost'),
+            'PORT': secret.get('POSTGRES_PORT', 5432),
+            'TEST': {
+                'NAME': secret.get("POSTGRES_TEST_DB_NAME", 'test_bhtom2')
+            }
+        },
+    }
 
 MIGRATION_MODULES = {
     'bhtom2': 'bhtom2.migrations'

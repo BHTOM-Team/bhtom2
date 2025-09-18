@@ -11,76 +11,206 @@
     gtag('config', 'G-C6NWTCL3HF');
   </script>
 
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
-    {% bootstrap_css %}
-    <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
-    <link rel="stylesheet" href="//cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
-    {% block additional_css %}
-    {% endblock %}
-    <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+  <!-- Bootstrap CSS -->
+  {% bootstrap_css %}
+  <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
+  <link rel="stylesheet" href="//cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+  {% block additional_css %}{% endblock %}
+  <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}"/>
 
-    {% bootstrap_javascript jquery='True' %}
+  {% bootstrap_javascript jquery='True' %}
 
-    <title>BHTOM | {% block title %}{% endblock %}</title>
+  <title>BHTOM | {% block title %}{% endblock %}</title>
 </head>
 <body>
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <a class="navbar-brand" href="/"><img src="{% static 'logo.png' %}" class="img-fluid"> BHTOM</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
-            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+  <a class="navbar-brand" href="/"><img src="{% static 'logo.png' %}" class="img-fluid"> BHTOM</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+          aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
 
-    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-        <ul class="navbar-nav mr-auto">
-            {% comment "Navbar Content Template" %}
-          The navbar_content.html template defines the list (li) of nav-items that appear
-          in the navbar-nav (ul).
-
-          To customize your navbar-nav in your TOM:
-          1. Create a templates/bhtom_common directory at the project level.
-          2. Copy bhtom_common/templates/bhtom_common/navbar_content.html to your project's
-             templates/bhtom_common directory.
-          3. Customize your navbar content by editing your navbar_content.html.
-
-          For more information,
-          see the Django tutorial, "Writing your first Django app",
-          Part 7, Section "Customize the admin look and feel"
-          {% endcomment %}
-            {% include 'bhtom_common/navbar_content.html' %}
-
-        </ul>
-        <ul class="navbar-nav ml-auto" id="login-buttons">
-            {% navbar_login %}
-        </ul>
-    </div>
-    
+  <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+    <ul class="navbar-nav mr-auto">
+      {% include 'bhtom_common/navbar_content.html' %}
+    </ul>
+    <ul class="navbar-nav ml-auto" id="login-buttons">
+      {% navbar_login %}
+    </ul>
+  </div>
 </nav>
 
- {% if PROFILE != 'PROD' %}
+{% if PROFILE != 'PROD' %}
 <div class="alert alert-danger" role="alert">
   This is a Test environment.
 </div>
 {% endif %}
 
-
 <main role="main" class="container-fluid">
-    {% bootstrap_messages %}
-    <div class="content">
-        {% block content %}
-        {% endblock %}
-    </div>
-
+  {% bootstrap_messages %}
+  <div class="content">
+    {% block content %}{% endblock %}
+  </div>
 </main>
 
-{% block javascript %}
-{% endblock %}
-{% block extra_javascript %}
-{% endblock %}
+{% block javascript %}{% endblock %}
+{% block extra_javascript %}{% endblock %}
+
+<!-- =========================
+     BHTOM doc chatbot (clean)
+     ========================= -->
+<style>
+/* Launcher button */
+#bhtom-bubble{
+  position:fixed; right:16px; bottom:16px; width:56px; height:56px; border-radius:50%;
+  background:#2a5bff; color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,.2); z-index:9999; font-size:22px; overflow:hidden; text-overflow:clip;
+}
+
+/* Panel: hidden by default; flex only when .open */
+#bhtom-panel{
+  position:fixed; right:16px; bottom:84px; width:420px; max-width:92vw; height:600px; max-height:75vh;
+  background:#fff; border:1px solid #e6e6e6; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.12);
+  display:none; overflow:hidden; z-index:9999; color:#111 !important; font-size:14px; line-height:1.45;
+}
+#bhtom-panel.open{ display:flex; flex-direction:column; }
+
+/* Header / Body / Input */
+#bhtom-header{
+  padding:12px 14px; font:600 14px system-ui; border-bottom:1px solid #eee;
+  display:flex; justify-content:space-between; align-items:center;
+}
+#bhtom-body{
+  padding:12px; flex:1 1 auto; overflow-y:auto !important; overflow-x:hidden;
+  background:#fafafa; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; scrollbar-gutter:stable;
+}
+#bhtom-input{ display:flex; border-top:1px solid #eee; }
+#bhtom-input input{ flex:1; border:0; padding:12px; font:14px system-ui; background:#fff; }
+#bhtom-input button{
+  border:0; padding:0 14px; cursor:pointer; font:600 14px system-ui; background:#2a5bff; color:#fff; border-radius:8px; margin:8px;
+}
+
+/* Messages */
+#bhtom-body .chat-rows{ display:flex; flex-direction:column; }
+.msg{
+  background:#fff; border:1px solid #eee; border-radius:10px; padding:10px 12px; margin:8px 0; line-height:1.45;
+  max-width:100%; word-break:break-word; overflow-wrap:anywhere; color:#111 !important; font-size:14px;
+}
+.msg.user{ background:#e9f0ff; border-color:#d9e4ff; align-self:flex-end; color:#0f172a !important; }
+.msg small{ color:#666 !important; }
+.msg pre{ max-width:100%; overflow:auto; padding:10px; background:#0b1020; color:#e8edf2 !important; border-radius:8px; font-size:12px; }
+.msg code{ font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace; white-space:pre-wrap; }
+#bhtom-panel .msg table{ display:block; max-width:100%; overflow-x:auto; }
+#bhtom-panel .msg img{ max-width:100%; height:auto; }
+#bhtom-panel a{ color:#2a5bff; text-decoration:underline; }
+
+/* Thinking indicator */
+.thinking{ position:relative; color:#333 !important; }
+.thinking:after{
+  content:""; display:inline-block; margin-left:8px; width:18px; height:18px; border-radius:50%;
+  border:2px solid #bbb; border-top-color:#2a5bff; animation:spin 0.9s linear infinite; vertical-align:middle;
+}
+@keyframes spin{ to{ transform:rotate(360deg) } }
+</style>
+
+<!-- Markdown & sanitization -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.5/dist/purify.min.js"></script>
+
+<div id="bhtom-bubble" title="Ask the BHTOM docs bot">💬</div>
+<div id="bhtom-panel">
+  <div id="bhtom-header">
+    <span>BHTOM Docs Bot</span>
+    <span id="bhtom-status" style="font:12px system-ui;color:#777"></span>
+  </div>
+  <div id="bhtom-body"><div class="chat-rows"></div></div>
+  <div id="bhtom-input">
+    <input id="bhtom-q" placeholder="Ask about the GUI, API, uploads…" autocomplete="off">
+    <button id="bhtom-send">Send</button>
+  </div>
+</div>
+
+<script>
+const START_URL="/chat/start/"; const MESSAGE_URL="/chat/message/";
+const $=id=>document.getElementById(id);
+const row=()=>document.querySelector("#bhtom-body .chat-rows");
+
+let THREAD_ID=null, BUSY=false;
+
+// Toggle panel via class (hidden by default)
+$("bhtom-bubble").onclick=()=>{
+  const p=$("bhtom-panel");
+  p.classList.toggle("open");
+  if (p.classList.contains("open")) $("bhtom-q").focus();
+};
+
+// Close on Escape
+document.addEventListener("keydown", (e)=>{
+  if(e.key==="Escape") $("bhtom-panel").classList.remove("open");
+});
+
+function renderMarkdown(md){
+  marked.setOptions({ breaks:true, gfm:true });
+  const html=marked.parse(md||"");
+  return DOMPurify.sanitize(html);
+}
+
+function addMsg(role, html, opts={}){
+  const el=document.createElement("div");
+  el.className="msg "+(role==="You"?"user":"bot")+(opts.thinking?" thinking":"");
+  el.innerHTML=html;
+  row().appendChild(el);
+  const body=$("bhtom-body");
+  body.scrollTop=body.scrollHeight;   // keep at bottom
+  return el;
+}
+
+async function ensureThread(){
+  if(THREAD_ID) return;
+  const r=await fetch(START_URL,{method:"POST"});
+  const j=await r.json(); THREAD_ID=j.thread_id;
+}
+
+// Ensure spinner is visible ≥ 400ms so users see it
+async function minDelay(promise, ms){
+  const t=new Promise(res=>setTimeout(res,ms));
+  const [result]=await Promise.all([promise,t]);
+  return result;
+}
+
+async function send(){
+  if(BUSY) return;
+  const q=$("bhtom-q").value.trim(); if(!q) return;
+  $("bhtom-q").value=""; addMsg("You", DOMPurify.sanitize(q));
+  BUSY=true; $("bhtom-send").disabled=true; $("bhtom-status").textContent="Thinking…";
+  const thinkingEl=addMsg("Bot", "<b>Thinking…</b>", {thinking:true});
+  try{
+    await ensureThread();
+    const resp = await minDelay(fetch(MESSAGE_URL,{
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({thread_id:THREAD_ID, message:q})
+    }), 400);
+    const j=await resp.json();
+    const sources=(j.citations||[]).map(n=>`- ${n}`).join("\n");
+    let md=j.answer || "(no response)";
+    if(sources) md += `\n\n### Sources\n${sources}`;
+    thinkingEl.classList.remove("thinking");
+    thinkingEl.innerHTML=renderMarkdown(md);
+  }catch(e){
+    thinkingEl.classList.remove("thinking");
+    thinkingEl.innerHTML=`<b>Error:</b> ${DOMPurify.sanitize(e.message||String(e))}`;
+  }finally{
+    BUSY=false; $("bhtom-send").disabled=false; $("bhtom-status").textContent="";
+    $("bhtom-q").focus();
+  }
+}
+$("bhtom-send").onclick=send;
+$("bhtom-q").addEventListener("keydown",e=>{ if(e.key==="Enter") send(); });
+</script>
+
 </body>
 </html>
-

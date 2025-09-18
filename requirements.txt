@@ -1,6 +1,7 @@
 alerce==1.0.1
 antares-client==1.1.0
-astroplan==0.8
+astropy>=5.3,<6
+astroplan>=0.10,<0.11
 beautifulsoup4>=4.9
 django==4.0.4
 django-bootstrap4>=3,<22
@@ -26,7 +27,6 @@ psycopg2-binary==2.9.3
 sentry-sdk==1.5.10
 typing-extensions>=4.2.0
 ztfquery==1.18.2
-astropy>=5.2.1
 astroquery>=0.4.4
 numpy>=1.22.3
 requests>=2.27.1
@@ -40,7 +40,8 @@ specutils==1.5.0
 sphinx>=4.0
 lxml==4.9.1
 crispy-bootstrap4>=2022.1
-openai==0.28.0
+openai>=1.40.0
+httpx<0.28
 drf_yasg==1.21.6 #swagger
 MulensModel>=2.15.0
 aiokafka==0.8.1
@@ -52,3 +53,4 @@ django-prometheus==2.3.1
 prometheus_client==0.20.0
 django-simple-captcha
 django-select2
+django-cors-headers
