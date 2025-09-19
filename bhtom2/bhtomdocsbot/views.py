@@ -1,8 +1,10 @@
 # bhtomdocsbot/views.py
-import json, os
+import json
+from django.conf import settings
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from openai import OpenAI
+
 
 def _client():
     return OpenAI()  # uses OPENAI_API_KEY from env
@@ -29,7 +31,7 @@ def chat_message(request):
 
     thread_id = body.get("thread_id")
     message = (body.get("message") or "").strip()
-    asst_id  = os.getenv("BHTOM_ASSISTANT_ID")
+    asst_id  = settings.BHTOM_ASSISTANT_ID
 
     if not thread_id or not message:
         return HttpResponseBadRequest("thread_id and message are required")

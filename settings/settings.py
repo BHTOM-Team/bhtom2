@@ -66,6 +66,7 @@ PROPOSALS_API_KEYS = {
 }
 
 OPENAI_API_KEY = secret.get('OPENAI_API_KEY', '')
+BHTOM_ASSISTANT_ID = secret.get('BHTOM_ASSISTANT_ID', '')
 
 # E-mail Messages
 
