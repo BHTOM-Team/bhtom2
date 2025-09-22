@@ -56,7 +56,7 @@ urlpatterns = [
     path("public/observatory/<str:identifier>",ObservatoryPublicDetailView.as_view(), name="public_obs_details"),
     path('captcha/', include('captcha.urls')),
     path('select2/', include('django_select2.urls')),
-    path("", include("bhtom_docsbot.urls")),  # mounts /chat/start/ and /chat/message/
+    path("", include("bhtom2.bhtom_docsbot.urls")),  # mounts /chat/start/ and /chat/message/
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
