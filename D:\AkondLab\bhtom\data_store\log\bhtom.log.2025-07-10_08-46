@@ -1,0 +1,12 @@
+[2025-07-10 08:45:33,300 - None - INFO] : registering new views: args: ('groups', <class 'bhtom_base.bhtom_common.api_views.GroupViewSet'>, 'groups'), kwargs: {}
+[2025-07-10 08:45:33,303 - None - INFO] : registering new views: args: ('targets', <class 'bhtom_base.bhtom_targets.api_views.TargetViewSet'>, 'targets'), kwargs: {}
+[2025-07-10 08:45:33,304 - None - INFO] : registering new views: args: ('targetextra', <class 'bhtom_base.bhtom_targets.api_views.TargetExtraViewSet'>, 'targetextra'), kwargs: {}
+[2025-07-10 08:45:33,304 - None - INFO] : registering new views: args: ('targetname', <class 'bhtom_base.bhtom_targets.api_views.TargetNameViewSet'>, 'targetname'), kwargs: {}
+[2025-07-10 08:45:33,321 - None - INFO] : registering new views: args: ('observations', <class 'bhtom_base.bhtom_observations.api_views.ObservationRecordViewSet'>, 'observations'), kwargs: {}
+[2025-07-10 08:45:33,331 - None - INFO] : registering new views: args: ('dataproducts', <class 'bhtom_base.bhtom_dataproducts.api_views.DataProductViewSet'>, 'dataproducts'), kwargs: {}
+[2025-07-10 08:46:34,159 - None - INFO] : registering new views: args: ('groups', <class 'bhtom_base.bhtom_common.api_views.GroupViewSet'>, 'groups'), kwargs: {}
+[2025-07-10 08:46:34,162 - None - INFO] : registering new views: args: ('targets', <class 'bhtom_base.bhtom_targets.api_views.TargetViewSet'>, 'targets'), kwargs: {}
+[2025-07-10 08:46:34,162 - None - INFO] : registering new views: args: ('targetextra', <class 'bhtom_base.bhtom_targets.api_views.TargetExtraViewSet'>, 'targetextra'), kwargs: {}
+[2025-07-10 08:46:34,163 - None - INFO] : registering new views: args: ('targetname', <class 'bhtom_base.bhtom_targets.api_views.TargetNameViewSet'>, 'targetname'), kwargs: {}
+[2025-07-10 08:46:34,186 - None - INFO] : registering new views: args: ('observations', <class 'bhtom_base.bhtom_observations.api_views.ObservationRecordViewSet'>, 'observations'), kwargs: {}
+[2025-07-10 08:46:34,200 - None - INFO] : registering new views: args: ('dataproducts', <class 'bhtom_base.bhtom_dataproducts.api_views.DataProductViewSet'>, 'dataproducts'), kwargs: {}
