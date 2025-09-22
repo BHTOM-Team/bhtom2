@@ -125,12 +125,14 @@ INSTALLED_APPS = [
     'bhtom2.apps.BHTOM2Config',
     'bhtom2.bhtom_observatory.apps.BhtomObservatoryConfig',
     'bhtom2.bhtom_calibration.apps.BhtomCalibrationConfig',
+    'bhtom2.bhtom_docsbot.apps.BhtomdocsbotConfig',
     'crispy_bootstrap4',
     'drf_yasg',
     'django_guid',
     'django_prometheus',
     'captcha',
-    'django_select2',    
+    'django_select2',
+    'corsheaders',
 ]
 
 
@@ -153,14 +155,9 @@ MIDDLEWARE = [
     'bhtom2.middleware.AccessControlMiddleware',
     'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django_prometheus.middleware.PrometheusAfterMiddleware',
+    "corsheaders.middleware.CorsMiddleware"
 ]
 
-INSTALLED_APPS += ["bhtomdocsbot", "corsheaders"]
-
-MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
-    *MIDDLEWARE,
-]
 # CORS: allow your own site; add GitHub Pages origin later if you embed there
 CORS_ALLOWED_ORIGINS = [
     "https://bhtom.space",
