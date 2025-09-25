@@ -261,43 +261,47 @@
                                 <td>{{ ccdphot.ccdphot_stdout_file|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Object</td>
+                                <td>Object name</td>
                                 <td>{{ ccdphot.fits_object|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits RA</td>
+                                <td>Right Ascension of the center of FoV [deg]</td>
                                 <td>{{ ccdphot.fits_ra|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits DEC</td>
+                                <td>Declination of the center of FoV [deg]</td>
                                 <td>{{ ccdphot.fits_dec|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits MJD</td>
+                                <td>Modified Julian Date [-]</td>
                                 <td>{{ ccdphot.fits_mjd|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits HJD</td>
+                                <td>Heliocentric Julian Date [-]</td>
                                 <td>{{ ccdphot.fits_hjd|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits EXP</td>
+                                <td>Barycentric Julian Date [-]</td>
+                                <td>{{ ccdphot.fits_bjd|default:"N/A" }}</td>
+                            </tr>
+                            <tr>
+                                <td>Exposure time [s]</td>
                                 <td>{{ ccdphot.fits_exp|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Filter</td>
+                                <td>Filter in the header</td>
                                 <td>{{ ccdphot.fits_filter|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Origin</td>
+                                <td>Origin of the data</td>
                                 <td>{{ ccdphot.fits_origin|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Observatory</td>
+                                <td>Name of the observatory site</td>
                                 <td>{{ ccdphot.fits_observat|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Telescope</td>
+                                <td>Telescope name or type</td>
                                 <td>{{ ccdphot.fits_telescop|default:"N/A" }}</td>
                             </tr>
                             <tr>
@@ -305,87 +309,83 @@
                                 <td>{{ ccdphot.fits_instrume|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Observer</td>
+                                <td>Observer's name</td>
                                 <td>{{ ccdphot.fits_observer|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits FWHM X</td>
+                                <td>Full-Width-at-Half-Maximum along X axis (median) [px]</td>
                                 <td>{{ ccdphot.fits_fwhm_x|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits FWHM Y</td>
+                                <td>Full-Width-at-Half-Maximum along Y axis (median) [px]</td>
                                 <td>{{ ccdphot.fits_fwhm_y|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits FWHM Average</td>
+                                <td>Average Full-Width-at-Half-Maximum [px]</td>
                                 <td>{{ ccdphot.fits_fwhm_av|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Seeing</td>
+                                <td>Average calculated seeing [arcsec]</td>
                                 <td>{{ ccdphot.fits_seeing|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Airmass</td>
+                                <td>Airmass [-]</td>
                                 <td>{{ ccdphot.fits_airmass|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Photometric Flag</td>
+                                <td>Photometric flag</td>
                                 <td>{{ ccdphot.fits_photflag|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Moon Elevation</td>
+                                <td>Moon elevation above horizon [deg]</td>
                                 <td>{{ ccdphot.fits_moonelev|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Sun Elevation</td>
+                                <td>Sun elevation above horizon [deg]</td>
                                 <td>{{ ccdphot.fits_sunelev|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Moon Distance</td>
+                                <td>Moon angular distance [deg]</td>
                                 <td>{{ ccdphot.fits_moondist|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Moon Azimuth</td>
+                                <td>Moon azimuth [deg]</td>
                                 <td>{{ ccdphot.fits_moonaz|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Sun Azimuth</td>
+                                <td>Sun azimuth [deg]</td>
                                 <td>{{ ccdphot.fits_sunaz|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Sun Distance</td>
+                                <td>Sun angular distance [deg]</td>
                                 <td>{{ ccdphot.fits_sundist|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Moon Fraction</td>
+                                <td>Moon fractional phase [-]</td>
                                 <td>{{ ccdphot.fits_moonfrac|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Number of Stars</td>
+                                <td>Number of stars detected in the image [-]</td>
                                 <td>{{ ccdphot.fits_numstars|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Filename</td>
+                                <td>Original filename</td>
                                 <td>{{ ccdphot.fits_filename|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits BJD</td>
-                                <td>{{ ccdphot.fits_bjd|default:"N/A" }}</td>
-                            </tr>
-                            <tr>
-                                <td>Fits Uploader</td>
+                                <td>Uploader's name</td>
                                 <td>{{ ccdphot.fits_uploader|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>Fits Original Name</td>
+                                <td>Observatory name</td>
                                 <td>{{ ccdphot.fits_oname|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>GLIM</td>
+                                <td>Calculated limiting magnitude in the frame in Gaia G [mag]</td>
                                 <td>{{ ccdphot.fits_glim|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td>TOIIFOV</td>
+                                <td>Is Target-Of-Interest present in the frame?</td>
                                 <td>{{ ccdphot.fits_toiifov|default:"N/A" }}</td>
                             </tr>
                              <tr>
