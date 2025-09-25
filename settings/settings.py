@@ -133,7 +133,6 @@ INSTALLED_APPS = [
     'django_prometheus',
     'captcha',
     'django_select2',
-    'corsheaders',
 ]
 
 
@@ -150,18 +149,12 @@ MIDDLEWARE = [
     'bhtom_base.bhtom_common.middleware.ExternalServiceMiddleware',
     'bhtom_base.bhtom_common.middleware.AuthStrategyMiddleware',
     'bhtom_custom_registration.bhtom_registration.middleware.RedirectAuthenticatedUsersFromRegisterMiddleware',
-  #  'bhtom_custom_registration.bhtom_registration.middleware.TermsCheckMiddleware',
+    'bhtom_custom_registration.bhtom_registration.middleware.TermsCheckMiddleware',
     'django_guid.middleware.guid_middleware',
     'bhtom2.middleware.RequestLogMiddleware',
     'bhtom2.middleware.AccessControlMiddleware',
     'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django_prometheus.middleware.PrometheusAfterMiddleware',
-    "corsheaders.middleware.CorsMiddleware"
-]
-
-# CORS: allow your own site; add GitHub Pages origin later if you embed there
-CORS_ALLOWED_ORIGINS = [
-    "https://bhtom.space",
 ]
 
 ROOT_URLCONF = 'bhtom2.urls'
