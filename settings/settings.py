@@ -67,6 +67,7 @@ PROPOSALS_API_KEYS = {
 }
 
 OPENAI_API_KEY = secret.get('OPENAI_API_KEY', '')
+BHTOM_ASSISTANT_ID = secret.get('BHTOM_ASSISTANT_ID', '')
 
 # E-mail Messages
 
@@ -125,13 +126,17 @@ INSTALLED_APPS = [
     'bhtom2.apps.BHTOM2Config',
     'bhtom2.bhtom_observatory.apps.BhtomObservatoryConfig',
     'bhtom2.bhtom_calibration.apps.BhtomCalibrationConfig',
+    'bhtom2.bhtom_docsbot.apps.BhtomdocsbotConfig',
     'crispy_bootstrap4',
     'drf_yasg',
     'django_guid',
     'django_prometheus',
     'captcha',
-    'django_select2'
+    'django_select2',
+    'corsheaders',
 ]
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -145,12 +150,18 @@ MIDDLEWARE = [
     'bhtom_base.bhtom_common.middleware.ExternalServiceMiddleware',
     'bhtom_base.bhtom_common.middleware.AuthStrategyMiddleware',
     'bhtom_custom_registration.bhtom_registration.middleware.RedirectAuthenticatedUsersFromRegisterMiddleware',
-    'bhtom_custom_registration.bhtom_registration.middleware.TermsCheckMiddleware',
+  #  'bhtom_custom_registration.bhtom_registration.middleware.TermsCheckMiddleware',
     'django_guid.middleware.guid_middleware',
     'bhtom2.middleware.RequestLogMiddleware',
     'bhtom2.middleware.AccessControlMiddleware',
     'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django_prometheus.middleware.PrometheusAfterMiddleware',
+    "corsheaders.middleware.CorsMiddleware"
+]
+
+# CORS: allow your own site; add GitHub Pages origin later if you embed there
+CORS_ALLOWED_ORIGINS = [
+    "https://bhtom.space",
 ]
 
 ROOT_URLCONF = 'bhtom2.urls'
@@ -189,6 +200,7 @@ DATABASES = {
         'PORT': secret.get('POSTGRES_PORT', 5432),
         'TEST': {
             'NAME': secret.get("POSTGRES_TEST_DB_NAME", 'test_bhtom2')
+
         }
     },
 }
