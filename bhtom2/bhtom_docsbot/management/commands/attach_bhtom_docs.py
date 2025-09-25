@@ -1,5 +1,6 @@
 import os, json, requests
 from pathlib import Path
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from openai import OpenAI
 
@@ -28,8 +29,8 @@ class Command(BaseCommand):
     requires_migrations_checks = False
 
     def handle(self, *args, **opts):
-        api_key = os.getenv("OPENAI_API_KEY")
-        asst_id = os.getenv("BHTOM_ASSISTANT_ID")
+        api_key = settings.OPENAI_API_KEY
+        asst_id = settings.BHTOM_ASSISTANT_ID
         if not api_key:  # safety checks
             self.stderr.write(self.style.ERROR("OPENAI_API_KEY not set"))
             return
