@@ -153,83 +153,89 @@
     <button id="bhtom-send">Send</button>
   </div>
 </div>
-
 <script>
-const START_URL="/chat/start/"; const MESSAGE_URL="/chat/message/";
-const $=id=>document.getElementById(id);
-const row=()=>document.querySelector("#bhtom-body .chat-rows");
+const START_URL="/chat/start/"; 
+const MESSAGE_URL="/chat/message/";
+const getEl = id => document.getElementById(id);   // ← renamed to avoid conflict
+const row = () => document.querySelector("#bhtom-body .chat-rows");
 
-let THREAD_ID=null, BUSY=false;
+let THREAD_ID = null, BUSY = false;
 
 // Toggle panel via class (hidden by default)
-$("bhtom-bubble").onclick=()=>{
-  const p=$("bhtom-panel");
+getEl("bhtom-bubble").onclick = () => {
+  const p = getEl("bhtom-panel");
   p.classList.toggle("open");
-  if (p.classList.contains("open")) $("bhtom-q").focus();
+  if (p.classList.contains("open")) getEl("bhtom-q").focus();
 };
 
 // Close on Escape
-document.addEventListener("keydown", (e)=>{
-  if(e.key==="Escape") $("bhtom-panel").classList.remove("open");
+document.addEventListener("keydown", (e) => {
+  if(e.key==="Escape") getEl("bhtom-panel").classList.remove("open");
 });
 
 function renderMarkdown(md){
   marked.setOptions({ breaks:true, gfm:true });
-  const html=marked.parse(md||"");
+  const html = marked.parse(md||"");
   return DOMPurify.sanitize(html);
 }
 
 function addMsg(role, html, opts={}){
-  const el=document.createElement("div");
-  el.className="msg "+(role==="You"?"user":"bot")+(opts.thinking?" thinking":"");
-  el.innerHTML=html;
+  const el = document.createElement("div");
+  el.className = "msg " + (role==="You"?"user":"bot") + (opts.thinking?" thinking":"");
+  el.innerHTML = html;
   row().appendChild(el);
-  const body=$("bhtom-body");
-  body.scrollTop=body.scrollHeight;   // keep at bottom
+  const body = getEl("bhtom-body");
+  body.scrollTop = body.scrollHeight;   // keep at bottom
   return el;
 }
 
 async function ensureThread(){
   if(THREAD_ID) return;
-  const r=await fetch(START_URL,{method:"POST"});
-  const j=await r.json(); THREAD_ID=j.thread_id;
+  const r = await fetch(START_URL,{method:"POST"});
+  const j = await r.json(); THREAD_ID = j.thread_id;
 }
 
-// Ensure spinner is visible ≥ 400ms so users see it
+// Ensure spinner is visible ≥ 400ms
 async function minDelay(promise, ms){
-  const t=new Promise(res=>setTimeout(res,ms));
-  const [result]=await Promise.all([promise,t]);
+  const t = new Promise(res => setTimeout(res, ms));
+  const [result] = await Promise.all([promise,t]);
   return result;
 }
 
 async function send(){
   if(BUSY) return;
-  const q=$("bhtom-q").value.trim(); if(!q) return;
-  $("bhtom-q").value=""; addMsg("You", DOMPurify.sanitize(q));
-  BUSY=true; $("bhtom-send").disabled=true; $("bhtom-status").textContent="Thinking…";
-  const thinkingEl=addMsg("Bot", "<b>Thinking…</b>", {thinking:true});
-  try{
+  const q = getEl("bhtom-q").value.trim(); if(!q) return;
+  getEl("bhtom-q").value = "";
+  addMsg("You", DOMPurify.sanitize(q));
+  BUSY = true; 
+  getEl("bhtom-send").disabled = true; 
+  getEl("bhtom-status").textContent = "Thinking…";
+  const thinkingEl = addMsg("Bot", "<b>Thinking…</b>", {thinking:true});
+  try {
     await ensureThread();
     const resp = await minDelay(fetch(MESSAGE_URL,{
       method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({thread_id:THREAD_ID, message:q})
+      body:JSON.stringify({thread_id: THREAD_ID, message: q})
     }), 400);
-    const j=await resp.json();
-    const sources=(j.citations||[]).map(n=>`- ${n}`).join("\n");
-    let md=j.answer || "(no response)";
+    const j = await resp.json();
+    const sources = (j.citations||[]).map(n=>`- ${n}`).join("\n");
+    let md = j.answer || "(no response)";
     if(sources) md += `\n\n### Sources\n${sources}`;
     thinkingEl.classList.remove("thinking");
-    thinkingEl.innerHTML=renderMarkdown(md);
-  }catch(e){
+    thinkingEl.innerHTML = renderMarkdown(md);
+  } catch(e) {
     thinkingEl.classList.remove("thinking");
-    thinkingEl.innerHTML=`<b>Error:</b> ${DOMPurify.sanitize(e.message||String(e))}`;
-  }finally{
-    BUSY=false; $("bhtom-send").disabled=false; $("bhtom-status").textContent="";
-    $("bhtom-q").focus();
+    thinkingEl.innerHTML = `<b>Error:</b> ${DOMPurify.sanitize(e.message||String(e))}`;
+  } finally {
+    BUSY = false; 
+    getEl("bhtom-send").disabled = false; 
+    getEl("bhtom-status").textContent = "";
+    getEl("bhtom-q").focus();
   }
 }
-$("bhtom-send").onclick=send;
-$("bhtom-q").addEventListener("keydown",e=>{ if(e.key==="Enter") send(); });
+
+getEl("bhtom-send").onclick = send;
+getEl("bhtom-q").addEventListener("keydown", e => { if(e.key==="Enter") send(); });
 </script>
 
 </body>
