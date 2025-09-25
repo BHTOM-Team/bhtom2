@@ -7,7 +7,7 @@ from openai import OpenAI
 
 
 def _client():
-    return OpenAI()  # uses OPENAI_API_KEY from env
+    return OpenAI(api_key=settings.OPENAI_API_KEY)
 
 def _has_new_surface(c):
     return hasattr(c, "threads") and hasattr(c, "assistants")
