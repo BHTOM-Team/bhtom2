@@ -6,19 +6,48 @@
     <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
     <link rel="stylesheet" href="{% static 'bhtom_targets/css/main.css' %}">
     <style>
-        .dhtmlwindow {
-            top: 100px !important;
-        }
-        .table-secondary {
-            height: 3px !important;
-            line-height: 3px !important;
-            padding: 2px 8px !important;
-        }
-        .table-secondary td {
-            padding: 2px 8px !important;
-            vertical-align: middle !important;
-        }
-    </style>
+    .dhtmlwindow {
+        top: 100px !important;
+    }
+    .table-secondary {
+        height: 3px !important;
+        line-height: 3px !important;
+        padding: 2px 8px !important;
+    }
+    .table-secondary td {
+        padding: 2px 8px !important;
+        vertical-align: middle !important;
+    }
+    
+    /* Jednakowa wysokość dla wszystkich zakładek */
+    .nav-link {
+        height: 60px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 18px !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Style dla aktywnej zakładki CCDPHOT */
+    .nav-link.active[data-target="#ccdphot"] {
+        background-color: #343a40 !important;
+        border: 2px solid white !important;
+        border-radius: 4px !important;
+    }
+    
+    /* Style dla nieaktywnej zakładki CCDPHOT */
+    .nav-link[data-target="#ccdphot"]:not(.active) {
+        background-color: transparent !important;
+        border: 2px solid transparent !important;
+    }
+    
+    /* Hover effect dla zakładki CCDPHOT */
+    .nav-link[data-target="#ccdphot"]:hover {
+        background-color: #495057 !important;
+        border: 2px solid #dee2e6 !important;
+    }
+</style>
 {% endblock %}
 {% block content %}
     {% include 'bhtom_dataproducts/partials/js9_scripts.html' %}
@@ -27,10 +56,11 @@
     <ul class="nav nav-tabs" id="tabs">
         <li class="nav-item">
           <span class="nav-link active" data-target="#calib" data-toggle="tab">Calibration</span>
-        </li>
         {% if object.data_product_type == "fits_file" %}
             <li class="nav-item">
-                <span class="nav-link" data-target="#ccdphot" data-toggle="tab">CCDPHOT</span>
+                <span class="nav-link" data-target="#ccdphot" data-toggle="tab">
+                    <img src="{% static 'CCD.svg' %}" alt="CCDPHOT" style="height: 60px; width: 120px; vertical-align: middle;">
+                </span>
             </li>
         {% endif %}
     </ul>
@@ -347,22 +377,22 @@
                             </tr>
                             <tr>
                                 <td><strong>Date & Time of observation (at start)</strong></td>
-                                <td>{{ ccdphot.fits_obsdate|default:"N/A" }}</td>
+                                <td>{{ ccdphot.fits_dateobs|default:"N/A" }}</td>
                             </tr>
                             <tr>
                                 <td><strong>Exposure time [s]</strong></td>
                                 <td>{{ ccdphot.fits_exp|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Modified Julian Date [-]</strong></td>
+                                <td><strong>Modified Julian Date</strong></td>
                                 <td>{{ ccdphot.fits_mjd|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Heliocentric Julian Date [-]</strong></td>
+                                <td><strong>Heliocentric Julian Date</strong></td>
                                 <td>{{ ccdphot.fits_hjd|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Barycentric Julian Date [-]</strong></td>
+                                <td><strong>Barycentric Julian Date</strong></td>
                                 <td>{{ ccdphot.fits_bjd|default:"N/A" }}</td>
                             </tr>
                             
@@ -379,7 +409,7 @@
                                 <td>{{ ccdphot.fits_azimuth|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Airmass [-]</strong></td>
+                                <td><strong>Airmass</strong></td>
                                 <td>{{ ccdphot.fits_airmass|default:"N/A" }}</td>
                             </tr>
                             
@@ -400,7 +430,7 @@
                                 <td>{{ ccdphot.fits_moondist|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Moon fractional phase [-]</strong></td>
+                                <td><strong>Moon fractional phase</strong></td>
                                 <td>{{ ccdphot.fits_moonfrac|default:"N/A" }}</td>
                             </tr>
                             <tr>
@@ -437,7 +467,7 @@
                                 <td>{{ ccdphot.fits_seeing|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Number of stars detected in the image [-]</strong></td>
+                                <td><strong>Number of stars detected in the image</strong></td>
                                 <td>{{ ccdphot.fits_numstars|default:"N/A" }}</td>
                             </tr>
                             <tr>
