@@ -30,7 +30,9 @@
         </li>
         {% if object.data_product_type == "fits_file" %}
             <li class="nav-item">
-                <span class="nav-link" data-target="#ccdphot" data-toggle="tab">CCDPHOT</span>
+                <span class="nav-link" data-target="#ccdphot" data-toggle="tab">
+    <img src="{% static 'CCD.svc' %}" alt="CCDPHOT" style="height: 20px;">
+</span>
             </li>
         {% endif %}
     </ul>
@@ -347,22 +349,22 @@
                             </tr>
                             <tr>
                                 <td><strong>Date & Time of observation (at start)</strong></td>
-                                <td>{{ ccdphot.fits_obsdate|default:"N/A" }}</td>
+                                <td>{{ ccdphot.fits_dateobs|default:"N/A" }}</td>
                             </tr>
                             <tr>
                                 <td><strong>Exposure time [s]</strong></td>
                                 <td>{{ ccdphot.fits_exp|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Modified Julian Date [-]</strong></td>
+                                <td><strong>Modified Julian Date</strong></td>
                                 <td>{{ ccdphot.fits_mjd|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Heliocentric Julian Date [-]</strong></td>
+                                <td><strong>Heliocentric Julian Date</strong></td>
                                 <td>{{ ccdphot.fits_hjd|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Barycentric Julian Date [-]</strong></td>
+                                <td><strong>Barycentric Julian Date</strong></td>
                                 <td>{{ ccdphot.fits_bjd|default:"N/A" }}</td>
                             </tr>
                             
@@ -379,7 +381,7 @@
                                 <td>{{ ccdphot.fits_azimuth|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Airmass [-]</strong></td>
+                                <td><strong>Airmass</strong></td>
                                 <td>{{ ccdphot.fits_airmass|default:"N/A" }}</td>
                             </tr>
                             
@@ -400,7 +402,7 @@
                                 <td>{{ ccdphot.fits_moondist|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Moon fractional phase [-]</strong></td>
+                                <td><strong>Moon fractional phase</strong></td>
                                 <td>{{ ccdphot.fits_moonfrac|default:"N/A" }}</td>
                             </tr>
                             <tr>
@@ -437,7 +439,7 @@
                                 <td>{{ ccdphot.fits_seeing|default:"N/A" }}</td>
                             </tr>
                             <tr>
-                                <td><strong>Number of stars detected in the image [-]</strong></td>
+                                <td><strong>Number of stars detected in the image</strong></td>
                                 <td>{{ ccdphot.fits_numstars|default:"N/A" }}</td>
                             </tr>
                             <tr>
