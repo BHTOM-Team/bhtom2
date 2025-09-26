@@ -18,6 +18,25 @@
             padding: 2px 8px !important;
             vertical-align: middle !important;
         }
+        
+        /* Style dla aktywnej zakładki CCDPHOT */
+        .nav-link.active[data-target="#ccdphot"] {
+            background-color: #343a40 !important;
+            border: 2px solid white !important;
+            border-radius: 4px !important;
+        }
+        
+        /* Style dla nieaktywnej zakładki CCDPHOT */
+        .nav-link[data-target="#ccdphot"]:not(.active) {
+            background-color: transparent !important;
+            border: 2px solid transparent !important;
+        }
+        
+        /* Hover effect dla zakładki CCDPHOT */
+        .nav-link[data-target="#ccdphot"]:hover {
+            background-color: #495057 !important;
+            border: 2px solid #dee2e6 !important;
+        }
     </style>
 {% endblock %}
 {% block content %}
