@@ -374,6 +374,7 @@ def get_client_ip(request):
 
 # UTIL to read the ADS API for papers on this target
 # utils.py (or utils_ads.py)
+import os
 import re
 import requests
 from urllib.parse import quote
@@ -385,118 +386,104 @@ ADS_WEB_ABS = "https://ui.adsabs.harvard.edu/abs/"
 def _ads_url(bibcode: str) -> str:
     return ADS_WEB_ABS + quote(bibcode or "")
 
-# Escape Solr/Lucene specials
+# ---- escaping & heuristics ----
 _SOLR_SPECIALS = re.compile(r'([+\-!(){}\[\]^"~*?:\\/])')
+_NUMERIC_ONLY  = re.compile(r'^\d+$')
+_GAIA_IDLIKE   = re.compile(r'^Gaia(?:DR|EDR)\d+[_\s-]?\d+$', re.IGNORECASE)
 
 def _solr_escape(term: str) -> str:
     return _SOLR_SPECIALS.sub(r'\\\1', term)
 
-# Heuristics: when to AVOID object:
-_NUMERIC_ONLY = re.compile(r'^\d+$')
-_GAIA_IDLIKE  = re.compile(r'^Gaia(?:DR|EDR)\d+[_\s-]?\d+$', re.IGNORECASE)
-
 def _use_object_field(alias: str) -> bool:
-    """
-    Return False for IDs that are not SIMBAD/NED-style object names.
-    """
-    if _NUMERIC_ONLY.match(alias):
-        return False
-    if _GAIA_IDLIKE.match(alias):
-        return False
-    return True  # default: try object + full
+    if _NUMERIC_ONLY.match(alias):    return False
+    if _GAIA_IDLIKE.match(alias):     return False
+    return True
 
-def _build_or_query(names):
+def _build_or_query(names, allow_object: bool = True) -> str:
     """
-    Build a safe OR query across aliases.
-    - For 'objecty' names: (object:"X" OR full:"X")
-    - For numeric / GaiaID-like: full:"X" only
+    Build an OR query across aliases.
+    - if allow_object and alias looks 'objecty' -> (object:"X" OR full:"X")
+    - else                                       -> (full:"X")
     """
-    terms = []
-    seen = set()
+    terms, seen = [], set()
     for n in names or []:
-        if not n:
-            continue
+        if not n: continue
         raw = n.strip()
         key = raw.lower()
-        if not raw or key in seen:
-            continue
+        if not raw or key in seen: continue
         seen.add(key)
-
         esc = _solr_escape(raw)
-        if _use_object_field(raw):
+        if allow_object and _use_object_field(raw):
             terms.append(f'(object:"{esc}" OR full:"{esc}")')
         else:
             terms.append(f'(full:"{esc}")')
-
     return "(" + " OR ".join(terms) + ")" if terms else 'full:""'
 
-def fetch_ads_text_block(names_or_single, rows: int = 50, max_pages: int = 2, timeout: int = 30) -> str:
-    # Normalize input -> list of aliases
+def _normalize_names(names_or_single):
     if isinstance(names_or_single, str):
         parts = []
         for line in names_or_single.split("\n"):
             parts.extend(line.replace(";", ",").split(","))
-        names = [p.strip() for p in parts if p.strip()]
-    else:
-        names = list(names_or_single or [])
+        return [p.strip() for p in parts if p.strip()]
+    return list(names_or_single or [])
 
-    token = (getattr(settings, "ADS_API_KEY", "") or "").strip()
+def fetch_ads_text_block(names_or_single, rows: int = 50, max_pages: int = 2, timeout: int = 30) -> str:
+    names = _normalize_names(names_or_single)
+
+    token = (getattr(settings, "ADS_API_KEY", "") or os.getenv("ADS_API_KEY", "")).strip()
     if not token:
         return "ERROR: ADS API token missing. Set ADS_API_KEY."
 
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/json",
-    }
-    fields = ["bibcode", "title", "author", "year", "pub", "doi"]
-    params = {
-        "q": _build_or_query(names),
-        "fl": ",".join(fields),
-        "fq": "database:astronomy",
-        "rows": rows,
-        "start": 0,
-        "sort": "date desc",
-    }
+    headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
+    fields  = ["bibcode", "title", "author", "year", "pub", "doi"]
 
-    all_docs = []
-    try:
+    def _run_query(allow_object: bool):
+        params = {
+            "q": _build_or_query(names, allow_object=allow_object),
+            "fl": ",".join(fields),
+            "fq": "collection:astronomy",   # fine to use collection here
+            "rows": rows, "start": 0, "sort": "date desc",
+        }
+        all_docs = []
         for _ in range(max_pages):
             r = requests.get(ADS_API_URL, headers=headers, params=params, timeout=timeout)
-            try:
-                r.raise_for_status()
-            except requests.HTTPError as e:
-                # Surface server message to help debug unusual aliases
-                return f"ERROR: {e}\nADS says: {r.text}"
+            r.raise_for_status()
             data = r.json()
             docs = data.get("response", {}).get("docs", [])
             all_docs.extend(docs)
-
             num_found = data.get("response", {}).get("numFound", 0)
             params["start"] += rows
             if params["start"] >= num_found:
                 break
+        return all_docs
+
+    try:
+        try:
+            docs = _run_query(allow_object=True)
+        except requests.HTTPError as e:
+            # If ADS says 'undefined field object', retry without object:
+            text = e.response.text if e.response is not None else ""
+            if "undefined field object" in text:
+                docs = _run_query(allow_object=False)
+            else:
+                return f"ERROR: {e}\nADS says: {text}"
     except requests.RequestException as e:
         return f"ERROR: ADS request failed: {e}"
 
     summary = ", ".join(names) if names else "(none)"
-    lines = [f"Results for names/aliases: {summary}\nCount: {len(all_docs)} item(s)\n"]
-    for i, p in enumerate(all_docs, 1):
-        title = (p.get("title") or [""])[0]
-        year = p.get("year", "")
+    lines = [f"Results for names/aliases: {summary}\nCount: {len(docs)} item(s)\n"]
+    for i, p in enumerate(docs, 1):
+        title   = (p.get("title") or [""])[0]
+        year    = p.get("year", "")
         authors = p.get("author") or []
-        short_auth = ", ".join(authors[:3]) + (" et al." if len(authors) > 3 else "")
-        bib = p.get("bibcode", "")
-        doi = (p.get("doi") or [None])[0]
-        url = _ads_url(bib)
-
+        short   = ", ".join(authors[:3]) + (" et al." if len(authors) > 3 else "")
+        bib     = p.get("bibcode", "")
+        doi     = (p.get("doi") or [None])[0]
+        url     = _ads_url(bib)
         lines.append(f"{i:>3}. {title} ({year})")
-        if short_auth:
-            lines.append(f"     {short_auth}")
-        if bib:
-            lines.append(f"     bibcode: {bib}")
+        if short: lines.append(f"     {short}")
+        if bib:   lines.append(f"     bibcode: {bib}")
         lines.append(f"     ADS URL: {url}")
-        if doi:
-            lines.append(f"     doi: {doi}")
+        if doi:   lines.append(f"     doi: {doi}")
         lines.append("")
-
     return "\n".join(lines)
