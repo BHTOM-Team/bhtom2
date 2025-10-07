@@ -371,3 +371,107 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
+# UTIL to read the ADS API for papers on this target
+# utils.py
+import requests
+from urllib.parse import quote
+from django.conf import settings
+
+ADS_API_URL = "https://api.adsabs.harvard.edu/v1/search/query"
+ADS_WEB_ABS = "https://ui.adsabs.harvard.edu/abs/"
+
+def _ads_url(bibcode: str) -> str:
+    return ADS_WEB_ABS + quote(bibcode or "")
+
+def _build_or_query(names):
+    """
+    Build an OR query over aliases, searching both ADS-linked objects and full text.
+    Example: (object:"SN2023ixf" OR full:"SN2023ixf" OR object:"AT 2023ixf" OR full:"AT 2023ixf")
+    """
+    cleaned, seen = [], set()
+    for n in names or []:
+        if not n:
+            continue
+        name = n.strip()
+        key = name.lower()
+        if name and key not in seen:
+            seen.add(key)
+            cleaned.append(name)
+
+    if not cleaned:
+        return 'full:""'  # harmless fallback
+
+    per_alias = [f'(object:"{a}" OR full:"{a}")' for a in cleaned]
+    return "(" + " OR ".join(per_alias) + ")"
+
+def fetch_ads_text_block(names_or_single, rows: int = 50, max_pages: int = 2, timeout: int = 30) -> str:
+    """
+    Accepts a string (single name) or an iterable of names/aliases.
+    Returns a single preformatted text block suitable for a <textarea>.
+    """
+    # Normalize input -> list of aliases
+    if isinstance(names_or_single, str):
+        # support comma/semicolon/newline separated input in a single string
+        chunks = []
+        for line in names_or_single.split("\n"):
+            chunks.extend(line.replace(";", ",").split(","))
+        names = [c.strip() for c in chunks if c.strip()]
+    else:
+        names = list(names_or_single or [])
+
+    token = getattr(settings, "ADS_DEV_KEY", None)
+    if not token:
+        return "ERROR: ADS API token missing. Set ADS_DEV_KEY in Django settings or environment."
+
+    q = _build_or_query(names)
+
+    headers = {"Authorization": f"Bearer {token}"}
+    fields = ["bibcode", "title", "author", "year", "pub", "doi"]
+    params = {
+        "q": q,
+        "fl": ",".join(fields),
+        "fq": "database:astronomy",
+        "rows": rows,
+        "start": 0,
+        "sort": "date desc",
+    }
+
+    all_docs = []
+    try:
+        for _ in range(max_pages):
+            r = requests.get(ADS_API_URL, headers=headers, params=params, timeout=timeout)
+            r.raise_for_status()
+            data = r.json()
+            docs = data.get("response", {}).get("docs", [])
+            all_docs.extend(docs)
+
+            num_found = data.get("response", {}).get("numFound", 0)
+            params["start"] += rows
+            if params["start"] >= num_found:
+                break
+    except requests.RequestException as e:
+        return f"ERROR: ADS request failed: {e}"
+
+    summary = ", ".join(names) if names else "(none)"
+    lines = [f"Results for names/aliases: {summary}\nCount: {len(all_docs)} item(s)\n"]
+    for i, p in enumerate(all_docs, 1):
+        title = (p.get("title") or [""])[0]
+        year = p.get("year", "")
+        authors = p.get("author") or []
+        short_auth = ", ".join(authors[:3]) + (" et al." if len(authors) > 3 else "")
+        bib = p.get("bibcode", "")
+        doi = (p.get("doi") or [None])[0]
+        url = _ads_url(bib)
+
+        lines.append(f"{i:>3}. {title} ({year})")
+        if short_auth:
+            lines.append(f"     {short_auth}")
+        if bib:
+            lines.append(f"     bibcode: {bib}")
+        lines.append(f"     ADS URL: {url}")
+        if doi:
+            lines.append(f"     doi: {doi}")
+        lines.append("")  # spacer
+
+    return "\n".join(lines)
