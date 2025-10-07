@@ -420,7 +420,7 @@ def fetch_ads_text_block(names_or_single, rows: int = 50, max_pages: int = 2, ti
     else:
         names = list(names_or_single or [])
 
-    token = getattr(settings, "ADS_DEV_KEY", None)
+    token = settings.ADS_DEV_KEY
     if not token:
         return "ERROR: ADS API token missing. Set ADS_DEV_KEY in Django settings or environment."
 
