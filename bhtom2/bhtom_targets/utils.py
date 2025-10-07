@@ -373,7 +373,8 @@ def get_client_ip(request):
     return ip
 
 # UTIL to read the ADS API for papers on this target
-# utils.py
+# utils.py (or utils_ads.py)
+import re
 import requests
 from urllib.parse import quote
 from django.conf import settings
@@ -384,52 +385,72 @@ ADS_WEB_ABS = "https://ui.adsabs.harvard.edu/abs/"
 def _ads_url(bibcode: str) -> str:
     return ADS_WEB_ABS + quote(bibcode or "")
 
+# Escape Solr/Lucene specials
+_SOLR_SPECIALS = re.compile(r'([+\-!(){}\[\]^"~*?:\\/])')
+
+def _solr_escape(term: str) -> str:
+    return _SOLR_SPECIALS.sub(r'\\\1', term)
+
+# Heuristics: when to AVOID object:
+_NUMERIC_ONLY = re.compile(r'^\d+$')
+_GAIA_IDLIKE  = re.compile(r'^Gaia(?:DR|EDR)\d+[_\s-]?\d+$', re.IGNORECASE)
+
+def _use_object_field(alias: str) -> bool:
+    """
+    Return False for IDs that are not SIMBAD/NED-style object names.
+    """
+    if _NUMERIC_ONLY.match(alias):
+        return False
+    if _GAIA_IDLIKE.match(alias):
+        return False
+    return True  # default: try object + full
+
 def _build_or_query(names):
     """
-    Build an OR query over aliases, searching both ADS-linked objects and full text.
-    Example: (object:"SN2023ixf" OR full:"SN2023ixf" OR object:"AT 2023ixf" OR full:"AT 2023ixf")
+    Build a safe OR query across aliases.
+    - For 'objecty' names: (object:"X" OR full:"X")
+    - For numeric / GaiaID-like: full:"X" only
     """
-    cleaned, seen = [], set()
+    terms = []
+    seen = set()
     for n in names or []:
         if not n:
             continue
-        name = n.strip()
-        key = name.lower()
-        if name and key not in seen:
-            seen.add(key)
-            cleaned.append(name)
+        raw = n.strip()
+        key = raw.lower()
+        if not raw or key in seen:
+            continue
+        seen.add(key)
 
-    if not cleaned:
-        return 'full:""'  # harmless fallback
+        esc = _solr_escape(raw)
+        if _use_object_field(raw):
+            terms.append(f'(object:"{esc}" OR full:"{esc}")')
+        else:
+            terms.append(f'(full:"{esc}")')
 
-    per_alias = [f'(object:"{a}" OR full:"{a}")' for a in cleaned]
-    return "(" + " OR ".join(per_alias) + ")"
+    return "(" + " OR ".join(terms) + ")" if terms else 'full:""'
 
 def fetch_ads_text_block(names_or_single, rows: int = 50, max_pages: int = 2, timeout: int = 30) -> str:
-    """
-    Accepts a string (single name) or an iterable of names/aliases.
-    Returns a single preformatted text block suitable for a <textarea>.
-    """
     # Normalize input -> list of aliases
     if isinstance(names_or_single, str):
-        # support comma/semicolon/newline separated input in a single string
-        chunks = []
+        parts = []
         for line in names_or_single.split("\n"):
-            chunks.extend(line.replace(";", ",").split(","))
-        names = [c.strip() for c in chunks if c.strip()]
+            parts.extend(line.replace(";", ",").split(","))
+        names = [p.strip() for p in parts if p.strip()]
     else:
         names = list(names_or_single or [])
 
-    token = settings.ADS_API_KEY
+    token = (getattr(settings, "ADS_API_KEY", "") or "").strip()
     if not token:
-        return "ERROR: ADS API token missing. Set ADS_API_KEY in Django settings or environment."
+        return "ERROR: ADS API token missing. Set ADS_API_KEY."
 
-    q = _build_or_query(names)
-
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/json",
+    }
     fields = ["bibcode", "title", "author", "year", "pub", "doi"]
     params = {
-        "q": q,
+        "q": _build_or_query(names),
         "fl": ",".join(fields),
         "fq": "database:astronomy",
         "rows": rows,
@@ -441,7 +462,11 @@ def fetch_ads_text_block(names_or_single, rows: int = 50, max_pages: int = 2, ti
     try:
         for _ in range(max_pages):
             r = requests.get(ADS_API_URL, headers=headers, params=params, timeout=timeout)
-            r.raise_for_status()
+            try:
+                r.raise_for_status()
+            except requests.HTTPError as e:
+                # Surface server message to help debug unusual aliases
+                return f"ERROR: {e}\nADS says: {r.text}"
             data = r.json()
             docs = data.get("response", {}).get("docs", [])
             all_docs.extend(docs)
@@ -472,6 +497,6 @@ def fetch_ads_text_block(names_or_single, rows: int = 50, max_pages: int = 2, ti
         lines.append(f"     ADS URL: {url}")
         if doi:
             lines.append(f"     doi: {doi}")
-        lines.append("")  # spacer
+        lines.append("")
 
     return "\n".join(lines)
