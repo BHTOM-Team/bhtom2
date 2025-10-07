@@ -830,8 +830,8 @@ from bhtom2.bhtom_targets.utils import fetch_ads_text_block
 
 #not using these aliases in the ADS query
 import re
-BLOCKED_SOURCES = {"CRTS", "NEOWISE", "2MASS"}
-BLOCKED_NAME_PREFIX = re.compile(r'^(?:CRTS|NEOWISE|2MASS)\b', re.IGNORECASE)
+BLOCKED_SOURCES = {"CRTS", "NEOWISE", "2MASS", "ATLAS", "PS1", "DECAPS", "twomass"}
+BLOCKED_NAME_PREFIX = re.compile(r'^(?:CRTS|NEOWISE|2MASS|ATLAS|PS1|DECAPS|twomass)\b', re.IGNORECASE)
 
 class TargetDetailView(BaseTargetDetailView):
     def get_context_data(self, *args, **kwargs):
