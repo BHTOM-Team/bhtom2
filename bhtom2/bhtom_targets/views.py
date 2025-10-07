@@ -821,3 +821,38 @@ class TargetPublicDetailView(DetailView):
             return redirect(reverse('bhtom_targets:target_not_found') + f'?target_name={self.kwargs.get("identifier")}')
         
         return super().get(request, *args, **kwargs)
+    
+
+# replacing targetdetailview and adding ads
+from bhtom_base.bhtom_targets.views import TargetDetailView as BaseTargetDetailView
+from bhtom_base.bhtom_targets.models import TargetName
+from utils import fetch_ads_text_block  # the helper we built earlier
+
+class TargetDetailView(BaseTargetDetailView):
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        target = self.object
+
+        alias_qs = (
+            TargetName.objects
+            .filter(target=target)
+            .exclude(name__isnull=True)
+            .exclude(name__exact="")
+            .values_list('name', flat=True)
+        )
+
+        names_list = [target.name] + list(alias_qs)
+        default_names = "; ".join(sorted({n.strip() for n in names_list if n and n.strip()}))
+        
+        
+        # Prefill the form with all names; preserve user input on submit
+        raw = self.request.GET.get('ads_names', default_names)
+        context['ads_names'] = raw
+        context['ads_default_names'] = default_names  # optional: for placeholder
+
+        # Only query ADS after user submits (keeps initial load fast)
+        context['ads_results_text'] = ""
+        if 'ads_names' in self.request.GET:
+            context['ads_results_text'] = fetch_ads_text_block(raw)
+
+        return context
