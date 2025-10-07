@@ -826,7 +826,7 @@ class TargetPublicDetailView(DetailView):
 # replacing targetdetailview and adding ads
 from bhtom_base.bhtom_targets.views import TargetDetailView as BaseTargetDetailView
 from bhtom_base.bhtom_targets.models import TargetName
-from utils import fetch_ads_text_block  # the helper we built earlier
+from bhtom2.bhtom_targets.utils import fetch_ads_text_block 
 
 class TargetDetailView(BaseTargetDetailView):
     def get_context_data(self, *args, **kwargs):
