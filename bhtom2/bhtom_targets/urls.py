@@ -1,15 +1,15 @@
 from django.urls import path
 
 from bhtom_base.bhtom_targets.views import TargetAddRemoveGroupingView, TargetDeleteView, \
-    TargetExportView, TargetGroupingCreateView, TargetGroupingDeleteView, TargetGroupingView, TargetNameSearchView, \
-    TargetDetailView
+    TargetExportView, TargetGroupingCreateView, TargetGroupingDeleteView, TargetGroupingView, TargetNameSearchView
 from .rest.views import CleanTargetListCache, GetTargetListApi, CleanTargetDetailsCache, TargetCreateApi, \
     TargetUpdateApi, TargetDeleteApi, GetPlotsApiView, TargetDownloadRadioDataApiView, TargetDownloadPhotometryDataApiView, GetDownloadedTargetListApi,\
         GetTargetsGroups, GetTargetsFromGroup
 
 from .views import TargetCreateView, TargetUpdateView, TargetGenerateTargetDescriptionLatexView, TargetImportView, \
     TargetDownloadPhotometryStatsLatexTableView, TargetListImagesView, TargetDownloadPhotometryDataView, \
-    TargetDownloadRadioDataView, TargetMicrolensingView, TargetListView, UpdateReducedDatum, TargetNotFoundView, TargetAddNewGroupingView
+    TargetDownloadRadioDataView, TargetMicrolensingView, TargetListView, UpdateReducedDatum, TargetNotFoundView, TargetAddNewGroupingView, \
+        TargetDetailView
 
 from bhtom_base.bhtom_common.api_router import SharedAPIRootRouter
 
@@ -73,5 +73,5 @@ urlpatterns = [
      path('<str:name>/', TargetDetailView.as_view(template_name='bhtom_targets/target_detail.html'),
          name='detail'),
      path('update-reduced-data/<int:pk>', UpdateReducedDatum.as_view(), name='update-reduced-data'),
-   
+
 ]
