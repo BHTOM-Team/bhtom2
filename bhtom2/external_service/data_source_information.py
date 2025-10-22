@@ -27,6 +27,8 @@ class DataSource(Enum):
     LOFAR = auto()
     twomass = auto()
     PTF = auto()
+    OGLE_OCVS = auto()
+    ASTRO_COLIBRI = auto()
  
 
 PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
@@ -54,7 +56,10 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.KMT_NET: "KMT-NET",
     DataSource.LOFAR: "LOFAR2m",
     DataSource.twomass: "2MASS",
-    DataSource.PTF: "PTF"
+    DataSource.PTF: "PTF",
+    DataSource.OGLE_OCVS: "OGLE OCVS ",
+    DataSource.ASTRO_COLIBRI: "Astro COLIBRI"
+
 }
 
 def get_pretty_survey_name(source_name: DataSource) -> str:
@@ -86,7 +91,10 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.KMT_NET: "KMT name",
     DataSource.LOFAR: "LOFAR2m name",
     DataSource.twomass: "2MASS name",
-    DataSource.PTF: "PTF"
+    DataSource.PTF: "PTF",
+    DataSource.OGLE_OCVS: "OGLE OCVS name",
+    DataSource.ASTRO_COLIBRI: "AstroCOLIBRI name"
+
 }
 
 
@@ -110,7 +118,9 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.ASASSN: ["g", "V"], 
     DataSource.OGLE_EWS: ['I'],
     DataSource.ATLAS: ['o','c'],
-    DataSource.KMT_NET: ['I']
+    DataSource.KMT_NET: ['I'],
+    DataSource.OGLE_OCVS: ['V','I'],
+    DataSource.ASTRO_COLIBRI: []
 }
 
 
