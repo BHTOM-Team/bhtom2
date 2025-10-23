@@ -85,7 +85,7 @@ or
 
 <!-- - `--match_dist <match_dist>`: This sets the matching distance (float) for astrometric cross-match in the standardisation procedure.  -->
 <!-- LW: I hid the match_dist as we set it fixed -->
-- `--data_product_type data_product_type`: Type of data product: `fits_file`, `photometry` (instrumental in SExtractor format), `photometry_nondetection`, `spectroscopy`
+- `--data_product_type data_product_type`: Type of data product: `fits_file`, `photometry` (instrumental in SExtractor format), `photometry_csv` or `spectroscopy`
 - `--comment comment`: comment to your upload
 - `--dry_run True/False`: if true, the script will be run in Dry Run (test) mode. The data will processed but will not be stored in the database. The default is false.
 <!-- - `--no_plot`: if true, no calibration plot will be generated. The default setting is false. -->
@@ -108,6 +108,33 @@ python upload_files_script.py --token 123_my_user_name_token_456 --observatory_n
 ```bash
 python upload_files_script.py --token 123token456 --target Gaia22bpl --observatory "my telescope" --data_product_type photometry --filename file1.cat --mjd 51234.123 --observer "John Doe"
 ```
+
+### Example Usage 3 for photometry CSV file in Python notebook
+
+```
+headers={
+            'Authorization': "Token " + str(auth_token)
+        }
+
+data = {
+    'target': 'AT2025abju',
+    'data_product_type': 'photometry_csv',
+    'observatory': 'GOTO',
+    'observers': 'wyrzykow',
+    'comment': 'Data from TNS'
+}
+filename="/content/phot_test.csv"
+file_list = [filename]
+
+response = requests.post(
+    url='https://uploadsvc2.astrolabs.pl/upload/',
+    headers=headers,
+    data=data,
+    files={'files': open(filename, 'rb')}
+)
+```
+
+Note, the observers field has to be valid user names registered in BHTOM (it can be a list). The owner of the datapoints submitted this way will still be the user behind the authorisation token used. Non-detections (limits) can be denoted with negative mag error.
 
 ### Response
 
