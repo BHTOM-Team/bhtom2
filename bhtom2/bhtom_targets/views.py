@@ -821,3 +821,41 @@ class TargetPublicDetailView(DetailView):
             return redirect(reverse('bhtom_targets:target_not_found') + f'?target_name={self.kwargs.get("identifier")}')
         
         return super().get(request, *args, **kwargs)
+    
+
+# replacing targetdetailview and adding ads
+from bhtom_base.bhtom_targets.views import TargetDetailView as BaseTargetDetailView
+from bhtom_base.bhtom_targets.models import TargetName
+from bhtom2.bhtom_targets.utils import fetch_ads_text_block 
+
+#not using these aliases in the ADS query
+import re
+BLOCKED_SOURCES = {"CRTS", "NEOWISE", "2MASS", "ATLAS", "PS1", "DECAPS", "twomass"}
+BLOCKED_NAME_PREFIX = re.compile(r'^(?:CRTS|NEOWISE|2MASS|ATLAS|PS1|DECAPS|twomass)\b', re.IGNORECASE)
+
+class TargetDetailView(BaseTargetDetailView):
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        target = self.object
+
+        # Prefill with target.name + aliases, excluding CRTS/NEOWISE/2MASS
+        alias_qs = (
+            TargetName.objects
+            .filter(target=target)
+            .exclude(source_name__in=BLOCKED_SOURCES)
+            .values_list('name', 'source_name')
+        )
+        aliases = [n for (n, src) in alias_qs if n and not BLOCKED_NAME_PREFIX.match(n)]
+        names_list = [target.name] + aliases
+
+        default_names = "; ".join(sorted({n.strip() for n in names_list if n and n.strip()}))
+
+        raw = self.request.GET.get('ads_names', default_names)
+        context['ads_names'] = raw
+        context['ads_default_names'] = default_names
+
+        context['ads_results_text'] = ""
+        if 'ads_names' in self.request.GET:
+            context['ads_results_text'] = fetch_ads_text_block(raw)  # see util changes below
+
+        return context
