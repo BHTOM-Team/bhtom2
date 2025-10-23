@@ -134,7 +134,7 @@ response = requests.post(
 )
 ```
 
-Note, the observers field has to be valid user names registered in BHTOM (it can be a list). The owner of the datapoints submitted this way will still be the user behind the authorisation token used. 
+Note, the observers field has to be valid user names registered in BHTOM (it can be a list). The owner of the datapoints submitted this way will still be the user behind the authorisation token used. Non-detections (limits) can be denoted with negative mag error.
 
 ### Response
 
