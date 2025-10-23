@@ -85,7 +85,7 @@ or
 
 <!-- - `--match_dist <match_dist>`: This sets the matching distance (float) for astrometric cross-match in the standardisation procedure.  -->
 <!-- LW: I hid the match_dist as we set it fixed -->
-- `--data_product_type data_product_type`: Type of data product: `fits_file`, `photometry` (instrumental in SExtractor format), `photometry_nondetection`, `spectroscopy`
+- `--data_product_type data_product_type`: Type of data product: `fits_file`, `photometry` (instrumental in SExtractor format)
 - `--comment comment`: comment to your upload
 - `--dry_run True/False`: if true, the script will be run in Dry Run (test) mode. The data will processed but will not be stored in the database. The default is false.
 <!-- - `--no_plot`: if true, no calibration plot will be generated. The default setting is false. -->
