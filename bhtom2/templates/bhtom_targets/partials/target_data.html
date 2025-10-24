@@ -115,22 +115,7 @@
     <a href='https://gaia.ari.uni-heidelberg.de/singlesource.html#id={{ value }}' target="_blank"> {{ value }}
     </a>
 </dd>
-<!-- {% elif value.source_name == "ASASSN" %}
-<dd class="col-sm-6">
-    <a href='{{ value.url }}' target="_blank"> {{ value }}
-    </a>
-</dd> -->
-<!-- {% elif value.source_name == "TNS" %}
-<dd class="col-sm-6">
-    <a href='{{ value.url }}' target="_blank">{{ value }}
-    </a>
-</dd> -->
-<!-- {% elif value.source_name == "ASTRO_COLIBRI" %}
-<dd class="col-sm-6">
-    <a href='{{ value.url }}' target="_blank">{{ value }}
-    </a>
-</dd> -->
-{% elif value.url != 'None' %}
+{% elif value.url%}
 <dd class="col-sm-6">
     <a href='{{ value.url }}' target="_blank">{{ value }}</a>
     <!-- value|trim_chars:2 -->
