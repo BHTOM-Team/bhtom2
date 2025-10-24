@@ -2,7 +2,7 @@
 This script reads all files in a directory, assumes they are fits with flatfielded/debiased/darkcorrected images,
 and uploads them to BHTOM for photometric processing for a given target.
 
-it also allows uploading cat files (with SExtractor-format photometry), but only one file at a time is allowed and MJD must be provided for that file.
+it also allows uploading cat/dat files (with SExtractor-format photometry), but only one file at a time is allowed and MJD must be provided for that file.
 
 '''
 
@@ -10,7 +10,7 @@ import os
 import requests
 import argparse
 
-data_product_type = 'fits_file' # fits_file or photometry (instrumental in SExtractor format), photometry_nondetection, spectroscopy. NOTE: that for photometry, mjd field is required
+data_product_type = 'fits_file' # fits_file or photometry (instrumental in SExtractor format)
 
 directory = '' # The directory containing all the necessary fits files
 
