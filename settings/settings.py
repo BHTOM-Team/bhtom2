@@ -365,6 +365,7 @@ CLASSIFICATION_TYPES = [
     ("LBV", "Luminous Blue Variable(LBV)"),
     ("M-dwarf flare", "M-dwarf flare"), ("Microlensing Event", "Microlensing Event"), ("Nova", "Nova"),
     ("Peculiar Supernova", "Peculiar Supernova"),
+    ("Planetary Transit", "Planetary Transit"),
     ("QSO", "Quasar(QSO)"), ("RCrB", "R CrB Variable"), ("RR Lyrae Variable", "RR Lyrae Variable"),
     ("SSO", "Solar System Object(SSO)"),
     ("Star", "Star"), ("SN", "Supernova(SN)"), 
