@@ -147,7 +147,7 @@ class GetTargetListApi(views.APIView):
 
         except ValueError as e:
             logger.error("Value error in targetList " + str(e))
-            return Response("Wrong format", status=400)
+            return Response("Wrong format: " + str(e), status=400)
 
         queryset = Target.objects.filter(query).order_by('created')
  
