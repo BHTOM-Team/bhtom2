@@ -949,7 +949,6 @@ You can use a Python script to update an existing target with Token Authenticati
 ```bash
   python update_target.py "My Target" --ra 135.789 --dec -30.123 --epoch "J2023" --classification "Galaxy" --discovery_date "2022-12-15T08:30:00Z" --importance 3 --cadence 12 --token <yourToken> 
 ```
-
 ## 3. Target List
 <!-- targets/getTargetList/ -->
 
@@ -967,12 +966,29 @@ You can requested only 200 records per request, use pramater "page" to get more 
 The request to retrieve the target list may include the following query parameters:
 
 - `name` (string): The name or identifier of the target.
-- `raMin` (number, optional): The minimum Right Ascension (RA) value, represented as a floating-point number.
-- `raMax` (number, optional): The maximum Right Ascension (RA) value, represented as a floating-point number.
-- `decMin` (number, optional): The minimum Declination (Dec) value, represented as a floating-point number.
-- `decMax` (number, optional): The maximum Declination (Dec) value, represented as a floating-point number.
-- `page` (number, optional): The number of requested page
-<!-- TODO: need more fields!! -->
+- `type` (string, optional): Type of the target.
+- `raMin` (number, optional): The minimum Right Ascension (RA) value.
+- `raMax` (number, optional): The maximum Right Ascension (RA) value.
+- `decMin` (number, optional): The minimum Declination (Dec) value.
+- `decMax` (number, optional): The maximum Declination (Dec) value.
+- `importanceMin` (number, optional): The minimum importance value.
+- `importanceMax` (number, optional): The maximum importance value.
+- `classification` (string, optional): Classification of the target.
+- `targetGroup` (string, optional): Name of the target group.
+- `coneSearchTarget` (string, optional): Target name and search radius, format: `"TargetName,Radius"`.
+- `coneSearchRaDecRadius` (string, optional): RA, Dec and search radius, format: `"RA,Dec,Radius"`.
+- `priority` (number, optional): Observing priority.
+- `galacticLatMin` (number, optional): Minimum galactic latitude.
+- `galacticLatMax` (number, optional): Maximum galactic latitude.
+- `galacticLonMin` (number, optional): Minimum galactic longitude.
+- `galacticLonMax` (number, optional): Maximum galactic longitude.
+- `description` (string, optional): Description of the target.
+- `sunSeparationMin` (number, optional): Minimum sun separation.
+- `sunSeparationMax` (number, optional): Maximum sun separation.
+- `lastMagMin` (number, optional): Minimum last magnitude.
+- `lastMagMax` (number, optional): Maximum last magnitude.
+- `page` (number, optional): The number of requested page.
+
 ### Example Request
 
 You can make a POST request to retrieve a list of targets based on the specified criteria using the `curl` command or a web browser.
@@ -982,7 +998,32 @@ You can make a POST request to retrieve a list of targets based on the specified
 ```bash
 curl -X POST \
   -H "Authorization: Token <yourToken>" \
-  "https://bh-tom2.astrolabs.pl/targets/getTargetList/?name=MyTarget&raMin=100.0&raMax=200.0&decMin=-30.0&decMax=30.0"
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "MyTarget",
+    "raMin": 100.0,
+    "raMax": 200.0,
+    "decMin": -30.0,
+    "decMax": 30.0,
+    "importanceMin": 1,
+    "importanceMax": 10,
+    "classification": "Star",
+    "targetGroup": "GroupA",
+    "coneSearchTarget": "TA,0.4",
+    "coneSearchRaDecRadius": "3.11,2.11,0.4",
+    "priority": 5,
+    "galacticLatMin": -10,
+    "galacticLatMax": 10,
+    "galacticLonMin": 100,
+    "galacticLonMax": 200,
+    "description": "Test target",
+    "sunSeparationMin": 30,
+    "sunSeparationMax": 90,
+    "lastMagMin": 15,
+    "lastMagMax": 20,
+    "page": 1
+  }' \
+  "https://bh-tom2.astrolabs.pl/targets/getTargetList/"
 ```
 
 Replace `<yourToken>` with your authentication token and adjust the URL as needed to specify your search criteria.
