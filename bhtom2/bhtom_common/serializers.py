@@ -82,6 +82,7 @@ class DataProductSerializer(serializers.ModelSerializer):
             'calib_survey_filter': f"{cal.use_catalog.survey or ''}/{cal.use_catalog.filters or ''}"  if cal.use_catalog else "",
             'standardised_to': f"{cal.survey or ''}/{cal.best_filter or ''}" if cal.survey and cal.best_filter else "",
             'magnitude': cal.mag or "",
+            'mag_error': cal.mag_error or "",
             'zp': cal.zeropoint or "",
             'scatter': cal.scatter or "",
             'number of datapoints used for calibration': cal.npoints or "",

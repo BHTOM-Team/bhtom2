@@ -13,6 +13,7 @@ from bhtom2.bhtom_targets.rest.serializers import TargetsSerializers, TargetDown
 from bhtom2.bhtom_targets.utils import update_targetList_cache, update_targetDetails_cache, get_client_ip
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom_base.bhtom_common.hooks import run_hook
+from bhtom_base.bhtom_targets.utils import cone_search_filter
 from bhtom_base.bhtom_targets.models import Target, DownloadedTarget, TargetList, TargetName
 from rest_framework import status
 import json
@@ -38,17 +39,27 @@ class GetTargetListApi(views.APIView):
             type=openapi.TYPE_OBJECT,
             properties={
                 'name': openapi.Schema(type=openapi.TYPE_STRING),
+                'type': openapi.Schema(type=openapi.TYPE_STRING),  
                 'raMin': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'raMax': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'decMin': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'decMax': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
-                'importance': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'importanceMin': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'importanceMax': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'classification': openapi.Schema(type=openapi.TYPE_STRING),
+                'targetGroup': openapi.Schema(type=openapi.TYPE_STRING),
+                'coneSearchTarget':  openapi.Schema(type=openapi.TYPE_STRING),
+                'coneSearchRaDecRadius':  openapi.Schema(type=openapi.TYPE_STRING),
                 'priority': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
-                'lastMag': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
-                'sunDistance': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
-                'galacticLat': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
-                'galacticLon': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'galacticLatMin': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'galacticLatMax': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'galacticLonMin': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'galacticLonMax': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'description': openapi.Schema(type=openapi.TYPE_STRING),
+                'sunSeparationMin': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'sunSeparationMax': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'lastMagMin': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'lastMagMax': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'page': openapi.Schema(type=openapi.TYPE_INTEGER, description='Page number for pagination'),
             },
             required=[]
@@ -67,16 +78,26 @@ class GetTargetListApi(views.APIView):
         query = Q()
 
         name = request.data.get('name', None)
+        targetType = request.data.get('type', None)
         raMin = request.data.get('raMin', None)
         raMax = request.data.get('raMax', None)
         decMin = request.data.get('decMin', None)
         decMax = request.data.get('decMax', None)
-        importance = request.data.get('importance', None)
+        importanceMin = request.data.get('importanceMin', None)
+        importanceMax = request.data.get('importanceMax', None)
+        classification = request.data.get('classification', None)
+        targetGroup = request.data.get('targetGroup', None)
+        coneSearchTarget = request.data.get('coneSearchTarget', None)
+        coneSearchRaDecRadius = request.data.get('coneSearchRaDecRadius', None)
         priority = request.data.get('priority', None)
-        lastMag = request.data.get('lastMag', None)
-        sunDistance = request.data.get('sunDistance', None)
-        galacticLat = request.data.get('galacticLat', None)
-        galacticLon = request.data.get('galacticLon', None)
+        lastMagMin = request.data.get('lastMagMin', None)
+        lastMagMax = request.data.get('lastMagMax', None)
+        sunSeparationMin = request.data.get('sunSeparationMin', None)
+        sunSeparationMax = request.data.get('sunSeparationMax', None)
+        galacticLatMin = request.data.get('galacticLatMin', None)
+        galacticLatMax = request.data.get('galacticLatMax', None)
+        galacticLonMin = request.data.get('galacticLonMin', None)
+        galacticLonMax = request.data.get('galacticLonMax', None)
         description = request.data.get('description', None)
         page = request.data.get('page', 1)
       
@@ -85,43 +106,77 @@ class GetTargetListApi(views.APIView):
         try:
             if name is not None:
                 query &= Q(name=name)
+            if targetType is not None:
+                query &= Q(type=targetType)
             if raMin is not None:
-                raMin = float(raMin)
-                query &= Q(ra__gte=raMin)
+                query &= Q(ra__gte=float(raMin))
             if raMax is not None:
-                raMax = float(raMax)
-                query &= Q(ra__lte=raMax)
+                query &= Q(ra__lte=float(raMax))
             if decMin is not None:
-                decMin = float(decMin)
-                query &= Q(dec__gte=decMin)
+                query &= Q(dec__gte=float(decMin))
             if decMax is not None:
-                decMax = float(decMax)
-                query &= Q(dec__lte=decMax)
-            if importance is not None:
-                importance = float(importance)
-                query &= Q(importance=importance)
+                query &= Q(dec__lte=float(decMax))
+            if importanceMin is not None:
+                query &= Q(importance__gte=float(importanceMin))
+            if importanceMax is not None:
+                query &= Q(importance__lte=float(importanceMax))
             if priority is not None:
-                priority = float(priority)
-                query &= Q(priority=priority)
-            if lastMag is not None:
-                lastMag = float(lastMag)
-                query &= Q(mag_last=lastMag)
-            if sunDistance is not None:
-                sunDistance = float(sunDistance)
-                query &= Q(sun_separation=sunDistance)
-            if galacticLat is not None:
-                galacticLat = float(galacticLat)
-                query &= Q(galactic_lat=galacticLat)
-            if galacticLon is not None:
-                galacticLon = float(galacticLon)
-                query &= Q(galactic_lng=galacticLon)
+                query &= Q(priority=float(priority))
+            if lastMagMin is not None:
+                query &= Q(mag_last__gte=float(lastMagMin))
+            if lastMagMax is not None:
+                query &= Q(mag_last__lte=float(lastMagMax))
+            if sunSeparationMin is not None:
+                query &= Q(sun_separation__gte=float(sunSeparationMin))
+            if sunSeparationMax is not None:
+                query &= Q(sun_separation__lte=float(sunSeparationMax))
+            if galacticLatMin is not None:
+                query &= Q(galactic_lat__gte=float(galacticLatMin))
+            if galacticLatMax is not None:
+                query &= Q(galactic_lat__lte=float(galacticLatMax))
+            if galacticLonMin is not None:
+                query &= Q(galactic_lng__gte=float(galacticLonMin))
+            if galacticLonMax is not None:
+                query &= Q(galactic_lng__lte=float(galacticLonMax))
             if description is not None:
-                query &= Q(description=description) 
+                query &= Q(description=description)
+            if classification is not None:
+                query &= Q(classification=classification)
+            if targetGroup is not None:
+                query &= Q(targetlist__name=targetGroup)
+
         except ValueError as e:
             logger.error("Value error in targetList " + str(e))
             return Response("Wrong format", status=400)
 
         queryset = Target.objects.filter(query).order_by('created')
+ 
+        # Obsługa coneSearchRaDecRadius: "RA,DEC,RADIUS"
+        if coneSearchRaDecRadius:
+            try:
+                ra_dec_radius = [float(x.strip()) for x in coneSearchRaDecRadius.split(',')]
+                if len(ra_dec_radius) == 3:
+                    ra, dec, radius = ra_dec_radius
+                    queryset = cone_search_filter(queryset, ra, dec, radius)
+            except Exception as e:
+                logger.error(f"Cone search by RA/Dec error: {e}")
+
+        # Obsługa coneSearchTarget: "TargetName,RADIUS"
+        if coneSearchTarget:
+            try:
+                target_name, radius = [x.strip() for x in coneSearchTarget.split(',')]
+                radius = float(radius)
+                target_obj = Target.objects.filter(
+                    Q(name__icontains=target_name) | Q(aliases__name__icontains=target_name)
+                ).distinct().first()
+                if target_obj:
+                    ra = target_obj.ra
+                    dec = target_obj.dec
+                    queryset = cone_search_filter(queryset, ra, dec, radius)
+            except Exception as e:
+                logger.error(f"Cone search by target name error: {e}")
+
+
         paginator = Paginator(queryset, self.pagination_class.max_page_size)
 
         try:
