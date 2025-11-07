@@ -29,7 +29,7 @@ class DataSource(Enum):
     PTF = auto()
     OGLE_OCVS = auto()
     ASTRO_COLIBRI = auto()
- 
+    GALEX = auto()
 
 PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.GAIA_ALERTS: "Gaia Alerts",
@@ -58,7 +58,8 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.twomass: "2MASS",
     DataSource.PTF: "PTF",
     DataSource.OGLE_OCVS: "OGLE OCVS ",
-    DataSource.ASTRO_COLIBRI: "Astro COLIBRI"
+    DataSource.ASTRO_COLIBRI: "Astro COLIBRI",
+    DataSource.GALEX: "GALEX"
 
 }
 
@@ -93,7 +94,8 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.twomass: "2MASS name",
     DataSource.PTF: "PTF",
     DataSource.OGLE_OCVS: "OGLE OCVS name",
-    DataSource.ASTRO_COLIBRI: "AstroCOLIBRI name"
+    DataSource.ASTRO_COLIBRI: "AstroCOLIBRI name",
+    DataSource.GALEX: "GALEX name"
 
 }
 
@@ -120,7 +122,8 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.ATLAS: ['o','c'],
     DataSource.KMT_NET: ['I'],
     DataSource.OGLE_OCVS: ['V','I'],
-    DataSource.ASTRO_COLIBRI: []
+    DataSource.ASTRO_COLIBRI: [],
+    DataSource.GALEX: []
 }
 
 
