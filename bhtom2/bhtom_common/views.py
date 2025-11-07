@@ -13,7 +13,7 @@ from rest_framework.authtoken.models import Token
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
-from bhtom2.bhtom_common.filters import CCDPhotJobFilter
+from bhtom2.bhtom_common.filters import CCDPhotJobFilter,DataproductFilter
 from django.views.generic import ListView, FormView
 from django_comments.models import Comment
 from settings import settings
@@ -312,18 +312,28 @@ class DataListInProgressView(LoginRequiredMixin, FilterView):
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
         return context
 
-class DataListCompletedView(SingleTableMixin, LoginRequiredMixin, ListView):
+class DataListCompletedView(LoginRequiredMixin, FilterView):
     """
     View for listing targets in the TOM. Only shows targets that the user is authorized to view. Requires authorization.
     """
     template_name = 'bhtom_common/data_product_management-completed.html'
     model = DataProduct
+    filterset_class = DataproductFilter 
     # table_class = TargetTable
 
     permission_required = 'bhtom_targets.view_target'
     table_pagination = False
     strict = False
 
+    def get_queryset(self):
+        days_delay = timezone.now() - timedelta(days=settings.DELETE_FITS_FILE_DAY)
+
+        qs =DataProduct.objects.filter(Q(created__gte=days_delay) &
+                                                            Q(data_product_type='fits_file') &
+                                                            Q(fits_data__isnull=False) &
+                                                            Q(status='S'))
+        return qs
+    
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
 
@@ -333,13 +343,8 @@ class DataListCompletedView(SingleTableMixin, LoginRequiredMixin, ListView):
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
 
-        days_delay = timezone.now() - timedelta(days=settings.DELETE_FITS_FILE_DAY)
-
-        context['fits_s_file'] = DataProduct.objects.filter(Q(created__gte=days_delay) &
-                                                            Q(data_product_type='fits_file') &
-                                                            Q(fits_data__isnull=False) &
-                                                            Q(status='S'))
-
+        context['fits_s_file'] =  context['filter'].qs 
+       
         return context
     
 
