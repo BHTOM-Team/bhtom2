@@ -5,9 +5,18 @@
 
 
 {% block content %}
-    {% if request.user.is_staff %}
+     {% if request.user.is_staff %}
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-2">
+                <form action="" method="get" class="form">
+                    {% bootstrap_form filter.form %}
+                    {% buttons %}
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <a href="{% url 'bhtom_common:list_completed' %}" class="btn btn-secondary" title="Reset">Reset</a>
+                    {% endbuttons %}
+                </form>
+            </div>
+            <div class="col-md-10">
                 <ul class="nav nav-tabs" id="tabs">
                     <li class="nav-item">
                         <span class="nav-link active" data-target="#fits_s" data-toggle="tab">Completed Fits</span>
@@ -18,7 +27,7 @@
                         <form id="s-fits-form" action="{% url 'bhtom_common:reload_s_fits' %}?next={{ request.path }}" method="POST">
                             {% csrf_token %}
                             <input type="hidden" id="selected-s-fits-ids" name="selected-s-fits-ids" value="">
-                            <h4>Delay: {{ delay_fits}} days</h4>
+                            <h4>Delay: {{ delay_fits }} days</h4>
                             <div class="mb-3">
                                 <button type="submit" class="btn btn-outline-primary ml-1" name="reload-fits-s">Restart Fits</button>
                             </div>
@@ -65,7 +74,7 @@
                                             {% else %}
                                             <td></td>
                                             {% endif %}
-                                            </tr>
+                                        </tr>
                                     {% empty %}
                                         <tr>
                                             <td colspan="7">No data yet.</td>
