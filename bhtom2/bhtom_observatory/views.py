@@ -280,9 +280,52 @@ class ObservatoryFavoriteDetailView(LoginRequiredMixin, DetailView):
         context['obsMatrix'] = obsMatrix
         return context
 
+# class CreateUserObservatory(LoginRequiredMixin, FormView):
+#     """
+#     View that handles creation of a favorite observatory for the user. Requires authentication.
+#     """
+
+#     template_name = 'bhtom_observatory/userObservatory_create.html'
+#     form_class = ObservatoryUserCreationForm
+#     success_url = reverse_lazy('bhtom_observatory:list')
+
+#     def get_form_kwargs(self):
+#         kwargs = super(CreateUserObservatory, self).get_form_kwargs()
+#         kwargs['user'] = self.request.user
+#         return kwargs
+
+#     def form_valid(self, form):
+
+#         user = self.request.user
+#         observatoryId = form.cleaned_data['observatory']
+#         camera = form.cleaned_data['camera']
+#         comment = form.cleaned_data['comment']
+
+#         try:
+#             observatoryUser = ObservatoryMatrix.objects.create(
+#                 user=user,
+#                 camera=camera,
+#                 active_flg=True,
+#                 comment=comment
+#             )
+#             observatoryUser.save()
+
+#             logger.info('Create user observatory: %s camera: %s, %s' % (observatoryId.name  ,camera.camera_name, str(user)))
+
+#         except Exception as e:
+#             logger.error('Create user observatory error: ' + str(e))
+#             messages.error(self.request, 'Error with creating the user observatory')
+#             return redirect(self.get_success_url())
+
+#         messages.success(self.request, 'Successfully created')
+#         return redirect(self.get_success_url())
+
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponseRedirect
+
 class CreateUserObservatory(LoginRequiredMixin, FormView):
     """
-    View that handles manual upload of DataProducts. Requires authentication.
+    View that handles creation of a favorite observatory for the user. Requires authentication.
     """
 
     template_name = 'bhtom_observatory/userObservatory_create.html'
@@ -295,32 +338,60 @@ class CreateUserObservatory(LoginRequiredMixin, FormView):
         return kwargs
 
     def form_valid(self, form):
-
         user = self.request.user
-        observatoryId = form.cleaned_data['observatory']
-        camera = form.cleaned_data['camera']
-        comment = form.cleaned_data['comment']
 
-        try:
-            observatoryUser = ObservatoryMatrix.objects.create(
-                user=user,
-                camera=camera,
-                active_flg=True,
-                comment=comment
-            )
-            observatoryUser.save()
+        # Check if observatory and camera IDs are passed directly through POST data
+        observatory_id = self.request.POST.get('observatory')
+        camera = self.request.POST.get('camera')
 
-            logger.info('Create user observatory: %s camera: %s, %s' % (observatoryId.name  ,camera.camera_name, str(user)))
+        if observatory_id and camera:
+            # Processing direct POST request from "Add to My List" button
+            try:
+                observatory = get_object_or_404(ObservatoryMatrix, id=observatory_id)
+                camera = get_object_or_404(Camera, id=camera)
 
-        except Exception as e:
-            logger.error('Create user observatory error: ' + str(e))
-            messages.error(self.request, 'Error with creating the user observatory')
-            return redirect(self.get_success_url())
+                observatory_user = ObservatoryMatrix.objects.create(
+                    user=user,
+                    camera=camera,
+                    active_flg=True,
+                    comment=""
+                )
+                observatory_user.save()
 
-        messages.success(self.request, 'Successfully created')
-        return redirect(self.get_success_url())
+                messages.success(self.request, 'Successfully added to your list.')
+                return HttpResponseRedirect(self.get_success_url())
 
+            except Exception as e:
+                logger.error('Error adding to list: ' + str(e))
+                messages.error(self.request, 'Could not add to your list.')
 
+        else:
+            # Original form submission flow
+            observatoryId = form.cleaned_data['observatory']
+            camera = form.cleaned_data['camera']
+            comment = form.cleaned_data['comment']
+
+            try:
+                observatory_user = ObservatoryMatrix.objects.create(
+                    user=user,
+                    camera=camera,
+                    active_flg=True,
+                    comment=comment
+                )
+                observatory_user.save()
+
+                logger.info('Create user observatory: %s camera: %s, %s' % (observatoryId.name, camera.camera_name, str(user)))
+
+                messages.success(self.request, 'Successfully created')
+                return redirect(self.get_success_url())
+
+            except Exception as e:
+                logger.error('Create user observatory error: ' + str(e))
+                messages.error(self.request, 'Error with creating the user observatory')
+
+        # Redirect in case of failure
+        return HttpResponseRedirect(self.get_success_url())
+    
 class DeleteUserObservatory(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('bhtom_observatory:list')
     model = ObservatoryMatrix
