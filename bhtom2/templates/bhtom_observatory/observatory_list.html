@@ -41,45 +41,49 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
               {% endif %}
             </tr>
           </thead>
-          <tbody>
-            {% for observatory in observatory_list %}
-            <tr>
-              <td>{{ observatory.name }}</td>
-              <td>{{ observatory.lon }}</td>
-              <td>{{ observatory.lat }}</td>
-              <td>
-                {% if observatory.id in prefix_obs %}
-                  {% for item in prefix_obs|get_item:observatory.id %}
-                      {{ item }}
-                      {% if not forloop.last %},{% endif %}
-                  {% endfor %}
-                {% else %}
-                    No data available
-                {% endif %}
-             </td>
-              <td>
-                {{ observatory.comment|truncatechars:30  }}
-              </td>
-              <td>{{ observatory.calibration_flg }}</td>
-              <!-- Add this inside the loop for each observatory -->
-              <td>
-                <button class="btn btn-success add-to-fav-btn" data-id="{{ observatory.id }}" data-name="{{ observatory.name }}">Add to Fav</button>
-              </td>
-
-              <td>
-                <a href="{% url 'bhtom_observatory:detail' pk=observatory.id %}" title="Observatory details" class="btn  btn-primary">Details</a>
-              </td>
-              {% if request.user.is_superuser %}
-              <td>
-                <a href="{% url 'bhtom_observatory:update' pk=observatory.id %}" title="Update observatory" class="btn  btn-primary">Edit</a>
-              </td>
-              <td>
-                <a href="{% url 'bhtom_observatory:delete' pk=observatory.id %}" title="Delete observatory" class="btn  btn-danger">Delete</a>
-              </td>
-              {% endif %}
-            </tr>
-            {% endfor %}
-          </tbody>
+<tbody>
+  {% for observatory in observatory_list %}
+  <tr>
+    <td>{{ observatory.name }}</td>
+    <td>{{ observatory.lon }}</td>
+    <td>{{ observatory.lat }}</td>
+    <td>
+      {% if observatory.id in prefix_obs %}
+        <ul>
+          {% for prefix in prefix_obs|get_item:observatory.id %}
+            <li>
+              {{ prefix }}
+              <!-- Button next to each camera/prefix -->
+              <form action="{% url 'add_to_favorites' %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="observatory_id" value="{{ observatory.id }}">
+                <input type="hidden" name="camera" value="{{ prefix }}">
+                <button type="submit" class="btn btn-success">Add to Fav</button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        No data available
+      {% endif %}
+    </td>
+    <td>{{ observatory.comment|truncatechars:30 }}</td>
+    <td>{{ observatory.calibration_flg }}</td>
+    
+    <td>
+      <a href="{% url 'bhtom_observatory:detail' pk=observatory.id %}" title="Observatory details" class="btn btn-primary">Details</a>
+    </td>
+    {% if request.user.is_superuser %}
+    <td>
+      <a href="{% url 'bhtom_observatory:update' pk=observatory.id %}" title="Update observatory" class="btn btn-primary">Edit</a>
+    </td>
+    <td>
+      <a href="{% url 'bhtom_observatory:delete' pk=observatory.id %}" title="Delete observatory" class="btn btn-danger">Delete</a>
+    </td>
+    {% endif %}
+  </tr>
+  {% endfor %}
+</tbody>
         </table>
       </div>
       <div class="tab-pane active" id="user">
