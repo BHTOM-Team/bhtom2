@@ -3,11 +3,15 @@
     {% for target_name in target.names %}
     {% if forloop.first %}
     <dt class="col-sm-6">Name</dt>
-    <dd class="col-sm-6">{{ target_name }}</dd>
+    <dd class="col-sm-6">
+        {{ target_name }}
+        <button id="copy-public-link-btn" type="button" class="btn btn-primary btn-sm ml-2">Public Target Link</button>
+        <input id="public-link" type="text" value="https://bhtom.space/public/target/{{ target.name }}" readonly hidden>
+    </dd>
     {% endif %}
     {% endfor %}
-
 </dl>
+
 <dl class="row">
     <dt class="col-sm-6">{{ "Target ID"}}</dt>
     <dd class="col-sm-6">{{ target.id }}</dd>
@@ -137,3 +141,55 @@
 {% endfor %}
 <!-- </dl> -->
 {% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const copyButton = document.getElementById('copy-public-link-btn');
+        const linkInput = document.getElementById('public-link');
+        
+        if (copyButton && linkInput) {
+            copyButton.addEventListener('click', function () {
+                try {
+                    linkInput.hidden = false; // Make input visible
+                    linkInput.select();
+                    linkInput.setSelectionRange(0, linkInput.value.length); // Select the text
+                    const success = document.execCommand('copy');
+                    linkInput.hidden = true; // Hide input again
+                    showAlert(success ? 'Link copied to clipboard!' : 'Failed to copy link.', success ? 'success' : 'error');
+                } catch (err) {
+                    showAlert('Unable to copy link.', 'error');
+                }
+            });
+        }
+
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `custom-alert ${type === 'error' ? 'error' : ''}`;
+            alert.innerText = message;
+            document.body.appendChild(alert);
+
+            setTimeout(() => {
+                alert.remove();
+            }, 2000); // Remove alert after 2 seconds
+        }
+    });
+</script>
+
+<style>
+    .custom-alert {
+        position: fixed;
+        top: 70px;
+        left: 40px;
+        background-color: #4ca2af; /* Green background */
+        color: white; /* White text */
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        font-size: 14px;
+    }
+
+    .custom-alert.error {
+        background-color: #f44336; /* Red background for errors */
+    }
+</style>
