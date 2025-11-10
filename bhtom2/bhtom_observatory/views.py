@@ -424,36 +424,3 @@ class ObservatoryPublicList(ListView):
         context['prefix_obs'] = prefix_obs
         return context
     
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-
-@csrf_exempt
-def add_to_favorites(request):
-    if request.method == 'POST':
-        user = request.user
-        observatory_id = request.POST.get('observatory_id')
-        
-        try:
-            observatory = Observatory.objects.get(id=observatory_id)
-            # Assuming camera and comment come from somewhere else, or set default values
-            camera = None  # Replace with actual logic
-            comment = ""   # Replace with actual logic
-
-            observatory_user = ObservatoryMatrix.objects.create(
-                user=user,
-                camera=camera,
-                active_flg=True,
-                comment=comment
-            )
-            observatory_user.save()
-            
-            logger.info(f'Created user observatory: {observatory.name} for user: {user}')
-            
-            return JsonResponse({'status': 'success'})
-        except Observatory.DoesNotExist:
-            return JsonResponse({'status': 'error', 'message': 'Observatory not found.'}, status=404)
-        except Exception as e:
-            logger.error(e)
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
