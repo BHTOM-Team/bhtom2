@@ -61,6 +61,11 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
                 {{ observatory.comment|truncatechars:30  }}
               </td>
               <td>{{ observatory.calibration_flg }}</td>
+              <!-- Add this inside the loop for each observatory -->
+              <td>
+                <button class="btn btn-success add-to-fav-btn" data-id="{{ observatory.id }}" data-name="{{ observatory.name }}">Add to Fav</button>
+              </td>
+
               <td>
                 <a href="{% url 'bhtom_observatory:detail' pk=observatory.id %}" title="Observatory details" class="btn  btn-primary">Details</a>
               </td>
@@ -127,5 +132,39 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
   });
   </script>
   
+<script>
+  $(document).ready(function() {
+      $('#observatories-table').DataTable({
+          "paging": false,
+          "searching": false
+      });
+      $('#user-observatories-table').DataTable({
+        "paging": false,
+        "searching": false
+    });
+
+    // Handle "Add to Fav" button click
+    $('.add-to-fav-btn').click(function() {
+      var observatoryId = $(this).data('id');
+      var observatoryName = $(this).data('name');
+
+      $.ajax({
+        url: '{% url "your_add_to_fav_view_url_name" %}', // Update with your URL
+        method: 'POST',
+        data: {
+          'observatory_id': observatoryId,
+          'csrfmiddlewaretoken': '{{ csrf_token }}' // Ensure CSRF token is included
+        },
+        success: function(response) {
+          alert('Successfully added ' + observatoryName + ' to favorites!');
+        },
+        error: function(xhr, status, error) {
+          console.error(error);
+          alert('Failed to add to favorites.');
+        }
+      });
+    });
+  });
+</script>
 
 {% endblock %}
