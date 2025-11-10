@@ -33,7 +33,8 @@ secret = dotenv_values(os.path.join(BASE_DIR, 'settings/env/.bhtom.env'))
 SECRET_KEY = secret.get("SECRET_KEY", '')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(int(secret.get("DEBUG", False)))
+#DEBUG = bool(int(secret.get("DEBUG", False)))
+DEBUG = True
 PROFILE = secret.get("PROFILE", "PROD")
 
 ALLOWED_HOSTS = [] + list(secret.get("ALLOWED_HOSTS", 'localhost').split(','))
