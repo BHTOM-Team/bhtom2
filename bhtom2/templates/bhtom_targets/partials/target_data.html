@@ -4,9 +4,9 @@
     {% if forloop.first %}
     <dt class="col-sm-6">Name</dt>
     <dd class="col-sm-6">
-        {{ target_name }}
-        <button id="copy-public-link-btn" type="button" class="btn btn-primary btn-sm ml-2">Public Target Link</button>
-        <input id="public-link" type="text" value="https://bhtom.space/public/target/{{ target.name }}" readonly hidden>
+        {{ target_name }}<br>
+        <button id="copy-public-link-btn" type="button" class="btn btn-primary btn-sm mt-2">Public Target Link</button>
+        <input id="public-link" type="text" value="https://bhtom.space/public/targets/{{ target.name }}" readonly hidden>
     </dd>
     {% endif %}
     {% endfor %}
