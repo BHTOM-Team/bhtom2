@@ -20,16 +20,18 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
 
 <div class="row">
   <div class="col-md-12">
-    <ul class="nav nav-tabs" id="tabs">
-      <li class="nav-item">
-        <span class="nav-link active" data-target="#user" data-toggle="tab">Favorite Observatories</span>
-      </li>
-      <li class="nav-item">
-        <span class="nav-link" data-target="#all" data-toggle="tab">Observatories</span>
-      </li>
-    </ul>
-    <div class="tab-content">
-      <div class="tab-pane" id="all">
+<ul class="nav nav-tabs" id="tabs" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active" id="user-tab" data-toggle="tab" href="#user" role="tab"
+       aria-controls="user" aria-selected="true">Favorite Observatories</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="all-tab" data-toggle="tab" href="#all" role="tab"
+       aria-controls="all" aria-selected="false">Observatories</a>
+  </li>
+</ul>
+<div class="tab-content">
+  <div class="tab-pane fade" id="all" role="tabpanel" aria-labelledby="all-tab">
         <a href="{% url 'bhtom_observatory:userObservatory_create' %}" title="Add new observatory" class="btn btn-outline-primary">Add new observatory</a>
           <table id="observatories-table" class="table table-hover sortable">
           <thead>
@@ -54,11 +56,11 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
         <li>
           {{ prefix }}
           <!-- Button next to each camera/prefix -->
-          <form action="{% url 'create_user_observatory' %}" method="post" style="display: inline;">
+          <form action="{% url 'bhtom_observatory:create_user_observatory' %}" method="post">
             {% csrf_token %}
             <input type="hidden" name="observatory" value="{{ observatory.id }}">
             <input type="hidden" name="camera" value="{{ prefix }}">
-            <button type="submit" class="btn btn-success">Add to My List</button>
+            <button type="submit" class="btn btn-primary">Add to My List</button>
           </form>
         </li>
       {% endfor %}
@@ -85,8 +87,8 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
   {% endfor %}
 </tbody>
         </table>
-      </div>
-      <div class="tab-pane active" id="user">
+  </div>
+  <div class="tab-pane fade show active" id="user" role="tabpanel" aria-labelledby="user-tab">
        <table  id="user-observatories-table" class="table table-hover sortable">
           <thead>
             <tr>
@@ -136,18 +138,5 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
   });
   </script>
 
+{% endblock %}
 
-<script>
-  $(document).ready(function() {
-    // Initialize DataTables for observatories tables
-    $('#observatories-table').DataTable({
-      "paging": false,
-      "searching": false
-    });
-
-    $('#user-observatories-table').DataTable({
-      "paging": false,
-      "searching": false
-    });
-      });
-</script>
