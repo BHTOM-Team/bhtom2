@@ -131,16 +131,17 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
     });
   });
   </script>
-  
+
+
 <script>
   $(document).ready(function() {
-      $('#observatories-table').DataTable({
-          "paging": false,
-          "searching": false
-      });
-      $('#user-observatories-table').DataTable({
-        "paging": false,
-        "searching": false
+    $('#observatories-table').DataTable({
+      "paging": false,
+      "searching": false
+    });
+    $('#user-observatories-table').DataTable({
+      "paging": false,
+      "searching": false
     });
 
     // Handle "Add to Fav" button click
@@ -149,7 +150,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
       var observatoryName = $(this).data('name');
 
       $.ajax({
-        url: '{% url "your_add_to_fav_view_url_name" %}', // Update with your URL
+        url: "{% url 'bhtom2.bhtom_observatory:add_to_favorites' %}", // Use the correct URL pattern name
         method: 'POST',
         data: {
           'observatory_id': observatoryId,
@@ -166,5 +167,21 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
     });
   });
 </script>
+
+<style>
+  .add-to-fav-btn {
+    background-color: blue;
+    color: white; /* Ensures text is readable */
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .add-to-fav-btn:hover {
+    background-color: darkblue;
+  }
+</style>
+
 
 {% endblock %}

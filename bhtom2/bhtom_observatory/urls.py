@@ -26,5 +26,5 @@ urlpatterns = [
     path('instrument/create/', CreateUserObservatory.as_view(), name='userObservatory_create'),
     path('user/<int:pk>/delete/', DeleteUserObservatory.as_view(), name='userObservatory_delete'),
     path('user/<int:pk>/update/', UpdateUserObservatory.as_view(), name='userObservatory_update'),
-    path('add-to-favorites/', add_to_favorites, name='add_to_favorites'),
+    path('add-to-favorites/', add_to_favorites, name='add_to_favorites'),  # Use the correct view function here
 ]
