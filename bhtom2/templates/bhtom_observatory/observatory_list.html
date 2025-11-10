@@ -47,26 +47,26 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
     <td>{{ observatory.name }}</td>
     <td>{{ observatory.lon }}</td>
     <td>{{ observatory.lat }}</td>
-    <td>
-      {% if observatory.id in prefix_obs %}
-        <ul>
-          {% for prefix in prefix_obs|get_item:observatory.id %}
-            <li>
-              {{ prefix }}
-              <!-- Button next to each camera/prefix -->
-              <form action="{% url 'add_to_favorites' %}" method="post" style="display: inline;">
-                {% csrf_token %}
-                <input type="hidden" name="observatory_id" value="{{ observatory.id }}">
-                <input type="hidden" name="camera" value="{{ prefix }}">
-                <button type="submit" class="btn btn-success">Add to Fav</button>
-              </form>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        No data available
-      {% endif %}
-    </td>
+<td>
+  {% if observatory.id in prefix_obs %}
+    <ul>
+      {% for prefix in prefix_obs|get_item:observatory.id %}
+        <li>
+          {{ prefix }}
+          <!-- Button next to each camera/prefix -->
+          <form action="{% url 'create_user_observatory' %}" method="post" style="display: inline;">
+            {% csrf_token %}
+            <input type="hidden" name="observatory" value="{{ observatory.id }}">
+            <input type="hidden" name="camera" value="{{ prefix }}">
+            <button type="submit" class="btn btn-success">Add to My List</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    No data available
+  {% endif %}
+</td>
     <td>{{ observatory.comment|truncatechars:30 }}</td>
     <td>{{ observatory.calibration_flg }}</td>
     
@@ -139,53 +139,15 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
 
 <script>
   $(document).ready(function() {
+    // Initialize DataTables for observatories tables
     $('#observatories-table').DataTable({
       "paging": false,
       "searching": false
     });
+
     $('#user-observatories-table').DataTable({
       "paging": false,
       "searching": false
     });
-
-    // Handle "Add to Fav" button click
-    $('.add-to-fav-btn').click(function() {
-      var observatoryId = $(this).data('id');
-      var observatoryName = $(this).data('name');
-
-      $.ajax({
-        url: "{% url 'bhtom2.bhtom_observatory:add_to_favorites' %}", // Use the correct URL pattern name
-        method: 'POST',
-        data: {
-          'observatory_id': observatoryId,
-          'csrfmiddlewaretoken': '{{ csrf_token }}' // Ensure CSRF token is included
-        },
-        success: function(response) {
-          alert('Successfully added ' + observatoryName + ' to favorites!');
-        },
-        error: function(xhr, status, error) {
-          console.error(error);
-          alert('Failed to add to favorites.');
-        }
       });
-    });
-  });
 </script>
-
-<style>
-  .add-to-fav-btn {
-    background-color: blue;
-    color: white; /* Ensures text is readable */
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-
-  .add-to-fav-btn:hover {
-    background-color: darkblue;
-  }
-</style>
-
-
-{% endblock %}

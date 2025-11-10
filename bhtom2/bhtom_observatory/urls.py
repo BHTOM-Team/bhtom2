@@ -3,7 +3,7 @@ from django.urls import path
 from bhtom2.bhtom_observatory.rest.view import GetObservatoryApi, CreateObservatoryApi, UpdateObservatoryApi, \
     GetObservatoryMatrixApi, CreateObservatoryMatrixApi, DeleteObservatoryMatrixApi
 from bhtom2.bhtom_observatory.views import CreateObservatory, UpdateObservatory, DeleteObservatory, ObservatoryList, \
-    ObservatoryDetailView, DeleteUserObservatory, UpdateUserObservatory, CreateUserObservatory, ObservatoryFavoriteDetailView,get_cameras, get_favorite_cameras, add_to_favorites
+    ObservatoryDetailView, DeleteUserObservatory, UpdateUserObservatory, CreateUserObservatory, ObservatoryFavoriteDetailView,get_cameras, get_favorite_cameras
 
 app_name = 'bhtom2.bhtom_observatory'
 
