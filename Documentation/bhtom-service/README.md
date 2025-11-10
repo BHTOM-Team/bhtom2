@@ -105,5 +105,9 @@ ATLAS data is automatically cleaned from extreme outliers (scipy.stats.z_score>1
 
 Cite: Tonry et al. (2018), Smith et al. (2020), Heinze et al. (2018), Shingles et al. (2021).
 
+### GALEX
+A standalone tool, gPhoton downloads the photon data for a specified coordinates from the GALEX GR 6/7 catalog and performs the aperture photometry, and produces the magnitude and flux. For the aperture photometry, we use 10 arcsec as the source radius and an annulus with an inner radius of 11 arcsec and an outer radius of 20 arcsec for the background.
+
+Cite: Million, et al. "gPhoton: The GALEX Photon Data Archive." The Astrophysical Journal 833.2 (2016): 292.
 
 
