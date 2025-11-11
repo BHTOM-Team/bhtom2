@@ -331,22 +331,20 @@ class CreateUserObservatory(LoginRequiredMixin, FormView):
         return kwargs
 
     def post(self, request, *args, **kwargs):
-        observatory_id = request.POST.get('observatory')
-        camera_prefix = request.POST.get('camera')  # this is the string prefix
-
-        if observatory_id and camera_prefix:
-            camera_obj = get_object_or_404(
-                Camera, observatory_id=observatory_id, prefix=camera_prefix
-            )
+        if request.POST.get('quick_add') == '1':
+            # Quick-add path: observatory + camera prefix
+            observatory_id = request.POST.get('observatory')
+            camera_prefix = request.POST.get('camera')
+            camera_obj = get_object_or_404(Camera, prefix=camera_prefix, observatory_id=observatory_id)
             obj, created = ObservatoryMatrix.objects.get_or_create(
-                user=request.user,
-                camera=camera_obj,
+                user=request.user, camera=camera_obj,
                 defaults={'active_flg': True, 'comment': ''},
             )
             messages.success(request, 'Successfully added to your list.' if created
                             else 'This observatory/camera is already on your list.')
             return redirect(self.get_success_url())
 
+        # Otherwise it's the normal form → let FormView handle it
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
