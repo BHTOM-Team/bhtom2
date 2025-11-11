@@ -53,14 +53,15 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
 {% if observatory.id in prefix_obs %}
   <div class="mt-2">
     {% for prefix in prefix_obs|get_item:observatory.id %}
-      <div class="d-flex align-items-center justify-content-between mb-1">
+      <div class="d-flex align-items-center mb-1">
+        <form action="{% url 'bhtom_observatory:userObservatory_create' %}" method="post" class="mb-0 mr-2">
+        {% csrf_token %}
+        <input type="hidden" name="quick_add" value="1">  {# <-- disambiguates #}
+        <input type="hidden" name="observatory" value="{{ observatory.id }}">
+        <input type="hidden" name="camera" value="{{ prefix }}">  {# still the prefix string #}
+        <button type="submit" class="btn btn-primary btn-xs px-2 py-0">Add to my list</button>
+      </form>
         <span>{{ prefix }}</span>
-        <form action="{% url 'bhtom_observatory:userObservatory_create' %}" method="post" class="mb-0">
-          {% csrf_token %}
-          <input type="hidden" name="observatory" value="{{ observatory.id }}">
-          <input type="hidden" name="camera" value="{{ prefix }}">
-          <button type="submit" class="btn btn-outline-primary btn-sm">Add to My List</button>
-        </form>
       </div>
     {% endfor %}
   </div>
