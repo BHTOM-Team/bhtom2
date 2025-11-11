@@ -372,13 +372,20 @@ class DeleteUserObservatory(LoginRequiredMixin, DeleteView):
         obj = super(DeleteUserObservatory, self).get_object()
         return obj
 
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()  # pk is the ObservatoryMatrix.id from your template
+        self.object.delete()
+        messages.success(request, 'Successfully removed from your list.')
+        return redirect(self.success_url)
+
     @transaction.atomic
     def form_valid(self, form):
         super().form_valid(form)
-        messages.success(self.request, 'Successfully deleted')
+        messages.success(self.request, 'Successfully deleted from your list.')
         logger.info("Delete observatory %s, user: %s" % (str(self.request), str(self.request.user)))
         return redirect(self.get_success_url())
-    
+        
 class UpdateUserObservatory(LoginRequiredMixin, UpdateView):
     template_name = 'bhtom_observatory/userObservatory_create.html'
     form_class = ObservatoryUserUpdateForm

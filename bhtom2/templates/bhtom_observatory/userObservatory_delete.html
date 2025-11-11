@@ -1,9 +1,9 @@
 {% extends 'bhtom_common/base.html' %}
 {% block content %}
-{% block title %}Confirm delete{% endblock %}
+{% block title %}Confirm delete from your list{% endblock %}
 <form class="form" method="post">
   {% csrf_token %}
-  <p>Are you sure you want to delete?</p>
+  <p>Are you sure you want to remove the observatory from your list?</p>
   <input type="submit" class="btn btn-danger" value="Confirm">
 </form>
 {% endblock %}

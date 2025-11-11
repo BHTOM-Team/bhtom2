@@ -8,14 +8,16 @@
 
 {% bootstrap_javascript jquery='True' %}
 {% block content %}
-<h4>List of observatories</h4>
+<h4>Observatories</h4>
 <p>
-List of your registered observatories/instruments you can use for uploading the data for processing.
-You should register an observatory in your account if you want a datapoint to be labeled with your name.
-<br>
-Here you can add a new observatory to your list if you are planning to upload images or instrumental photometry for it.
-You can choose one from the list of already registered observatories, or create a new one.
-Note that different instrument (e.g. CCD) on the same telescope counts as a different observatory.
+This page allows managing observatories/instruments registered in BHTOM for automated image processing.
+</p><p>
+  The <strong>All Observatories</strong> tab lists all telescopes and instruments currently registered in BHTOM.   
+If you plan to upload and process your imaging or instrumental photometry data, you must first have the corresponding observatory added to your <strong>Favorite Observatories</strong> list — only then will your submitted data be correctly linked and labeled with your name.  
+You can add an observatory to your favorites directly from the <strong>All Observatories</strong> tab, or through a form behind <strong>Add Observatory</strong> button. Use <strong>Add Observatory</strong> link also if it does not yet exist in the system.  
+Note that different instruments (e.g. CCD cameras) mounted on the same telescope are treated as separate observatory entries.
+</p>
+<p>Note that when using scripts for data uploads with API, the observatory (ONAME) should be in your Favorite list. You can also add an observatory to your Favorite list via API. 
 </p>
 
 <div class="row">
@@ -27,7 +29,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
   </li>
   <li class="nav-item">
     <a class="nav-link" id="all-tab" data-toggle="tab" href="#all" role="tab"
-       aria-controls="all" aria-selected="false">Observatories</a>
+       aria-controls="all" aria-selected="false">All Observatories</a>
   </li>
 </ul>
 <div class="tab-content">
@@ -101,16 +103,21 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
               <td>{{ observatory.lon }}</td>
               <td>{{ observatory.lat }}</td>
               <td>
-                {% if observatory.id in prefix_user_obs %}
-                  {% for item in prefix_user_obs|get_item:observatory.id %}
-                      {{ item }}
-                      {% if not forloop.last %},{% endif %}
+                {% if user_obs_entries|get_item:observatory.id %}
+                  {% for entry in user_obs_entries|get_item:observatory.id %}
+                    <div class="d-flex align-items-center mb-1">
+                      <form action="{% url 'bhtom_observatory:userObservatory_delete' pk=entry.id %}"
+                            method="post" class="mb-0 mr-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Remove</button>
+                      </form>
+                      <span>{{ entry.prefix }}</span>
+                    </div>
                   {% endfor %}
                 {% else %}
-                    No data available
+                  No data available
                 {% endif %}
-             </td>
-              <td>
+              </td>              <td>
                 <a href="{% url 'bhtom_observatory:detail-favorite' pk=observatory.id %}" title="Observatory details with favorite cameras" class="btn  btn-primary">Details</a>
               </td>
             </tr>
