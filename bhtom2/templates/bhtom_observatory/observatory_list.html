@@ -60,7 +60,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
             {% csrf_token %}
             <input type="hidden" name="observatory" value="{{ observatory.id }}">
             <input type="hidden" name="camera" value="{{ prefix }}">
-            <button type="submit" class="btn btn-primary">Add to My List</button>
+            <button type="submit" class="btn btn-outline-primary btn-sm mt-2">Add to My List</button>
           </form>
         </li>
       {% endfor %}
@@ -111,7 +111,6 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
                     No data available
                 {% endif %}
              </td>
-              <td>{{ observatory.comment|truncatechars:30  }}</td>
               <td>
                 <a href="{% url 'bhtom_observatory:detail-favorite' pk=observatory.id %}" title="Observatory details with favorite cameras" class="btn  btn-primary">Details</a>
               </td>
