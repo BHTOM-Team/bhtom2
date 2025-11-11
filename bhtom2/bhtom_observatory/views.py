@@ -347,9 +347,6 @@ class CreateUserObservatory(LoginRequiredMixin, FormView):
         if observatory_id and camera:
             # Processing direct POST request from "Add to My List" button
             try:
-                observatory = get_object_or_404(ObservatoryMatrix, id=observatory_id)
-                camera = get_object_or_404(Camera, id=camera)
-
                 observatory_user = ObservatoryMatrix.objects.create(
                     user=user,
                     camera=camera,
