@@ -192,7 +192,7 @@ class ObservatoryList(LoginRequiredMixin, ListView):
                 obsMatrix = ObservatoryMatrix.objects.filter(user=self.request.user, camera__observatory= obs)
                 onames = [obs.camera.prefix for obs in obsMatrix]
                 prefix_user_obs[obs.id] = onames
-        context['prefix_user_obs'] = prefix_user_obs
+        context['prefix_user_obs'] = prefix_user_obs or {}
         context['observatory_user_list'] = user_observatories
 
         return context
@@ -471,5 +471,6 @@ class ObservatoryPublicList(ListView):
 
         context['observatory_list'] = observatories_with_active_cameras
         context['prefix_obs'] = prefix_obs
+
         return context
     

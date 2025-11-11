@@ -103,7 +103,7 @@ Note that different instruments (e.g. CCD cameras) mounted on the same telescope
               <td>{{ observatory.lon }}</td>
               <td>{{ observatory.lat }}</td>
 <td>
-  {% with items=(prefix_user_obs|default:{}|get_item:observatory.id) %}
+  {% with items=prefix_user_obs|get_item:observatory.id %}
     {% if items %}
       {% for item in items %}
         {{ item }}{% if not forloop.last %},{% endif %}
