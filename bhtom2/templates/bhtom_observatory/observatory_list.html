@@ -90,37 +90,53 @@ Note that different instruments (e.g. CCD cameras) mounted on the same telescope
         </table>
   </div>
   <div class="tab-pane fade show active" id="user" role="tabpanel" aria-labelledby="user-tab">
-       <table  id="user-observatories-table" class="table table-hover sortable">
-          <thead>
-            <tr>
-              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Observatory(ONAME)</th><th>Details</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for observatory in observatory_user_list %}
-            <tr>
-              <td>{{ observatory.name }}</td>
-              <td>{{ observatory.lon }}</td>
-              <td>{{ observatory.lat }}</td>
-<td>
-  {% with items=prefix_user_obs|get_item:observatory.id %}
-    {% if items %}
-      {% for item in items %}
-        {{ item }}{% if not forloop.last %},{% endif %}
-      {% endfor %}
-    {% else %}
-      No data available
-    {% endif %}
-  {% endwith %}
-</td>
+<table id="user-observatories-table" class="table table-hover sortable">
+  <thead>
+    <tr>
+      <th>Observatory Name</th>
+      <th>Lon</th>
+      <th>Lat</th>
+      <th>Observatory (ONAME)</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for observatory in observatory_user_list %}
+      <tr>
+        <td>{{ observatory.name }}</td>
+        <td>{{ observatory.lon }}</td>
+        <td>{{ observatory.lat }}</td>
 
-            <td>
-                <a href="{% url 'bhtom_observatory:detail-favorite' pk=observatory.id %}" title="Observatory details with favorite cameras" class="btn  btn-primary">Details</a>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        <td>
+          {% with items=prefix_user_obs|get_item:observatory.id %}
+            {% if items %}
+              {% for entry in items %}
+                <div class="d-flex align-items-center mb-1">
+                  <form action="{% url 'bhtom_observatory:userObservatory_delete' pk=entry.id %}"
+                        method="post" class="mb-0 mr-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Remove</button>
+                  </form>
+                  <span>{{ entry.prefix }}</span>
+                </div>
+              {% endfor %}
+            {% else %}
+              No data available
+            {% endif %}
+          {% endwith %}
+        </td>
+
+        <td>
+          <a href="{% url 'bhtom_observatory:detail-favorite' pk=observatory.id %}"
+             title="Observatory details with favorite cameras"
+             class="btn btn-primary btn-sm">
+            Details
+          </a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
       </div>
   </div>
     </div>
