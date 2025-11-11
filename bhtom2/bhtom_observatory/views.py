@@ -294,23 +294,23 @@ class ObservatoryFavoriteDetailView(LoginRequiredMixin, DetailView):
 #         kwargs['user'] = self.request.user
 #         return kwargs
 
-#     def form_valid(self, form):
+    # def form_valid(self, form):
 
-#         user = self.request.user
-#         observatoryId = form.cleaned_data['observatory']
-#         camera = form.cleaned_data['camera']
-#         comment = form.cleaned_data['comment']
+    #     user = self.request.user
+    #     observatoryId = form.cleaned_data['observatory']
+    #     camera = form.cleaned_data['camera']
+    #     comment = form.cleaned_data['comment']
 
-#         try:
-#             observatoryUser = ObservatoryMatrix.objects.create(
-#                 user=user,
-#                 camera=camera,
-#                 active_flg=True,
-#                 comment=comment
-#             )
-#             observatoryUser.save()
+    #     try:
+    #         observatoryUser = ObservatoryMatrix.objects.create(
+    #             user=user,
+    #             camera=camera,
+    #             active_flg=True,
+    #             comment=comment
+    #         )
+    #         observatoryUser.save()
 
-#             logger.info('Create user observatory: %s camera: %s, %s' % (observatoryId.name  ,camera.camera_name, str(user)))
+    #         logger.info('Create user observatory: %s camera: %s, %s' % (observatoryId.name  ,camera.camera_name, str(user)))
 
 #         except Exception as e:
 #             logger.error('Create user observatory error: ' + str(e))
@@ -331,24 +331,23 @@ class CreateUserObservatory(LoginRequiredMixin, FormView):
         return kwargs
 
     def post(self, request, *args, **kwargs):
-            # QUICK ADD path (button click)
-            observatory_id = request.POST.get('observatory')
-            camera = request.POST.get('camera')  # must be an ID, see (2)
-            if observatory_id and camera:
-                # Assuming ObservatoryMatrix maps user<->camera (observatory via camera)
-                obj, created = ObservatoryMatrix.objects.get_or_create(
-                    user=request.user,
-                    camera=camera,
-                    defaults={'active_flg': True, 'comment': ''},
-                )
-                if created:
-                    messages.success(request, 'Successfully added to your list.')
-                else:
-                    messages.info(request, 'This observatory/camera is already on your list.')
-                return redirect(self.get_success_url())
+        observatory_id = request.POST.get('observatory')
+        camera_prefix = request.POST.get('camera')  # this is the string prefix
 
-            # FALL BACK to normal form submission
-            return super().post(request, *args, **kwargs)
+        if observatory_id and camera_prefix:
+            camera_obj = get_object_or_404(
+                Camera, observatory_id=observatory_id, prefix=camera_prefix
+            )
+            obj, created = ObservatoryMatrix.objects.get_or_create(
+                user=request.user,
+                camera=camera_obj,
+                defaults={'active_flg': True, 'comment': ''},
+            )
+            messages.success(request, 'Successfully added to your list.' if created
+                            else 'This observatory/camera is already on your list.')
+            return redirect(self.get_success_url())
+
+        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         user = self.request.user
