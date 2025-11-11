@@ -36,7 +36,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
           <table id="observatories-table" class="table table-hover sortable">
           <thead>
             <tr>
-              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Observatory(ONAME)</th><th>Comment</th><th>Only Instrumental photometry file</th>
+              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Observatory(ONAME)</th><th>Only Instrumental photometry file</th>
               <th>Details</th>
               {% if request.user.is_superuser %}
               <th>Update</th><th>Delete</th>
@@ -69,7 +69,6 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
     No data available
   {% endif %}
 </td>
-    <td>{{ observatory.comment|truncatechars:30 }}</td>
     <td>{{ observatory.calibration_flg }}</td>
     
     <td>
@@ -92,7 +91,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
        <table  id="user-observatories-table" class="table table-hover sortable">
           <thead>
             <tr>
-              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Observatory(ONAME)</th><th>Comment</th><th>Details</th>
+              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Observatory(ONAME)</th><th>Details</th>
             </tr>
           </thead>
           <tbody>

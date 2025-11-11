@@ -331,25 +331,24 @@ class CreateUserObservatory(LoginRequiredMixin, FormView):
         return kwargs
 
     def post(self, request, *args, **kwargs):
-        # QUICK ADD path (button click)
-        observatory_id = request.POST.get('observatory')
-        camera_id = request.POST.get('camera')  
-        if observatory_id and camera_id:
-            camera = get_object_or_404(Camera, id=camera_id, observatory_id=observatory_id)
-            # Assuming ObservatoryMatrix maps user<->camera (observatory via camera)
-            obj, created = ObservatoryMatrix.objects.get_or_create(
-                user=request.user,
-                camera=camera,
-                defaults={'active_flg': True, 'comment': ''},
-            )
-            if created:
-                messages.success(request, 'Successfully added to your list.')
-            else:
-                messages.info(request, 'This observatory/camera is already on your list.')
-            return redirect(self.get_success_url())
+            # QUICK ADD path (button click)
+            observatory_id = request.POST.get('observatory')
+            camera = request.POST.get('camera')  # must be an ID, see (2)
+            if observatory_id and camera:
+                # Assuming ObservatoryMatrix maps user<->camera (observatory via camera)
+                obj, created = ObservatoryMatrix.objects.get_or_create(
+                    user=request.user,
+                    camera=camera,
+                    defaults={'active_flg': True, 'comment': ''},
+                )
+                if created:
+                    messages.success(request, 'Successfully added to your list.')
+                else:
+                    messages.info(request, 'This observatory/camera is already on your list.')
+                return redirect(self.get_success_url())
 
-        # FALL BACK to normal form submission
-        return super().post(request, *args, **kwargs)
+            # FALL BACK to normal form submission
+            return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         user = self.request.user
