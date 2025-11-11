@@ -56,7 +56,7 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
         <li>
           {{ prefix }}
           <!-- Button next to each camera/prefix -->
-          <form action="{% url 'bhtom_observatory:create_user_observatory' %}" method="post">
+          <form action="{% url 'bhtom_observatory:userObservatory_create' %}" method="post">
             {% csrf_token %}
             <input type="hidden" name="observatory" value="{{ observatory.id }}">
             <input type="hidden" name="camera" value="{{ prefix }}">
