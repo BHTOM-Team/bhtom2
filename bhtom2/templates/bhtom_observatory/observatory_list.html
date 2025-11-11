@@ -50,24 +50,23 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
     <td>{{ observatory.lon }}</td>
     <td>{{ observatory.lat }}</td>
 <td>
-  {% if observatory.id in prefix_obs %}
-    <ul>
-      {% for prefix in prefix_obs|get_item:observatory.id %}
-        <li>
-          {{ prefix }}
-          <!-- Button next to each camera/prefix -->
-          <form action="{% url 'bhtom_observatory:userObservatory_create' %}" method="post">
-            {% csrf_token %}
-            <input type="hidden" name="observatory" value="{{ observatory.id }}">
-            <input type="hidden" name="camera" value="{{ prefix }}">
-            <button type="submit" class="btn btn-outline-primary btn-sm mt-2">Add to My List</button>
-          </form>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    No data available
-  {% endif %}
+{% if observatory.id in prefix_obs %}
+  <div class="mt-2">
+    {% for prefix in prefix_obs|get_item:observatory.id %}
+      <div class="d-flex align-items-center justify-content-between mb-1">
+        <span>{{ prefix }}</span>
+        <form action="{% url 'bhtom_observatory:userObservatory_create' %}" method="post" class="mb-0">
+          {% csrf_token %}
+          <input type="hidden" name="observatory" value="{{ observatory.id }}">
+          <input type="hidden" name="camera" value="{{ prefix }}">
+          <button type="submit" class="btn btn-outline-primary btn-sm">Add to My List</button>
+        </form>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  No data available
+{% endif %}
 </td>
     <td>{{ observatory.calibration_flg }}</td>
     
