@@ -179,21 +179,25 @@ class ObservatoryList(LoginRequiredMixin, ListView):
 
         prefix_user_obs = {}
 
-        user_cameras = ObservatoryMatrix.objects.filter(user=self.request.user).values_list('camera__id', flat=True)
-        user_active_obs_id = Camera.objects.filter(id__in=user_cameras, active_flg=True).values_list('observatory_id',flat=True)
-        user_observatories = Observatory.objects.filter(id__in=user_active_obs_id)
+        user_matrices = (
+            ObservatoryMatrix.objects
+            .filter(user=self.request.user, camera__active_flg=True)
+            .select_related('camera', 'camera__observatory')
+        )
 
+        # Collect observatories the user actually has
+        user_observatories = Observatory.objects.filter(
+            id__in=user_matrices.values_list('camera__observatory_id', flat=True).distinct()
+        )
+
+        # Build: obs_id -> [{'id': matrix.id, 'prefix': matrix.camera.prefix}, ...]
         for obs in user_observatories:
-            camera_count = ObservatoryMatrix.objects.filter(user=self.request.user, camera__observatory= obs).count()
-            if camera_count == 1:
-                obsMatrix = ObservatoryMatrix.objects.get(user=self.request.user, camera__observatory= obs)
-                prefix_user_obs[obs.id] = [obsMatrix.camera.prefix]
-            else:
-                obsMatrix = ObservatoryMatrix.objects.filter(user=self.request.user, camera__observatory= obs)
-                onames = [obs.camera.prefix for obs in obsMatrix]
-                prefix_user_obs[obs.id] = onames
-        context['prefix_user_obs'] = prefix_user_obs
+            matrices = [m for m in user_matrices if m.camera.observatory_id == obs.id]
+            prefix_user_obs[obs.id] = [{'id': m.id, 'prefix': m.camera.prefix} for m in matrices]
+
         context['observatory_user_list'] = user_observatories
+        context['prefix_user_obs'] = prefix_user_obs or {}
+
 
         return context
     
@@ -280,47 +284,50 @@ class ObservatoryFavoriteDetailView(LoginRequiredMixin, DetailView):
         context['obsMatrix'] = obsMatrix
         return context
 
-class CreateUserObservatory(LoginRequiredMixin, FormView):
-    """
-    View that handles manual upload of DataProducts. Requires authentication.
-    """
 
+class CreateUserObservatory(LoginRequiredMixin, FormView):
     template_name = 'bhtom_observatory/userObservatory_create.html'
     form_class = ObservatoryUserCreationForm
-    success_url = reverse_lazy('bhtom_observatory:list')
+    success_url = reverse_lazy('bhtom_observatory:list')  
 
     def get_form_kwargs(self):
-        kwargs = super(CreateUserObservatory, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
 
-    def form_valid(self, form):
-
-        user = self.request.user
-        observatoryId = form.cleaned_data['observatory']
-        camera = form.cleaned_data['camera']
-        comment = form.cleaned_data['comment']
-
-        try:
-            observatoryUser = ObservatoryMatrix.objects.create(
-                user=user,
-                camera=camera,
-                active_flg=True,
-                comment=comment
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('quick_add') == '1':
+            # Quick-add path: observatory + camera prefix
+            observatory_id = request.POST.get('observatory')
+            camera_prefix = request.POST.get('camera')
+            camera_obj = get_object_or_404(Camera, prefix=camera_prefix, observatory_id=observatory_id)
+            obj, created = ObservatoryMatrix.objects.get_or_create(
+                user=request.user, camera=camera_obj,
+                defaults={'active_flg': True, 'comment': ''},
             )
-            observatoryUser.save()
-
-            logger.info('Create user observatory: %s camera: %s, %s' % (observatoryId.name  ,camera.camera_name, str(user)))
-
-        except Exception as e:
-            logger.error('Create user observatory error: ' + str(e))
-            messages.error(self.request, 'Error with creating the user observatory')
+            messages.success(request, 'Successfully added to your list.' if created
+                            else 'This observatory/camera is already on your list.')
             return redirect(self.get_success_url())
 
-        messages.success(self.request, 'Successfully created')
+        # Otherwise it's the normal form → let FormView handle it
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        user = self.request.user
+        observatory = form.cleaned_data['observatory']
+        camera = form.cleaned_data['camera']
+        comment = form.cleaned_data.get('comment', '')
+
+        obj, created = ObservatoryMatrix.objects.get_or_create(
+            user=user, camera=camera,
+            defaults={'active_flg': True, 'comment': comment},
+        )
+        if created:
+            messages.success(self.request, 'Successfully created.')
+        else:
+            messages.info(self.request, 'This observatory/camera is already on your list.')
         return redirect(self.get_success_url())
-
-
+    
 class DeleteUserObservatory(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('bhtom_observatory:list')
     model = ObservatoryMatrix
@@ -330,13 +337,20 @@ class DeleteUserObservatory(LoginRequiredMixin, DeleteView):
         obj = super(DeleteUserObservatory, self).get_object()
         return obj
 
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()  # pk is the ObservatoryMatrix.id from your template
+        self.object.delete()
+        messages.success(request, 'Successfully removed from your list.')
+        return redirect(self.success_url)
+
     @transaction.atomic
     def form_valid(self, form):
         super().form_valid(form)
-        messages.success(self.request, 'Successfully deleted')
+        messages.success(self.request, 'Successfully deleted from your list.')
         logger.info("Delete observatory %s, user: %s" % (str(self.request), str(self.request.user)))
         return redirect(self.get_success_url())
-    
+        
 class UpdateUserObservatory(LoginRequiredMixin, UpdateView):
     template_name = 'bhtom_observatory/userObservatory_create.html'
     form_class = ObservatoryUserUpdateForm
@@ -422,5 +436,6 @@ class ObservatoryPublicList(ListView):
 
         context['observatory_list'] = observatories_with_active_cameras
         context['prefix_obs'] = prefix_obs
+
         return context
     

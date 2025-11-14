@@ -8,106 +8,135 @@
 
 {% bootstrap_javascript jquery='True' %}
 {% block content %}
-<h4>List of observatories</h4>
+<h4>Observatories</h4>
 <p>
-List of your registered observatories/instruments you can use for uploading the data for processing.
-You should register an observatory in your account if you want a datapoint to be labeled with your name.
-<br>
-Here you can add a new observatory to your list if you are planning to upload images or instrumental photometry for it.
-You can choose one from the list of already registered observatories, or create a new one.
-Note that different instrument (e.g. CCD) on the same telescope counts as a different observatory.
+This page allows managing observatories/instruments registered in BHTOM for automated image processing.
+</p><p>
+  The <strong>All Observatories</strong> tab lists all telescopes and instruments currently registered in BHTOM.   
+If you plan to upload and process your imaging or instrumental photometry data, you must first have the corresponding observatory added to your <strong>Favorite Observatories</strong> list — only then will your submitted data be correctly linked and labeled with your name.  
+You can add an observatory to your favorites directly from the <strong>All Observatories</strong> tab, or through a form behind <strong>Add Observatory</strong> button. Use <strong>Add Observatory</strong> link also if it does not yet exist in the system.  
+Note that different instruments (e.g. CCD cameras) mounted on the same telescope are treated as separate observatory entries.
+</p>
+<p>Note that when using scripts for data uploads with API, the observatory (ONAME) should be in your Favorite list. You can also add an observatory to your Favorite list via API. 
 </p>
 
 <div class="row">
   <div class="col-md-12">
-    <ul class="nav nav-tabs" id="tabs">
-      <li class="nav-item">
-        <span class="nav-link active" data-target="#user" data-toggle="tab">Favorite Observatories</span>
-      </li>
-      <li class="nav-item">
-        <span class="nav-link" data-target="#all" data-toggle="tab">Observatories</span>
-      </li>
-    </ul>
-    <div class="tab-content">
-      <div class="tab-pane" id="all">
+<ul class="nav nav-tabs" id="tabs" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active" id="user-tab" data-toggle="tab" href="#user" role="tab"
+       aria-controls="user" aria-selected="true">Favorite Observatories</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="all-tab" data-toggle="tab" href="#all" role="tab"
+       aria-controls="all" aria-selected="false">All Observatories</a>
+  </li>
+</ul>
+<div class="tab-content">
+  <div class="tab-pane fade" id="all" role="tabpanel" aria-labelledby="all-tab">
         <a href="{% url 'bhtom_observatory:userObservatory_create' %}" title="Add new observatory" class="btn btn-outline-primary">Add new observatory</a>
           <table id="observatories-table" class="table table-hover sortable">
           <thead>
             <tr>
-              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Observatory(ONAME)</th><th>Comment</th><th>Only Instrumental photometry file</th>
+              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Observatory(ONAME)</th><th>Only Instrumental photometry file</th>
               <th>Details</th>
               {% if request.user.is_superuser %}
               <th>Update</th><th>Delete</th>
               {% endif %}
             </tr>
           </thead>
-          <tbody>
-            {% for observatory in observatory_list %}
-            <tr>
-              <td>{{ observatory.name }}</td>
-              <td>{{ observatory.lon }}</td>
-              <td>{{ observatory.lat }}</td>
-              <td>
-                {% if observatory.id in prefix_obs %}
-                  {% for item in prefix_obs|get_item:observatory.id %}
-                      {{ item }}
-                      {% if not forloop.last %},{% endif %}
-                  {% endfor %}
-                {% else %}
-                    No data available
-                {% endif %}
-             </td>
-              <td>
-                {{ observatory.comment|truncatechars:30  }}
-              </td>
-              <td>{{ observatory.calibration_flg }}</td>
-              <td>
-                <a href="{% url 'bhtom_observatory:detail' pk=observatory.id %}" title="Observatory details" class="btn  btn-primary">Details</a>
-              </td>
-              {% if request.user.is_superuser %}
-              <td>
-                <a href="{% url 'bhtom_observatory:update' pk=observatory.id %}" title="Update observatory" class="btn  btn-primary">Edit</a>
-              </td>
-              <td>
-                <a href="{% url 'bhtom_observatory:delete' pk=observatory.id %}" title="Delete observatory" class="btn  btn-danger">Delete</a>
-              </td>
-              {% endif %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+<tbody>
+  {% for observatory in observatory_list %}
+  <tr>
+    <td>{{ observatory.name }}</td>
+    <td>{{ observatory.lon }}</td>
+    <td>{{ observatory.lat }}</td>
+<td>
+{% if observatory.id in prefix_obs %}
+  <div class="mt-2">
+    {% for prefix in prefix_obs|get_item:observatory.id %}
+      <div class="d-flex align-items-center mb-1">
+        <form action="{% url 'bhtom_observatory:userObservatory_create' %}" method="post" class="mb-0 mr-2">
+        {% csrf_token %}
+        <input type="hidden" name="quick_add" value="1">  {# <-- disambiguates #}
+        <input type="hidden" name="observatory" value="{{ observatory.id }}">
+        <input type="hidden" name="camera" value="{{ prefix }}">  {# still the prefix string #}
+        <button type="submit" class="btn btn-outline-primary btn-xs px-2 py-0">Add to my list</button>
+      </form>
+        <span>{{ prefix }}</span>
       </div>
-      <div class="tab-pane active" id="user">
-       <table  id="user-observatories-table" class="table table-hover sortable">
-          <thead>
-            <tr>
-              <th>Observatory Name</th><th>Lon</th><th>Lat</th><th>Observatory(ONAME)</th><th>Comment</th><th>Details</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for observatory in observatory_user_list %}
-            <tr>
-              <td>{{ observatory.name }}</td>
-              <td>{{ observatory.lon }}</td>
-              <td>{{ observatory.lat }}</td>
-              <td>
-                {% if observatory.id in prefix_user_obs %}
-                  {% for item in prefix_user_obs|get_item:observatory.id %}
-                      {{ item }}
-                      {% if not forloop.last %},{% endif %}
-                  {% endfor %}
-                {% else %}
-                    No data available
-                {% endif %}
-             </td>
-              <td>{{ observatory.comment|truncatechars:30  }}</td>
-              <td>
-                <a href="{% url 'bhtom_observatory:detail-favorite' pk=observatory.id %}" title="Observatory details with favorite cameras" class="btn  btn-primary">Details</a>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
+    {% endfor %}
+  </div>
+{% else %}
+  No data available
+{% endif %}
+</td>
+    <td>{{ observatory.calibration_flg }}</td>
+    
+    <td>
+      <a href="{% url 'bhtom_observatory:detail' pk=observatory.id %}" title="Observatory details" class="btn btn-primary">Details</a>
+    </td>
+    {% if request.user.is_superuser %}
+    <td>
+      <a href="{% url 'bhtom_observatory:update' pk=observatory.id %}" title="Update observatory" class="btn btn-primary">Edit</a>
+    </td>
+    <td>
+      <a href="{% url 'bhtom_observatory:delete' pk=observatory.id %}" title="Delete observatory" class="btn btn-danger">Delete</a>
+    </td>
+    {% endif %}
+  </tr>
+  {% endfor %}
+</tbody>
         </table>
+  </div>
+  <div class="tab-pane fade show active" id="user" role="tabpanel" aria-labelledby="user-tab">
+<table id="user-observatories-table" class="table table-hover sortable">
+  <thead>
+    <tr>
+      <th>Observatory Name</th>
+      <th>Lon</th>
+      <th>Lat</th>
+      <th>Observatory (ONAME)</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for observatory in observatory_user_list %}
+      <tr>
+        <td>{{ observatory.name }}</td>
+        <td>{{ observatory.lon }}</td>
+        <td>{{ observatory.lat }}</td>
+
+        <td>
+          {% with items=prefix_user_obs|get_item:observatory.id %}
+            {% if items %}
+              {% for entry in items %}
+                <div class="d-flex align-items-center mb-1">
+                  <form action="{% url 'bhtom_observatory:userObservatory_delete' pk=entry.id %}"
+                        method="post" class="mb-0 mr-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Remove</button>
+                  </form>
+                  <span>{{ entry.prefix }}</span>
+                </div>
+              {% endfor %}
+            {% else %}
+              No data available
+            {% endif %}
+          {% endwith %}
+        </td>
+
+        <td>
+          <a href="{% url 'bhtom_observatory:detail-favorite' pk=observatory.id %}"
+             title="Observatory details with favorite cameras"
+             class="btn btn-primary btn-sm">
+            Details
+          </a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
       </div>
   </div>
     </div>
@@ -126,6 +155,6 @@ Note that different instrument (e.g. CCD) on the same telescope counts as a diff
     });
   });
   </script>
-  
 
 {% endblock %}
+
