@@ -1,0 +1,502 @@
+version: "3.7"
+
+services:
+
+  bhtom_db:
+    container_name: bhtom_db
+    env_file:
+      - .db.env
+    networks:
+      bhtom_db:
+        ipv4_address: 172.31.0.10
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: prod/db_Dockerfile
+    volumes:
+      - ./data/db:/docker-entrypoint-initdb.d/
+      - bhtom_db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_INITDB_ARGS=--auth=scram-sha-256
+      - POSTGRES_HOST_AUTH_METHOD=scram-sha-256
+      - POSTGRES_DB=${POSTGRES_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
+    ports:
+      - "${POSTGRES_PORT}:5432"
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+  bhtom:
+    container_name: bhtom
+    networks:
+      bhtom_network:
+        ipv4_address: 172.30.0.20
+      bhtom_db:
+        ipv4_address: 172.31.0.20
+    build:
+      context: ..
+      dockerfile: docker/prod/web_Dockerfile
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=scram-sha-256"
+    restart: on-failure
+    volumes:
+      - log:/data/log
+      - plots:/data/plots
+      - targets:/data/targets
+      - fits_data:/data/fits
+      - static:/bhtom/_static
+      - cache:/data/cache
+      - archive:/data/archive
+    ports:
+      - "7010:8000"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+    depends_on:
+      - bhtom_db
+
+  zookeeper1:
+    image: 'confluentinc/cp-zookeeper:7.3.2'
+    container_name: zookeeper1
+    networks:
+      - kafka_network
+    hostname: zookeeper1
+    volumes:
+      - zookeeper1-data:/var/lib/zookeeper/data
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+    restart: always
+
+  zookeeper2:
+    image: confluentinc/cp-zookeeper:7.3.2
+    container_name: zookeeper2
+    networks:
+      - kafka_network
+    hostname: zookeeper2
+    volumes:
+      - zookeeper2-data:/var/lib/zookeeper/data
+    environment:
+      ZOOKEEPER_SERVER_ID: 2
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2182:2182"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+    restart: always
+
+  zookeeper3:
+    image: confluentinc/cp-zookeeper:7.3.2
+    container_name: zookeeper3
+    networks:
+      - kafka_network
+    hostname: zookeeper3
+    volumes:
+      - zookeeper3-data:/var/lib/zookeeper/data
+    environment:
+      ZOOKEEPER_SERVER_ID: 3
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2183:2183"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+    restart: always
+
+  kafka1:
+    image: 'confluentinc/cp-kafka:7.3.2'
+    container_name: kafka1
+    networks:
+      kafka_network:
+        ipv4_address: 172.32.0.10
+      bhtom_network:
+        ipv4_address: 172.30.0.30
+    restart: always
+    volumes:
+      - kafka1-data:/var/lib/kafka/data
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181,zookeeper2:2182,zookeeper3:2183"
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:19092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_REPLICA_LAG_TIME_MAX_MS: 4000
+      KAFKA_SOCKET_TIMEOUT_MS: 4000
+
+    depends_on:
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
+
+  kafka2:
+    image: 'confluentinc/cp-kafka:7.3.2'
+    container_name: kafka2
+    volumes:
+      - kafka2-data:/var/lib/kafka/data
+    networks:
+      kafka_network:
+        ipv4_address: 172.32.0.11
+      bhtom_network:
+        ipv4_address: 172.30.0.31
+    ports:
+      - "9093:9093"
+      - "29093:29093"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181,zookeeper2:2182,zookeeper3:2183"
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:19093,PLAINTEXT_HOST://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_REPLICA_LAG_TIME_MAX_MS: 4000
+      KAFKA_SOCKET_TIMEOUT_MS: 4000
+
+    depends_on:
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
+    restart: always
+
+  kafka3:
+    image: 'confluentinc/cp-kafka:7.3.2'
+    container_name: kafka3
+    volumes:
+      - kafka3-data:/var/lib/kafka/data
+    networks:
+      kafka_network:
+        ipv4_address: 172.32.0.12
+      bhtom_network:
+        ipv4_address: 172.30.0.32
+    ports:
+      - "9094:9094"
+      - "29094:29094"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181,zookeeper2:2182,zookeeper3:2183"
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:19094,PLAINTEXT_HOST://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_REPLICA_LAG_TIME_MAX_MS: 4000
+      KAFKA_SOCKET_TIMEOUT_MS: 4000
+
+    depends_on:
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
+    restart: always
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    env_file:
+      - .kafka.env
+    restart: on-failure
+    networks:
+      kafka_network:
+        ipv4_address: 172.32.0.20
+    ports:
+      - "7080:8080"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      KAFKA_CLUSTERS_0_NAME: 'broker1'
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'kafka1:19092'
+      KAFKA_CLUSTERS_0_ZOOKEEPER: 'zookeeper1:2181'
+      KAFKA_CLUSTERS_1_NAME: 'broker2'
+      KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS: 'kafka2:19093'
+      KAFKA_CLUSTERS_1_ZOOKEEPER: 'zookeeper2:2182'
+      KAFKA_CLUSTERS_2_NAME: 'broker3'
+      KAFKA_CLUSTERS_2_BOOTSTRAPSERVERS: 'kafka3:19094'
+      KAFKA_CLUSTERS_2_ZOOKEEPER: 'zookeeper3:2183'
+      AUTH_TYPE: "LOGIN_FORM"
+      SPRING_SECURITY_USER_NAME: ${KAFKA_UI_USER}
+      SPRING_SECURITY_USER_PASSWORD: ${KAFKA_UI_PASSWORD}
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+  mongo:
+    image: mongo:7.0.0
+    container_name: mongo
+    restart: on-failure
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      graylog:
+        ipv4_address: 172.33.0.10
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+    container_name: elasticsearch
+    restart: on-failure
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+      - log_els:/usr/share/elasticsearch/logs
+    environment:
+      - http.host=0.0.0.0
+      - discovery.type=single-node
+      - transport.host=localhost
+      - network.host=0.0.0.0
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      graylog:
+        ipv4_address: 172.33.0.11
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+  graylog:
+    image: graylog/graylog:5.1
+    container_name: graylog
+    restart: on-failure
+    volumes:
+      - graylog_data:/usr/share/graylog/data
+      - graylog_config:/usr/share/graylog/data/config
+    environment:
+      - GRAYLOG_PASSWORD_SECRET=${GRAYLOG_PASSWORD_SECRET}
+      - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD_SHA2}
+      - GRAYLOG_HTTP_EXTERNAL_URI=http://localhost:7900/
+      - DISABLE_TELEMETRY=1
+      - GRAYLOG_EMAIL_ENABLED=true
+      - GRAYLOG_EMAIL_HOSTNAME=smtp.gmail.com
+      - GRAYLOG_EMAIL_PORT=587
+      - GRAYLOG_EMAIL_USE_AUTH=true
+      - GRAYLOG_EMAIL_USE_TLS=true
+      - GRAYLOG_EMAIL_USE_SSL=false
+      - GRAYLOG_EMAIL_AUTH_USERNAME=${TOMEMAIL}
+      - GRAYLOG_EMAIL_AUTH_PASSWORD=${TOMEMAILPASSWORD}
+    networks:
+      graylog:
+        ipv4_address: 172.33.0.12
+      bhtom_network:
+        ipv4_address: 172.30.0.50
+    links:
+      - mongo
+      - elasticsearch
+    depends_on:
+      - mongo
+      - elasticsearch
+    ports:
+      # Containers should only listen on 127.0.0.1, Apache is our TLS proxy
+      # Graylog web interface and REST API
+      - 7900:9000
+      # Syslog TCP
+      - 1514:1514
+      # Syslog UDP
+      # - 1514:1514/udp
+      # GELF TCP
+      - "12201:12201/tcp" # GELF TCP
+      - "12201:12201/udp" # GELF UDP
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+    entrypoint: /usr/bin/tini -- wait-for-it elasticsearch:9200 --  /docker-entrypoint.sh
+
+volumes:
+  bhtom_db:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/bhtom_db
+  cache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/cache
+  mongo_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/mongo
+  es_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/es_data
+  graylog_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/graylog
+  graylog_config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/graylog_config
+  log:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/log
+  log_els:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/log/elasticsearch
+  plots:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/plots
+  targets:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/targets
+  archive:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/cpcsArchiveFile
+  fits_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/fits
+  static:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/static/bhtom
+  kafka1-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/kafka/kafka1
+  kafka2-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/kafka/kafka2
+  kafka3-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/kafka/kafka3
+  zookeeper1-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/kafka/zookeeper1
+  zookeeper2-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/kafka/zookeeper2
+  zookeeper3-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/kafka/zookeeper3
+  env:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_STORE_PATH}/env/prod
+
+networks:
+  bhtom_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+  bhtom_db:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.0.0/16
+  kafka_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.32.0.0/16
+  graylog:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.33.0.0/16
