@@ -256,7 +256,8 @@ services:
     environment:
       - GRAYLOG_PASSWORD_SECRET=${GRAYLOG_PASSWORD_SECRET}
       - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD_SHA2}
-      - GRAYLOG_HTTP_EXTERNAL_URI=http://localhost:7900/
+      - GRAYLOG_HTTP_BIND_ADDRESS=0.0.0.0:9000
+      - GRAYLOG_HTTP_EXTERNAL_URI=https://manager.bh-tom2.astrouw.edu.pl/graylog/
       - DISABLE_TELEMETRY=1
       - GRAYLOG_EMAIL_ENABLED=true
       - GRAYLOG_EMAIL_HOSTNAME=smtp.gmail.com
