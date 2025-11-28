@@ -74,16 +74,10 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "100m"
-        max-file: "5"
-
     restart: always
 
   zookeeper2:
-    image: confluentinc/cp-zookeeper:7.3.2
+    image: 'confluentinc/cp-zookeeper:7.3.2'
     container_name: zookeeper2
     networks:
       - kafka_network
@@ -97,16 +91,10 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2182:2182"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "100m"
-        max-file: "5"
-
     restart: always
 
   zookeeper3:
-    image: confluentinc/cp-zookeeper:7.3.2
+    image: 'confluentinc/cp-zookeeper:7.3.2'
     container_name: zookeeper3
     networks:
       - kafka_network
@@ -120,12 +108,6 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2183:2183"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "100m"
-        max-file: "5"
-
     restart: always
 
   kafka1:
@@ -134,58 +116,42 @@ services:
     networks:
       - kafka_network
       - bhtom_network
-    restart: always
     volumes:
       - kafka1-data:/var/lib/kafka/data
     ports:
       - "9092:9092"
       - "29092:29092"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "100m"
-        max-file: "5"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181,zookeeper2:2181,zookeeper3:2181"
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:19092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:19092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_REPLICA_LAG_TIME_MAX_MS: 4000
-      KAFKA_SOCKET_TIMEOUT_MS: 4000
-
     depends_on:
       - zookeeper1
       - zookeeper2
       - zookeeper3
+    restart: always
 
   kafka2:
     image: 'confluentinc/cp-kafka:7.3.2'
     container_name: kafka2
-    volumes:
-      - kafka2-data:/var/lib/kafka/data
     networks:
       - kafka_network
       - bhtom_network
+    volumes:
+      - kafka2-data:/var/lib/kafka/data
     ports:
       - "9093:9093"
       - "29093:29093"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "100m"
-        max-file: "5"
     environment:
       KAFKA_BROKER_ID: 2
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181,zookeeper2:2181,zookeeper3:2181"
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:19093,PLAINTEXT_HOST://localhost:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:19093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_REPLICA_LAG_TIME_MAX_MS: 4000
-      KAFKA_SOCKET_TIMEOUT_MS: 4000
-
     depends_on:
       - zookeeper1
       - zookeeper2
@@ -195,29 +161,21 @@ services:
   kafka3:
     image: 'confluentinc/cp-kafka:7.3.2'
     container_name: kafka3
-    volumes:
-      - kafka3-data:/var/lib/kafka/data
     networks:
       - kafka_network
       - bhtom_network
+    volumes:
+      - kafka3-data:/var/lib/kafka/data
     ports:
       - "9094:9094"
       - "29094:29094"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "100m"
-        max-file: "5"
     environment:
       KAFKA_BROKER_ID: 3
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181,zookeeper2:2181,zookeeper3:2181"
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:19094,PLAINTEXT_HOST://localhost:9094
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:19094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-      KAFKA_REPLICA_LAG_TIME_MAX_MS: 4000
-      KAFKA_SOCKET_TIMEOUT_MS: 4000
-
     depends_on:
       - zookeeper1
       - zookeeper2
@@ -232,26 +190,16 @@ services:
     restart: on-failure
     networks:
       - kafka_network
-      - bhtom_network
-      - graylog
     ports:
       - "7080:8080"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "100m"
-        max-file: "5"
     environment:
       DYNAMIC_CONFIG_ENABLED: 'true'
       KAFKA_CLUSTERS_0_NAME: 'broker1'
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'kafka1:19092'
-      KAFKA_CLUSTERS_0_ZOOKEEPER: 'zookeeper1:2181'
       KAFKA_CLUSTERS_1_NAME: 'broker2'
       KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS: 'kafka2:19093'
-      KAFKA_CLUSTERS_1_ZOOKEEPER: 'zookeeper2:2181'
       KAFKA_CLUSTERS_2_NAME: 'broker3'
       KAFKA_CLUSTERS_2_BOOTSTRAPSERVERS: 'kafka3:19094'
-      KAFKA_CLUSTERS_2_ZOOKEEPER: 'zookeeper3:2181'
       AUTH_TYPE: "LOGIN_FORM"
       SPRING_SECURITY_USER_NAME: ${KAFKA_UI_USER}
       SPRING_SECURITY_USER_PASSWORD: ${KAFKA_UI_PASSWORD}
