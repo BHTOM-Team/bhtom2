@@ -317,8 +317,8 @@ services:
       - GRAYLOG_EMAIL_AUTH_USERNAME=${TOMEMAIL}
       - GRAYLOG_EMAIL_AUTH_PASSWORD=${TOMEMAILPASSWORD}
     networks:
-        -graylog
-        -bhtom_network
+      - graylog
+      - bhtom_network
     links:
       - mongo
       - elasticsearch
