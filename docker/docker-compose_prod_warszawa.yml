@@ -231,7 +231,9 @@ services:
       - .kafka.env
     restart: on-failure
     networks:
-        - graylog
+      - kafka_network
+      - bhtom_network
+      - graylog
     ports:
       - "7080:8080"
     logging:
