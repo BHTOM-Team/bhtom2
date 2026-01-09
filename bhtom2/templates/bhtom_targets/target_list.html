@@ -70,7 +70,14 @@
             {{ filter.fields }}
             <div class="col-md-4">
                 <form action="" method="get" class="form">
-                    {% bootstrap_form filter.form exclude='tweet,epoch,pm_ra,pm_dec,distance,distance_err,dont_update_me' %}
+                    {% bootstrap_form filter.form exclude='tweet,epoch,pm_ra,pm_dec,distance,distance_err,dont_update_me,has_optical,has_infrared,has_radio,has_xray,has_gamma,has_polarimetry' %}
+                    <h6>Data Types</h6>
+                    {% bootstrap_field filter.form.has_optical %}
+                    {% bootstrap_field filter.form.has_infrared %}
+                    {% bootstrap_field filter.form.has_radio %}
+                    {% bootstrap_field filter.form.has_xray %}
+                    {% bootstrap_field filter.form.has_gamma %}
+                    {% bootstrap_field filter.form.has_polarimetry %}
                     {% buttons %}
                         <button type="submit" class="btn btn-primary">
                             Filter
