@@ -10,7 +10,10 @@ from bhtom_base.bhtom_targets.models import Target, DownloadedTarget,TargetList
 class TargetsSerializers(serializers.ModelSerializer):
     class Meta:
         model = Target
-        fields = ('name', 'ra', 'dec', 'epoch','description', 'classification', 'discovery_date', 'importance', 'cadence')
+        fields = (
+            'name', 'ra', 'dec', 'epoch', 'description', 'classification', 'discovery_date', 'importance', 'cadence',
+            'has_optical', 'has_infrared', 'has_radio', 'has_xray', 'has_gamma', 'has_polarimetry'
+        )
 
     def validate(self, data):
         unknown = set(self.initial_data) - set(self.fields)
@@ -41,6 +44,12 @@ class TargetsSerializers(serializers.ModelSerializer):
         instance.discovery_date = validated_data.get('discovery_date', instance.discovery_date)
         instance.importance = validated_data.get('importance', instance.importance)
         instance.cadence = validated_data.get('cadence', instance.cadence)
+        instance.has_optical = validated_data.get('has_optical', instance.has_optical)
+        instance.has_infrared = validated_data.get('has_infrared', instance.has_infrared)
+        instance.has_radio = validated_data.get('has_radio', instance.has_radio)
+        instance.has_xray = validated_data.get('has_xray', instance.has_xray)
+        instance.has_gamma = validated_data.get('has_gamma', instance.has_gamma)
+        instance.has_polarimetry = validated_data.get('has_polarimetry', instance.has_polarimetry)
         instance.modified = timezone.now()
         instance.save()
         return instance
