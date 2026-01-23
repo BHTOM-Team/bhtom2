@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from bhtom2.kafka.topic import kafkaTopic
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom2.bhtom_targets.utils import get_brokers
-from bhtom_base.bhtom_dataproducts.models import BrokerCadence, ReducedDatum
+from bhtom_base.bhtom_dataproducts.models import BrokerCadence, ReducedDatum, Target
 from django_comments.models import Comment
 import requests
 from django.conf import settings
