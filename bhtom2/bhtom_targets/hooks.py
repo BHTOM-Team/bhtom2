@@ -1,7 +1,7 @@
 from bhtom2.bhtom_targets.utils import update_targetList_cache
 from bhtom2.kafka.producer.reducedDatumEvent import ReducedDatumEventProducer
 from bhtom2.kafka.producer.targetEvent import TargetCreateEventProducer
-
+from django.contrib.contenttypes.models import ContentType
 from bhtom2.kafka.topic import kafkaTopic
 from bhtom2.utils.bhtom_logger import BHTOMLogger
 from bhtom2.bhtom_targets.utils import get_brokers
@@ -25,13 +25,14 @@ def target_post_save(target, created=False, user=None):
             logger.error("Error targetEvent, %s" % str(e))
         try:
             full_name = user.get_full_name() or user.username
-
+            content_type = ContentType.objects.get_for_model(Target)
+            content_type_id = content_type.id
             Comment.objects.create(
                 user_id=user.id,
                 user_name=user.username,
                 user_email=user.email,
                 object_pk=target.id,
-                content_type_id=12,
+                content_type_id=content_type_id,
                 site_id=1,
                 is_public=True,
                 comment=f"Target created by {full_name}({user.username}) on {target.created}",
