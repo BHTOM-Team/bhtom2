@@ -16,6 +16,7 @@ logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.hooks')
 
 # actions done just after saving the target (in creation or update)
 def target_post_save(target, created=False, user=None):
+    logger.info(f"target_post_save: target={target}, created={created}, user={user}")
     if created:
         try:
             TargetCreateEventProducer().send_message(kafkaTopic.createTarget, target)
