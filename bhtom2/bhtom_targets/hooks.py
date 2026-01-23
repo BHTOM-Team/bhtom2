@@ -18,11 +18,11 @@ logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.hooks')
 def target_post_save(target, created=False, user=None):
     logger.info(f"target_post_save: target={target}, created={created}, user={user}")
     if created:
-        try:
-            TargetCreateEventProducer().send_message(kafkaTopic.createTarget, target)
-            logger.info("Send Create target Event, %s" % str(target.name))
-        except Exception as e:
-            logger.info("Error targetEvent, %s" % str(e))
+        # try:
+        #     TargetCreateEventProducer().send_message(kafkaTopic.createTarget, target)
+        #     logger.info("Send Create target Event, %s" % str(target.name))
+        # except Exception as e:
+        #     logger.info("Error targetEvent, %s" % str(e))
         try:
             full_name = user.get_full_name() or user.username
             content_type = ContentType.objects.get_for_model(Target)
