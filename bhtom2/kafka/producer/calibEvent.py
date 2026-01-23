@@ -45,4 +45,4 @@ class CalibCreateEventProducer:
                               value=message_json,
                               headers={"Correlation-ID": guid}
                               )
-        self.producer.poll()
+        self.producer.poll(2)
