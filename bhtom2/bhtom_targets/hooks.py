@@ -16,20 +16,17 @@ logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.hooks')
 
 # actions done just after saving the target (in creation or update)
 def target_post_save(target, created=False, user=None):
+    logger.info(f"target_post_save: target={target}, created={created}, user={user}")
     if created:
-
-        logger.info(f"target_post_save: target={target}, created={created}, user={user}")
-        # try:
-        #     TargetCreateEventProducer().send_message(kafkaTopic.createTarget, target)
-        #     logger.info("Send Create target Event, %s" % str(target.name))
-        # except Exception as e:
-        #     logger.info("Error targetEvent, %s" % str(e))
+        try:
+            TargetCreateEventProducer().send_message(kafkaTopic.createTarget, target)
+            logger.info("Send Create target Event, %s" % str(target.name))
+        except Exception as e:
+            logger.error("Error targetEvent, %s" % str(e))
         try:
             full_name = user.get_full_name() or user.username
             content_type = ContentType.objects.get_for_model(Target)
             content_type_id = content_type.id
-            logger.info("STEP 1")
-        
             Comment.objects.create(
                 user_id=user.id,
                 user_name=user.username,
@@ -40,20 +37,16 @@ def target_post_save(target, created=False, user=None):
                 is_public=True,
                 comment=f"Target created by {full_name}({user.username}) on {target.created}",
             )
-            logger.info("STEP 1 END")
         except Exception as e :
-            logger.info("Error while create comment: " + str(e))
-    logger.info("STEP 2")
+            logger.error("Error while create comment: " + str(e))
     try:
-        logger.info("STEP 3")
         brokers = get_brokers()
         for broker in brokers:
-            logger.info("STEP 4")
             ReducedDatumEventProducer().send_message(kafkaTopic.updateReducedDatum, target, broker, isNew=True)
         logger.info("Send Create reducedDatum Event, %s" % str(target.name))
     except Exception as e:
-        logger.info("Error reducedDatum Event, %s" % str(e))
-    logger.info(f"target_post_save finished: target={target}, created={created}, user={user}")
+        logger.error("Error reducedDatum Event, %s" % str(e))
+
 
 def update_alias(target, broker):
     try:
