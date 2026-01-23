@@ -46,7 +46,7 @@ def target_post_save(target, created=False, user=None):
         logger.info("Send Create reducedDatum Event, %s" % str(target.name))
     except Exception as e:
         logger.info("Error reducedDatum Event, %s" % str(e))
-
+    logger.info(f"target_post_save finished: target={target}, created={created}, user={user}")
 
 def update_alias(target, broker):
     try:
