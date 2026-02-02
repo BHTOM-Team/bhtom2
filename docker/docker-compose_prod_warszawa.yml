@@ -72,6 +72,11 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
       ZOOKEEPER_TICK_TIME: 2000
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "2"
     ports:
       - "2181:2181"
     restart: always
@@ -89,6 +94,11 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
       ZOOKEEPER_TICK_TIME: 2000
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "2"
     ports:
       - "2182:2182"
     restart: always
@@ -106,6 +116,11 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
       ZOOKEEPER_TICK_TIME: 2000
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "2"
     ports:
       - "2183:2183"
     restart: always
@@ -128,6 +143,11 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "2"
     depends_on:
       - zookeeper1
       - zookeeper2
@@ -152,6 +172,11 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "2"
     depends_on:
       - zookeeper1
       - zookeeper2
@@ -176,6 +201,11 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "2"
     depends_on:
       - zookeeper1
       - zookeeper2
@@ -219,7 +249,7 @@ services:
       driver: "json-file"
       options:
         max-size: "100m"
-        max-file: "5"
+        max-file: "2"
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2

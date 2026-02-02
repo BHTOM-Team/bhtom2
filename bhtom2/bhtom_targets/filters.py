@@ -63,6 +63,16 @@ def filter_text(queryset, name, value):
 
 class TargetFilter(django_filters.FilterSet):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.form.is_bound:
+            for flag in (
+                'has_optical', 'has_infrared', 'has_radio',
+                'has_xray', 'has_gamma', 'has_polarimetry'
+            ):
+                if flag in self.form.fields:
+                    self.form.fields[flag].initial = True
+
     def filter_name(self, queryset, name, value):
         return queryset.filter(Q(name__icontains=value) | Q(aliases__name__icontains=value)).distinct()
    
@@ -206,6 +216,12 @@ class TargetFilter(django_filters.FilterSet):
     targetlist__name = django_filters.ModelChoiceFilter(queryset=get_target_list_queryset, label="Target Grouping")
 
     description = django_filters.CharFilter(method='filter_description', label='Description')
+    has_optical = django_filters.BooleanFilter(field_name='has_optical', label='Has Optical')
+    has_infrared = django_filters.BooleanFilter(field_name='has_infrared', label='Has Infrared')
+    has_radio = django_filters.BooleanFilter(field_name='has_radio', label='Has Radio')
+    has_xray = django_filters.BooleanFilter(field_name='has_xray', label='Has X-ray')
+    has_gamma = django_filters.BooleanFilter(field_name='has_gamma', label='Has Gamma')
+    has_polarimetry = django_filters.BooleanFilter(field_name='has_polarimetry', label='Has Polarimetry')
 
     order = django_filters.OrderingFilter(
         fields=['name', 'mag_last', 'importance', 'priority', 'sun_separation', 'galb', 'created', 'modified'],
@@ -223,4 +239,7 @@ class TargetFilter(django_filters.FilterSet):
 
     class Meta:
         model = Target
-        fields = ['type', 'name', 'classification', 'description', 'cone_search', 'targetlist__name']
+        fields = [
+            'type', 'name', 'classification', 'description', 'cone_search', 'targetlist__name',
+            'has_optical', 'has_infrared', 'has_radio', 'has_xray', 'has_gamma', 'has_polarimetry'
+        ]

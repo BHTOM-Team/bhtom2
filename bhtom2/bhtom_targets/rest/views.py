@@ -28,6 +28,21 @@ from bhtom2.utils.api_pagination import StandardResultsSetPagination
 
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.rest-view')
 
+def _parse_bool(value):
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in ('true', '1', 'yes', 'y', 't'):
+            return True
+        if normalized in ('false', '0', 'no', 'n', 'f'):
+            return False
+    raise ValueError(f'Invalid boolean value: {value}')
+
 class GetTargetListApi(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -59,6 +74,12 @@ class GetTargetListApi(views.APIView):
                 'sunSeparationMax': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'lastMagMin': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
                 'lastMagMax': openapi.Schema(type=openapi.TYPE_NUMBER, format=openapi.FORMAT_FLOAT),
+                'hasOptical': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'hasInfrared': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'hasRadio': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'hasXray': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'hasGamma': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'hasPolarimetry': openapi.Schema(type=openapi.TYPE_BOOLEAN),
                 'page': openapi.Schema(type=openapi.TYPE_INTEGER, description='Page number for pagination'),
             },
             required=[]
@@ -98,6 +119,12 @@ class GetTargetListApi(views.APIView):
         galacticLonMin = request.data.get('galacticLonMin', None)
         galacticLonMax = request.data.get('galacticLonMax', None)
         description = request.data.get('description', None)
+        hasOptical = request.data.get('hasOptical', None)
+        hasInfrared = request.data.get('hasInfrared', None)
+        hasRadio = request.data.get('hasRadio', None)
+        hasXray = request.data.get('hasXray', None)
+        hasGamma = request.data.get('hasGamma', None)
+        hasPolarimetry = request.data.get('hasPolarimetry', None)
         page = request.data.get('page', 1)
       
         
@@ -143,6 +170,18 @@ class GetTargetListApi(views.APIView):
                 query &= Q(classification=classification)
             if targetGroup is not None:
                 query &= Q(targetlist__name=targetGroup)
+            if hasOptical is not None:
+                query &= Q(has_optical=_parse_bool(hasOptical))
+            if hasInfrared is not None:
+                query &= Q(has_infrared=_parse_bool(hasInfrared))
+            if hasRadio is not None:
+                query &= Q(has_radio=_parse_bool(hasRadio))
+            if hasXray is not None:
+                query &= Q(has_xray=_parse_bool(hasXray))
+            if hasGamma is not None:
+                query &= Q(has_gamma=_parse_bool(hasGamma))
+            if hasPolarimetry is not None:
+                query &= Q(has_polarimetry=_parse_bool(hasPolarimetry))
 
         except ValueError as e:
             logger.error("Value error in targetList " + str(e))
@@ -239,6 +278,12 @@ class TargetCreateApi(views.APIView):
                 'discovery_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'importance': openapi.Schema(type=openapi.TYPE_NUMBER),
                 'cadence': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'has_optical': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'has_infrared': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'has_radio': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'has_xray': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'has_gamma': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'has_polarimetry': openapi.Schema(type=openapi.TYPE_BOOLEAN),
             },
             required=['name', 'ra', 'dec']
         ),
@@ -284,7 +329,13 @@ class TargetUpdateApi(views.APIView):
                 'discovery_date': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
                 'importance': openapi.Schema(type=openapi.TYPE_NUMBER),
                 'cadence': openapi.Schema(type=openapi.TYPE_NUMBER),
-                'description': openapi.Schema(type=openapi.TYPE_STRING)
+                'description': openapi.Schema(type=openapi.TYPE_STRING),
+                'has_optical': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'has_infrared': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'has_radio': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'has_xray': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'has_gamma': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'has_polarimetry': openapi.Schema(type=openapi.TYPE_BOOLEAN),
             },
             required=[]
         ),
