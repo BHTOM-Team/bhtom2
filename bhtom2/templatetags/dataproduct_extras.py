@@ -335,6 +335,59 @@ def photometry_for_target_obs(context, target, width=1000, height=600, backgroun
         'plot': offline.plot(fig, output_type='div', show_link=False)
     }
 
+@register.inclusion_tag('bhtom_dataproducts/partials/photometry_for_target_highenergy.html', takes_context=True)
+def photometry_for_target_highenergy(context, target, width=1000, height=600, background=None, label_color=None, grid=True):
+    fig = None
+    if target.photometry_plot_highenergy is not None and target.photometry_plot_obs != '':
+        base_path = settings.DATA_PLOTS_PATH
+        try:
+            fig = plotly.io.read_json(base_path + str(target.photometry_plot_highenergy))
+
+            # Get current date as a string in 'YYYY-MM-DD' format
+            current_date = datetime.datetime.now().strftime('%Y-%m-%d')
+
+            # Calculate the y-range from your data traces
+            y_values = [trace['y'] for trace in fig['data'] if 'y' in trace]
+            y_min = np.min([np.min(values) for values in y_values])
+            y_max = np.max([np.max(values) for values in y_values])
+
+            # Add a vertical dashed line at the current date
+            line_trace = go.Scatter(
+                x=[current_date, current_date],
+                y=[y_min-2, y_max+2],  # This will make the line span the entire plot in Y
+                mode='lines',
+                name='NOW',
+                line=dict(
+                    color="Grey",  # Change the color here
+                    width=1,
+                    dash="dash",  # This makes the line dashed.
+                ),
+                showlegend=True
+            )
+            fig.add_trace(line_trace)
+
+            return {
+                'target': target,
+                'plot': offline.plot(fig, output_type='div', show_link=False)
+            }
+        except:
+            logger.warning("Plot(high energy) does not exist")
+
+    layout = go.Layout(
+        height=height,
+        width=width,
+        paper_bgcolor=background,
+        plot_bgcolor=background
+
+    )
+    layout.legend.font.color = label_color
+    fig = go.Figure(data=[], layout=layout)
+
+    return {
+        'target': target,
+        'plot': offline.plot(fig, output_type='div', show_link=False)
+    }
+
 
 ### static and simpler version of the plot for massive list table
 @register.inclusion_tag('bhtom_dataproducts/partials/photometry_for_target_icon.html', takes_context=True)
