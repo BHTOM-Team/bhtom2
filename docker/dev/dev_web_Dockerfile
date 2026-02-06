@@ -10,6 +10,7 @@ WORKDIR /bhtom
 COPY . /bhtom/
 COPY docker/dev/.env /bhtom/settings/env/.bhtom.env
 
+
 RUN pwd
 RUN apt update
 RUN apt install -y libpq-dev
