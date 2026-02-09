@@ -51,7 +51,26 @@ urlpatterns = [
          name='alerts:list'),
     path('', include('django_prometheus.urls')),
     path('metrics/', custom_metrics, name='custom_metrics'),
-    path("public/targets/<str:identifier>",TargetPublicDetailView.as_view(template_name="bhtom_targets/target_public_detail.html")),
+    # path("public/target/<str:identifier>",TargetPublicDetailView.as_view(template_name="bhtom_targets/target_public_detail.html")),
+    # path("public/target/<str:identifier>/",TargetPublicDetailView.as_view(template_name="bhtom_targets/target_public_detail.html")),
+    path(
+        "public/target/<int:pk>/",
+        TargetPublicDetailView.as_view(template_name="bhtom_targets/target_public_detail.html"),
+        name="public_target_by_pk",
+    ),
+    path(
+        "public/target/<int:pk>",
+        TargetPublicDetailView.as_view(template_name="bhtom_targets/target_public_detail.html"),
+    ),
+        path(
+        "public/target/<str:identifier>/",
+        TargetPublicDetailView.as_view(template_name="bhtom_targets/target_public_detail.html"),
+        name="public_target_by_name",
+    ),
+    path(
+        "public/target/<str:identifier>",
+        TargetPublicDetailView.as_view(template_name="bhtom_targets/target_public_detail.html"),
+    ),
     path("public/observatory/",ObservatoryPublicList.as_view()),
     path("public/observatory/<str:identifier>",ObservatoryPublicDetailView.as_view(), name="public_obs_details"),
     path('captcha/', include('captcha.urls')),
