@@ -290,8 +290,8 @@ def photometry_for_target_obs(context, target, width=1000, height=600, backgroun
         try:
             fig = plotly.io.read_json(base_path + str(target.photometry_plot_obs))
 
-            # Get current date as a string in 'YYYY-MM-DD' format
-            current_date = datetime.datetime.now().strftime('%Y-%m-%d')
+            # Get current date as a string in 'YYYY-MM-DD' format + hours+mins+seconds
+            current_date = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
 
             # Calculate the y-range from your data traces
             y_values = [trace['y'] for trace in fig['data'] if 'y' in trace]
@@ -343,8 +343,8 @@ def photometry_for_target_highenergy(context, target, width=1000, height=600, ba
         try:
             fig = plotly.io.read_json(base_path + str(target.photometry_plot_highenergy))
 
-            # Get current date as a string in 'YYYY-MM-DD' format
-            current_date = datetime.datetime.now().strftime('%Y-%m-%d')
+            # Get current date as a string in 'YYYY-MM-DD' format + hours+mins+seconds
+            current_date = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
 
             # Calculate the y-range from your data traces
             y_values = [trace['y'] for trace in fig['data'] if 'y' in trace]
