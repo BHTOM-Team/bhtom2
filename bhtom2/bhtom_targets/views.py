@@ -805,12 +805,13 @@ class TargetPublicDetailView(DetailView):
 
     def get_object(self):
         identifier = self.kwargs.get("identifier")
-        try:
+        if identifier is None:
+            identifier = str(self.kwargs.get("pk"))
 
+        try:
             if identifier.isdigit():
                 return Target.objects.get(id=int(identifier))
-            else:
-                return Target.objects.get(name=identifier)
+            return Target.objects.get(name=identifier)
         except:
             raise Http404
 

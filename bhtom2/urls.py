@@ -56,7 +56,6 @@ urlpatterns = [
     path(
         "public/targets/<int:pk>/",
         TargetPublicDetailView.as_view(template_name="bhtom_targets/target_public_detail.html"),
-        name="public_target_by_pk",
     ),
     path(
         "public/targets/<int:pk>",
@@ -65,7 +64,6 @@ urlpatterns = [
         path(
         "public/targets/<str:identifier>/",
         TargetPublicDetailView.as_view(template_name="bhtom_targets/target_public_detail.html"),
-        name="public_target_by_name",
     ),
     path(
         "public/targets/<str:identifier>",
