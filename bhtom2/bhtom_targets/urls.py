@@ -72,6 +72,11 @@ urlpatterns = [
          name='detail'),
      path('<str:name>/', TargetDetailView.as_view(template_name='bhtom_targets/target_detail.html'),
          name='detail'),
+     path('<int:pk>', TargetDetailView.as_view(template_name='bhtom_targets/target_detail.html'),
+         name='detail'),
+     path('<str:name>', TargetDetailView.as_view(template_name='bhtom_targets/target_detail.html'),
+         name='detail'),
+
      path('update-reduced-data/<int:pk>', UpdateReducedDatum.as_view(), name='update-reduced-data'),
 
 ]

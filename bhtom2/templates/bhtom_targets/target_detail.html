@@ -50,7 +50,12 @@
                        data-toggle="tab">Photometry</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="phot-models-tab" href="#phot-models" role="tab" data-toggle="tab">Models</a>
+                    <a class="nav-link" id="photometry-obs-tab" href="#photometry-obs" role="tab"
+                       data-toggle="tab">Photometry(Per Obs)</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="phot-models-tab" href="#phot-models" role="tab" 
+                        data-toggle="tab">Models</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" id="spectroscopy-tab" href="#spectroscopy" role="tab"
@@ -105,7 +110,18 @@
                         </div>
                     </div>
 
-                    {% comment %} Plot with observers instead of filters {% endcomment %}
+                    {% comment %} Plot with high energy data, shown below {% endcomment %}
+
+                    {% photometry_for_target_highenergy target %}
+
+                    {% recent_photometry object limit=5 %}
+
+                </div>
+
+                <div class="tab-pane" id="photometry-obs">
+
+                    {% comment %} Plot with observers instead of filters -moved to a new tab {% endcomment %}
+
                     {% photometry_for_target_obs target %}
 
                     <div class="row menu-row">
@@ -113,6 +129,12 @@
                             <button onclick="download_photometry()" class="btn btn-primary" role="button">Download
                                 photometry data
                             </button>
+                            {% if request.user.is_superuser or request.user.is_staff %}
+                              <button onclick="update_reduceDatum()" class="btn btn-primary" role="button">
+                                  Check for new data
+                            </button>
+                            {% endif %}
+
                         </div>
                         <div class="col-lg-6 text-right">
                             <button onclick="download_radio()" class="btn btn-primary" role="button">Download radio
@@ -120,6 +142,7 @@
                             </button>
                         </div>
                     </div>
+
 
                     {% recent_photometry object limit=5 %}
 

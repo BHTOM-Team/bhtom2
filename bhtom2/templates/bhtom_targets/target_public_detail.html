@@ -61,6 +61,7 @@
                     {% photometry_for_target target %}
                     {% comment %} Plot with observers instead of filters {% endcomment %}
                     {% photometry_for_target_obs target %}
+                    {% photometry_for_target_highenergy target %}
                     {% recent_photometry object limit=5 %}
                 </div>
                 <div class="tab-pane" id="publication">
