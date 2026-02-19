@@ -21,7 +21,7 @@ from django.conf import settings
 from django.core import serializers
 import os
 from django.http import FileResponse
-from bhtom2.utils.reduced_data_utils import save_photometry_data_for_target_to_csv_file, \
+from bhtom2.utils.reduced_data_utils import save_high_energy_data_for_target_to_csv_file, save_photometry_data_for_target_to_csv_file, \
     save_radio_data_for_target_to_csv_file
 from abc import ABC, abstractmethod
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -518,7 +518,6 @@ class GetPlotsObsApiView(views.APIView):
             return Response({"Error ": 'Something went wrong ' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"Plots": results}, status=status.HTTP_200_OK)
 
-
 class TargetDownloadRadioDataApiView(views.APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -568,6 +567,59 @@ class TargetDownloadRadioDataApiView(views.APIView):
         except Exception as e:
             logger.error(f'Error while generating radio data to CSV file for target with id={target_id}: {e}')
             return Response({"Error ": 'Something went wrong ' + str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
+        finally:
+            if tmp:
+                os.remove(tmp.name)
+
+class TargetDownloadHEDataApiView(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'name': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=['name']
+        ),
+        manual_parameters=[
+            openapi.Parameter(
+                name='Authorization',
+                in_=openapi.IN_HEADER,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='Token <Your Token>'
+            ),
+        ],
+    )
+    def post(self, request):
+        serializer = TargetDownloadDataSerializer(data=request.data)
+        if not serializer.is_valid():
+            logger.info('Error bad request')
+            return Response({"Error": 'Something went wrong, bad request in API '}, status=status.HTTP_400_BAD_REQUEST)
+
+        name = serializer.validated_data['name']
+        target_id = Target.objects.get(name=name).id
+
+        logger.info(f'API Generating radio data in CSV file for target with id={target_id}...')
+
+        tmp = None
+        try:
+            tmp, filename = save_high_energy_data_for_target_to_csv_file(name)
+            ip_address = get_client_ip(request)
+            DownloadedTarget.objects.create(
+                user=request.user,
+                target_id=target_id,
+                download_type='H',
+                ip_address=ip_address
+            )
+            return FileResponse(open(tmp.name, 'rb'),
+                                as_attachment=True,
+                                filename=filename)
+        except Exception as e:
+            logger.error(f'Error while generating high energy data to CSV file for target with id={target_id}: {e}')
+            return Response({"Error ": 'Something went wrong in high energy download' + str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
         finally:
             if tmp:
                 os.remove(tmp.name)
