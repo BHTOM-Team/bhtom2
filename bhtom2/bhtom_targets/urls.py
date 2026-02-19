@@ -2,11 +2,11 @@ from django.urls import path
 
 from bhtom_base.bhtom_targets.views import TargetAddRemoveGroupingView, TargetDeleteView, \
     TargetExportView, TargetGroupingCreateView, TargetGroupingDeleteView, TargetGroupingView, TargetNameSearchView
-from .rest.views import CleanTargetListCache, GetTargetListApi, CleanTargetDetailsCache, TargetCreateApi, \
+from .rest.views import CleanTargetListCache, GetTargetListApi, CleanTargetDetailsCache, TargetCreateApi, TargetDownloadHEDataApiView, \
     TargetUpdateApi, TargetDeleteApi, GetPlotsApiView, TargetDownloadRadioDataApiView, TargetDownloadPhotometryDataApiView, GetDownloadedTargetListApi,\
         GetTargetsGroups, GetTargetsFromGroup
 
-from .views import TargetCreateView, TargetUpdateView, TargetGenerateTargetDescriptionLatexView, TargetImportView, \
+from .views import TargetCreateView, TargetDownloadHEDataView, TargetUpdateView, TargetGenerateTargetDescriptionLatexView, TargetImportView, \
     TargetDownloadPhotometryStatsLatexTableView, TargetListImagesView, TargetDownloadPhotometryDataView, \
     TargetDownloadRadioDataView, TargetMicrolensingView, TargetListView, UpdateReducedDatum, TargetNotFoundView, TargetAddNewGroupingView, \
         TargetDetailView
@@ -29,8 +29,9 @@ urlpatterns = [
      path('deleteTarget/', TargetDeleteApi.as_view()),
      path('get-plots/', GetPlotsApiView.as_view()),
      path('get-downloaded-target-list/', GetDownloadedTargetListApi.as_view()),
-     path('download-radio/', TargetDownloadRadioDataApiView.as_view()),
      path('download-photometry/', TargetDownloadPhotometryDataApiView.as_view()),
+     path('download-radio/', TargetDownloadRadioDataApiView.as_view()),
+     path('download-high-energy/', TargetDownloadHEDataApiView.as_view()),
      path('target-groups/', GetTargetsGroups.as_view()),
      path('targets-from-group/', GetTargetsFromGroup.as_view()),
      path('target_not_found/', TargetNotFoundView.as_view(), name='target_not_found'),
@@ -61,6 +62,8 @@ urlpatterns = [
          name='download_photometry_data'),
      path('<int:pk>/download-radio', TargetDownloadRadioDataView.as_view(), name='download_radio_data'),
      path('<str:name>/download-radio', TargetDownloadRadioDataView.as_view(), name='download_radio_data'),
+     path('<int:pk>/download-high-energy', TargetDownloadHEDataView.as_view(), name='download_high_energy'),
+     path('<str:name>/download-high-energy', TargetDownloadHEDataView.as_view(), name='download_high_energy'),
      path('<int:pk>/microlensing',
          TargetMicrolensingView.as_view(template_name='bhtom_targets/target_microlensing.html'),
          name="microlensing_model"),

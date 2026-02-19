@@ -44,7 +44,7 @@ from django.views.generic.detail import DetailView
 from guardian.mixins import PermissionListMixin
 from bhtom2.bhtom_targets.filters import TargetFilter
 
-from bhtom2.utils.reduced_data_utils import save_photometry_data_for_target_to_csv_file, \
+from bhtom2.utils.reduced_data_utils import save_high_energy_data_for_target_to_csv_file, save_photometry_data_for_target_to_csv_file, \
     save_radio_data_for_target_to_csv_file
 
 from bhtom_base.bhtom_targets.models import Target, TargetList
@@ -582,6 +582,17 @@ class TargetDownloadRadioDataView(TargetDownloadDataView):
                 ip_address=ip_address
             )
         return save_radio_data_for_target_to_csv_file(target_id)
+
+class TargetDownloadHEDataView(TargetDownloadDataView):
+    def generate_data_method(self, target_id):
+        ip_address = get_client_ip(self.request)
+        DownloadedTarget.objects.create(
+                user=self.request.user,
+                target_id=target_id,
+                download_type='H',
+                ip_address=ip_address
+            )
+        return save_high_energy_data_for_target_to_csv_file(target_id)
 
 
 # Table list view with light curves only
