@@ -62,6 +62,64 @@ def get_radio_data_table(target: Target) -> Tuple[List[List[str]], List[str]]:
     return data, columns
 
 
+def get_high_energy_data_table(target: Target) -> Tuple[List[List[str]], List[str]]:
+
+    logger.debug(
+        f'Downloading high energy data as a table for target {target.name}...')
+
+    counts_datums = ReducedDatum.objects.filter(
+        target=target,
+        data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
+        value_unit=ReducedDatumUnit.COUNTS,
+        active_flg=True
+    )
+    flux_datums = ReducedDatum.objects.filter(
+        target=target,
+        data_type=settings.DATA_PRODUCT_TYPES['photometry'][0],
+        value_unit=ReducedDatumUnit.FLUX,
+        active_flg=True
+    )
+
+    columns: List[str] = ['MJD', 'COUNTS', 'COUNTS_Error',
+                          'FLUX', 'FLUX_Error', 'Facility', 'Band', 'Observer']
+
+    merged_data: dict = {}
+
+    for datum in counts_datums:
+        key = (datum.mjd, datum.facility, datum.filter, datum.observer)
+        merged_data[key] = [
+            datum.mjd,
+            datum.value,
+            datum.error,
+            None,
+            None,
+            datum.facility,
+            datum.filter,
+            datum.observer
+        ]
+
+    for datum in flux_datums:
+        key = (datum.mjd, datum.facility, datum.filter, datum.observer)
+        if key not in merged_data:
+            merged_data[key] = [
+                datum.mjd,
+                None,
+                None,
+                datum.value,
+                datum.error,
+                datum.facility,
+                datum.filter,
+                datum.observer
+            ]
+        else:
+            merged_data[key][3] = datum.value
+            merged_data[key][4] = datum.error
+
+    data: List[List[Any]] = list(merged_data.values())
+
+    return data, columns
+
+
 def save_data_to_temporary_file(data: List[List[Any]],
                                 columns: List[str],
                                 filename: str,
@@ -126,5 +184,19 @@ def save_radio_data_for_target_to_csv_file(target_id_name) -> Tuple[NamedTempora
     data, columns = get_radio_data_table(target)
 
     filename: str = "target_%s_radio.csv" % target.name
+
+    return save_data_to_temporary_file(data, columns, filename)
+
+
+def save_high_energy_data_for_target_to_csv_file(target_id_name) -> Tuple[NamedTemporaryFile, str]:
+    #if target_id is int, this is the id, if str this is name:
+    if isinstance(target_id_name, int):
+        target: Target = Target.objects.get(pk=target_id_name)
+    else:
+        target: Target = Target.objects.get(name=target_id_name)
+
+    data, columns = get_high_energy_data_table(target)
+
+    filename: str = "target_%s_highenergy.csv" % target.name
 
     return save_data_to_temporary_file(data, columns, filename)

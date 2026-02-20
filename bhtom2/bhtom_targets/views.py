@@ -44,7 +44,7 @@ from django.views.generic.detail import DetailView
 from guardian.mixins import PermissionListMixin
 from bhtom2.bhtom_targets.filters import TargetFilter
 
-from bhtom2.utils.reduced_data_utils import save_photometry_data_for_target_to_csv_file, \
+from bhtom2.utils.reduced_data_utils import save_high_energy_data_for_target_to_csv_file, save_photometry_data_for_target_to_csv_file, \
     save_radio_data_for_target_to_csv_file
 
 from bhtom_base.bhtom_targets.models import Target, TargetList
@@ -583,6 +583,17 @@ class TargetDownloadRadioDataView(TargetDownloadDataView):
             )
         return save_radio_data_for_target_to_csv_file(target_id)
 
+class TargetDownloadHEDataView(TargetDownloadDataView):
+    def generate_data_method(self, target_id):
+        ip_address = get_client_ip(self.request)
+        DownloadedTarget.objects.create(
+                user=self.request.user,
+                target_id=target_id,
+                download_type='H',
+                ip_address=ip_address
+            )
+        return save_high_energy_data_for_target_to_csv_file(target_id)
+
 
 # Table list view with light curves only
 class TargetListImagesView(SingleTableMixin, PermissionListMixin, FilterView):
@@ -634,13 +645,14 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
         allobs = []
         allobs_nowise = []
         for datum in datums:
-            if str(datum.filter) == "WISE(W1)" or str(datum.filter) == "WISE(W2)":
-                #                allobs.append(str("WISE"))
-                allobs.append(str(datum.filter))
+            ff = str(datum.filter)
+            if "LAT" in ff:
                 continue
-            else:
-                allobs_nowise.append(str(datum.filter))
-                allobs.append(str(datum.filter))
+
+            allobs.append(ff)
+
+            if "WISE" not in ff:
+                allobs_nowise.append(ff)
 
         # counting the number of entires per filter in order to remove the very short ones
         filter_counts = {}

@@ -113,6 +113,14 @@
                     {% comment %} Plot with high energy data, shown below {% endcomment %}
 
                     {% photometry_for_target_highenergy target %}
+                    
+                    <div class="row menu-row">
+                        <div class="col-lg-6">
+                            <button onclick="download_high_energy()" class="btn btn-primary" role="button">
+                                Download High Energy data
+                            </button>
+                        </div>
+                    </div>
 
                     {% recent_photometry object limit=5 %}
 
@@ -315,6 +323,10 @@
 
         function download_radio() {
             window.open('{% url "targets:download_radio_data" target.id %}')
+        }
+
+        function download_high_energy() {
+            window.open('{% url "targets:download_high_energy" target.id %}')
         }
 
         function open_microlensing_model() {
