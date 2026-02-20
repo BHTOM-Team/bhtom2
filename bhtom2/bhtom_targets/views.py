@@ -645,13 +645,14 @@ class TargetMicrolensingView(PermissionRequiredMixin, DetailView):
         allobs = []
         allobs_nowise = []
         for datum in datums:
-            if str(datum.filter) == "WISE(W1)" or str(datum.filter) == "WISE(W2)":
-                #                allobs.append(str("WISE"))
-                allobs.append(str(datum.filter))
+            ff = str(datum.filter)
+            if "LAT" in ff:
                 continue
-            else:
-                allobs_nowise.append(str(datum.filter))
-                allobs.append(str(datum.filter))
+
+            allobs.append(ff)
+
+            if "WISE" not in ff:
+                allobs_nowise.append(ff)
 
         # counting the number of entires per filter in order to remove the very short ones
         filter_counts = {}
