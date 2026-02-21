@@ -24,10 +24,12 @@ class TargetsSerializers(serializers.ModelSerializer):
         if 'dec' in data:
             dec = data['dec']
 
-        data.setdefault('epoch', 2000.0)
-        data.setdefault('classification', 'Unknown')
-        data.setdefault('importance', 9.98)
-        data.setdefault('cadence', 1.0)
+        # Apply API defaults only for create. For partial update, omitted fields must stay unchanged.
+        if self.instance is None:
+            data.setdefault('epoch', 2000.0)
+            data.setdefault('classification', 'Unknown')
+            data.setdefault('importance', 9.98)
+            data.setdefault('cadence', 1.0)
 
         if unknown:
             raise serializers.ValidationError("Unknown field(s): {}".format(", ".join(unknown)))
