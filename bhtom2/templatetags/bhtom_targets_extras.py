@@ -43,12 +43,12 @@ def get_item(dictionary, key):
 
 
 @register.inclusion_tag('bhtom_targets/partials/target_table.html')
-def target_table(targets):
+def target_table(targets, query_string=''):
     """
     Returns a partial for a table of targets, used in the target_list.html template
     by default
     """
-    return {'object_list': targets}
+    return {'object_list': targets, 'query_string': query_string}
 
 @register.filter
 def substring(value, arg):

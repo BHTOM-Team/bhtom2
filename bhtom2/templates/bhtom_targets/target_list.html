@@ -28,7 +28,7 @@
             </div>
             <div style="padding-bottom: 20px;"></div>
             {% select_target_js %}
-            {% cache 86400 target_distribution_cache object_list using="targetList" %}
+            {% cache 86400 target_distribution_cache query_string using="targetList" %}
                 {% target_distribution filter.qs %}
             {% endcache %}
 
@@ -52,9 +52,9 @@
                     <button type="submit" class="btn btn-outline-danger ml-1" name="remove">Remove</button>
                 </div>
                 {% if query_string == '' %}
-                   {% target_table object_list %}
+                   {% target_table object_list query_string %}
                 {% else %}
-                    {% target_table object_list %}
+                    {% target_table object_list query_string %}
                 {% endif %}
             </form>
             <!-- closing table and form to add targets -->
