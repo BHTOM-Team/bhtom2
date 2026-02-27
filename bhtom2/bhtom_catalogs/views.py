@@ -24,20 +24,11 @@ class CatalogQueryView(FormView):
     
 
     def form_valid(self, form):
-    # Ensures that the form parameters are valid and runs the catalog query.
-
-    # :param form: CatalogQueryForm with required parameter`s
-    # :type form: CatalogQueryForm
         try:
             term = form.cleaned_data['term']
             service = form.cleaned_data['service']
-            post_data = {
-                'terms': term,
-                'harvester': service
-            }
-            header = {
-                "Correlation-ID": get_guid(),
-            }
+            post_data = {'terms': term, 'harvester': service}
+            header = {"Correlation-ID": get_guid()}
 
             response = requests.post(
                 settings.HARVESTER_URL + '/findTargetWithHarvester/',
@@ -61,22 +52,22 @@ class CatalogQueryView(FormView):
             if response.status_code == 400 and 'Target not found' in response_text:
                 form.add_error('term', ValidationError('Object not found'))
             else:
-                form.add_error('term', ValidationError(f"Harvester error {response.status_code}: {response.text}"))
-                return self.form_invalid(form)
-
-        except Exception as e:
-            form.add_error('term', ValidationError(f"Error while searching for target: {e}"))
-            logger.error("Oops something went wrong: " + str(e))
+                form.add_error('term', ValidationError(f'Harvester error {response.status_code}: {response_text}'))
             return self.form_invalid(form)
 
         except (ValueError, json.JSONDecodeError) as e:
             logger.error(f'Invalid JSON from harvester: {e}')
-            form.add_error('term', ValidationError("Error while searching for target"))
+            form.add_error('term', ValidationError('Error while searching for target'))
+            return self.form_invalid(form)
+
+        except requests.RequestException as e:
+            logger.error(f'Harvester HTTP error: {e}')
+            form.add_error('term', ValidationError('Error while searching for target'))
             return self.form_invalid(form)
 
         except Exception as e:
-            form.add_error('term', ValidationError("Error while searching for target"))
             logger.error("Oops something went wrong: " + str(e))
+            form.add_error('term', ValidationError(f'Error while searching for target: {e}'))
             return self.form_invalid(form)
 
     def get_success_url(self):
