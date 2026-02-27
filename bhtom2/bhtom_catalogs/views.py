@@ -24,12 +24,10 @@ class CatalogQueryView(FormView):
     
 
     def form_valid(self, form):
-        """
-        Ensures that the form parameters are valid and runs the catalog query.
+    # Ensures that the form parameters are valid and runs the catalog query.
 
-        :param form: CatalogQueryForm with required parameter`s
-        :type form: CatalogQueryForm
-        """
+    # :param form: CatalogQueryForm with required parameter`s
+    # :type form: CatalogQueryForm
         try:
             term = form.cleaned_data['term']
             service = form.cleaned_data['service']
@@ -38,26 +36,48 @@ class CatalogQueryView(FormView):
                 'harvester': service
             }
             header = {
-                "Correlation-ID" : get_guid(),
+                "Correlation-ID": get_guid(),
             }
-            response = requests.post(settings.HARVESTER_URL + '/findTargetWithHarvester/', data=post_data, headers=header)
-            
+
+            response = requests.post(
+                settings.HARVESTER_URL + '/findTargetWithHarvester/',
+                data=post_data,
+                headers=header,
+                timeout=30,
+            )
+
             if response.status_code == 200:
-                # Extract JSON from the response
-                self.target = json.loads(response.text)
+                self.target = response.json()
                 if 'discovery_date' not in self.target or self.target.get('discovery_date') is None:
                     self.target['discovery_date'] = ''
+                return super().form_valid(form)
+
+            response_text = response.text or ''
+            logger.error(
+                f'Harvester request failed. status={response.status_code}, '
+                f'service={service}, term={term}, response={response_text}'
+            )
+
+            if response.status_code == 400 and 'Target not found' in response_text:
+                form.add_error('term', ValidationError('Object not found'))
             else:
-                response.raise_for_status()
-        except MissingDataException:
-            form.add_error('term', ValidationError('Object not found'))
+                form.add_error('term', ValidationError("Error while searching for target"))
             return self.form_invalid(form)
+
+        except requests.RequestException as e:
+            logger.error(f'Harvester HTTP error: {e}')
+            form.add_error('term', ValidationError("Error while searching for target"))
+            return self.form_invalid(form)
+
+        except (ValueError, json.JSONDecodeError) as e:
+            logger.error(f'Invalid JSON from harvester: {e}')
+            form.add_error('term', ValidationError("Error while searching for target"))
+            return self.form_invalid(form)
+
         except Exception as e:
             form.add_error('term', ValidationError("Error while searching for target"))
             logger.error("Oops something went wrong: " + str(e))
             return self.form_invalid(form)
-
-        return super().form_valid(form)
 
     def get_success_url(self):
         """
