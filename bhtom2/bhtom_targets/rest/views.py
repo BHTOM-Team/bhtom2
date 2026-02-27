@@ -20,6 +20,7 @@ import json
 from django.conf import settings
 from django.core import serializers
 import os
+import math
 from django.http import FileResponse
 from bhtom2.utils.reduced_data_utils import save_high_energy_data_for_target_to_csv_file, save_photometry_data_for_target_to_csv_file, \
     save_radio_data_for_target_to_csv_file
@@ -43,7 +44,22 @@ def _parse_bool(value):
             return False
     raise ValueError(f'Invalid boolean value: {value}')
 
+
+def clean_floats_for_json(obj):
+        if isinstance(obj, float):
+            if math.isnan(obj) or math.isinf(obj):
+                return None
+            return obj
+        elif isinstance(obj, dict):
+            return {k: clean_floats_for_json(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [clean_floats_for_json(v) for v in obj]
+        else:
+            return obj
+        
 class GetTargetListApi(views.APIView):
+
+
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
@@ -254,9 +270,8 @@ class GetTargetListApi(views.APIView):
             'count': paginator.count,
             'num_pages': paginator.num_pages,
             'current_page': paginated_queryset.number,
-            'data': fields_only
+            'data': clean_floats_for_json(fields_only)
         }
-        
         return Response(response_data, status=200)
 
 
