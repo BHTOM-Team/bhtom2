@@ -33,6 +33,7 @@ class DataSource(Enum):
     SWIFT_UVOT = auto()
     FAVA = auto()
     SkyMapper = auto()
+    LSST = auto()
 
 PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.GAIA_ALERTS: "Gaia Alerts",
@@ -65,7 +66,8 @@ PRETTY_SURVEY_NAME: Dict[DataSource, str] = {
     DataSource.GALEX: "GALEX",
     DataSource.SWIFT_UVOT: "SwiftUVOT",
     DataSource.FAVA: "FAVA",
-    DataSource.SkyMapper: "SkyMapper"
+    DataSource.SkyMapper: "SkyMapper",
+    DataSource.LSST: "LSST"
 
 }
 
@@ -104,7 +106,8 @@ TARGET_NAME_KEYS: Dict[DataSource, str] = {
     DataSource.GALEX: "GALEX name",
     DataSource.SWIFT_UVOT: "SwiftUVOT name",
     DataSource.FAVA: "FAVA name",
-    DataSource.SkyMapper: "SkyMapper name"
+    DataSource.SkyMapper: "SkyMapper name",
+    DataSource.LSST: "LSST name"
 
 }
 
@@ -136,6 +139,7 @@ FILTERS: Dict[DataSource, List[str]] = {
     DataSource.SWIFT_UVOT: [],
     DataSource.FAVA: [],
     DataSource.SkyMapper: [],
+    DataSource.LSST: [],
 }
 
 
