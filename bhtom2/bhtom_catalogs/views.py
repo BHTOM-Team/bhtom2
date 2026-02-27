@@ -50,7 +50,7 @@ class CatalogQueryView(FormView):
             )
 
             if response.status_code == 400 and 'Target not found' in response_text:
-                form.add_error('term', ValidationError('Object not found'))
+                form.add_error('term', ValidationError(f'Object not found dupa {term}'))
             else:
                 form.add_error('term', ValidationError(f'Harvester error {response.status_code}: {response_text}'))
             return self.form_invalid(form)
