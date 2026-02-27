@@ -1,5 +1,5 @@
 {% load bootstrap4 targets_extras bhtom_targets_extras dataproduct_extras cache static%}
-{% cache 86400 targets_list_cache object_list using="targetList" %}
+{% cache 86400 targets_list_cache query_string using="targetList" %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <link rel="stylesheet" href="{% static 'bhtom_common/css/main.css' %}">
 <table class="table table-hover sortable">
