@@ -59,74 +59,8 @@ services:
     depends_on:
       - bhtom_db
 
-  zookeeper1:
-    image: 'confluentinc/cp-zookeeper:7.3.2'
-    container_name: zookeeper1
-    networks:
-      - kafka_network
-    hostname: zookeeper1
-    volumes:
-      - zookeeper1-data:/var/lib/zookeeper/data
-    environment:
-      ZOOKEEPER_SERVER_ID: 1
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
-      ZOOKEEPER_TICK_TIME: 2000
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "100m"
-        max-file: "2"
-    ports:
-      - "2181:2181"
-    restart: always
-
-  zookeeper2:
-    image: 'confluentinc/cp-zookeeper:7.3.2'
-    container_name: zookeeper2
-    networks:
-      - kafka_network
-    hostname: zookeeper2
-    volumes:
-      - zookeeper2-data:/var/lib/zookeeper/data
-    environment:
-      ZOOKEEPER_SERVER_ID: 2
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
-      ZOOKEEPER_TICK_TIME: 2000
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "100m"
-        max-file: "2"
-    ports:
-      - "2182:2182"
-    restart: always
-
-  zookeeper3:
-    image: 'confluentinc/cp-zookeeper:7.3.2'
-    container_name: zookeeper3
-    networks:
-      - kafka_network
-    hostname: zookeeper3
-    volumes:
-      - zookeeper3-data:/var/lib/zookeeper/data
-    environment:
-      ZOOKEEPER_SERVER_ID: 3
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
-      ZOOKEEPER_TICK_TIME: 2000
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "100m"
-        max-file: "2"
-    ports:
-      - "2183:2183"
-    restart: always
-
   kafka1:
-    image: 'confluentinc/cp-kafka:7.3.2'
+    image: 'confluentinc/cp-kafka:7.6.0'
     container_name: kafka1
     networks:
       - kafka_network
@@ -137,25 +71,28 @@ services:
       - "9092:9092"
       - "29092:29092"
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181,zookeeper2:2181,zookeeper3:2181"
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:19092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:29093,2@kafka2:29093,3@kafka3:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka1:19092,CONTROLLER://kafka1:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka1:19092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
     logging:
       driver: "json-file"
       options:
         max-size: "100m"
         max-file: "2"
-    depends_on:
-      - zookeeper1
-      - zookeeper2
-      - zookeeper3
     restart: always
 
   kafka2:
-    image: 'confluentinc/cp-kafka:7.3.2'
+    image: 'confluentinc/cp-kafka:7.6.0'
     container_name: kafka2
     networks:
       - kafka_network
@@ -166,25 +103,28 @@ services:
       - "9093:9093"
       - "29093:29093"
     environment:
-      KAFKA_BROKER_ID: 2
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181,zookeeper2:2181,zookeeper3:2181"
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:19093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_NODE_ID: 2
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:29093,2@kafka2:29093,3@kafka3:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka2:19092,CONTROLLER://kafka2:29093,PLAINTEXT_HOST://0.0.0.0:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka2:19092,PLAINTEXT_HOST://localhost:9093'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
     logging:
       driver: "json-file"
       options:
         max-size: "100m"
         max-file: "2"
-    depends_on:
-      - zookeeper1
-      - zookeeper2
-      - zookeeper3
     restart: always
 
   kafka3:
-    image: 'confluentinc/cp-kafka:7.3.2'
+    image: 'confluentinc/cp-kafka:7.6.0'
     container_name: kafka3
     networks:
       - kafka_network
@@ -195,21 +135,24 @@ services:
       - "9094:9094"
       - "29094:29094"
     environment:
-      KAFKA_BROKER_ID: 3
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper1:2181,zookeeper2:2181,zookeeper3:2181"
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:19094
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_NODE_ID: 3
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:29093,2@kafka2:29093,3@kafka3:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka3:19092,CONTROLLER://kafka3:29093,PLAINTEXT_HOST://0.0.0.0:9094'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka3:19092,PLAINTEXT_HOST://localhost:9094'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
     logging:
       driver: "json-file"
       options:
         max-size: "100m"
         max-file: "2"
-    depends_on:
-      - zookeeper1
-      - zookeeper2
-      - zookeeper3
     restart: always
 
   kafka-ui:
@@ -421,24 +364,6 @@ volumes:
       type: none
       o: bind
       device: ${DATA_STORE_PATH}/kafka/kafka3
-  zookeeper1-data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${DATA_STORE_PATH}/kafka/zookeeper1
-  zookeeper2-data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${DATA_STORE_PATH}/kafka/zookeeper2
-  zookeeper3-data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${DATA_STORE_PATH}/kafka/zookeeper3
   env:
     driver: local
     driver_opts:
