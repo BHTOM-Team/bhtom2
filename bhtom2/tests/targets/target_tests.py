@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import pytz
+from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.contrib.messages import get_messages
 from django.contrib.messages.constants import SUCCESS, WARNING
@@ -10,6 +11,8 @@ from bhtom_base.bhtom_targets.tests.factories import NonSiderealTargetFactory, S
 from guardian.shortcuts import assign_perm
 
 from bhtom_base.bhtom_targets.models import Target, TargetExtra, TargetList, TargetName
+from bhtom2.bhtom_targets.forms import SiderealTargetCreateForm
+from bhtom2.bhtom_targets.rest.serializers import TargetsSerializers
 from bhtom2.bhtom_targets.utils import import_targets
 #from .factories import SiderealTargetFactory, NonSiderealTargetFactory, TargetGroupingFactory, TargetNameFactory
 
@@ -257,6 +260,62 @@ class TestTargetCreate(TestCase):
         self.assertContains(response, target_data['name'])
         target = Target.objects.get(name=target_data['name'])
         self.assertTrue(target.targetextra_set.filter(key='category', value='type2').exists())
+
+
+class TestTargetNameValidation(TestCase):
+    def _valid_form_data(self, name):
+        classification = settings.CLASSIFICATION_TYPES[0][0] if settings.CLASSIFICATION_TYPES else 'Unknown'
+        return {
+            'name': name,
+            'ra': 10.0,
+            'dec': 10.0,
+            'epoch': 2000.0,
+            'classification': classification,
+            'description': 'valid target description',
+        }
+
+    def test_rejects_parentheses_in_name(self):
+        form = SiderealTargetCreateForm(data=self._valid_form_data('Bad(Target)'))
+        self.assertFalse(form.is_valid())
+        self.assertIn('name', form.errors)
+        self.assertIn('Target name cannot contain any of: ( ) / \\ :', form.errors['name'][0])
+
+    def test_rejects_slash_backslash_colon_in_name(self):
+        form = SiderealTargetCreateForm(data=self._valid_form_data(r'Bad\Target'))
+        self.assertFalse(form.is_valid())
+        self.assertIn('name', form.errors)
+        self.assertIn('Target name cannot contain any of: ( ) / \\ :', form.errors['name'][0])
+
+    def test_rejects_web_address_or_query_in_name(self):
+        form = SiderealTargetCreateForm(data=self._valid_form_data('www.evil-site.example'))
+        self.assertFalse(form.is_valid())
+        self.assertIn('name', form.errors)
+        self.assertIn('Target name cannot contain web addresses or query strings.', form.errors['name'][0])
+
+
+class TestTargetCreateApiNameValidation(TestCase):
+    def _valid_payload(self, name):
+        return {
+            'name': name,
+            'ra': 123.456,
+            'dec': -32.1,
+        }
+
+    def test_rejects_forbidden_characters(self):
+        serializer = TargetsSerializers(data=self._valid_payload('Bad(Target)'))
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('name', serializer.errors)
+        self.assertIn('Target name cannot contain any of: ( ) / \\ :', serializer.errors['name'][0])
+
+    def test_rejects_web_address(self):
+        serializer = TargetsSerializers(data=self._valid_payload('https://bad.example'))
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('name', serializer.errors)
+        self.assertIn('Target name cannot contain web addresses or query strings.', serializer.errors['name'][0])
+
+    def test_accepts_regular_name(self):
+        serializer = TargetsSerializers(data=self._valid_payload('Gaia24abc'))
+        self.assertTrue(serializer.is_valid(), serializer.errors)
 
     @override_settings(EXTRA_FIELDS=[
         {'name': 'wins', 'type': 'number'},

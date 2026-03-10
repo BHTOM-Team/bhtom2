@@ -1,3 +1,5 @@
+import re
+
 from django.utils import timezone
 
 from rest_framework import serializers
@@ -5,6 +7,13 @@ from rest_framework import serializers
 from bhtom2.bhtom_targets.utils import check_duplicate_source_names, check_for_existing_alias, coords_to_degrees, \
     check_for_existing_coords
 from bhtom_base.bhtom_targets.models import Target, DownloadedTarget,TargetList
+
+FORBIDDEN_TARGET_NAME_CHARS_RE = re.compile(r'[()/\\:]')
+URL_LIKE_TARGET_NAME_RE = re.compile(
+    r'(?i)\b(?:https?://|ftp://|www\.|javascript:|data:|file:|vbscript:|[a-z0-9-]+(?:\.[a-z0-9-]+)+)\b'
+)
+QUERY_LIKE_TARGET_NAME_RE = re.compile(r'(?i)(?:\?|&)[^=\s]{1,100}=')
+ENCODED_URL_OR_QUERY_RE = re.compile(r'(?i)(?:%2f|%5c|%3a|%3f|%26|%3d|%28|%29)')
 
 
 class TargetsSerializers(serializers.ModelSerializer):
@@ -18,6 +27,18 @@ class TargetsSerializers(serializers.ModelSerializer):
     def validate(self, data):
         unknown = set(self.initial_data) - set(self.fields)
         ra = dec = 0
+
+        # Apply stricter target name validation for create endpoint payloads.
+        name = data.get('name')
+        if name is not None:
+            if FORBIDDEN_TARGET_NAME_CHARS_RE.search(name):
+                raise serializers.ValidationError({'name': [r'Target name cannot contain any of: ( ) / \ :']})
+            if (
+                URL_LIKE_TARGET_NAME_RE.search(name)
+                or QUERY_LIKE_TARGET_NAME_RE.search(name)
+                or ENCODED_URL_OR_QUERY_RE.search(name)
+            ):
+                raise serializers.ValidationError({'name': ['Target name cannot contain web addresses or query strings.']})
 
         if 'ra' in data:
             ra = data['ra']

@@ -25,6 +25,12 @@ from bhtom_base.bhtom_targets.models import (
 
 CLASSIFICATION_TYPES = settings.CLASSIFICATION_TYPES
 logger: BHTOMLogger = BHTOMLogger(__name__, 'Bhtom: bhtom_targets.forms')
+FORBIDDEN_TARGET_NAME_CHARS_RE = re.compile(r'[()/\\:]')
+URL_LIKE_TARGET_NAME_RE = re.compile(
+    r'(?i)\b(?:https?://|ftp://|www\.|javascript:|data:|file:|vbscript:|[a-z0-9-]+(?:\.[a-z0-9-]+)+)\b'
+)
+QUERY_LIKE_TARGET_NAME_RE = re.compile(r'(?i)(?:\?|&)[^=\s]{1,100}=')
+ENCODED_URL_OR_QUERY_RE = re.compile(r'(?i)(?:%2f|%5c|%3a|%3f|%26|%3d|%28|%29)')
 
 
 class CustomClassificationChoiceField(forms.ChoiceField):
@@ -146,18 +152,28 @@ class TargetForm(forms.ModelForm):
         return instance
 
     def clean_name(self):
-        cleaned_data = self.clean()
-        name = cleaned_data.get('name', '')
+        name = self.cleaned_data.get('name', '')
         if name is not None:
             self.validate_data(name)
+            self.validate_target_name(name)
         return name
 
     def clean_description(self):
-        cleaned_data = self.clean()
-        description = cleaned_data.get('description', '')
+        description = self.cleaned_data.get('description', '')
         if description is not None:
             self.validate_data(description)
         return description
+
+    def validate_target_name(self, value):
+        if FORBIDDEN_TARGET_NAME_CHARS_RE.search(value):
+            raise ValidationError(r"Target name cannot contain any of: ( ) / \ :")
+
+        if (
+            URL_LIKE_TARGET_NAME_RE.search(value)
+            or QUERY_LIKE_TARGET_NAME_RE.search(value)
+            or ENCODED_URL_OR_QUERY_RE.search(value)
+        ):
+            raise ValidationError("Target name cannot contain web addresses or query strings.")
 
     def validate_data(self, value):
         field_value = value.replace('\r', '')
@@ -286,7 +302,7 @@ class SiderealTargetCreateForm(TargetForm):
     #     fields = SIDEREAL_FIELDS
     
     def clean_name(self):
-        name = self.cleaned_data.get('name')
+        name = super().clean_name()
         if self.instance.pk is None:  # Check if it's a new instance
             if Target.objects.filter(name=name).exists():
                 existing_target = Target.objects.get(name=name)
