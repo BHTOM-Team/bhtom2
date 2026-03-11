@@ -34,7 +34,10 @@ echo "Running server..."
 
 
 gunicorn --bind 0.0.0.0:8000 bhtom2.wsgi:application \
-    --log-level error --timeout 600 --workers 10 --threads 1 \
-    --log-config docker/prod/logging.conf -k gevent
+    --log-level error --timeout 600 --graceful-timeout 120 \
+    --workers 10 --threads 2 \
+    --max-requests 1000 --max-requests-jitter 100 \
+    --worker-class sync \
+    --log-config docker/prod/logging.conf
 
 exec "$@"
