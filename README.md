@@ -51,7 +51,8 @@ Oficial Gaia DR3 data release. Limited to selected sources only.
 ALLWISE is an archival MID-IR WISE data, while NEOWISE is a new on-going scanning mission, providing data every 6 months for targets from all-over the sky
 
 ### CRTS (Catalina)
-Read directly from Caltech archive, contain neary 10-year long time-series for most of the sky (North and South) except the Galactic Plane. Observations were taken in a broad-band clear filter we call CRTS (CL)
+Read directly from Caltech archive at http://nesssi.cacr.caltech.edu/CRTS/. It contains nearly 10-year long time-series for most of the sky (North and South) except the Galactic Plane. Observations were taken in a broad-band clear filter we call CRTS (CL). BHTOM does a 0.1arcmin search and provides the photometry of the events found in the search, more than one Object ID can be included in the retrieved light curve. If you want to manually check the output you can use  <query = "http://nunuku.caltech.edu/cgi-bin/getcssconedb_release_img.cgi?RADec=" + ra_str + "+" + dec_str + \
+    "&Rad=" + radius_crts + "&DB=photcat&OUT=web&SHORT=short">
 
 ### FIRST (Radio)
 From WSDB.
