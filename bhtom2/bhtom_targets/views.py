@@ -253,7 +253,17 @@ class TargetListView(SingleTableMixin, PermissionListMixin, FilterView):
         context['groupings'] = (TargetList.objects.all()
                                 if self.request.user.is_authenticated
                                 else TargetList.objects.none())
-        context['query_string'] = self.request.META['QUERY_STRING']
+        
+        # Always build query string from actual filter data to ensure cache consistency
+        from urllib.parse import urlencode
+        if hasattr(self, 'filterset') and self.filterset.data:
+            # Sort parameters to ensure consistent cache keys
+            sorted_params = sorted(self.filterset.data.items())
+            query_string = urlencode(sorted_params)
+        else:
+            query_string = self.request.META['QUERY_STRING']
+        
+        context['query_string'] = query_string
         context['target_count'] = context['object_list'].count
 
         return context
