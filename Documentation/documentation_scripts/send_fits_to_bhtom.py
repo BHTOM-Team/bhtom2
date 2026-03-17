@@ -13,7 +13,7 @@ import time
 import argparse
 import sys
 
-bhtom2_url = "https://uploadsvc2.astrolabs.pl/upload/"
+bhtom2_url = "https://uploadsvc2.astrouw.edu.pl/upload/"
 
 def input_arguments(): 
     global indir, inhash, inobject, infilter, intype, dryrun, inmjd, inobservat, intoken
@@ -82,7 +82,7 @@ if __name__ == '__main__':
         print("\n### There's no such directory '"+str(indir)+"'. Quitting.\n")
         sys.exit(1)
     if number_of_files > 0:
-        print("\n$$$ NOW SENDING DATA TO BHTOM (https://bh-tom.astrolabs.pl) $$$\n")
+        print("\n$$$ NOW SENDING DATA TO BHTOM (https://bh-tom.astrouw.edu.pl) $$$\n")
     else:
         print("\n# No files present inside '" + str(indir) + "'")
         print("  Program is terminating.\n")
