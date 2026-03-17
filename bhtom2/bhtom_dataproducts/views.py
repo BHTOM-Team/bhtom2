@@ -461,10 +461,23 @@ class DataDetailsView(DetailView):
                 context['ccdphot'] = ccdphot
                 context['fits_webp_url'] = data_product.fits_webp.url if data_product.fits_webp else None
             
-            observers = data_product.observers
-            observers_users = User.objects.filter(id__in=observers)
-            observers_names = [f"{user.first_name} {user.last_name}" for user in observers_users]
-            observers_string = ', '.join(observers_names)
+            observers = data_product.observers or []
+            observer_ids = []
+            observer_names = []
+            for observer_item in observers:
+                try:
+                    observer_ids.append(int(observer_item))
+                except (TypeError, ValueError):
+                    observer_name = str(observer_item).strip()
+                    if observer_name:
+                        observer_names.append(observer_name)
+
+            if observer_ids:
+                observers_users = User.objects.filter(id__in=observer_ids)
+                db_names = [f"{user.first_name} {user.last_name}".strip() for user in observers_users]
+                observer_names.extend([name for name in db_names if name])
+
+            observers_string = ', '.join(observer_names)
             context['observers'] =   observers_string
             
             if data_product.photometry_data:
