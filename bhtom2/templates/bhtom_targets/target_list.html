@@ -28,9 +28,7 @@
             </div>
             <div style="padding-bottom: 20px;"></div>
             {% select_target_js %}
-            {% cache 86400 target_distribution_cache query_string using="targetList" %}
-                {% target_distribution filter.qs %}
-            {% endcache %}
+            {% target_distribution filter.qs %}
 
             <label id="displaySelected"></label>
             <button id="optionSelectAll" type="button" class="btn btn-link"
@@ -51,11 +49,7 @@
                     <button type="submit" class="btn btn-outline-primary ml-1" name="move">Move</button>
                     <button type="submit" class="btn btn-outline-danger ml-1" name="remove">Remove</button>
                 </div>
-                {% if query_string == '' %}
-                   {% target_table object_list query_string %}
-                {% else %}
-                    {% target_table object_list query_string %}
-                {% endif %}
+                {% target_table object_list query_string %}
             </form>
             <!-- closing table and form to add targets -->
 
