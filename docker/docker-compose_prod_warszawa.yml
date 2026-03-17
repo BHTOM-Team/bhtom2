@@ -350,7 +350,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ${DATA_STORE_PATH}/bhtom_db
+      device: /mnt/prefect_db/bhtom_db_data
   cache:
     driver: local
     driver_opts:
