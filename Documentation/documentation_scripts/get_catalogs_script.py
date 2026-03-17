@@ -5,7 +5,7 @@ def get_catalogs(token, page):
     headers = {
         'Authorization': f'Token {token}'
     }
-    api_url =  f'https://bh-tom2.astrolabs.pl/calibration/get-catalogs/?page={page}',
+    api_url =  f'https://bh-tom2.astrouw.edu.pl/calibration/get-catalogs/?page={page}',
     response = requests.get(api_url, headers=headers)
     print(response.json())
  

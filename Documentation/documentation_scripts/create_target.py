@@ -17,7 +17,7 @@ def create_target(name, ra, dec, epoch, classification, discovery_date, importan
         "importance": importance,
         "cadence": cadence,
     }
-    api_url="https://bh-tom2.astrolabs.pl/targets/createTarget/"
+    api_url="https://bh-tom2.astrouw.edu.pl/targets/createTarget/"
     response = requests.post(api_url,headers=headers, json=data)
     print(response.json())
 

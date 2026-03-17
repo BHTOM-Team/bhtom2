@@ -12,7 +12,7 @@ import time
 import argparse
 import sys
 
-bhtom_url = "https://bh-tom.astrolabs.pl/photometry-upload/"
+bhtom_url = "https://bh-tom.astrouw.edu.pl/photometry-upload/"
 
 
 def input_arguments():
@@ -92,7 +92,7 @@ if __name__ == '__main__':
 
     number_of_files = len(os.listdir(indir))
     if number_of_files > 0:
-        print("\n$$$ NOW SENDING DATA TO BHTOM (https://bh-tom.astrolabs.pl) $$$\n")
+        print("\n$$$ NOW SENDING DATA TO BHTOM (https://bh-tom.astrouw.edu.pl.pl) $$$\n")
     else:
         print("\n# No files present inside '" + str(indir) + "'")
         print("  Program is terminating.\n")
