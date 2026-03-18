@@ -181,7 +181,7 @@ This API facilitates programmable batch file calibration file to the **BHTOM sys
 
 ```bash
 curl -X 'POST' \
-  'https://uploadsvc2..bh-tom2.astrouw.edu.pl/calibFile/' \
+  'https://uploadsvc2.bh-tom2.astrouw.edu.pl/calibFile/' \
   -H 'accept: application/json' \
   -H 'Authorization: Token <yourToken>' \
   -H 'Content-Type: application/json' \
