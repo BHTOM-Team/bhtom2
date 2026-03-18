@@ -30,7 +30,7 @@ Once you have acquired this token, it allows you to access and utilize all other
 
 ```http
 curl -X 'POST' \
-  'https://bh-tom2.astrolabs.pl/api/token-auth/' \
+  'https://bh-tom2.astrouw.edu.pl/api/token-auth/' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -H 'X-CSRFToken: uUz2fRnXhPuvD9YuuiDW9cD1LsajeaQnE4hwtEAfR00SgV9bD5HCe5i8n4m4KcOr' \
@@ -127,7 +127,7 @@ filename="/content/phot_test.csv"
 file_list = [filename]
 
 response = requests.post(
-    url='https://uploadsvc2.astrolabs.pl/upload/',
+    url='https://uploadsvc2.bh-tom2.astrouw.edu.pl/upload/',
     headers=headers,
     data=data,
     files={'files': open(filename, 'rb')}
@@ -181,7 +181,7 @@ This API facilitates programmable batch file calibration file to the **BHTOM sys
 
 ```bash
 curl -X 'POST' \
-  'https://uploadsvc2.astrolabs.pl/calibFile/' \
+  'https://uploadsvc2..bh-tom2.astrouw.edu.pl/calibFile/' \
   -H 'accept: application/json' \
   -H 'Authorization: Token <yourToken>' \
   -H 'Content-Type: application/json' \
@@ -269,7 +269,7 @@ This API endpoint allows users to retrieve calibration results for previously up
 
 ```bash
 curl -X 'POST' \
-  'https://bh-tom2.astrolabs.pl/calibration/get-calibration-res/' \
+  'https://bh-tom2.astrouw.edu.pl/calibration/get-calibration-res/' \
   -H 'accept: application/json' \
   -H 'Authorization: Token <your token>'\
   -H 'Content-Type: application/json' \
@@ -340,7 +340,7 @@ The request header should include the following:
 
 ```bash
 curl -X 'POST' \
-  'https://bh-tom2.astrolabs.pl/observatory/getObservatoryList/' \
+  'https://bh-tom2.astrouw.edu.pl/observatory/getObservatoryList/' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Token <yourToken>' \
@@ -400,7 +400,7 @@ This API endpoint allows users to add observatory to their favourite list. Users
 
 ```bash
 curl -X POST \
-  'https://bh-tom2.astrolabs.pl/observatory/addFavouriteObservatory/' \
+  'https://bh-tom2.astrouw.edu.pl/observatory/addFavouriteObservatory/' \
   -H 'Authorization: Token <yourToken>' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -413,7 +413,7 @@ curl -X POST \
 
 ```bash
 curl -X POST \
-  'https://bh-tom2.astrolabs.pl/observatory/addFavouriteObservatory/' \
+  'https://bh-tom2.astrouw.edu.pl/observatory/addFavouriteObservatory/' \
   -H 'Authorization: Token <yourToken>' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -487,7 +487,7 @@ curl -X POST \
     "example_file": "observatory_example.txt",
     "comment": "This observatory is for calibration purposes."
   }' \
-  https://bh-tom2.astrolabs.pl/observatory/createObservatory/
+  https://bh-tom2.astrouw.edu.pl/observatory/createObservatory/
 ```
 
 ### Using Python Script
@@ -548,7 +548,7 @@ curl -X PATCH \
     "calibration_flg": true,
     "comment": "Updated observatory information."
   }' \
-  https://bh-tom2.astrolabs.pl/observatory/updateObservatory/
+  https://bh-tom2.astrouw.edu.pl/observatory/updateObservatory/
 ```
 
 ### Using Python Script
@@ -610,7 +610,7 @@ curl -X POST \
     "created_start": "2023-01-01T00:00:00Z",
     "created_end": "2023-12-31T23:59:59Z"
   }' \
-  https://bh-tom2.astrolabs.pl/observatory/getFavouriteObservatory/
+  https://bh-tom2.astrouw.edu.pl/observatory/getFavouriteObservatory/
 ```
 
 ### Using Python Script
@@ -661,7 +661,7 @@ curl -X DELETE \
     "observatory": "My Observatory",
     "camera": "My Camera"
   }' \
-  https://bh-tom2.astrolabs.pl/observatory/deleteFavouriteObservatory/
+  https://bh-tom2.astrouw.edu.pl/observatory/deleteFavouriteObservatory/
 ```
 
 ### Using Python Script
@@ -719,7 +719,7 @@ curl -X POST \
   -d '{
     "name": "My Target",
   }' \
-  https://bh-tom2.astrolabs.pl/targets/download-photometry/
+  https://bh-tom2.astrouw.edu.pl/targets/download-photometry/
 ```
 ### Using Python Script
 
@@ -763,7 +763,7 @@ curl -X POST \
   -d '{
     "name": "My Target",
   }' \
-  https://bh-tom2.astrolabs.pl/targets/download-radio/
+  https://bh-tom2.astrouw.edu.pl/targets/download-radio/
 ```
 ### Using Python Script
 
@@ -837,7 +837,7 @@ curl -X POST \
     "importance": 5,
     "cadence": 24
   }' \
-  https://bh-tom2.astrolabs.pl/targets/createTarget/
+  https://bh-tom2.astrouw.edu.pl/targets/createTarget/
 ```
 ### Using Python Script
 
@@ -936,7 +936,7 @@ curl -X PATCH \
     "importance": 3,
     "cadence": 12
   }' \
-  https://bh-tom2.astrolabs.pl/targets/updateTarget/{name}/
+  https://bh-tom2.astrouw.edu.pl/targets/updateTarget/{name}/
 ```
 
 Replace `<yourToken>` with your authentication token and `{name}` with the actual name or identifier of the target you want to update.
@@ -1023,7 +1023,7 @@ curl -X POST \
     "lastMagMax": 20,
     "page": 1
   }' \
-  "https://bh-tom2.astrolabs.pl/targets/getTargetList/"
+  "https://bh-tom2.astrouw.edu.pl/targets/getTargetList/"
 ```
 
 Replace `<yourToken>` with your authentication token and adjust the URL as needed to specify your search criteria.
@@ -1070,7 +1070,7 @@ curl -X DELETE \
   -d '{
     "name": "MyTarget"
   }' \
-  https://bh-tom2.astrolabs.pl/targets/deleteTarget/
+  https://bh-tom2.astrouw.edu.pl/targets/deleteTarget/
 ```
 
 Replace `<yourToken>` with your authentication token and `"MyTarget"` with the name or identifier of the target you want to delete.
@@ -1113,7 +1113,7 @@ curl -X POST \
   -d '{
     "targetNames": ["Target1", "Target2", "Target3"]
   }' \
-https://bh-tom2.astrolabs.pl/targets/get-plots/
+https://bh-tom2.astrouw.edu.pl/targets/get-plots/
 ```
 
 Replace `<yourToken>` with your valid authentication token and adjust the target names in the request body as needed.
@@ -1144,7 +1144,7 @@ You can make a POST request to clean the target list cache using the `curl` comm
 ```bash
 curl -X POST \
   -H "Authorization: Token <yourToken>" \
-  "https://bh-tom2.astrolabs.pl/targets/cleanTargetListCache/"
+  "https://bh-tom2.astrouw.edu.pl/targets/cleanTargetListCache/"
 ```
 
 Replace `<yourToken>` with your valid authentication token.
@@ -1173,7 +1173,7 @@ You can make a POST request to clean the target details cache using the `curl` c
 ```bash
 curl -X POST \
   -H "Authorization: Token <yourToken>" \
-  "https://bh-tom2.astrolabs.pl/targets/cleanTargetDetailsCache/"
+  "https://bh-tom2.astrouw.edu.pl/targets/cleanTargetDetailsCache/"
 ```
 
 Replace `<yourToken>` with your valid authentication token.
@@ -1220,7 +1220,7 @@ curl -X POST \
         "download_type": "R",
         "page": 1
       }' \
-  "https://bh-tom2.astrolabs.pl/targets/getDownloadedTargetList/"
+  "https://bh-tom2.astrouw.edu.pl/targets/getDownloadedTargetList/"
 
 ```
 
@@ -1258,7 +1258,7 @@ curl -X POST \
   -d '{
         "page": 1
       }' \
-  "https://bh-tom2.astrolabs.pl/targets/target-groups/"
+  "https://bh-tom2.astrouw.edu.pl/targets/target-groups/"
   ```
 
 ## 10 Get Targets From Group 
@@ -1296,7 +1296,7 @@ curl -X POST \
         "id": 1,
         "page": 1
       }' \
-  "https://bh-tom2.astrolabs.pl/targets/targets-from-group/"
+  "https://bh-tom2.astrouw.edu.pl/targets/targets-from-group/"
 ```
 
 ## 11. GetCommentsApi
@@ -1338,7 +1338,7 @@ This API endpoint allows users to filter comments based on various parameters, s
 
 ```bash
 curl -X 'POST' \
-  "https://bh-tom2.astrolabs.pl/common/api/comments/" \
+  "https://bh-tom2.astrouw.edu.pl/common/api/comments/" \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Token <yourToken>' \
@@ -1432,7 +1432,7 @@ You can make a POST request using the `curl` command or any HTTP client that sup
 ```bash
 curl -X POST \
   -H "Authorization: Token <yourToken>" \
-  "https://bh-tom2.astrolabs.pl/common/api/data/"
+  "https://bh-tom2.astrouw.edu.pl/common/api/data/"
 ```
 
 Replace `<yourToken>` with your valid authentication token.
@@ -1441,7 +1441,7 @@ Replace `<yourToken>` with your valid authentication token.
 
 ```bash
 curl -X POST -H "Content-Type: application/json" -H "Authorization: Token <yourToken>" \
-  "https://bh-tom2.astrolabs.pl/common/api/data/" \
+  "https://bh-tom2.astrouw.edu.pl/common/api/data/" \
   -d '{
     "data_product_type": "photometry",
     "id": 1,
@@ -1494,7 +1494,7 @@ curl -X DELETE \
   -d '{
     "id": "12345"
   }' \
-  "https://bh-tom2.astrolabs.pl/common/api/deleteDataProduct/"
+  "https://bh-tom2.astrouw.edu.pl/common/api/deleteDataProduct/"
 ```
 
 Replace `<yourToken>` with your valid authentication token and `12345` with the ID of the data product you want to delete.
@@ -1530,7 +1530,7 @@ You can make a POST request using the `curl` command or any HTTP client that sup
 ```bash
 curl -X POST \
   -H "Authorization: Token <yourToken>" \
-  "https://bh-tom2.astrolabs.pl/common/api/reducedDatum/"
+  "https://bh-tom2.astrouw.edu.pl/common/api/reducedDatum/"
 ```
 
 Replace `<yourToken>` with your valid authentication token.
@@ -1538,7 +1538,7 @@ Replace `<yourToken>` with your valid authentication token.
 
 ```bash
 curl -X POST -H "Content-Type: application/json" -H "Authorization: Token <yourToken>" \
-  "https://bh-tom2.astrolabs.pl/common/api/reducedDatum/"  -d '{ 
+  "https://bh-tom2.astrouw.edu.pl/common/api/reducedDatum/"  -d '{ 
   "target_name": "ExampleTarget",
   "page": 1
 }' 
@@ -1586,7 +1586,7 @@ curl -X DELETE \
     "observer": "ObserverName",
     "delete_associated_data_product": true
   }' \
-  "https://bh-tom2.astrolabs.pl/common/api/deleteReducedDatum/"
+  "https://bh-tom2.astrouw.edu.pl/common/api/deleteReducedDatum/"
 ```
 
 Replace `<yourToken>` with your valid authentication token.
@@ -1635,7 +1635,7 @@ curl -X POST \
     "filter": "V",
     "observer": "ObserverName"
   }' \
-  "https://bh-tom2.astrolabs.pl/common/api/deactivateReducedDatum/"
+  "https://bh-tom2.astrouw.edu.pl/common/api/deactivateReducedDatum/"
 ```
 
 Replace `<yourToken>` with your valid authentication token.
@@ -1688,7 +1688,7 @@ curl -X POST \
     "status": 1,
     "status_message": "Calibration restarted"
   }' \
-  "https://bh-tom2.astrolabs.pl/calibration/restart-calib-by-id/"
+  "https://bh-tom2.astrouw.edu.pl/calibration/restart-calib-by-id/"
 ```
 
 Replace `<yourToken>` with your valid authentication token.
@@ -1741,7 +1741,7 @@ curl -X POST \
     "status": 1,
     "status_message": "Calibration restarted successfully"
   }' \
-   "https://bh-tom2.astrolabs.pl/calibration/restart-calib-by-target/"
+   "https://bh-tom2.astrouw.edu.pl/calibration/restart-calib-by-target/"
 ```
 
 Replace `<yourToken>` with your valid authentication token.
@@ -1793,7 +1793,7 @@ curl -X POST \
     "status": 1,
     "status_message": "Calibration initiated"
   }' \
-   "https://bh-tom2.astrolabs.pl/calibration/restart-calib-by-dataproduct/"
+   "https://bh-tom2.astrouw.edu.pl/calibration/restart-calib-by-dataproduct/"
 ```
 
 Replace `<yourToken>` with your valid authentication token.
@@ -1825,7 +1825,7 @@ This API allows admin users to retrieve a list of user accounts from the BHTOM s
 
 ```bash
 curl -X 'POST' \
-  'https://bh-tom2.astrolabs.pl/common/api/users/' \
+  'https://bh-tom2.astrouw.edu.pl/common/api/users/' \
   -H 'Authorization: Token <yourToken>' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -1881,7 +1881,7 @@ This API allows authenticated users to update the list of observers associated w
 
 ```bash
 curl -X 'POST' \
-  'https://bh-tom2.astrolabs.pl/common/api/changeObservers/' \
+  'https://bh-tom2.astrouw.edu.pl/common/api/changeObservers/' \
   -H 'Authorization: Token <yourToken>' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -1927,7 +1927,7 @@ This API allows authenticated users to download a photometry file (.dat) by data
 
 ```bash
 curl -X 'POST' \
-  'https://bh-tom2.astrolabs.pl/common/api/downloadPhotometryFile/' \
+  'https://bh-tom2.astrouw.edu.pl/common/api/downloadPhotometryFile/' \
   -H 'Authorization: Token <yourToken>' \
   -H 'Content-Type: application/json' \
   -d '{
