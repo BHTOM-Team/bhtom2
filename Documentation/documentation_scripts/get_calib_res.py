@@ -18,7 +18,7 @@ def send_calibration_request(auth_token, files, get_plot=True):
         'Content-Type': 'application/json',
         'X-CSRFToken': 'uUz2fRnXhPuvD9YuuiDW9cD1LsajeaQnE4hwtEAfR00SgV9bD5HCe5i8n4m4KcOr'
     }
-    api_url =  "https://bh-tom2.astrolabs.pl/calibration/get-calibration-res/"
+    api_url =  "https://bh-tom2.astrouw.edu.pl/calibration/get-calibration-res/"
         # Send the POST request
     response = requests.post(api_url, json=request_body, headers=headers)
     print(response.json())

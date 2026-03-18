@@ -90,7 +90,7 @@ for file in file_list:
             data['match_dist'] = match_dist
 
         response = requests.post(
-            url='https://uploadsvc2.astrolabs.pl/upload/',
+            url='https://uploadsvc2.bh-tom2.astrouw.edu.pl/upload/',
             headers={
                 'Authorization': "Token " + str(token)
             },
