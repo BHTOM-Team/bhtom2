@@ -18,7 +18,7 @@ for filename in os.listdir(directory):
     with open(os.path.join(directory, filename), 'rb') as f:
         print("Sending...")
         response = requests.post(
-            url='https://uploadsvc2.astrouw.edu.pl/upload/',
+            url='https://uploadsvc2.bh-tom2.astrouw.edu.pl/upload/',
             headers={
                 'Authorization': "Token " + str(token)
             },

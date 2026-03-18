@@ -13,7 +13,7 @@ import time
 import argparse
 import sys
 
-bhtom2_url = "https://uploadsvc2.astrouw.edu.pl/upload/"
+bhtom2_url = "https://uploadsvc2.bh-tom2.astrouw.edu.pl/upload/"
 
 def input_arguments(): 
     global indir, inhash, inobject, infilter, intype, dryrun, inmjd, inobservat, intoken
