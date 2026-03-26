@@ -42,6 +42,7 @@ class Calibration_data(models.Model):
     match_distans = models.FloatField(default=0.5)
     no_plot = models.BooleanField(default=True)
     calibration_plot = models.TextField(null=True, blank=True)
+    cpcs_results = models.JSONField(null=True, blank=True)
     number_tries = models.IntegerField(null=False, default=0)
     calibration_log = models.URLField(null=True, blank=True, default=None)
 

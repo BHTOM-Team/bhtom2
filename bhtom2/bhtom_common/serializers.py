@@ -73,7 +73,8 @@ class DataProductSerializer(serializers.ModelSerializer):
                 'scatter': "",
                 'number of datapoints used for calibration': "",
                 'outlier fraction': "",
-                'matching radius[arcsec]': ""
+                'matching radius[arcsec]': "",
+                'cpcs_results': {}
             }
         return {
             'id': cal.id or "",
@@ -87,7 +88,8 @@ class DataProductSerializer(serializers.ModelSerializer):
             'scatter': cal.scatter or "",
             'number of datapoints used for calibration': cal.npoints or "",
             'outlier fraction': cal.outlier_fraction or "",
-            'matching radius[arcsec]': cal.match_distans or ""
+            'matching radius[arcsec]': cal.match_distans or "",
+            'cpcs_results': cal.cpcs_results if cal.cpcs_results is not None else {}
         }
     def get_ccdphot_result(self,obj):
         try:

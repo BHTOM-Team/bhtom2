@@ -527,7 +527,8 @@ class ReloadPhotometry(LoginRequiredMixin, View):
                             exp_time=ccdphotJob.fits_exp,
                             ra=dataProduct.target.ra,
                             dec=dataProduct.target.dec,
-                            no_plot=False
+                            no_plot=False,
+                            cpcs_results=None
                         )
                     except CCDPhotJob.DoesNotExist:
                         logger.error("CCDPhotJob not exist")
