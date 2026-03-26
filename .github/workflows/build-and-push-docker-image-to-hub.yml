@@ -40,21 +40,3 @@ jobs:
 
       - name: Push latest Docker image
         run: docker push hub.astrolabs.pl/bh-tom2-test/bh-tom2-test:latest
-
-  deploy-test:
-    runs-on: ubuntu-latest
-    needs: build
-    if: ${{ secrets.TEST_SERVER_HOST != '' && secrets.TEST_SERVER_USER != '' && secrets.TEST_SERVER_SSH_KEY != '' && secrets.TEST_COMPOSE_PATH != '' && secrets.TEST_COMPOSE_FILE != '' && secrets.TEST_COMPOSE_SERVICE != '' }}
-
-    steps:
-      - name: Deploy on test server (pull + restart)
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.TEST_SERVER_HOST }}
-          username: ${{ secrets.TEST_SERVER_USER }}
-          key: ${{ secrets.TEST_SERVER_SSH_KEY }}
-          script: |
-            set -e
-            cd ${{ secrets.TEST_COMPOSE_PATH }}
-            docker compose -f ${{ secrets.TEST_COMPOSE_FILE }} pull ${{ secrets.TEST_COMPOSE_SERVICE }}
-            docker compose -f ${{ secrets.TEST_COMPOSE_FILE }} up -d ${{ secrets.TEST_COMPOSE_SERVICE }}
