@@ -482,17 +482,19 @@ class DataDetailsView(DetailView):
             
             if data_product.photometry_data:
                 context['photometry_data'] = data_product.photometry_data.split('/')[-1]
+                context['observatory'] = None
+                context['camera'] = None
+                context['owner'] = None
 
-                try:
-                    observatory_matrix = ObservatoryMatrix.objects.get(id=data_product.observatory.id)
-                except ObservatoryMatrix.DoesNotExist:
-                    logger.error("Observatory not found")
-                    error_message = 'Observatory not found'
-                    raise
-
-                context['observatory'] = observatory_matrix.camera.observatory
-                context['camera'] = observatory_matrix.camera
-                context['owner'] = observatory_matrix.user.first_name + ' ' + observatory_matrix.user.last_name
+                if data_product.observatory_id:
+                    try:
+                        observatory_matrix = ObservatoryMatrix.objects.get(id=data_product.observatory_id)
+                        context['observatory'] = observatory_matrix.camera.observatory if observatory_matrix.camera else None
+                        context['camera'] = observatory_matrix.camera
+                        if observatory_matrix.user:
+                            context['owner'] = f"{observatory_matrix.user.first_name} {observatory_matrix.user.last_name}".strip()
+                    except ObservatoryMatrix.DoesNotExist:
+                        logger.warning("ObservatoryMatrix not found for data product id=%s", data_product.id)
 
                 try:
                     calibration = Calibration_data.objects.get(dataproduct=data_product)
