@@ -430,38 +430,36 @@ class DataDetailsView(DetailView):
     def get_context_data(self, **kwargs):
         logger.debug("Start preparation data details")
         error_message = "An error occurred while processing the data."
+        context = {}
         try:
-            try:
-                context = {}
-                data_product = DataProduct.objects.get(id=kwargs['pk'])
-                context['object'] = data_product
-                target = Target.objects.get(id=data_product.target.id)
-                context['target'] = target
-            except DataProduct.DoesNotExist:
-                logger.error("DataProduct not found")
-                error_message = 'Data not found'
-                raise
-            except Target.DoesNotExist:
-                logger.error("Target not found")
-                error_message = 'Target not found'
-                raise
+            data_product = DataProduct.objects.get(id=kwargs['pk'])
+            context['object'] = data_product
+            if data_product.target_id is None:
+                logger.error("Target not set for data product id=%s", data_product.id)
+                context['error_message'] = 'Target not found'
+                return context
+            context['target'] = data_product.target
+        except DataProduct.DoesNotExist:
+            logger.error("DataProduct not found")
+            context['error_message'] = 'Data not found'
+            return context
+        except Exception:
+            logger.exception("Unexpected error while loading base data for dataproduct id=%s", kwargs.get('pk'))
+            context['error_message'] = error_message
+            return context
 
+        try:
             if data_product.data_product_type == "fits_file":
-                try:
-                    ccdphot = CCDPhotJob.objects.get(job_id=data_product.id)
-
-                except CCDPhotJob.DoesNotExist:
-                    logger.error("CCDPhotJob not found: data" + str(data_product.id))
-                    error_message = 'Data not found'
-                    raise
-
-                if data_product.data_product_type == 'fits_file':
-                    context['fits_data'] = data_product.data.name.split('/')[-1]
-
+                ccdphot = CCDPhotJob.objects.filter(job_id=data_product.id).first()
+                if ccdphot is None:
+                    logger.warning("CCDPhotJob not found for fits dataproduct id=%s", data_product.id)
+                context['fits_data'] = data_product.data.name.split('/')[-1] if data_product.data else None
                 context['ccdphot'] = ccdphot
                 context['fits_webp_url'] = data_product.fits_webp.url if data_product.fits_webp else None
             
             observers = data_product.observers or []
+            if isinstance(observers, str):
+                observers = [o.strip() for o in observers.split(',') if o.strip()]
             observer_ids = []
             observer_names = []
             for observer_item in observers:
@@ -516,8 +514,8 @@ class DataDetailsView(DetailView):
                     logger.debug("Calibration_data not found")
                     context['calibration'] = None
 
-        except Exception as e:
-            logger.error(str(e))
+        except Exception:
+            logger.exception("Unexpected error while building dataproduct details id=%s", data_product.id)
             context['error_message'] = error_message
             return context
 
