@@ -206,10 +206,10 @@
                             <td>Matching radius[arcsec]</td>
                             <td>{{ calibration.match_distans }}</td>
                         </tr>
-                        {% if calibration.cpcs_results %}
+                        {% if calibration_cpcs_results %}
                         <tr>
                             <td>CPCS results (metadata)</td>
-                            <td><pre>{{ calibration.cpcs_results|pprint }}</pre></td>
+                            <td><pre>{{ calibration_cpcs_results|pprint }}</pre></td>
                         </tr>
                         {% endif %}
                         <tr>
