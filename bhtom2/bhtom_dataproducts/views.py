@@ -458,6 +458,8 @@ class DataDetailsView(DetailView):
                 context['fits_webp_url'] = data_product.fits_webp.url if data_product.fits_webp else None
             
             observers = data_product.observers or []
+            if not isinstance(observers, (list, tuple, set, str)):
+                observers = [observers]
             if isinstance(observers, str):
                 observers = [o.strip() for o in observers.split(',') if o.strip()]
             observer_ids = []
@@ -526,7 +528,6 @@ class DataDetailsView(DetailView):
             context = self.get_context_data(**kwargs)
             if 'error_message' in context:
                 messages.error(request, context['error_message'])
-                return HttpResponseRedirect(reverse('bhtom_dataproducts:list_all'))
         except Exception as e:
             logger.error("Error in DataDetailsView: " + str(e))
             return HttpResponseRedirect(reverse('bhtom_dataproducts:list_all'))
