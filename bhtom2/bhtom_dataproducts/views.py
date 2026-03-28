@@ -431,25 +431,34 @@ class DataDetailsView(DetailView):
         logger.debug("Start preparation data details")
         error_message = "An error occurred while processing the data."
         context = {}
+        debug_step = "init"
         try:
+            debug_step = "load_dataproduct"
             data_product = DataProduct.objects.get(id=kwargs['pk'])
             context['object'] = data_product
+            debug_step = "load_target"
             if data_product.target_id is None:
                 logger.error("Target not set for data product id=%s", data_product.id)
                 context['error_message'] = 'Target not found'
+                context['error_step'] = debug_step
                 return context
             context['target'] = data_product.target
         except DataProduct.DoesNotExist:
             logger.error("DataProduct not found")
             context['error_message'] = 'Data not found'
+            context['error_step'] = debug_step
+            context['error_detail'] = f"DataProduct id={kwargs.get('pk')} does not exist."
             return context
-        except Exception:
+        except Exception as e:
             logger.exception("Unexpected error while loading base data for dataproduct id=%s", kwargs.get('pk'))
             context['error_message'] = error_message
+            context['error_step'] = debug_step
+            context['error_detail'] = str(e)
             return context
 
         try:
             if data_product.data_product_type == "fits_file":
+                debug_step = "load_ccdphot"
                 ccdphot = CCDPhotJob.objects.filter(job_id=data_product.id).first()
                 if ccdphot is None:
                     logger.warning("CCDPhotJob not found for fits dataproduct id=%s", data_product.id)
@@ -457,6 +466,7 @@ class DataDetailsView(DetailView):
                 context['ccdphot'] = ccdphot
                 context['fits_webp_url'] = data_product.fits_webp.url if data_product.fits_webp else None
             
+            debug_step = "parse_observers"
             observers = data_product.observers or []
             if not isinstance(observers, (list, tuple, set, str)):
                 observers = [observers]
@@ -481,6 +491,7 @@ class DataDetailsView(DetailView):
             context['observers'] =   observers_string
             
             if data_product.photometry_data:
+                debug_step = "load_photometry_metadata"
                 context['photometry_data'] = data_product.photometry_data.split('/')[-1]
                 context['observatory'] = None
                 context['camera'] = None
@@ -488,6 +499,7 @@ class DataDetailsView(DetailView):
 
                 if data_product.observatory_id:
                     try:
+                        debug_step = "load_observatory_matrix"
                         observatory_matrix = ObservatoryMatrix.objects.get(id=data_product.observatory_id)
                         context['observatory'] = observatory_matrix.camera.observatory if observatory_matrix.camera else None
                         context['camera'] = observatory_matrix.camera
@@ -497,6 +509,7 @@ class DataDetailsView(DetailView):
                         logger.warning("ObservatoryMatrix not found for data product id=%s", data_product.id)
 
                 try:
+                    debug_step = "load_calibration_data"
                     calibration = Calibration_data.objects.get(dataproduct=data_product)
                     context['calibration'] = calibration
                     if calibration.calibration_log is not None and calibration.calibration_log != '':
@@ -506,6 +519,7 @@ class DataDetailsView(DetailView):
 
                     if calibration.calibration_plot:
                         try:
+                            debug_step = "load_calibration_plot"
                             with open(settings.DATA_PLOTS_PATH + calibration.calibration_plot, "rb") as image_file:
                                 encoded_string = base64.b64encode(image_file.read())
                                 context['cpcs_plot'] = encoded_string.decode("utf-8")
@@ -516,9 +530,11 @@ class DataDetailsView(DetailView):
                     logger.debug("Calibration_data not found")
                     context['calibration'] = None
 
-        except Exception:
+        except Exception as e:
             logger.exception("Unexpected error while building dataproduct details id=%s", data_product.id)
             context['error_message'] = error_message
+            context['error_step'] = debug_step
+            context['error_detail'] = str(e)
             return context
 
         return context
@@ -529,8 +545,12 @@ class DataDetailsView(DetailView):
             if 'error_message' in context:
                 messages.error(request, context['error_message'])
         except Exception as e:
-            logger.error("Error in DataDetailsView: " + str(e))
-            return HttpResponseRedirect(reverse('bhtom_dataproducts:list_all'))
+            logger.exception("Error in DataDetailsView")
+            context = {
+                'error_message': "An error occurred while processing the data.",
+                'error_step': "view.get",
+                'error_detail': str(e),
+            }
 
         return self.render_to_response(context)
 
