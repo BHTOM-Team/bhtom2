@@ -51,8 +51,19 @@
 {% endblock %}
 {% block content %}
     {% include 'bhtom_dataproducts/partials/js9_scripts.html' %}
-    
+    {% if error_message %}
+    <div class="alert alert-danger" role="alert">
+        <strong>{{ error_message }}</strong>
+        {% if error_step %}
+            <div>Step: {{ error_step }}</div>
+        {% endif %}
+        {% if user.is_staff and error_detail %}
+            <pre class="mb-0 mt-2">{{ error_detail }}</pre>
+        {% endif %}
+    </div>
+    {% endif %}
 
+    {% if object and target %}
     <ul class="nav nav-tabs" id="tabs">
         <li class="nav-item">
           <span class="nav-link active" data-target="#calib" data-toggle="tab">Calibration</span>
@@ -512,29 +523,34 @@
             </div>
         </div>
     </div>
+    {% endif %}
   
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.1/js/bootstrap.min.js"></script>
     <script>
         
-        document.getElementById('downloadButton').addEventListener('click', function () {
-            // Get the base64-encoded data from the image source
-            var encodedData = document.getElementById('calibrationPlot').src.split(',')[1];
+        var downloadButton = document.getElementById('downloadButton');
+        var calibrationPlot = document.getElementById('calibrationPlot');
+        if (downloadButton && calibrationPlot) {
+            downloadButton.addEventListener('click', function () {
+                // Get the base64-encoded data from the image source
+                var encodedData = calibrationPlot.src.split(',')[1];
 
-            // Decode base64 data
-            var decodedData = atob(encodedData);
+                // Decode base64 data
+                var decodedData = atob(encodedData);
 
-            // Create a data URI for the image
-            var dataURI = 'data:image/png;base64,' + encodedData;
+                // Create a data URI for the image
+                var dataURI = 'data:image/png;base64,' + encodedData;
 
-            // Create a link and trigger the download
-            var link = document.createElement('a');
-            link.href = dataURI;
-            link.download = 'calibration_plot.png';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
+                // Create a link and trigger the download
+                var link = document.createElement('a');
+                link.href = dataURI;
+                link.download = 'calibration_plot.png';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        }
 
         document.addEventListener("DOMContentLoaded", function() {
             // Initialize all tooltips
