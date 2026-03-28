@@ -450,7 +450,7 @@ class DataDetailsView(DetailView):
             context['error_detail'] = f"DataProduct id={kwargs.get('pk')} does not exist."
             return context
         except Exception as e:
-            logger.exception("Unexpected error while loading base data for dataproduct id=%s", kwargs.get('pk'))
+            logger.exception(f"Unexpected error while loading base data for dataproduct id={kwargs.get('pk')}")
             context['error_message'] = error_message
             context['error_step'] = debug_step
             context['error_detail'] = str(e)
@@ -531,7 +531,7 @@ class DataDetailsView(DetailView):
                     context['calibration'] = None
 
         except Exception as e:
-            logger.exception("Unexpected error while building dataproduct details id=%s", data_product.id)
+            logger.exception(f"Unexpected error while building dataproduct details id={data_product.id}")
             context['error_message'] = error_message
             context['error_step'] = debug_step
             context['error_detail'] = str(e)
