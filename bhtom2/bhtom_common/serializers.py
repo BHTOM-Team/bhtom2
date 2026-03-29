@@ -6,6 +6,7 @@ from bhtom_base.bhtom_targets.models import Target
 from django_comments.models import Comment
 from django.contrib.auth.models import User
 import json
+from django.db.utils import ProgrammingError, OperationalError
 
 class CCDPhotJobSerializer(serializers.ModelSerializer):
     class Meta:
@@ -89,8 +90,14 @@ class DataProductSerializer(serializers.ModelSerializer):
             'number of datapoints used for calibration': cal.npoints or "",
             'outlier fraction': cal.outlier_fraction or "",
             'matching radius[arcsec]': cal.match_distans or "",
-            'cpcs_results': cal.cpcs_results if cal.cpcs_results is not None else {}
+            'cpcs_results': self._safe_cpcs_results(cal)
         }
+
+    def _safe_cpcs_results(self, calibration):
+        try:
+            return calibration.cpcs_results if calibration.cpcs_results is not None else {}
+        except (ProgrammingError, OperationalError):
+            return {}
     def get_ccdphot_result(self,obj):
         try:
             ccdphot = CCDPhotJob.objects.get(dataProduct_id = obj.id)

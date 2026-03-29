@@ -26,6 +26,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 
 import requests
+from django.db.utils import ProgrammingError, OperationalError
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -430,38 +431,48 @@ class DataDetailsView(DetailView):
     def get_context_data(self, **kwargs):
         logger.debug("Start preparation data details")
         error_message = "An error occurred while processing the data."
+        context = {}
+        debug_step = "init"
         try:
-            try:
-                context = {}
-                data_product = DataProduct.objects.get(id=kwargs['pk'])
-                context['object'] = data_product
-                target = Target.objects.get(id=data_product.target.id)
-                context['target'] = target
-            except DataProduct.DoesNotExist:
-                logger.error("DataProduct not found")
-                error_message = 'Data not found'
-                raise
-            except Target.DoesNotExist:
-                logger.error("Target not found")
-                error_message = 'Target not found'
-                raise
+            debug_step = "load_dataproduct"
+            data_product = DataProduct.objects.get(id=kwargs['pk'])
+            context['object'] = data_product
+            debug_step = "load_target"
+            if data_product.target_id is None:
+                logger.error("Target not set for data product id=%s", data_product.id)
+                context['error_message'] = 'Target not found'
+                context['error_step'] = debug_step
+                return context
+            context['target'] = data_product.target
+        except DataProduct.DoesNotExist:
+            logger.error("DataProduct not found")
+            context['error_message'] = 'Data not found'
+            context['error_step'] = debug_step
+            context['error_detail'] = f"DataProduct id={kwargs.get('pk')} does not exist."
+            return context
+        except Exception as e:
+            logger.exception(f"Unexpected error while loading base data for dataproduct id={kwargs.get('pk')}")
+            context['error_message'] = error_message
+            context['error_step'] = debug_step
+            context['error_detail'] = str(e)
+            return context
 
+        try:
             if data_product.data_product_type == "fits_file":
-                try:
-                    ccdphot = CCDPhotJob.objects.get(job_id=data_product.id)
-
-                except CCDPhotJob.DoesNotExist:
-                    logger.error("CCDPhotJob not found: data" + str(data_product.id))
-                    error_message = 'Data not found'
-                    raise
-
-                if data_product.data_product_type == 'fits_file':
-                    context['fits_data'] = data_product.data.name.split('/')[-1]
-
+                debug_step = "load_ccdphot"
+                ccdphot = CCDPhotJob.objects.filter(job_id=data_product.id).first()
+                if ccdphot is None:
+                    logger.warning("CCDPhotJob not found for fits dataproduct id=%s", data_product.id)
+                context['fits_data'] = data_product.data.name.split('/')[-1] if data_product.data else None
                 context['ccdphot'] = ccdphot
                 context['fits_webp_url'] = data_product.fits_webp.url if data_product.fits_webp else None
             
+            debug_step = "parse_observers"
             observers = data_product.observers or []
+            if not isinstance(observers, (list, tuple, set, str)):
+                observers = [observers]
+            if isinstance(observers, str):
+                observers = [o.strip() for o in observers.split(',') if o.strip()]
             observer_ids = []
             observer_names = []
             for observer_item in observers:
@@ -481,22 +492,39 @@ class DataDetailsView(DetailView):
             context['observers'] =   observers_string
             
             if data_product.photometry_data:
+                debug_step = "load_photometry_metadata"
                 context['photometry_data'] = data_product.photometry_data.split('/')[-1]
+                context['observatory'] = None
+                context['camera'] = None
+                context['owner'] = None
+                context['calibration_cpcs_results'] = None
+
+                if data_product.observatory_id:
+                    try:
+                        debug_step = "load_observatory_matrix"
+                        observatory_matrix = ObservatoryMatrix.objects.get(id=data_product.observatory_id)
+                        context['observatory'] = observatory_matrix.camera.observatory if observatory_matrix.camera else None
+                        context['camera'] = observatory_matrix.camera
+                        if observatory_matrix.user:
+                            context['owner'] = f"{observatory_matrix.user.first_name} {observatory_matrix.user.last_name}".strip()
+                    except ObservatoryMatrix.DoesNotExist:
+                        logger.warning("ObservatoryMatrix not found for data product id=%s", data_product.id)
 
                 try:
-                    observatory_matrix = ObservatoryMatrix.objects.get(id=data_product.observatory.id)
-                except ObservatoryMatrix.DoesNotExist:
-                    logger.error("Observatory not found")
-                    error_message = 'Observatory not found'
-                    raise
-
-                context['observatory'] = observatory_matrix.camera.observatory
-                context['camera'] = observatory_matrix.camera
-                context['owner'] = observatory_matrix.user.first_name + ' ' + observatory_matrix.user.last_name
-
-                try:
-                    calibration = Calibration_data.objects.get(dataproduct=data_product)
+                    debug_step = "load_calibration_data"
+                    try:
+                        calibration = Calibration_data.objects.get(dataproduct=data_product)
+                    except (ProgrammingError, OperationalError) as e:
+                        if 'cpcs_results' in str(e):
+                            # Migration-safe fallback: keep legacy fields available.
+                            calibration = Calibration_data.objects.defer('cpcs_results').get(dataproduct=data_product)
+                        else:
+                            raise
                     context['calibration'] = calibration
+                    try:
+                        context['calibration_cpcs_results'] = calibration.cpcs_results
+                    except (ProgrammingError, OperationalError):
+                        context['calibration_cpcs_results'] = None
                     if calibration.calibration_log is not None and calibration.calibration_log != '':
                         context['cpcs_log'] = calibration.calibration_log.split('/')[-1]
                     else:
@@ -504,6 +532,7 @@ class DataDetailsView(DetailView):
 
                     if calibration.calibration_plot:
                         try:
+                            debug_step = "load_calibration_plot"
                             with open(settings.DATA_PLOTS_PATH + calibration.calibration_plot, "rb") as image_file:
                                 encoded_string = base64.b64encode(image_file.read())
                                 context['cpcs_plot'] = encoded_string.decode("utf-8")
@@ -515,8 +544,10 @@ class DataDetailsView(DetailView):
                     context['calibration'] = None
 
         except Exception as e:
-            logger.error(str(e))
+            logger.exception(f"Unexpected error while building dataproduct details id={data_product.id}")
             context['error_message'] = error_message
+            context['error_step'] = debug_step
+            context['error_detail'] = str(e)
             return context
 
         return context
@@ -526,10 +557,13 @@ class DataDetailsView(DetailView):
             context = self.get_context_data(**kwargs)
             if 'error_message' in context:
                 messages.error(request, context['error_message'])
-                return HttpResponseRedirect(reverse('bhtom_dataproducts:list_all'))
         except Exception as e:
-            logger.error("Error in DataDetailsView: " + str(e))
-            return HttpResponseRedirect(reverse('bhtom_dataproducts:list_all'))
+            logger.exception("Error in DataDetailsView")
+            context = {
+                'error_message': "An error occurred while processing the data.",
+                'error_step': "view.get",
+                'error_detail': str(e),
+            }
 
         return self.render_to_response(context)
 
