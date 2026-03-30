@@ -26,7 +26,6 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 
 import requests
-from django.db.utils import ProgrammingError, OperationalError
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -512,19 +511,9 @@ class DataDetailsView(DetailView):
 
                 try:
                     debug_step = "load_calibration_data"
-                    try:
-                        calibration = Calibration_data.objects.get(dataproduct=data_product)
-                    except (ProgrammingError, OperationalError) as e:
-                        if 'cpcs_results' in str(e):
-                            # Migration-safe fallback: keep legacy fields available.
-                            calibration = Calibration_data.objects.defer('cpcs_results').get(dataproduct=data_product)
-                        else:
-                            raise
+                    calibration = Calibration_data.objects.get(dataproduct=data_product)
                     context['calibration'] = calibration
-                    try:
-                        context['calibration_cpcs_results'] = calibration.cpcs_results
-                    except (ProgrammingError, OperationalError):
-                        context['calibration_cpcs_results'] = None
+                    context['calibration_cpcs_results'] = calibration.cpcs_results
                     if calibration.calibration_log is not None and calibration.calibration_log != '':
                         context['cpcs_log'] = calibration.calibration_log.split('/')[-1]
                     else:
