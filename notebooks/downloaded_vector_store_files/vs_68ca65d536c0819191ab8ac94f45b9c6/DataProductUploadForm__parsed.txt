@@ -1,0 +1,11 @@
+{
+  "object": "vector_store.file_content.page",
+  "data": [
+    {
+      "type": "text",
+      "text": "# Upload Data Products\n\n*Form class:* `bhtom2.bhtom_dataproducts.forms.DataProductUploadForm`\n\n| Field | Type | Required | Choices | Help |\n|------|------|----------|---------|------|\n| **observation_record** | ModelChoiceField | no | --------- |  |\n| **target** | ModelChoiceField | no | --------- |  |\n| **files** | FileField | no |  |  |\n| **data_product_type** | ChoiceField | yes |  Photometry - SExtractor format, Photometry - CSV, FITS File, Spectroscopy |  |\n| **dryRun** | BooleanField | no |  |  |\n| **referrer** | CharField | yes |  |  |\n| **mjd** | FloatField | no |  |  |\n| **observer** | ModelMultipleChoiceField | no | AnonymousUser, wyrzykow |  |\n| **observatory** | ObservatoryChoiceField | no | --------- |  |\n| **observatory_input** | CharField | no |  |  |\n| **camera** | CameraChoiceField | no | --------- |  |\n| **filter** | ChoiceField | no | Auto |  |\n| **comment** | CharField | no |  |  |\n"
+    }
+  ],
+  "has_more": false,
+  "next_page": null
+}

@@ -1,0 +1,52 @@
+[
+  {
+    "vector_store_id": "vs_68ca65d536c0819191ab8ac94f45b9c6",
+    "vector_store_file_id": "file-G2KykuY7EwbN8njHtmzFoV",
+    "file_id": "file-G2KykuY7EwbN8njHtmzFoV",
+    "filename": "DocumentationAPI.md",
+    "local_path": null,
+    "parsed_text_path": "notebooks/downloaded_vector_store_files/vs_68ca65d536c0819191ab8ac94f45b9c6/DocumentationAPI__parsed.txt",
+    "original_download_error": "400 {\n  \"error\": {\n    \"message\": \"Not allowed to download files of purpose: assistants\",\n    \"type\": \"invalid_request_error\",\n    \"param\": null,\n    \"code\": null\n  },\n  \"detail\": {\n    \"message\": \"Not allowed to download files of purpose: assistants\",\n    \"code\": null\n  }\n}\n",
+    "parsed_download_error": null
+  },
+  {
+    "vector_store_id": "vs_68ca65d536c0819191ab8ac94f45b9c6",
+    "vector_store_file_id": "file-LVPxuSu2QqgRu5TEGFnphp",
+    "file_id": "file-LVPxuSu2QqgRu5TEGFnphp",
+    "filename": "TargetDetailPage.md",
+    "local_path": null,
+    "parsed_text_path": "notebooks/downloaded_vector_store_files/vs_68ca65d536c0819191ab8ac94f45b9c6/TargetDetailPage__parsed.txt",
+    "original_download_error": "400 {\n  \"error\": {\n    \"message\": \"Not allowed to download files of purpose: assistants\",\n    \"type\": \"invalid_request_error\",\n    \"param\": null,\n    \"code\": null\n  },\n  \"detail\": {\n    \"message\": \"Not allowed to download files of purpose: assistants\",\n    \"code\": null\n  }\n}\n",
+    "parsed_download_error": null
+  },
+  {
+    "vector_store_id": "vs_68ca65d536c0819191ab8ac94f45b9c6",
+    "vector_store_file_id": "file-VkDqiGkFqhEwuVfbKmodGd",
+    "file_id": "file-VkDqiGkFqhEwuVfbKmodGd",
+    "filename": "FAQ.md",
+    "local_path": null,
+    "parsed_text_path": "notebooks/downloaded_vector_store_files/vs_68ca65d536c0819191ab8ac94f45b9c6/FAQ__parsed.txt",
+    "original_download_error": "400 {\n  \"error\": {\n    \"message\": \"Not allowed to download files of purpose: assistants\",\n    \"type\": \"invalid_request_error\",\n    \"param\": null,\n    \"code\": null\n  },\n  \"detail\": {\n    \"message\": \"Not allowed to download files of purpose: assistants\",\n    \"code\": null\n  }\n}\n",
+    "parsed_download_error": null
+  },
+  {
+    "vector_store_id": "vs_68ca65d536c0819191ab8ac94f45b9c6",
+    "vector_store_file_id": "file-CZzW6mR6FecVAkfy83US74",
+    "file_id": "file-CZzW6mR6FecVAkfy83US74",
+    "filename": "CreateTarget.md",
+    "local_path": null,
+    "parsed_text_path": "notebooks/downloaded_vector_store_files/vs_68ca65d536c0819191ab8ac94f45b9c6/CreateTarget__parsed.txt",
+    "original_download_error": "400 {\n  \"error\": {\n    \"message\": \"Not allowed to download files of purpose: assistants\",\n    \"type\": \"invalid_request_error\",\n    \"param\": null,\n    \"code\": null\n  },\n  \"detail\": {\n    \"message\": \"Not allowed to download files of purpose: assistants\",\n    \"code\": null\n  }\n}\n",
+    "parsed_download_error": null
+  },
+  {
+    "vector_store_id": "vs_68ca65d536c0819191ab8ac94f45b9c6",
+    "vector_store_file_id": "file-TcZBRwbEMCR88pojvtdwda",
+    "file_id": "file-TcZBRwbEMCR88pojvtdwda",
+    "filename": "DataProductUploadForm.md",
+    "local_path": null,
+    "parsed_text_path": "notebooks/downloaded_vector_store_files/vs_68ca65d536c0819191ab8ac94f45b9c6/DataProductUploadForm__parsed.txt",
+    "original_download_error": "400 {\n  \"error\": {\n    \"message\": \"Not allowed to download files of purpose: assistants\",\n    \"type\": \"invalid_request_error\",\n    \"param\": null,\n    \"code\": null\n  },\n  \"detail\": {\n    \"message\": \"Not allowed to download files of purpose: assistants\",\n    \"code\": null\n  }\n}\n",
+    "parsed_download_error": null
+  }
+]
