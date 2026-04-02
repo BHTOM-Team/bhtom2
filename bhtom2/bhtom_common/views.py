@@ -439,8 +439,8 @@ class UpdateFits(LoginRequiredMixin, FormView):
                     data.fits_data = ''
                     logger.info("Delete fits from disk: " + str(data.data))
                 except Exception as e:
-                    logger.warning("Error in delete fits: " + str(e))
-                    messages.warning(self.request, str(e))
+                    data.fits_data = ''
+                    logger.warning("Error in delete fits, fits file already was deleted : " + str(e))
                     continue
 
             if status_message:
@@ -527,7 +527,8 @@ class ReloadPhotometry(LoginRequiredMixin, View):
                             exp_time=ccdphotJob.fits_exp,
                             ra=dataProduct.target.ra,
                             dec=dataProduct.target.dec,
-                            no_plot=False
+                            no_plot=False,
+                            cpcs_results=None
                         )
                     except CCDPhotJob.DoesNotExist:
                         logger.error("CCDPhotJob not exist")
