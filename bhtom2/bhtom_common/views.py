@@ -441,6 +441,8 @@ class UpdateFits(LoginRequiredMixin, FormView):
                 except Exception as e:
                     data.fits_data = ''
                     logger.warning("Error in delete fits, fits file already was deleted : " + str(e))
+                    data.status = status
+                    data.save()
                     continue
 
             if status_message:
