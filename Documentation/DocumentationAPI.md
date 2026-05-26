@@ -1800,6 +1800,43 @@ Replace `<yourToken>` with your valid authentication token.
 
 
 
+# GET CURRENT USER API
+
+### Description
+
+This API allows an authenticated user to retrieve their own basic identity details associated with the provided token. It returns only the authenticated user from `request.user` and does not expose other users.
+
+### Endpoint
+
+* **Method**: GET
+* **URL**: `common/api/users/me/`
+* **Authentication**: Token required
+
+### Example Request
+
+```bash
+curl -X 'GET' \
+  'https://bh-tom2.astrouw.edu.pl/common/api/users/me/' \
+  -H 'Authorization: Token <yourToken>'
+```
+
+### Successful Response (200 OK)
+
+```json
+{
+  "id": 123,
+  "username": "jdoe",
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "email": "jane@example.org"
+}
+```
+
+### Error Responses
+
+* `401 Unauthorized`: Missing or invalid token
+
+
 # GET USERS DETAILS API
 
 ### Description
@@ -1944,5 +1981,4 @@ Returns photometry file:
 * `400 Bad Request`: Missing required fields or invalid data
 * `404 Not Found`: DataProduct with the given ID does not exist
 * `500 Internal Server Error`: Unexpected server error
-
 
