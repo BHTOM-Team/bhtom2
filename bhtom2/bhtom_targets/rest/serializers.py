@@ -30,7 +30,15 @@ class TargetsSerializers(serializers.ModelSerializer):
 
         # Apply stricter target name validation for create endpoint payloads.
         name = data.get('name')
+        
+        # For create operations, name is required
+        if self.instance is None and not name:
+            raise serializers.ValidationError({'name': ['Target name is required.']})
+        # For updates, if name is being changed, validate it
         if name is not None:
+            if isinstance(name, str) and not name.strip():
+                raise serializers.ValidationError({'name': ['Target name cannot be empty.']})
+            
             if FORBIDDEN_TARGET_NAME_CHARS_RE.search(name):
                 raise serializers.ValidationError({'name': [r'Target name cannot contain any of: ( ) / \ :']})
             if (
