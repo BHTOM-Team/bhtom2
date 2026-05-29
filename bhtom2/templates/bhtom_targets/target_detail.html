@@ -51,7 +51,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" id="photometry-obs-tab" href="#photometry-obs" role="tab"
-                       data-toggle="tab">Photometry(Per Obs)</a>
+                       data-toggle="tab">Photometry<br>Per Observatory</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" id="phot-models-tab" href="#phot-models" role="tab" 
@@ -64,12 +64,6 @@
                 {% if request.user.is_superuser or request.user.is_staff %}
                     <li class="nav-item">
                         <a class="nav-link" id="observe-tab" href="#observe" role="tab" data-toggle="tab">Observe</a>
-                    </li>
-                {% endif %}
-                {% if request.user.is_superuser or request.user.is_staff %}
-                    <li class="nav-item">
-                        <a class="nav-link" id="observations-tab" href="#observations" role="tab"
-                           data-toggle="tab">Observations</a>
                     </li>
                 {% endif %}
                 <li class="nav-item">
@@ -198,16 +192,6 @@
                                         href="https://github.com/TOMToolkit/tom_nonsidereal_airmass" target="_blank">non-sidereal
                                     airmass plugin.</a></p>
                         {% endif %}
-                    </div>
-                {% endif %}
-                {% if request.user.is_superuser or request.user.is_staff %}
-                    <div class="tab-pane" id="observations">
-                        {% existing_observation_form object %}
-                        <h4>Observations</h4>
-                        <a href="{% url 'targets:detail' pk=target.id %}?update_status=True"
-                           title="Update status of observations for target" class="btn btn-primary">Update Observations
-                            Status</a>
-                        {% observation_list object %}
                     </div>
                 {% endif %}
                 {% if perms.bhtom_targets.view_target %}

@@ -36,7 +36,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.db.models import Q, Prefetch
-from bhtom2.bhtom_common.serializers import DataProductSerializer,CommentSerializer,ReducedDataSerializer, UserSerializer
+from bhtom2.bhtom_common.serializers import DataProductSerializer, CommentSerializer, ReducedDataSerializer, UserSerializer, CurrentUserSerializer
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from rest_framework.exceptions import PermissionDenied
 
@@ -1271,6 +1271,21 @@ class GetUsersDetails(views.APIView):
                 {"error": f"An unexpected error occurred: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class CurrentUserApiView(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        responses={
+            200: openapi.Response('Current user details', CurrentUserSerializer()),
+            401: 'Unauthorized',
+        }
+    )
+    def get(self, request):
+        serialized_user = CurrentUserSerializer(request.user)
+        return Response(serialized_user.data, status=status.HTTP_200_OK)
 
 
 class ChangeObserversView(views.APIView):
