@@ -7,6 +7,7 @@ from typing import Any, List, Optional, Tuple
 import pandas as pd
 
 from django.conf import settings
+from django.contrib.auth.models import User
 from bhtom_base.bhtom_targets.models import Target
 
 from bhtom_base.bhtom_dataproducts.models import ReducedDatum
@@ -58,13 +59,41 @@ def get_photometry_data_table(target: Target) -> Tuple[List[List[str]], List[str
         active_flg=True
     ).select_related('data_product')  # prefetch DataProduct for efficiency
 
+    observer_ids = set()
+    for datum in datums:
+        observers_list = getattr(getattr(datum, 'data_product', None), 'observers', None)
+        if not observers_list:
+            continue
+        for observer_item in observers_list:
+            try:
+                observer_ids.add(int(observer_item))
+            except (TypeError, ValueError):
+                continue
+
+    users_by_id = {}
+    for user in User.objects.filter(id__in=observer_ids).only('id', 'first_name', 'last_name', 'username'):
+        full_name = f"{(user.first_name or '').strip()} {(user.last_name or '').strip()}".strip()
+        users_by_id[user.id] = full_name or user.username
+
     columns = ['mjd', 'value', 'error', 'facility', 'filter', 'observer']
     data = []
 
     for datum in datums:
         if datum.data_product and datum.data_product.observers:
             observers_list = datum.data_product.observers
-            observers_str = ', '.join(str(o) for o in observers_list)
+            observer_names = []
+            for observer_item in observers_list:
+                observer_name = None
+                try:
+                    parsed_observer_id = int(observer_item)
+                    observer_name = users_by_id.get(parsed_observer_id, str(observer_item).strip())
+                except (TypeError, ValueError):
+                    observer_name = str(observer_item).strip()
+
+                if observer_name and observer_name not in observer_names:
+                    observer_names.append(observer_name)
+
+            observers_str = ', '.join(observer_names)
         else:
             observers_str = datum.observer or ''
 
