@@ -1326,7 +1326,7 @@ class AdminCreateUserApiView(views.APIView):
             user = serializer.save(password=password)
             group, _ = Group.objects.get_or_create(name='Public')
             group.user_set.add(user)
-            Token.objects.get_or_create(user=user)
+            token, _ = Token.objects.get_or_create(user=user)
 
         return Response({
             'message': 'User created successfully.',
@@ -1335,6 +1335,7 @@ class AdminCreateUserApiView(views.APIView):
             'first_name': user.first_name,
             'surname': user.last_name,
             'email': user.email,
+            'token': token.key,
         }, status=status.HTTP_201_CREATED)
 
 

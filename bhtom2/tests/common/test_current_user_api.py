@@ -73,12 +73,12 @@ class AdminUserApiTestCase(TestCase):
         self.assertEqual(payload['username'], 'jane.doe')
         self.assertEqual(payload['email'], 'jane@example.org')
         self.assertNotIn('password', payload)
-        self.assertNotIn('token', payload)
+        self.assertTrue(payload['token'])
 
         user = User.objects.get(username='jane.doe')
         self.assertEqual(user.first_name, 'Jane')
         self.assertEqual(user.last_name, 'Doe')
-        self.assertTrue(Token.objects.filter(user=user).exists())
+        self.assertEqual(Token.objects.get(user=user).key, payload['token'])
         self.assertTrue(Group.objects.get(name='Public').user_set.filter(id=user.id).exists())
 
         profile = LatexUser.objects.get(user=user)
