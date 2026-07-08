@@ -1894,6 +1894,127 @@ Returns a list of user objects:
 
 ---
 
+# ADMIN CREATE USER API
+
+### Description
+
+This API allows admin users to create an active BHTOM user account automatically. The username is generated as `firstname.surname`; a random password and API token are created but are not returned by this endpoint.
+
+### Endpoint
+
+* **Method**: POST
+* **URL**: `common/api/users/create/`
+* **Authentication**: Token required
+* **Permissions**: Must be admin (`is_staff = True`)
+
+### Request Parameters (JSON Body)
+
+| Parameter     | Type   | Required | Description                    |
+| ------------- | ------ | -------- | ------------------------------ |
+| `firstname`   | string | Yes      | First name                     |
+| `surname`     | string | Yes      | Surname / last name            |
+| `email`       | string | Yes      | Email address                  |
+| `affiliation` | string | No       | User affiliation               |
+| `about`       | string | Yes      | Custom information about user  |
+
+### Example Request
+
+```bash
+curl -X 'POST' \
+  'https://bh-tom2.astrouw.edu.pl/common/api/users/create/' \
+  -H 'Authorization: Token <adminToken>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "firstname": "Jane",
+    "surname": "Doe",
+    "email": "jane@example.org",
+    "affiliation": "Example Observatory",
+    "about": "Observer account created by admin"
+}'
+```
+
+### Successful Response (201 Created)
+
+```json
+{
+  "message": "User created successfully.",
+  "id": 123,
+  "username": "jane.doe",
+  "first_name": "Jane",
+  "surname": "Doe",
+  "email": "jane@example.org"
+}
+```
+
+### Error Responses
+
+* `400 Bad Request`: Missing required fields, invalid data, or generated username already exists. The response includes `details` with field-level messages.
+* `403 Forbidden`: User is not an admin
+
+Example duplicate username response:
+
+```json
+{
+  "Error": "Could not create user.",
+  "details": {
+    "username": [
+      "User with generated username 'jane.doe' already exists."
+    ]
+  }
+}
+```
+
+---
+
+# ADMIN GET USER TOKEN API
+
+### Description
+
+This API allows admin users to retrieve the API token for a given username.
+
+### Endpoint
+
+* **Method**: POST
+* **URL**: `common/api/users/token/`
+* **Authentication**: Token required
+* **Permissions**: Must be admin (`is_staff = True`)
+
+### Request Parameters (JSON Body)
+
+| Parameter  | Type   | Required | Description |
+| ---------- | ------ | -------- | ----------- |
+| `username` | string | Yes      | Username    |
+
+### Example Request
+
+```bash
+curl -X 'POST' \
+  'https://bh-tom2.astrouw.edu.pl/common/api/users/token/' \
+  -H 'Authorization: Token <adminToken>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "username": "jane.doe"
+}'
+```
+
+### Successful Response (200 OK)
+
+```json
+{
+  "id": 123,
+  "username": "jane.doe",
+  "token": "<user-token>"
+}
+```
+
+### Error Responses
+
+* `400 Bad Request`: Missing username
+* `403 Forbidden`: User is not an admin
+* `404 Not Found`: User does not exist
+
+---
+
 # CHANGE OBSERVERS API
 
 ### Description
@@ -1981,4 +2102,3 @@ Returns photometry file:
 * `400 Bad Request`: Missing required fields or invalid data
 * `404 Not Found`: DataProduct with the given ID does not exist
 * `500 Internal Server Error`: Unexpected server error
-
