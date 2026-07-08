@@ -1898,7 +1898,7 @@ Returns a list of user objects:
 
 ### Description
 
-This API allows admin users to create an active BHTOM user account automatically. The username is generated as `firstname.surname`; a random password and API token are created but are not returned by this endpoint.
+This API allows admin users to create an active BHTOM user account automatically. The username is generated as `firstname.surname`; a random password is created but is not returned by this endpoint. The new user's API token is returned in the response.
 
 ### Endpoint
 
@@ -1942,7 +1942,8 @@ curl -X 'POST' \
   "username": "jane.doe",
   "first_name": "Jane",
   "surname": "Doe",
-  "email": "jane@example.org"
+  "email": "jane@example.org",
+  "token": "<user-token>"
 }
 ```
 
