@@ -3,7 +3,8 @@ from django.urls import path
 from bhtom2.bhtom_common.views import GetDataProductApi, DataListView, ReloadFits, ReloadPhotometry, \
      DeletePointAndRestartProcess, UpdateFits, ReloadPhotometryWithFits, NewsletterView, DataListCompletedView, CommentAPIView,DataListCCDPHOTErrorView, \
      DataListInProgressView, DataListInCalibView, DataListCPCSErrorView, DataListCPCSLimitView, GetReducedDataApi  ,DeleteReduceDatumApiView, \
-          DeactivateReduceDatumApiView, DeleteDataProductApiView, GetUsersDetails, CurrentUserApiView, ChangeObserversView, GetPhotometryFile
+          DeactivateReduceDatumApiView, DeleteDataProductApiView, GetUsersDetails, CurrentUserApiView, AdminCreateUserApiView, \
+          AdminGetUserTokenApiView, ChangeObserversView, GetPhotometryFile
 
 from bhtom_base.bhtom_common.api_router import SharedAPIRootRouter
 
@@ -34,6 +35,8 @@ urlpatterns = [
      path('api/comments/', CommentAPIView.as_view()),
      path('api/users/',GetUsersDetails.as_view()),
      path('api/users/me/', CurrentUserApiView.as_view(), name='current_user_api'),
+     path('api/users/create/', AdminCreateUserApiView.as_view(), name='admin_create_user_api'),
+     path('api/users/token/', AdminGetUserTokenApiView.as_view(), name='admin_get_user_token_api'),
      path('api/changeObservers/', ChangeObserversView.as_view()),
      path('api/downloadPhotometryFile/', GetPhotometryFile.as_view()),
 ]
