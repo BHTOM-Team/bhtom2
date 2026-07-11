@@ -5,6 +5,7 @@ from bhtom2.bhtom_calibration.models import Calibration_data
 from bhtom_base.bhtom_targets.models import Target
 from django_comments.models import Comment
 from django.contrib.auth.models import User
+from bhtom_custom_registration.bhtom_registration.models import LatexUser
 import json
 
 class CCDPhotJobSerializer(serializers.ModelSerializer):
@@ -138,3 +139,50 @@ class CurrentUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'email']
+
+
+class AdminCreateUserSerializer(serializers.Serializer):
+    firstname = serializers.CharField(max_length=150, required=False)
+    first_name = serializers.CharField(max_length=150, required=False)
+    surname = serializers.CharField(max_length=150)
+    email = serializers.EmailField(max_length=150)
+    affiliation = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    about = serializers.CharField(required=True, allow_blank=False)
+
+    def validate(self, attrs):
+        first_name = (attrs.get('firstname') or attrs.get('first_name') or '').strip()
+        surname = attrs['surname'].strip()
+        if not first_name:
+            raise serializers.ValidationError({"firstname": "This field is required."})
+        if not surname:
+            raise serializers.ValidationError({"surname": "This field may not be blank."})
+
+        attrs['first_name'] = first_name
+        attrs['surname'] = surname
+        username = f"{first_name.lower()}.{surname.lower()}"
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError({
+                "username": f"User with generated username '{username}' already exists."
+            })
+        attrs['username'] = username
+        return attrs
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            password=password,
+            first_name=validated_data['first_name'].strip(),
+            last_name=validated_data['surname'].strip(),
+            email=validated_data['email'].strip(),
+            is_active=True,
+        )
+        LatexUser.objects.update_or_create(
+            user=user,
+            defaults={
+                'latex_name': f"{user.first_name} {user.last_name}",
+                'latex_affiliation': validated_data.get('affiliation', ''),
+                'about_me': validated_data['about'],
+            }
+        )
+        return user

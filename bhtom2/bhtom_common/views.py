@@ -1,4 +1,5 @@
 import os
+import secrets
 from datetime import timedelta, datetime
 from django.db import transaction
 import requests
@@ -26,7 +27,7 @@ from bhtom2.utils.api_pagination import StandardResultsSetPagination
 from django_tables2.views import SingleTableMixin
 from bhtom_base.bhtom_dataproducts.models import DataProduct, ReducedDatum, CCDPhotJob
 from django.contrib import messages
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 import json
 from rest_framework import status
 from rest_framework import views
@@ -36,7 +37,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.db.models import Q, Prefetch
-from bhtom2.bhtom_common.serializers import DataProductSerializer, CommentSerializer, ReducedDataSerializer, UserSerializer, CurrentUserSerializer
+from bhtom2.bhtom_common.serializers import DataProductSerializer, CommentSerializer, ReducedDataSerializer, UserSerializer, CurrentUserSerializer, AdminCreateUserSerializer
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from rest_framework.exceptions import PermissionDenied
 
@@ -1286,6 +1287,104 @@ class CurrentUserApiView(views.APIView):
     def get(self, request):
         serialized_user = CurrentUserSerializer(request.user)
         return Response(serialized_user.data, status=status.HTTP_200_OK)
+
+
+class AdminCreateUserApiView(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'firstname': openapi.Schema(type=openapi.TYPE_STRING, description='First name'),
+                'surname': openapi.Schema(type=openapi.TYPE_STRING, description='Surname / last name'),
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email address'),
+                'affiliation': openapi.Schema(type=openapi.TYPE_STRING, description='Optional affiliation'),
+                'about': openapi.Schema(type=openapi.TYPE_STRING, description='About the user'),
+            },
+            required=['firstname', 'surname', 'email', 'about']
+        ),
+        responses={
+            201: 'Created user',
+            400: 'Bad Request',
+            403: 'Permission Denied',
+        }
+    )
+    def post(self, request):
+        if not request.user.is_staff:
+            raise PermissionDenied(detail="Access denied. You must be an admin.")
+
+        serializer = AdminCreateUserSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                'Error': 'Could not create user.',
+                'details': serializer.errors,
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        password = secrets.token_urlsafe(18)
+
+        with transaction.atomic():
+            user = serializer.save(password=password)
+            group, _ = Group.objects.get_or_create(name='Public')
+            group.user_set.add(user)
+            token, _ = Token.objects.get_or_create(user=user)
+
+        return Response({
+            'message': 'User created successfully.',
+            'id': user.id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'surname': user.last_name,
+            'email': user.email,
+            'token': token.key,
+        }, status=status.HTTP_201_CREATED)
+
+
+class AdminGetUserTokenApiView(views.APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING, description='Username'),
+            },
+            required=['username']
+        ),
+        responses={
+            200: 'User token',
+            400: 'Bad Request',
+            403: 'Permission Denied',
+            404: 'User not found',
+        }
+    )
+    def post(self, request):
+        if not request.user.is_staff:
+            raise PermissionDenied(detail="Access denied. You must be an admin.")
+
+        username = request.data.get('username')
+        if not username:
+            return Response({
+                "Error": "Missing required parameter.",
+                "details": {"username": "This field is required."},
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response({
+                "Error": "User not found.",
+                "details": {"username": f"No user exists with username '{username}'."},
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'token': token.key,
+        }, status=status.HTTP_200_OK)
 
 
 class ChangeObserversView(views.APIView):
