@@ -199,7 +199,8 @@ class DataListCPCSErrorView(LoginRequiredMixin,FilterView):
             if calib_data.status == 'E':
                 context['photometry_data'].append({
                     'dataProduct': data.dataProduct,
-                    'calibData': calib_data
+                    'calibData': calib_data,
+                    'photometry_flag': data.fits_photflag,
                 })
 
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
@@ -249,7 +250,8 @@ class DataListCPCSLimitView(LoginRequiredMixin, FilterView):
             if calib_data.status == 'S' and calib_data.mag_error in [1, -1]:
                 context['photometry_data'].append({
                     'dataProduct': data.dataProduct,
-                    'calibData': calib_data
+                    'calibData': calib_data,
+                    'photometry_flag': data.fits_photflag,
                 })
 
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
