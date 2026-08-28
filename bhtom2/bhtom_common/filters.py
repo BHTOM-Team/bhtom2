@@ -8,6 +8,7 @@ class CCDPhotJobFilter(django_filters.FilterSet):
     observatory = django_filters.CharFilter(label='Observatory', method='filter_observatory_name')
     user = django_filters.CharFilter(label='Owner', method='filter_owner_name')
     mjd = django_filters.NumberFilter(label='MJD', method='filter_mjd')
+    photometry_flag = django_filters.NumberFilter(label='Photometry Flag', method='filter_photometry_flag')
 
     created = django_filters.DateFromToRangeFilter(
         label='Date Range (yyyy-mm-dd)',
@@ -34,6 +35,11 @@ class CCDPhotJobFilter(django_filters.FilterSet):
         return queryset.filter(
             Q(dataProduct__spectroscopydatum__mjd=value) |
             Q(dataProduct__calibration_data__mjd=value)
+        )
+
+    def filter_photometry_flag(self, queryset, name, value):
+        return queryset.filter(
+            Q(fits_photflag=value)
         )
 
     def filter_created_range(self, queryset, name, value):

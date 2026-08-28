@@ -37,6 +37,7 @@
                                 <th>Target</th>
                                 <th>User</th>
                                 <th>Data Type</th>
+                                <th>Photometry Flag</th>
                                 <th>Status</th>
                                 <th>Status Message</th>
                                 <th>Details</th>
@@ -52,6 +53,7 @@
                                     <td><a href="{% url 'bhtom_targets:detail' data.dataProduct.target.name %}">{{ data.dataProduct.target.name }}</a></td>
                                     <td>{{ data.dataProduct.user.first_name }} {{ data.dataProduct.user.last_name }}</td>
                                     <td>{{ data.dataProduct.data_product_type }}</td>
+                                    <td>{{ data.photometry_flag|default:"-" }}</td>
                                     <td>
                                         {% if data.calibData.status == "C" %}
                                             TO DO
@@ -66,7 +68,7 @@
                                         {% endif %}
                                     </td>
                                     <td>{{ data.calibData.status_message }}</td>
-                                    {% if data.dataProduct.data_product_type == 'fits_file' or data.dataProduct..data_product_type == 'photometry' %}
+                                    {% if data.dataProduct.data_product_type == 'fits_file' or data.dataProduct.data_product_type == 'photometry' %}
                                     <td>
                                         <a href="{% url 'bhtom_dataproducts:dataproduct-details' pk=data.dataProduct.id %}" title="Show details"
                                             class="btn btn-primary">Detail</a>

@@ -36,6 +36,7 @@
                                 <th>Observatory</th>
                                 <th>Target</th>
                                 <th>User</th>
+                                <th>Photometry Flag</th>
                                 <th>Status</th>
                                 <th>Details</th>
                             </tr>
@@ -49,6 +50,7 @@
                                     <td>{{ fits.dataProduct.observatory }}</td>
                                     <td><a href="{% url 'bhtom_targets:detail' fits.dataProduct.target.name %}">{{ fits.dataProduct.target.name }}</a></td>
                                     <td>{{ fits.dataProduct.user.first_name }} {{ fits.dataProduct.user.last_name }}</td>
+                                    <td>{{ fits.fits_photflag|default:"-" }}</td>
                                     <td>
                                         {% if fits.dataProduct.status == "C" %}
                                             TO DO
