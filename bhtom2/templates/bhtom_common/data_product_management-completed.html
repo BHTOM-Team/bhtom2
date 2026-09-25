@@ -91,130 +91,54 @@
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('#fits-error-table').DataTable({
-                "searching": false,
-                "paging": false,
-                "columnDefs": [{
-                    "targets": [0], // First column
-                    "orderable": false // Disable sorting
+            var fitsTable = $('#fits-table').DataTable({
+                searching: false,
+                paging: true,
+                pageLength: 25,
+                lengthMenu: [10, 25, 50, 100],
+                order: [],
+                columnDefs: [{
+                    targets: [0],
+                    orderable: false
                 }],
-                "drawCallback": function(settings) {
-                    // Uncheck the "select all" checkbox when the table redraws
-                    $('#selected-fits-checkbox').prop('checked', false);
+                drawCallback: function() {
+                    $('#selected-s-fits-checkbox').prop('checked', false);
                 }
             });
-        });
-        
-        $(document).ready(function() {
-            $('#fits-table').DataTable({
-                "searching": false,
-                "paging": false,
-                "columnDefs": [{
-                    "targets": [0], // First column
-                    "orderable": false // Disable sorting
-                }],
-                "drawCallback": function(settings) {
-                    // Uncheck the "select all" checkbox when the table redraws
-                    $('#selected-fits-checkbox').prop('checked', false);
-                }
+
+            fitsTable.on('page.dt draw.dt', function() {
+                $('#selected-s-fits-checkbox').prop('checked', false);
             });
         });
-        
-        $(document).ready(function() {
-            $('#photometry-table').DataTable({
-                "searching": false,
-                "paging": false,
-                "columnDefs": [{
-                    "targets": [0], // First column
-                    "orderable": false // Disable sorting
-                }],
-                "drawCallback": function(settings) {
-                    // Uncheck the "select all" checkbox when the table redraws
-                    $('#selected-photometry-checkbox').prop('checked', false);
-                }
-            });
-        });
-        
-        var selectedIds = [];
-    
-        function toggleSelectAll(checkboxName,tableName) {
-            var checkboxes = document.getElementsByName(checkboxName);
+
+        function toggleSelectAll(checkboxName, tableName) {
             var selectAllCheckbox = document.getElementById(checkboxName + '-checkbox');
-            for (var i = 0; i < checkboxes.length; i++) {
-                checkboxes[i].checked = selectAllCheckbox.checked;
-            }
+            var table = $('#' + tableName).DataTable();
+            var rows = table.rows({ page: 'all' }).nodes().to$();
+            var checkboxes = rows.find('input[name="' + checkboxName + '"]');
+            checkboxes.each(function() {
+                this.checked = selectAllCheckbox.checked;
+            });
         }
-
-
-
-        {% comment %} Version with paging {% endcomment %}
-        {% comment %} function goToPage(pageIndex, tableName) {
-            var pageButtons = document.querySelectorAll('a.paginate_button[aria-controls="' + tableName + '"]');
-            for (var i = 0; i < pageButtons.length; i++) {
-                if (pageButtons[i].innerText.trim() === pageIndex.toString()) {
-                    pageButtons[i].click();
-                    break;
-                }
-            }
-        }
-     {% endcomment %}
-
-        {% comment %} function updateHiddenField(checkboxName, tableName) {
-            selectedIds = [];
-            var currentPageIndex = parseInt(document.querySelector('.paginate_button.current').innerText);
-            var checkboxes = document.getElementsByName(checkboxName);
-            var pageButtons = document.querySelectorAll('a.paginate_button[aria-controls="' + tableName + '"]');
-            for (var pageIndex = 1; pageIndex < pageButtons.length; pageIndex++) {
-                goToPage(pageIndex,tableName);
-                checkboxes = document.getElementsByName(checkboxName);
-                for (var j = 0; j < checkboxes.length; j++) {
-                    if (checkboxes[j].checked) {
-                        var id = checkboxes[j].value;
-                        if (!selectedIds.includes(id)) {
-                            selectedIds.push(id);
-                        }
-                    }
-                }
-            }
-            goToPage(currentPageIndex,tableName);
-            
-            $('#' + checkboxName + '-ids').val(selectedIds.join(','));
-        }  {% endcomment %}
 
         function updateHiddenField(checkboxName, tableName) {
-            selectedIds = [];
-            var checkboxes = document.getElementsByName(checkboxName);
-                for (var j = 0; j < checkboxes.length; j++) {
-                    if (checkboxes[j].checked) {
-                        var id = checkboxes[j].value;
-                        if (!selectedIds.includes(id)) {
-                            selectedIds.push(id);
-                        }
+            var selectedIds = [];
+            var table = $('#' + tableName).DataTable();
+            var checkboxes = table.rows({ page: 'all' }).nodes().to$().find('input[name="' + checkboxName + '"]');
+            checkboxes.each(function() {
+                if (this.checked) {
+                    var id = this.value;
+                    if (!selectedIds.includes(id)) {
+                        selectedIds.push(id);
                     }
                 }
+            });
             $('#' + checkboxName + '-ids').val(selectedIds.join(','));
-        } 
-        $('button[name="reload-photometry"]').click(function() {
-            updateHiddenField('selected-photometry', "photometry-table");
-        });
-    
-        $('button[name="update-photometry"]').click(function() {
-            updateHiddenField('selected-photometry', "photometry-table");
-        });
-        $('button[name="reload"]').click(function() {
-            updateHiddenField('selected-fits','fits-error-table');
-        });
-      
-        $('button[name="update"]').click(function() {
-            updateHiddenField('selected-fits','fits-error-table');
-        });
-        $('button[name="test_reload"]').click(function() {
-            updateHiddenField('selected-fits','fits-error-table');
-        });
-        $('button[name="reload-fits-s"]').click(function() {
-            updateHiddenField('selected-s-fits','fits-table');
-        });
+        }
 
+        $('button[name="reload-fits-s"]').click(function() {
+            updateHiddenField('selected-s-fits', 'fits-table');
+        });
     </script>
     
 {% endblock %}

@@ -115,6 +115,7 @@ class DataListInCalibView(LoginRequiredMixin, FilterView):
     template_name = 'bhtom_common/data_product_management-in-calibration.html'
     model = CCDPhotJob
     filterset_class = CCDPhotJobFilter
+    paginate_by = 25
 
     def get_queryset(self):
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
@@ -141,8 +142,10 @@ class DataListInCalibView(LoginRequiredMixin, FilterView):
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
         context['delay_fits'] = settings.DELETE_FITS_FILE_DAY
 
+        filtered_qs = context.get('page_obj').object_list if 'page_obj' in context else context['filter'].qs
+
         context['photometry_data'] = []
-        for data in context['filter'].qs:
+        for data in filtered_qs:
             try:
                 calib_data = Calibration_data.objects.get(dataproduct=data.dataProduct)
                 if calib_data.status in ['P', 'C']:
@@ -163,7 +166,7 @@ class DataListCPCSErrorView(LoginRequiredMixin,FilterView):
     model = CCDPhotJob
     filterset_class = CCDPhotJobFilter
     permission_required = 'bhtom_targets.view_target'
-    table_pagination = False
+    paginate_by = 25
     strict = False
 
     def get_queryset(self):
@@ -214,7 +217,7 @@ class DataListCPCSLimitView(LoginRequiredMixin, FilterView):
     filterset_class = CCDPhotJobFilter
 
     permission_required = 'bhtom_targets.view_target'
-    table_pagination = False
+    paginate_by = 25
     strict = False
 
     def get_queryset(self):
@@ -265,7 +268,7 @@ class DataListCCDPHOTErrorView(LoginRequiredMixin, FilterView):
     filterset_class = CCDPhotJobFilter
 
     permission_required = 'bhtom_targets.view_target'
-    table_pagination = False
+    paginate_by = 25
     strict = False
     
     def get_queryset(self):
@@ -283,7 +286,7 @@ class DataListCCDPHOTErrorView(LoginRequiredMixin, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['fits_file'] =  context['filter'].qs 
+        context['fits_file'] = context.get('page_obj').object_list if 'page_obj' in context else context['filter'].qs
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
         return context
 
@@ -291,7 +294,7 @@ class DataListInProgressView(LoginRequiredMixin, FilterView):
     template_name = 'bhtom_common/data_product_management-in-progress.html'
     model = CCDPhotJob
     filterset_class = CCDPhotJobFilter
-
+    paginate_by = 25
 
     def get_queryset(self):
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
@@ -311,7 +314,7 @@ class DataListInProgressView(LoginRequiredMixin, FilterView):
         if not self.request.user.is_staff:
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
-        context['fits_file'] = context['filter'].qs 
+        context['fits_file'] = context.get('page_obj').object_list if 'page_obj' in context else context['filter'].qs
         context['delay_fits_error'] = settings.DELETE_FITS_ERROR_FILE_DAY
         return context
 
@@ -325,7 +328,7 @@ class DataListCompletedView(LoginRequiredMixin, FilterView):
     # table_class = TargetTable
 
     permission_required = 'bhtom_targets.view_target'
-    table_pagination = False
+    paginate_by = 25
     strict = False
 
     def get_queryset(self):
@@ -346,8 +349,8 @@ class DataListCompletedView(LoginRequiredMixin, FilterView):
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
 
-        context['fits_s_file'] =  context['filter'].qs 
-       
+        context['fits_s_file'] = context.get('page_obj').object_list if 'page_obj' in context else context['filter'].qs
+
         return context
     
 
