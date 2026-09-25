@@ -1,21 +1,23 @@
-FROM --platform=linux/amd64 python:3.8-slim-buster
+FROM --platform=linux/amd64 python:3.8-slim-bookworm
 
 EXPOSE 8000
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONBUFFERED=1
+ENV PYTHONPATH=/bhtom
 
 WORKDIR /bhtom
 
 COPY . /bhtom/
 COPY docker/dev/.env /bhtom/settings/env/.bhtom.env
 
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        libpq-dev \
+        gcc \
+        g++ \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN pwd
-RUN apt update
-RUN apt install -y libpq-dev
-RUN apt install -y gcc g++
-
-RUN python -m pip install -r requirements.txt
+RUN python -m pip install --no-cache-dir -r requirements.txt
 
 CMD ["sh", "docker/dev/dev_entrypoint.sh"]
