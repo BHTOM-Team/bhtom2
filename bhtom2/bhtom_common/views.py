@@ -115,7 +115,16 @@ class DataListInCalibView(LoginRequiredMixin, FilterView):
     template_name = 'bhtom_common/data_product_management-in-calibration.html'
     model = CCDPhotJob
     filterset_class = CCDPhotJobFilter
-    paginate_by = 25
+    paginate_by = 50
+
+    def get_paginate_by(self, queryset):
+        values = (25, 50, 100, 500)
+        value = self.request.GET.get('page_size', self.paginate_by)
+        try:
+            value = int(value)
+        except (TypeError, ValueError):
+            return self.paginate_by
+        return value if value in values else self.paginate_by
 
     def get_queryset(self):
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
@@ -134,7 +143,6 @@ class DataListInCalibView(LoginRequiredMixin, FilterView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Redirect non-staff users (keep your original logic)
         if not self.request.user.is_staff:
             logger.error("The user is not an admin")
             return redirect(reverse('home'))
@@ -166,8 +174,17 @@ class DataListCPCSErrorView(LoginRequiredMixin,FilterView):
     model = CCDPhotJob
     filterset_class = CCDPhotJobFilter
     permission_required = 'bhtom_targets.view_target'
-    paginate_by = 25
+    paginate_by = 50
     strict = False
+
+    def get_paginate_by(self, queryset):
+        values = (25, 50, 100, 500)
+        value = self.request.GET.get('page_size', self.paginate_by)
+        try:
+            value = int(value)
+        except (TypeError, ValueError):
+            return self.paginate_by
+        return value if value in values else self.paginate_by
 
     def get_queryset(self):
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
@@ -191,7 +208,7 @@ class DataListCPCSErrorView(LoginRequiredMixin,FilterView):
 
         context['photometry_data'] = []
 
-        filtered_qs = context['filter'].qs
+        filtered_qs = context.get('page_obj').object_list if 'page_obj' in context else context['filter'].qs
 
         for data in filtered_qs:
             try:
@@ -217,8 +234,17 @@ class DataListCPCSLimitView(LoginRequiredMixin, FilterView):
     filterset_class = CCDPhotJobFilter
 
     permission_required = 'bhtom_targets.view_target'
-    paginate_by = 25
+    paginate_by = 50
     strict = False
+
+    def get_paginate_by(self, queryset):
+        values = (25, 50, 100, 500)
+        value = self.request.GET.get('page_size', self.paginate_by)
+        try:
+            value = int(value)
+        except (TypeError, ValueError):
+            return self.paginate_by
+        return value if value in values else self.paginate_by
 
     def get_queryset(self):
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
@@ -242,7 +268,7 @@ class DataListCPCSLimitView(LoginRequiredMixin, FilterView):
 
         context['photometry_data'] = []
 
-        filtered_qs = context['filter'].qs
+        filtered_qs = context.get('page_obj').object_list if 'page_obj' in context else context['filter'].qs
 
         for data in filtered_qs:
             try:
@@ -268,8 +294,17 @@ class DataListCCDPHOTErrorView(LoginRequiredMixin, FilterView):
     filterset_class = CCDPhotJobFilter
 
     permission_required = 'bhtom_targets.view_target'
-    paginate_by = 25
+    paginate_by = 50
     strict = False
+
+    def get_paginate_by(self, queryset):
+        values = (25, 50, 100, 500)
+        value = self.request.GET.get('page_size', self.paginate_by)
+        try:
+            value = int(value)
+        except (TypeError, ValueError):
+            return self.paginate_by
+        return value if value in values else self.paginate_by
     
     def get_queryset(self):
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
@@ -294,7 +329,16 @@ class DataListInProgressView(LoginRequiredMixin, FilterView):
     template_name = 'bhtom_common/data_product_management-in-progress.html'
     model = CCDPhotJob
     filterset_class = CCDPhotJobFilter
-    paginate_by = 25
+    paginate_by = 50
+
+    def get_paginate_by(self, queryset):
+        values = (25, 50, 100, 500)
+        value = self.request.GET.get('page_size', self.paginate_by)
+        try:
+            value = int(value)
+        except (TypeError, ValueError):
+            return self.paginate_by
+        return value if value in values else self.paginate_by
 
     def get_queryset(self):
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
@@ -328,8 +372,17 @@ class DataListCompletedView(LoginRequiredMixin, FilterView):
     # table_class = TargetTable
 
     permission_required = 'bhtom_targets.view_target'
-    paginate_by = 25
+    paginate_by = 50
     strict = False
+
+    def get_paginate_by(self, queryset):
+        values = (25, 50, 100, 500)
+        value = self.request.GET.get('page_size', self.paginate_by)
+        try:
+            value = int(value)
+        except (TypeError, ValueError):
+            return self.paginate_by
+        return value if value in values else self.paginate_by
 
     def get_queryset(self):
         days_delay = timezone.now() - timedelta(days=settings.DELETE_FITS_FILE_DAY)
