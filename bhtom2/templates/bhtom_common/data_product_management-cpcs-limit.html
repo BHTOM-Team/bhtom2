@@ -27,6 +27,9 @@
                         <button type="submit" class="btn btn-outline-primary ml-1" name="test-reload-photometry">Test Reload Fits</button>
                     </div>
 
+                    {% if page_obj %}
+                        <div class="text-muted small mb-2">Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ paginator.count }}</div>
+                    {% endif %}
                     <table id="photometry-table" class="table table-hover">
                         <thead>
                             <tr>
@@ -85,6 +88,29 @@
                         </tbody>
                     </table>
                 </form>
+                {% if page_obj and paginator.num_pages > 1 %}
+                    <nav aria-label="Page navigation" class="mt-3">
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a></li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                            {% endif %}
+                            {% for num in paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            {% if page_obj.has_next %}
+                                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a></li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">Next</span></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
             </div>
         </div>
     {% endif %}
@@ -94,10 +120,9 @@
         $(document).ready(function() {
             var photometryTable = $('#photometry-table').DataTable({
                 searching: false,
-                paging: true,
-                pageLength: 25,
-                lengthMenu: [10, 25, 50, 100],
-                order: [],
+                paging: false,
+                ordering: false,
+                info: false,
                 columnDefs: [{
                     targets: [0],
                     orderable: false

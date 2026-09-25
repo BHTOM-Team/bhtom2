@@ -166,7 +166,7 @@ class DataListCPCSErrorView(LoginRequiredMixin,FilterView):
     model = CCDPhotJob
     filterset_class = CCDPhotJobFilter
     permission_required = 'bhtom_targets.view_target'
-    paginate_by = 25
+    paginate_by = 50
     strict = False
 
     def get_queryset(self):
@@ -191,7 +191,7 @@ class DataListCPCSErrorView(LoginRequiredMixin,FilterView):
 
         context['photometry_data'] = []
 
-        filtered_qs = context['filter'].qs
+        filtered_qs = context.get('page_obj').object_list if 'page_obj' in context else context['filter'].qs
 
         for data in filtered_qs:
             try:
@@ -217,7 +217,7 @@ class DataListCPCSLimitView(LoginRequiredMixin, FilterView):
     filterset_class = CCDPhotJobFilter
 
     permission_required = 'bhtom_targets.view_target'
-    paginate_by = 25
+    paginate_by = 50
     strict = False
 
     def get_queryset(self):
@@ -242,7 +242,7 @@ class DataListCPCSLimitView(LoginRequiredMixin, FilterView):
 
         context['photometry_data'] = []
 
-        filtered_qs = context['filter'].qs
+        filtered_qs = context.get('page_obj').object_list if 'page_obj' in context else context['filter'].qs
 
         for data in filtered_qs:
             try:
@@ -268,7 +268,7 @@ class DataListCCDPHOTErrorView(LoginRequiredMixin, FilterView):
     filterset_class = CCDPhotJobFilter
 
     permission_required = 'bhtom_targets.view_target'
-    paginate_by = 25
+    paginate_by = 50
     strict = False
     
     def get_queryset(self):
@@ -294,7 +294,7 @@ class DataListInProgressView(LoginRequiredMixin, FilterView):
     template_name = 'bhtom_common/data_product_management-in-progress.html'
     model = CCDPhotJob
     filterset_class = CCDPhotJobFilter
-    paginate_by = 25
+    paginate_by = 50
 
     def get_queryset(self):
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
@@ -328,7 +328,7 @@ class DataListCompletedView(LoginRequiredMixin, FilterView):
     # table_class = TargetTable
 
     permission_required = 'bhtom_targets.view_target'
-    paginate_by = 25
+    paginate_by = 50
     strict = False
 
     def get_queryset(self):
