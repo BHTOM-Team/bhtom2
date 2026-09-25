@@ -92,52 +92,61 @@
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('#photometry-table').DataTable({
-                "searching": false,
-                "paging": false,
-                "columnDefs": [{
-                    "targets": [0], // First column
-                    "orderable": false // Disable sorting
+            var photometryTable = $('#photometry-table').DataTable({
+                searching: false,
+                paging: true,
+                pageLength: 25,
+                lengthMenu: [10, 25, 50, 100],
+                order: [],
+                columnDefs: [{
+                    targets: [0],
+                    orderable: false
                 }],
-                "drawCallback": function(settings) {
-                    // Uncheck the "select all" checkbox when the table redraws
+                drawCallback: function() {
                     $('#selected-photometry-checkbox').prop('checked', false);
                 }
             });
+
+            photometryTable.on('page.dt draw.dt', function() {
+                $('#selected-photometry-checkbox').prop('checked', false);
+            });
         });
 
-        function toggleSelectAll(checkboxName,tableName) {
-            var checkboxes = document.getElementsByName(checkboxName);
+        function toggleSelectAll(checkboxName, tableName) {
             var selectAllCheckbox = document.getElementById(checkboxName + '-checkbox');
-            for (var i = 0; i < checkboxes.length; i++) {
-                checkboxes[i].checked = selectAllCheckbox.checked;
-            }
+            var table = $('#' + tableName).DataTable();
+            var rows = table.rows({ page: 'all' }).nodes().to$();
+            var checkboxes = rows.find('input[name="' + checkboxName + '"]');
+            checkboxes.each(function() {
+                this.checked = selectAllCheckbox.checked;
+            });
         }
 
-        function updateHiddenField(checkboxName) {
+        function updateHiddenField(checkboxName, tableName) {
             var selectedIds = [];
-            var checkboxes = document.getElementsByName(checkboxName);
-            for (var j = 0; j < checkboxes.length; j++) {
-                if (checkboxes[j].checked) {
-                    var id = checkboxes[j].value;
+            var table = $('#' + tableName).DataTable();
+            var checkboxes = table.rows({ page: 'all' }).nodes().to$().find('input[name="' + checkboxName + '"]');
+            checkboxes.each(function() {
+                if (this.checked) {
+                    var id = this.value;
                     if (!selectedIds.includes(id)) {
                         selectedIds.push(id);
                     }
                 }
-            }
+            });
             $('#' + checkboxName + '-ids').val(selectedIds.join(','));
         }
 
         $('button[name="reload-photometry"]').click(function() {
-            updateHiddenField('selected-photometry');
+            updateHiddenField('selected-photometry', 'photometry-table');
         });
 
         $('button[name="update-photometry"]').click(function() {
-            updateHiddenField('selected-photometry');
+            updateHiddenField('selected-photometry', 'photometry-table');
         });
 
         $('button[name="test-reload-photometry"]').click(function() {
-            updateHiddenField('selected-photometry');
+            updateHiddenField('selected-photometry', 'photometry-table');
         });
     </script>
     
