@@ -34,21 +34,15 @@
                             {% if page_obj %}
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <div class="text-muted small">Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ paginator.count }}</div>
-                                    <form method="get" class="form-inline">
-                                        {% for key, value in request.GET.items %}
-                                            {% if key != 'page_size' and key != 'page' %}
-                                                <input type="hidden" name="{{ key }}" value="{{ value }}">
-                                            {% endif %}
-                                        {% endfor %}
-                                        <input type="hidden" name="page" value="1">
+                                    <div class="d-flex align-items-center">
                                         <label for="page-size-completed" class="small text-muted mb-0 mr-2">Rows per page</label>
-                                        <select id="page-size-completed" name="page_size" class="form-control form-control-sm" onchange="this.form.submit()">
+                                        <select id="page-size-completed" name="page_size" class="form-control form-control-sm" onchange="changePageSize(this.value)">
                                             <option value="25" {% if request.GET.page_size|default:'50' == '25' %}selected{% endif %}>25</option>
                                             <option value="50" {% if request.GET.page_size|default:'50' == '50' %}selected{% endif %}>50</option>
                                             <option value="100" {% if request.GET.page_size|default:'50' == '100' %}selected{% endif %}>100</option>
                                             <option value="500" {% if request.GET.page_size|default:'50' == '500' %}selected{% endif %}>500</option>
                                         </select>
-                                    </form>
+                                    </div>
                                 </div>
                             {% endif %}
                             <table id="fits-table" class="table table-hover">
@@ -141,6 +135,13 @@
     {% endif %}
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script>
+        function changePageSize(value) {
+            const params = new URLSearchParams(window.location.search);
+            params.set('page_size', value);
+            params.set('page', '1');
+            window.location.search = params.toString();
+        }
+
         $(document).ready(function() {
             var fitsTable = $('#fits-table').DataTable({
                 searching: false,
