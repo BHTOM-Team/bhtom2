@@ -45,13 +45,13 @@
                                 <th class="sort">
                                     <input type="checkbox" id="selected-fits-checkbox" onclick="toggleSelectAll('selected-fits','fits-error-table')">
                                 </th>
-                                <th>Data</th>
-                                <th>Created</th>
-                                <th>Observatory</th>
-                                <th>Target</th>
-                                <th>User</th>
-                                <th>Photometry Flag</th>
-                                <th>Status</th>
+                                <th style="cursor:pointer" onclick="changeSort('data')">Data</th>
+                                <th style="cursor:pointer" onclick="changeSort('created')">Created</th>
+                                <th style="cursor:pointer" onclick="changeSort('observatory')">Observatory</th>
+                                <th style="cursor:pointer" onclick="changeSort('target')">Target</th>
+                                <th style="cursor:pointer" onclick="changeSort('user')">User</th>
+                                <th style="cursor:pointer" onclick="changeSort('photometry_flag')">Photometry Flag</th>
+                                <th style="cursor:pointer" onclick="changeSort('status')">Status</th>
                                 <th>Details</th>
                             </tr>
                         </thead>
@@ -127,6 +127,20 @@
         function changePageSize(value) {
             const params = new URLSearchParams(window.location.search);
             params.set('page_size', value);
+            params.set('page', '1');
+            window.location.search = params.toString();
+        }
+
+        function changeSort(field) {
+            const params = new URLSearchParams(window.location.search);
+            const current = params.get('ordering');
+            let next = `-${field}`;
+            if (current === `-${field}`) {
+                next = field;
+            } else if (current === field) {
+                next = `-${field}`;
+            }
+            params.set('ordering', next);
             params.set('page', '1');
             window.location.search = params.toString();
         }
