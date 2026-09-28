@@ -116,6 +116,7 @@ class DataListInCalibView(LoginRequiredMixin, FilterView):
     model = CCDPhotJob
     filterset_class = CCDPhotJobFilter
     paginate_by = 50
+    strict = False
 
     def get_paginate_by(self, queryset):
         values = (25, 50, 100, 500)
@@ -126,19 +127,42 @@ class DataListInCalibView(LoginRequiredMixin, FilterView):
             return self.paginate_by
         return value if value in values else self.paginate_by
 
+    def get_ordering(self):
+        ordering = self.request.GET.get('ordering', '-job_id')
+        allowed = {
+            'data': 'dataProduct__data',
+            '-data': '-dataProduct__data',
+            'created': 'dataProduct__created',
+            '-created': '-dataProduct__created',
+            'observatory': 'dataProduct__observatory',
+            '-observatory': '-dataProduct__observatory',
+            'target': 'dataProduct__target__name',
+            '-target': '-dataProduct__target__name',
+            'user': 'dataProduct__user__last_name',
+            '-user': '-dataProduct__user__last_name',
+            'data_type': 'dataProduct__data_product_type',
+            '-data_type': '-dataProduct__data_product_type',
+            'status': 'dataProduct__calibration_data__status',
+            '-status': '-dataProduct__calibration_data__status',
+            'status_message': 'dataProduct__calibration_data__status_message',
+            '-status_message': '-dataProduct__calibration_data__status_message',
+            'job_id': 'job_id',
+            '-job_id': '-job_id',
+        }
+        return [allowed.get(ordering, '-job_id')]
+
     def get_queryset(self):
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
 
-        # Filter CCDPhotJobs with conditions + user filtering
         qs = CCDPhotJob.objects.filter(
             (Q(status='F') | Q(status='D')) &
             Q(dataProduct__status='R') &
             ~Q(dataProduct__fits_data__isnull=True) &
             ~Q(dataProduct__fits_data='') &
             Q(dataProduct__created__gte=days_delay_error)
-        ).order_by('-job_id')
+        )
 
-        return qs
+        return qs.order_by(*self.get_ordering())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -169,7 +193,7 @@ class DataListInCalibView(LoginRequiredMixin, FilterView):
 
         return context
 
-class DataListCPCSErrorView(LoginRequiredMixin,FilterView):
+class DataListCPCSErrorView(LoginRequiredMixin, FilterView):
     template_name = 'bhtom_common/data_product_management-cpcs-error.html'
     model = CCDPhotJob
     filterset_class = CCDPhotJobFilter
@@ -186,6 +210,32 @@ class DataListCPCSErrorView(LoginRequiredMixin,FilterView):
             return self.paginate_by
         return value if value in values else self.paginate_by
 
+    def get_ordering(self):
+        ordering = self.request.GET.get('ordering', '-job_id')
+        allowed = {
+            'data': 'dataProduct__data',
+            '-data': '-dataProduct__data',
+            'created': 'dataProduct__created',
+            '-created': '-dataProduct__created',
+            'observatory': 'dataProduct__observatory',
+            '-observatory': '-dataProduct__observatory',
+            'target': 'dataProduct__target__name',
+            '-target': '-dataProduct__target__name',
+            'user': 'dataProduct__user__last_name',
+            '-user': '-dataProduct__user__last_name',
+            'data_type': 'dataProduct__data_product_type',
+            '-data_type': '-dataProduct__data_product_type',
+            'status': 'dataProduct__calibration_data__status',
+            '-status': '-dataProduct__calibration_data__status',
+            'status_message': 'dataProduct__calibration_data__status_message',
+            '-status_message': '-dataProduct__calibration_data__status_message',
+            'photometry_flag': 'fits_photflag',
+            '-photometry_flag': '-fits_photflag',
+            'job_id': 'job_id',
+            '-job_id': '-job_id',
+        }
+        return [allowed.get(ordering, '-job_id')]
+
     def get_queryset(self):
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
 
@@ -193,11 +243,11 @@ class DataListCPCSErrorView(LoginRequiredMixin,FilterView):
             (Q(status='F') | Q(status='D')) &
             ~Q(dataProduct__fits_data__isnull=True) &
             ~Q(dataProduct__fits_data='') &
-            Q(dataProduct__created__gte=days_delay_error)
-        ).order_by('-job_id')
+            Q(dataProduct__created__gte=days_delay_error) &
+            Q(dataProduct__calibration_data__status='E')
+        )
 
-
-        return qs
+        return qs.order_by(*self.get_ordering())
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
@@ -207,7 +257,6 @@ class DataListCPCSErrorView(LoginRequiredMixin,FilterView):
             return redirect(reverse('home'))
 
         context['photometry_data'] = []
-
         filtered_qs = context.get('page_obj').object_list if 'page_obj' in context else context['filter'].qs
 
         for data in filtered_qs:
@@ -232,7 +281,6 @@ class DataListCPCSLimitView(LoginRequiredMixin, FilterView):
     template_name = 'bhtom_common/data_product_management-cpcs-limit.html'
     model = CCDPhotJob
     filterset_class = CCDPhotJobFilter
-
     permission_required = 'bhtom_targets.view_target'
     paginate_by = 50
     strict = False
@@ -246,6 +294,32 @@ class DataListCPCSLimitView(LoginRequiredMixin, FilterView):
             return self.paginate_by
         return value if value in values else self.paginate_by
 
+    def get_ordering(self):
+        ordering = self.request.GET.get('ordering', '-job_id')
+        allowed = {
+            'data': 'dataProduct__data',
+            '-data': '-dataProduct__data',
+            'created': 'dataProduct__created',
+            '-created': '-dataProduct__created',
+            'observatory': 'dataProduct__observatory',
+            '-observatory': '-dataProduct__observatory',
+            'target': 'dataProduct__target__name',
+            '-target': '-dataProduct__target__name',
+            'user': 'dataProduct__user__last_name',
+            '-user': '-dataProduct__user__last_name',
+            'data_type': 'dataProduct__data_product_type',
+            '-data_type': '-dataProduct__data_product_type',
+            'status': 'dataProduct__calibration_data__status',
+            '-status': '-dataProduct__calibration_data__status',
+            'status_message': 'dataProduct__calibration_data__status_message',
+            '-status_message': '-dataProduct__calibration_data__status_message',
+            'photometry_flag': 'fits_photflag',
+            '-photometry_flag': '-fits_photflag',
+            'job_id': 'job_id',
+            '-job_id': '-job_id',
+        }
+        return [allowed.get(ordering, '-job_id')]
+
     def get_queryset(self):
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
 
@@ -253,11 +327,12 @@ class DataListCPCSLimitView(LoginRequiredMixin, FilterView):
             (Q(status='F') | Q(status='D')) &
             ~Q(dataProduct__fits_data__isnull=True) &
             ~Q(dataProduct__fits_data='') &
-            Q(dataProduct__created__gte=days_delay_error)
-        ).order_by('-job_id')
+            Q(dataProduct__created__gte=days_delay_error) &
+            Q(dataProduct__calibration_data__status='S') &
+            Q(dataProduct__calibration_data__mag_error__in=[1, -1])
+        )
 
-   
-        return qs
+        return qs.order_by(*self.get_ordering())
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
@@ -267,7 +342,6 @@ class DataListCPCSLimitView(LoginRequiredMixin, FilterView):
             return redirect(reverse('home'))
 
         context['photometry_data'] = []
-
         filtered_qs = context.get('page_obj').object_list if 'page_obj' in context else context['filter'].qs
 
         for data in filtered_qs:
@@ -287,12 +361,11 @@ class DataListCPCSLimitView(LoginRequiredMixin, FilterView):
         context['delay_fits'] = settings.DELETE_FITS_FILE_DAY
 
         return context
-    
+
 class DataListCCDPHOTErrorView(LoginRequiredMixin, FilterView):
     template_name = 'bhtom_common/data_product_management-ccdphot-error.html'
     model = CCDPhotJob
     filterset_class = CCDPhotJobFilter
-
     permission_required = 'bhtom_targets.view_target'
     paginate_by = 50
     strict = False
@@ -305,7 +378,31 @@ class DataListCCDPHOTErrorView(LoginRequiredMixin, FilterView):
         except (TypeError, ValueError):
             return self.paginate_by
         return value if value in values else self.paginate_by
-    
+
+    def get_ordering(self):
+        ordering = self.request.GET.get('ordering', '-job_id')
+        allowed = {
+            'data': 'dataProduct__data',
+            '-data': '-dataProduct__data',
+            'created': 'dataProduct__created',
+            '-created': '-dataProduct__created',
+            'observatory': 'dataProduct__observatory',
+            '-observatory': '-dataProduct__observatory',
+            'target': 'dataProduct__target__name',
+            '-target': '-dataProduct__target__name',
+            'user': 'dataProduct__user__last_name',
+            '-user': '-dataProduct__user__last_name',
+            'data_type': 'dataProduct__data_product_type',
+            '-data_type': '-dataProduct__data_product_type',
+            'status': 'dataProduct__status',
+            '-status': '-dataProduct__status',
+            'photometry_flag': 'fits_photflag',
+            '-photometry_flag': '-fits_photflag',
+            'job_id': 'job_id',
+            '-job_id': '-job_id',
+        }
+        return [allowed.get(ordering, '-job_id')]
+
     def get_queryset(self):
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
 
@@ -314,10 +411,9 @@ class DataListCCDPHOTErrorView(LoginRequiredMixin, FilterView):
             .exclude(dataProduct__status='S') \
             .exclude(dataProduct__fits_data__isnull=True) \
             .exclude(dataProduct__fits_data='') \
-            .filter(dataProduct__created__gte=days_delay_error, dataProduct__status='E') \
-            .order_by('-job_id')
+            .filter(dataProduct__created__gte=days_delay_error, dataProduct__status='E')
 
-        return qs
+        return qs.order_by(*self.get_ordering())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -330,6 +426,7 @@ class DataListInProgressView(LoginRequiredMixin, FilterView):
     model = CCDPhotJob
     filterset_class = CCDPhotJobFilter
     paginate_by = 50
+    strict = False
 
     def get_paginate_by(self, queryset):
         values = (25, 50, 100, 500)
@@ -340,6 +437,30 @@ class DataListInProgressView(LoginRequiredMixin, FilterView):
             return self.paginate_by
         return value if value in values else self.paginate_by
 
+    def get_ordering(self):
+        ordering = self.request.GET.get('ordering', '-job_id')
+        allowed = {
+            'data': 'dataProduct__data',
+            '-data': '-dataProduct__data',
+            'created': 'dataProduct__created',
+            '-created': '-dataProduct__created',
+            'observatory': 'dataProduct__observatory',
+            '-observatory': '-dataProduct__observatory',
+            'target': 'dataProduct__target__name',
+            '-target': '-dataProduct__target__name',
+            'user': 'dataProduct__user__last_name',
+            '-user': '-dataProduct__user__last_name',
+            'data_type': 'dataProduct__data_product_type',
+            '-data_type': '-dataProduct__data_product_type',
+            'status': 'dataProduct__status',
+            '-status': '-dataProduct__status',
+            'status_message': 'dataProduct__status_message',
+            '-status_message': '-dataProduct__status_message',
+            'job_id': 'job_id',
+            '-job_id': '-job_id',
+        }
+        return [allowed.get(ordering, '-job_id')]
+
     def get_queryset(self):
         days_delay_error = timezone.now() - timedelta(days=settings.DELETE_FITS_ERROR_FILE_DAY)
 
@@ -348,9 +469,9 @@ class DataListInProgressView(LoginRequiredMixin, FilterView):
             Q(dataProduct__created__gte=days_delay_error) &
             ~Q(dataProduct__fits_data__isnull=True) &
             ~Q(dataProduct__fits_data='')
-        ).order_by('-job_id')
+        )
 
-        return qs
+        return qs.order_by(*self.get_ordering())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -368,9 +489,7 @@ class DataListCompletedView(LoginRequiredMixin, FilterView):
     """
     template_name = 'bhtom_common/data_product_management-completed.html'
     model = DataProduct
-    filterset_class = DataproductFilter 
-    # table_class = TargetTable
-
+    filterset_class = DataproductFilter
     permission_required = 'bhtom_targets.view_target'
     paginate_by = 50
     strict = False
@@ -384,15 +503,39 @@ class DataListCompletedView(LoginRequiredMixin, FilterView):
             return self.paginate_by
         return value if value in values else self.paginate_by
 
+    def get_ordering(self):
+        ordering = self.request.GET.get('ordering', '-created')
+        allowed = {
+            'data': 'data',
+            '-data': '-data',
+            'created': 'created',
+            '-created': '-created',
+            'observatory': 'observatory',
+            '-observatory': '-observatory',
+            'target': 'target__name',
+            '-target': '-target__name',
+            'user': 'user__last_name',
+            '-user': '-user__last_name',
+            'data_type': 'data_product_type',
+            '-data_type': '-data_product_type',
+            'status': 'status',
+            '-status': '-status',
+            'job_id': 'id',
+            '-job_id': '-id',
+        }
+        return [allowed.get(ordering, '-created')]
+
     def get_queryset(self):
         days_delay = timezone.now() - timedelta(days=settings.DELETE_FITS_FILE_DAY)
 
-        qs =DataProduct.objects.filter(Q(created__gte=days_delay) &
-                                                            Q(data_product_type='fits_file') &
-                                                            Q(fits_data__isnull=False) &
-                                                            Q(status='S'))
-        return qs
-    
+        qs = DataProduct.objects.filter(
+            Q(created__gte=days_delay) &
+            Q(data_product_type='fits_file') &
+            Q(fits_data__isnull=False) &
+            Q(status='S')
+        )
+        return qs.order_by(*self.get_ordering())
+
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
 
@@ -403,7 +546,6 @@ class DataListCompletedView(LoginRequiredMixin, FilterView):
             return redirect(reverse('home'))
 
         context['fits_s_file'] = context.get('page_obj').object_list if 'page_obj' in context else context['filter'].qs
-
         return context
     
 
