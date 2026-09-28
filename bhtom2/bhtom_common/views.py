@@ -244,7 +244,7 @@ class DataListCPCSErrorView(LoginRequiredMixin, FilterView):
             ~Q(dataProduct__fits_data__isnull=True) &
             ~Q(dataProduct__fits_data='') &
             Q(dataProduct__created__gte=days_delay_error) &
-            Q(calibration_data__status='E')
+            Q(dataProduct__calibration_data__status='E')
         )
 
         return qs.order_by(*self.get_ordering())
@@ -309,10 +309,10 @@ class DataListCPCSLimitView(LoginRequiredMixin, FilterView):
             '-user': '-dataProduct__user__last_name',
             'data_type': 'dataProduct__data_product_type',
             '-data_type': '-dataProduct__data_product_type',
-            'status': 'calibration_data__status',
-            '-status': '-calibration_data__status',
-            'status_message': 'calibration_data__status_message',
-            '-status_message': '-calibration_data__status_message',
+            'status': 'dataProduct__calibration_data__status',
+            '-status': '-dataProduct__calibration_data__status',
+            'status_message': 'dataProduct__calibration_data__status_message',
+            '-status_message': '-dataProduct__calibration_data__status_message',
             'photometry_flag': 'fits_photflag',
             '-photometry_flag': '-fits_photflag',
             'job_id': 'job_id',
@@ -328,8 +328,8 @@ class DataListCPCSLimitView(LoginRequiredMixin, FilterView):
             ~Q(dataProduct__fits_data__isnull=True) &
             ~Q(dataProduct__fits_data='') &
             Q(dataProduct__created__gte=days_delay_error) &
-            Q(calibration_data__status='S') &
-            Q(calibration_data__mag_error__in=[1, -1])
+            Q(dataProduct__calibration_data__status='S') &
+            Q(dataProduct__calibration_data__mag_error__in=[1, -1])
         )
 
         return qs.order_by(*self.get_ordering())
