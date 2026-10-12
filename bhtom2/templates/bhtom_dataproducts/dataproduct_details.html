@@ -357,15 +357,13 @@
                             </tr>
                             <tr>
                                 <td><strong>CCDPhot -table result</strong></td>
-                                <td>
-                                    {% if ccdphot.table_fits_result_file %}
-                                        <a href="{{ ccdphot.table_fits_result_file }}" download>{{ ccdphot.table_fits_result_file }}</a>
-                                    {% elif fits_table_data_url %}
-                                        <a href="{{ fits_table_data_url }}" download>{{ fits_table_data|default:fits_table_data_url }}</a>
-                                    {% else %}
-                                        N/A
-                                    {% endif %}
-                                </td>
+                                {% if fits_table_data is not None %}
+                                    <td>
+                                        <a href="{% url 'bhtom2.bhtom_dataproducts:fits_table_download' id=object.id %}">{{ fits_table_data }}</a>
+                                    </td>
+                                {% else %}
+                                    <td></td>
+                                {% endif %}
                             </tr>
                             <tr>
                                 <td><strong>CCDPhot Result File</strong></td>

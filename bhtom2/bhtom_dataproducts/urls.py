@@ -2,7 +2,8 @@ from django.urls import path
 from bhtom2.bhtom_dataproducts.views import FitsUploadAPIView, DataProductUploadView, DataProductListAllView, \
     DataProductListUserView, \
     DataProductGroupListView, DataProductGroupCreateView, DataProductGroupDetailView, photometry_download, \
-    DataDetailsView, CpcsArchiveData, CalibrationLogDownload, DataProductDeleteView, download_archive_photometry,  CpcsCatalogData
+    fits_table_download, DataDetailsView, CpcsArchiveData, CalibrationLogDownload, DataProductDeleteView, \
+    download_archive_photometry, CpcsCatalogData
 
 app_name = 'bhtom2.bhtom_dataproducts'
 urlpatterns = [
@@ -14,6 +15,7 @@ urlpatterns = [
     path('data/group/create/', DataProductGroupCreateView.as_view(), name='group-create'),
     path('data/group/<str:name>/', DataProductGroupDetailView.as_view(), name='group-detail'),
     path('download/photometry/<int:id>/', photometry_download.as_view(), name='photometry_download'),
+    path('download/table-fits/<int:id>/', fits_table_download.as_view(), name='fits_table_download'),
     path('data/<int:pk>/', DataDetailsView.as_view(), name='dataproduct-details'),
     path('delete/<int:pk>/', DataProductDeleteView.as_view(), name='delete'),
     path('cpcs_data', CpcsArchiveData.as_view(), name='list_cpcs'),

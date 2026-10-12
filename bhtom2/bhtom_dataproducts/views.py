@@ -423,6 +423,40 @@ class photometry_download(LoginRequiredMixin, View):
                 return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
 
 
+class fits_table_download(LoginRequiredMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        try:
+            file = self.kwargs['id']
+            logger.info('Download table FITS file: %s, user: %s' % (str(file), str(self.request.user)))
+            dataProduct = DataProduct.objects.get(id=file)
+            assert dataProduct.fits_table_data is not None
+
+        except (DataProduct.DoesNotExist, AssertionError):
+            logger.error('Download table FITS error, file not exist')
+            messages.error(self.request, 'File not found')
+            if self.request.META.get('HTTP_REFERER') is None:
+                return HttpResponseRedirect('/')
+            else:
+                return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+
+        try:
+            address = settings.DATA_MEDIA_PATH + format(dataProduct.fits_table_data)
+
+            logger.debug('Table FITS download address: ' + address)
+            open(address, 'r')
+
+            return FileResponse(open(address, 'rb'), as_attachment=True)
+
+        except IOError:
+            logger.error('Download table FITS error, file not exist')
+            messages.error(self.request, 'File not found')
+            if self.request.META.get('HTTP_REFERER') is None:
+                return HttpResponseRedirect('/')
+            else:
+                return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+
+
 class DataDetailsView(DetailView):
     template_name = 'bhtom_dataproducts/dataproduct_details.html'
     model = DataProduct
