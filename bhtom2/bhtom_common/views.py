@@ -926,6 +926,7 @@ class GetDataProductApi(views.APIView):
                 'data_product_type': openapi.Schema(type=openapi.TYPE_STRING),
                 'status': openapi.Schema(type=openapi.TYPE_STRING),
                 'fits_data': openapi.Schema(type=openapi.TYPE_STRING),
+                'fits_table_data': openapi.Schema(type=openapi.TYPE_STRING),
                 'photometry_data': openapi.Schema(type=openapi.TYPE_STRING),
                 'oname': openapi.Schema(type=openapi.TYPE_STRING),
                 'created_start': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME),
@@ -967,6 +968,7 @@ class GetDataProductApi(views.APIView):
         data_product_type = request.data.get('data_product_type', None)
         dp_status = request.data.get('status', None)
         fits_data = request.data.get('fits_data', None)
+        fits_table_data = request.data.get('fits_table_data', None)
         photometry_data = request.data.get('photometry_data', None)
         oname = request.data.get('oname', None)
         created_start = request.data.get('created_start', None)
@@ -995,6 +997,8 @@ class GetDataProductApi(views.APIView):
             query &= Q(observatory__camera__prefix=oname)
         if fits_data is not None:
             query &= Q(fits_data__contains=fits_data)
+        if fits_table_data is not None:
+            query &= Q(fits_table_data__contains=fits_table_data)
         if created_start is not None:
             query &= Q(created__gte=created_start)
         if created_end is not None:

@@ -310,6 +310,16 @@
                                 <td colspan="2"></td>
                             </tr>
                             <tr>
+                                <td><strong>ccdphot table FITS</strong></td>
+                                <td>
+                                    {% if fits_table_data_url %}
+                                        <a href="{{ fits_table_data_url }}" target="_blank">{{ fits_table_data|default:fits_table_data_url }}</a>
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
                                 <td><strong>Original filename</strong></td>
                                 <td>{{ ccdphot.fits_filename|default:"N/A" }}</td>
                             </tr>
