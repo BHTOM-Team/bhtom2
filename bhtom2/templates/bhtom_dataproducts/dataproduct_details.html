@@ -507,7 +507,13 @@
                             </tr>
                             <tr>
                                 <td><strong>Photometric flag</strong></td>
-                                <td>{{ ccdphot.fits_photflag|default:"N/A" }}</td>
+                                <td>
+                                    {% if ccdphot.fits_photflag is None %}
+                                        N/A
+                                    {% else %}
+                                        {{ ccdphot.fits_photflag }}
+                                    {% endif %}
+                                </td>
                             </tr>
                              <tr>
                                 <td><strong>Photometric flag comment </strong></td>

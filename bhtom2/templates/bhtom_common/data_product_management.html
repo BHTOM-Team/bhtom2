@@ -32,14 +32,14 @@
                                 <thead>
                                     <tr>
                                         <th class="sort"><input type="checkbox" id="selected-photometry-checkbox" onclick="toggleSelectAll('selected-photometry','photometry-table')"></th>
-                                        <th>Data</th>
-                                        <th>Created</th>
-                                        <th>Observatory</th>
-                                        <th>Target</th>
-                                        <th>User</th>
-                                        <th>Data Type</th>
-                                        <th>Status</th>
-                                        <th>Status Message</th>
+                                        <th style="cursor:pointer" onclick="changeSort('data')">Data</th>
+                                        <th style="cursor:pointer" onclick="changeSort('created')">Created</th>
+                                        <th style="cursor:pointer" onclick="changeSort('observatory')">Observatory</th>
+                                        <th style="cursor:pointer" onclick="changeSort('target')">Target</th>
+                                        <th style="cursor:pointer" onclick="changeSort('user')">User</th>
+                                        <th style="cursor:pointer" onclick="changeSort('data_type')">Data Type</th>
+                                        <th style="cursor:pointer" onclick="changeSort('status')">Status</th>
+                                        <th style="cursor:pointer" onclick="changeSort('status_message')">Status Message</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -89,12 +89,12 @@
                                 <thead>
                                     <tr>
                                         <th class="sort"><input type="checkbox" id="selected-fits-checkbox" onclick="toggleSelectAll('selected-fits','fits-error-table')"></th>
-                                        <th>Data</th>
-                                        <th>Created</th>
-                                        <th>Observatory</th>
-                                        <th>Target</th>
-                                        <th>User</th>
-                                        <th>Status</th>
+                                        <th style="cursor:pointer" onclick="changeSort('data')">Data</th>
+                                        <th style="cursor:pointer" onclick="changeSort('created')">Created</th>
+                                        <th style="cursor:pointer" onclick="changeSort('observatory')">Observatory</th>
+                                        <th style="cursor:pointer" onclick="changeSort('target')">Target</th>
+                                        <th style="cursor:pointer" onclick="changeSort('user')">User</th>
+                                        <th style="cursor:pointer" onclick="changeSort('status')">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
