@@ -463,6 +463,8 @@ class DataDetailsView(DetailView):
                 if ccdphot is None:
                     logger.warning("CCDPhotJob not found for fits dataproduct id=%s", data_product.id)
                 context['fits_data'] = data_product.data.name.split('/')[-1] if data_product.data else None
+                context['fits_table_data'] = data_product.fits_table_data.split('/')[-1] if data_product.fits_table_data else None
+                context['fits_table_data_url'] = data_product.fits_table_data if data_product.fits_table_data else None
                 context['ccdphot'] = ccdphot
                 context['fits_webp_url'] = data_product.fits_webp.url if data_product.fits_webp else None
             
