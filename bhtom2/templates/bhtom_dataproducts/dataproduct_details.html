@@ -358,8 +358,10 @@
                             <tr>
                                 <td><strong>CCDPhot -table result</strong></td>
                                 <td>
-                                    {% if fits_table_data_url %}
-                                        <a href="{{ fits_table_data_url }}" target="_blank" download="{{ fits_table_data|default:fits_table_data_url }}">{{ fits_table_data|default:fits_table_data_url }}</a>
+                                    {% if ccdphot.table_fits_result_file %}
+                                        <a href="{{ ccdphot.table_fits_result_file }}" download>{{ ccdphot.table_fits_result_file }}</a>
+                                    {% elif fits_table_data_url %}
+                                        <a href="{{ fits_table_data_url }}" download>{{ fits_table_data|default:fits_table_data_url }}</a>
                                     {% else %}
                                         N/A
                                     {% endif %}
