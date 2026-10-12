@@ -1376,7 +1376,8 @@ API for DataProduct list, which lists uploaded instrumental or fits files and tr
 | id                 | Integer  | Unique identifier for the data product.                                    |
 | data_product_type  | String   | Type of data product (e.g., photometry, spectroscopy).                      |
 | status             | String   | Status of the data product.                                                |
-| fits_data          | String   | Name of the fits file.                                                     |
+| fits_data          | String   | Name of the main FITS file.                                                |
+| fits_table_data    | String   | Name of the generated `-table.fits` file.                                  |
 | photometry_data    | String   | Name of the photometry file.                                               |
 | oname              | String   | Name of the observatory (replaces "camera").                               |
 | created_start      | String   | Start date for creation date filter (ISO 8601 format).                     |
@@ -1403,6 +1404,7 @@ API for DataProduct list, which lists uploaded instrumental or fits files and tr
     "id": 1,
     "status": "Dataproduct status",
     "fits_data": "fits file name",
+    "fits_table_data": "generated table.fits file name",
     "photometry_data": "photometry file name",
     "oname": "BIALKOW_ANDOR-DW432",
     "created_start": "2024-01-01",
@@ -1447,6 +1449,7 @@ curl -X POST -H "Content-Type: application/json" -H "Authorization: Token <yourT
     "id": 1,
     "status": "Dataproduct status",
     "fits_data": "fits file name",
+    "fits_table_data": "generated table.fits file name",
     "photometry_data": "photometry file name",
     "oname": "BIALKOW_ANDOR-DW432",
     "created_start": "2024-01-01",
